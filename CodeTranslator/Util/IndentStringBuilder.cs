@@ -4,14 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeTranslator.Shared
+namespace CodeTranslator.Util
 {
+    // TODO: Add function to disable trim trailing whitespace
     public class IndentStringBuilder
     {
         StringBuilder _builder;
         int _currentIndentLevel;
-        bool _newLine;
-        bool _nonEmptyLine;
+        bool _doIndent;
 
         public uint IndentSpaces { get; set; }
 
@@ -23,24 +23,32 @@ namespace CodeTranslator.Shared
         public IndentStringBuilder(StringBuilder builder)
         {
             _builder = builder;
-            _newLine = true;
+            _doIndent = true;
             IndentSpaces = 4;
         }
 
-        // TODO: Handle custom newline neding
         public void Append(string str)
         {
-            appendIndent();
+            if (str == string.Empty)
+                return;
+
+            append(str);
+        }
+
+        // TODO: Support custom newline neding
+        private void append(string str)
+        {
+            appendIndent(str, false);
             _builder.Append(str);
             if (str.EndsWith(Environment.NewLine))
-                _newLine = true;
+                _doIndent = true;
         }
 
         public void AppendLine(string str = "")
         {
-            appendIndent();
+            appendIndent(str, true);
             _builder.AppendLine(str);
-            _newLine = true;
+            _doIndent = true;
         }
 
         public void IncreaseIndent()
@@ -56,12 +64,19 @@ namespace CodeTranslator.Shared
             _currentIndentLevel--;
         }
 
-        private void appendIndent()
+        private void appendIndent(string str, bool appendLine)
         {
-            if (!_newLine)
+            if (!_doIndent)
                 return;
 
-            _newLine = false;
+            _doIndent = false;
+            if (str.StartsWith(Environment.NewLine) ||
+                appendLine && str == string.Empty)
+            {
+                // Trim trailing whitespace
+                return;
+            }
+
             _builder.Append(' ', _currentIndentLevel * (int)IndentSpaces);
         }
 

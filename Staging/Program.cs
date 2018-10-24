@@ -19,7 +19,7 @@ namespace ConsoleApp1
             MSBuildWorkspace workspace = MSBuildWorkspace.Create();
 
             GeneratorArgs genargs = new GeneratorArgs();
-            genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\main\java";
+            genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\alt\java";
 
             //Solution solution = workspace.OpenSolutionAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet.sln").Result;
             //var conv = SolutionConverter.CreateFor<CSToJavaConversion>(solution);

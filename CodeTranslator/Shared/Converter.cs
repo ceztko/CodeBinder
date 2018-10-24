@@ -28,9 +28,10 @@ namespace CodeTranslator.Shared
         {
             foreach (var result in Convert().Concat(Conversion.DefaultResults))
             {
-                var path = Path.Combine(args.SourceRootPath,
-                    result.TargetBasePath, result.TargetFileName);
-                File.WriteAllText(path, result.ConvertedCode);
+                var basepath = Path.Combine(args.SourceRootPath, result.TargetBasePath);
+                Directory.CreateDirectory(basepath);
+                var filepath = Path.Combine(basepath, result.TargetFileName);
+                File.WriteAllText(filepath, result.ConvertedCode);
             }
         }
     }

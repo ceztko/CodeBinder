@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CodeTranslator.Shared;
+using CodeTranslator.Util;
 using CodeTranslator.Shared.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 

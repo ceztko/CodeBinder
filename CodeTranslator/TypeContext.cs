@@ -1,6 +1,6 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
-using CodeTranslator.Shared;
+using CodeTranslator.Util;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
