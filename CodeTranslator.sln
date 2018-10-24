@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Staging", "Staging\Staging.csproj", "{0E88F8E0-3107-42F8-9190-F0579A886809}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeTranslatorAttributes", "CodeTranslatorAttributes\CodeTranslatorAttributes.csproj", "{987A3F7D-C314-4A61-A2DB-7483131A918E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,18 @@ Global
 		{0E88F8E0-3107-42F8-9190-F0579A886809}.Release|x64.Build.0 = Release|Any CPU
 		{0E88F8E0-3107-42F8-9190-F0579A886809}.Release|x86.ActiveCfg = Release|Any CPU
 		{0E88F8E0-3107-42F8-9190-F0579A886809}.Release|x86.Build.0 = Release|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Debug|x64.Build.0 = Debug|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Debug|x86.Build.0 = Debug|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Release|x64.ActiveCfg = Release|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Release|x64.Build.0 = Release|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Release|x86.ActiveCfg = Release|Any CPU
+		{987A3F7D-C314-4A61-A2DB-7483131A918E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
