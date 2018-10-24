@@ -1,0 +1,4 @@
+This project forked ICSharpCode.CodeConverter[1] on
+the commit 85f914f383f1e943f3721c11ba349915acb2fa38 .
+
+[1] https://github.com/icsharpcode/CodeConverter
