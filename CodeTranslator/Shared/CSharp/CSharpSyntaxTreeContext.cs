@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    public class CSharpSyntaxTreeContext : RoslynSyntaxTreeContext
+    public class CSharpSyntaxTreeContext : SyntaxTreeContext
     {
         public List<ClassDeclarationSyntax> Classes { get; private set; }
         public List<EnumDeclarationSyntax> Enums { get; private set; }

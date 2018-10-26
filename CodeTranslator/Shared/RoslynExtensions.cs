@@ -9,30 +9,26 @@ namespace CodeTranslator.Shared
 {
     static class RoslynExtensions
     {
-        public static SemanticModel GetSemanticModel(this SyntaxNode node, RoslynSyntaxTreeContext treeContext)
+        public static string GetFullMetadataName(this SyntaxNode node, SyntaxTreeContext treeContext)
+        {
+            var info = node.GetTypeInfo(treeContext);
+            return info.GetFullMetadataName();
+        }
+
+        public static TypeInfo GetTypeInfo(this SyntaxNode node, SyntaxTreeContext treeContext)
+        {
+            var model = node.GetSemanticModel(treeContext);
+            return model.GetTypeInfo(node);
+        }
+
+        public static SemanticModel GetSemanticModel(this SyntaxNode node, SyntaxTreeContext treeContext)
         {
             return treeContext.GetSemanticModel(node.SyntaxTree);
-        }
-
-        public static string GetFullMetadataName(this SyntaxNode node, RoslynSyntaxTreeContext treeContext)
-        {
-            var info = treeContext.GetTypeInfo(node);
-            return info.GetFullMetadataName(treeContext);
-        }
-
-        public static string GetFullMetadataName(ref this TypeInfo info, RoslynSyntaxTreeContext treeContext)
-        {
-            return treeContext.GetFullMetadataName(info.ConvertedType);
         }
 
         public static string GetFullMetadataName(ref this TypeInfo info)
         {
             return info.ConvertedType.GetFullMetadataName();
-        }
-
-        public static string GetFullMetadataName(this ISymbol symbol, RoslynSyntaxTreeContext treeContext)
-        {
-            return treeContext.GetFullMetadataName(symbol);
         }
 
         // Reference: https://stackoverflow.com/a/27106959/213871

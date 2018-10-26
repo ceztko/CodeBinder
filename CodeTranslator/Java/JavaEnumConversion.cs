@@ -13,10 +13,12 @@ namespace CodeTranslator.Java
     class JavaEnumConversion : JavaTypeConversion
     {
         CSharpEnumTypeContext _context;
+        bool _isFlag;
 
         public JavaEnumConversion(CSharpEnumTypeContext node)
         {
             _context = node;
+            _isFlag = node.IsFlag();
         }
 
         public override string TypeName
@@ -51,14 +53,11 @@ namespace CodeTranslator.Java
         private void WriteMember(IndentStringBuilder builder, EnumMemberDeclarationSyntax member)
         {
             builder.Append(member.GetName());
-            if (_context.IsFlag)
+            if (_isFlag)
             {
 
             }
-            else
-            {
 
-            }
             builder.AppendLine(",");
         }
     }

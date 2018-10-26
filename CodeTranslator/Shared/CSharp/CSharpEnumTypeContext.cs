@@ -9,22 +9,9 @@ using System.Text;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    public class CSharpEnumTypeContext : CSharpTypeContext
+    public sealed class CSharpEnumTypeContext : CSharpTypeContext<EnumDeclarationSyntax>
     {
-        public new EnumDeclarationSyntax Node { get; private set; }
-
-        public bool IsFlag { get; private set; }
-
         public CSharpEnumTypeContext(EnumDeclarationSyntax node, CSharpSyntaxTreeContext treeContext)
-            : base(treeContext)
-        {
-            Node = node;
-            IsFlag = node.IsFlag(treeContext);
-        }
-
-        protected override CSharpSyntaxNode GetNode()
-        {
-            return Node;
-        }
+            : base(node, treeContext) { }
     }
 }

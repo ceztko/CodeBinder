@@ -29,4 +29,21 @@ namespace CodeTranslator.Shared.CSharp
 
         protected abstract CSharpSyntaxNode GetNode();
     }
+
+    public class CSharpTypeContext<TNode> : CSharpTypeContext
+        where TNode : CSharpSyntaxNode
+    {
+        public new TNode Node { get; private set; }
+
+        protected CSharpTypeContext(TNode node, CSharpSyntaxTreeContext treeContext)
+            : base(treeContext)
+        {
+            Node = node;
+        }
+
+        protected override CSharpSyntaxNode GetNode()
+        {
+            return Node;
+        }
+    }
 }
