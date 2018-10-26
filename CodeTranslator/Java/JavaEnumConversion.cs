@@ -5,30 +5,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using CodeTranslator.Util;
+using CodeTranslator.Shared;
 using CodeTranslator.Shared.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeTranslator.Java
 {
-    class JavaEnumConversion : JavaTypeConversion
+    class JavaEnumConversion : JavaTypeConversion<CSharpEnumTypeContext>
     {
-        CSharpEnumTypeContext _context;
         bool _isFlag;
 
-        public JavaEnumConversion(CSharpEnumTypeContext node)
+        public JavaEnumConversion(CSharpEnumTypeContext typeContext)
+            : base(typeContext)
         {
-            _context = node;
-            _isFlag = node.IsFlag();
+            _isFlag = typeContext.Node.IsFlag(typeContext);
         }
 
         public override string TypeName
         {
-            get { return _context.Node.GetName(); }
+            get { return TypeContext.Node.GetName(); }
         }
 
         public override void WriteDeclaration(IndentStringBuilder builder)
         {
-            var modifiers = _context.Node.GetJavaModifiersString();
+            var modifiers = TypeContext.Node.GetJavaModifiersString();
             if (modifiers != string.Empty)
             {
                 builder.Append(modifiers);
@@ -46,7 +46,7 @@ namespace CodeTranslator.Java
 
         private void WriteMembers(IndentStringBuilder builder)
         {
-            foreach (var member in _context.Node.Members)
+            foreach (var member in TypeContext.Node.Members)
                 WriteMember(builder, member);
         }
 
@@ -55,7 +55,9 @@ namespace CodeTranslator.Java
             builder.Append(member.GetName());
             if (_isFlag)
             {
-
+                builder.Append("(");
+                builder.Append(member.GetEnumValue(TypeContext).ToString());
+                builder.Append(")");
             }
 
             builder.AppendLine(",");

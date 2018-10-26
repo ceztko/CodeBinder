@@ -1,5 +1,6 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
+using CodeTranslator.Shared.CSharp;
 using CodeTranslator.Util;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,11 @@ namespace CodeTranslator.Java
                 _Namespace = value;
                 _Basepath = value.Replace('.', Path.DirectorySeparatorChar);
             }
+        }
+
+        public CSharpTypeContext TypeContext
+        {
+            get { return GetTypeContext(); }
         }
 
         public override string BasePath
@@ -68,5 +74,23 @@ namespace CodeTranslator.Java
         }
 
         public abstract void WriteDeclaration(IndentStringBuilder builder);
+
+        protected abstract CSharpTypeContext GetTypeContext();
+    }
+
+    abstract class JavaTypeConversion<TTypeContext> : JavaTypeConversion
+        where TTypeContext : CSharpTypeContext
+    {
+        public new TTypeContext TypeContext { get; private set; }
+
+        protected JavaTypeConversion(TTypeContext typeContext)
+        {
+            TypeContext = typeContext;
+        }
+
+        protected override CSharpTypeContext GetTypeContext()
+        {
+            return TypeContext;
+        }
     }
 }

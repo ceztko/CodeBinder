@@ -8,7 +8,7 @@ using System.Text;
 
 namespace CodeTranslator
 {
-    public abstract class TypeContext
+    public abstract class TypeContext : ISemanticModelProvider
     {
         public TypeConversion Conversion { get; internal set; }
 
@@ -36,5 +36,10 @@ namespace CodeTranslator
         }
 
         protected abstract SyntaxTreeContext GetTreeContext();
+
+        public SemanticModel GetSemanticModel(SyntaxTree tree)
+        {
+            return TreeContext.GetSemanticModel(tree);
+        }
     }
 }

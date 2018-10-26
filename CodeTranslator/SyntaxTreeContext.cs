@@ -9,7 +9,7 @@ namespace CodeTranslator
 {
     // NOTE: Don't add overloadings to access the cache here:
     // add them as extension methods
-    public class SyntaxTreeContext
+    public class SyntaxTreeContext : ISemanticModelProvider
     {
         private Dictionary<SyntaxTree, SemanticModel> _modelCache;
         public Compilation Compilation { get; internal set; }

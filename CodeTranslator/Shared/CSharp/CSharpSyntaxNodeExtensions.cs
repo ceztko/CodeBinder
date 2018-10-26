@@ -9,24 +9,29 @@ using System.Linq;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    static class CSharpTypeContextExtensions
+    static class CSharpSyntaxNodeExtensions
     {
         const string FLAG_ATTRIBUTE_FULLANAME = "System.FlagsAttribute";
 
-        public static bool IsFlag(this CSharpEnumTypeContext node)
+        public static bool IsFlag(this EnumDeclarationSyntax node, ISemanticModelProvider provider)
         {
             foreach (var attribute in GetAttributes(node))
             {
-                var fullName = attribute.GetFullMetadataName(node.TreeContext);
+                var fullName = attribute.GetFullMetadataName(provider);
                 if (fullName == FLAG_ATTRIBUTE_FULLANAME)
                     return true;
             }
             return false;
         }
 
-        public static IEnumerable<AttributeSyntax> GetAttributes(this CSharpEnumTypeContext type)
+        public static int GetEnumValue(this EnumMemberDeclarationSyntax node, ISemanticModelProvider provider)
         {
-            foreach (var list in type.Node.AttributeLists)
+            return node.EqualsValue.Value.GetValue<int>(provider);
+        }
+
+        public static IEnumerable<AttributeSyntax> GetAttributes(this EnumDeclarationSyntax node)
+        {
+            foreach (var list in node.AttributeLists)
             {
                 foreach (var attribute in list.Attributes)
                     yield return attribute;
