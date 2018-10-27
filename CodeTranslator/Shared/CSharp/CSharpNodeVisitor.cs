@@ -39,11 +39,13 @@ namespace CodeTranslator.Shared.CSharp
 
             public override void VisitStructDeclaration(StructDeclarationSyntax node)
             {
+                _context.Structs.Add(node);
                 DefaultVisit(node);
             }
 
             public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
             {
+                _context.Interfaces.Add(node);
                 DefaultVisit(node);
             }
 

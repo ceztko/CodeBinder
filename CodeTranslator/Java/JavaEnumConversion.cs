@@ -15,11 +15,6 @@ namespace CodeTranslator.Java
     {
         bool _isFlag;
 
-        public override string TypeName
-        {
-            get { return TypeContext.Node.GetName(); }
-        }
-
         public override void InitWrite()
         {
             _isFlag = TypeContext.Node.IsFlag(TypeContext);

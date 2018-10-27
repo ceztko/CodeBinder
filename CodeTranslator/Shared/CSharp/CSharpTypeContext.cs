@@ -2,6 +2,7 @@
 // This file is subject to the MIT license
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,7 +18,7 @@ namespace CodeTranslator.Shared.CSharp
             TreeContext = treeContext;
         }
 
-        public CSharpSyntaxNode Node
+        public BaseTypeDeclarationSyntax Node
         {
             get { return GetNode(); }
         }
@@ -27,12 +28,12 @@ namespace CodeTranslator.Shared.CSharp
             return TreeContext;
         }
 
-        protected abstract CSharpSyntaxNode GetNode();
+        protected abstract BaseTypeDeclarationSyntax GetNode();
     }
 
-    public abstract class CSharpTypeContext<TTypeConversion, TNode> : CSharpTypeContext
+    public abstract class CSharpTypeContext<TNode, TTypeConversion> : CSharpTypeContext
+        where TNode : BaseTypeDeclarationSyntax
         where TTypeConversion : TypeConversion
-        where TNode : CSharpSyntaxNode
     {
         public new TTypeConversion Conversion { get; private set; }
 
@@ -45,7 +46,7 @@ namespace CodeTranslator.Shared.CSharp
             Conversion = conversion;
         }
 
-        protected override CSharpSyntaxNode GetNode()
+        protected override BaseTypeDeclarationSyntax GetNode()
         {
             return Node;
         }

@@ -11,13 +11,18 @@ namespace CodeTranslator.Shared.CSharp
 {
     public class CSharpSyntaxTreeContext : SyntaxTreeContext
     {
+        public List<InterfaceDeclarationSyntax> Interfaces { get; private set; }
         public List<ClassDeclarationSyntax> Classes { get; private set; }
+        public List<StructDeclarationSyntax> Structs { get; private set; }
         public List<EnumDeclarationSyntax> Enums { get; private set; }
 
         public CSharpSyntaxTreeContext()
         {
+            Interfaces = new List<InterfaceDeclarationSyntax>();
             Classes = new List<ClassDeclarationSyntax>();
+            Structs = new List<StructDeclarationSyntax>();
             Enums = new List<EnumDeclarationSyntax>();
+
         }
     }
 }

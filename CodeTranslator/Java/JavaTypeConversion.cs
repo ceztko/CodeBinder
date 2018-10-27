@@ -35,9 +35,9 @@ namespace CodeTranslator.Java
             get { return TypeName + ".java"; }
         }
 
-        public abstract string TypeName
+        public virtual string TypeName
         {
-            get;
+            get { return TypeContext.Node.GetName(); }
         }
 
         public override string GeneratedPreamble
