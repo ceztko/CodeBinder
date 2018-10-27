@@ -24,6 +24,11 @@ namespace CodeTranslator.Shared.CSharp
             return false;
         }
 
+        public static string GetFullMetadataName(this BaseTypeSyntax type, ISemanticModelProvider provider)
+        {
+            return type.Type.GetFullMetadataName(provider);
+        }
+
         public static int GetEnumValue(this EnumMemberDeclarationSyntax node, ISemanticModelProvider provider)
         {
             return node.EqualsValue.Value.GetValue<int>(provider);
@@ -36,6 +41,16 @@ namespace CodeTranslator.Shared.CSharp
                 foreach (var attribute in list.Attributes)
                     yield return attribute;
             }
+        }
+
+        public static string GetName(this BaseTypeSyntax type)
+        {
+            return (type.Type as IdentifierNameSyntax).GetName();
+        }
+
+        public static string GetName(this IdentifierNameSyntax node)
+        {
+            return node.Identifier.Text;
         }
 
         public static string GetName(this BaseTypeDeclarationSyntax node)

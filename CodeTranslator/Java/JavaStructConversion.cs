@@ -8,8 +8,13 @@ namespace CodeTranslator.Java
 {
     class JavaStructConversion : JavaTypeConversion<CSharpStructTypeContext>
     {
-        public override void WriteDeclaration(IndentStringBuilder builder)
+        public override void WriteTypeBody(IndentStringBuilder builder)
         {
+        }
+
+        public override string TypeDeclaration
+        {
+            get { return "class"; }
         }
     }
 }

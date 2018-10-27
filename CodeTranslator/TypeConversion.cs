@@ -1,13 +1,14 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
 using CodeTranslator.Util;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CodeTranslator
 {
-    public abstract class TypeConversion
+    public abstract class TypeConversion : ISemanticModelProvider
     {
         public string ToFullString()
         {
@@ -16,6 +17,11 @@ namespace CodeTranslator
             builder.AppendLine(GeneratedPreamble);
             Write(builder);
             return builder.ToString();
+        }
+
+        public SemanticModel GetSemanticModel(SyntaxTree tree)
+        {
+            return TypeContext.TreeContext.GetSemanticModel(tree);
         }
 
         public virtual void InitWrite() { /* Do nothing */ }

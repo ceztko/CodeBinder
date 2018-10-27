@@ -17,33 +17,18 @@ namespace CodeTranslator.Java
 
         public override void InitWrite()
         {
-            _isFlag = TypeContext.Node.IsFlag(TypeContext);
+            _isFlag = TypeContext.Node.IsFlag(this);
         }
 
-        public override void WriteDeclaration(IndentStringBuilder builder)
+        public override void WriteTypeBody(IndentStringBuilder builder)
         {
-            var modifiers = TypeContext.Node.GetJavaModifiersString();
-            if (modifiers != string.Empty)
-            {
-                builder.Append(modifiers);
-                builder.Append(" ");
-            }
-
-            builder.Append("enum ");
-            builder.Append(TypeName);
-            builder.AppendLine(" {");
-            using (builder = builder.Indent())
-            {
-                WriteMembers(builder);
-                builder.AppendLine();
-                builder.AppendLine("public final int value");
-                builder.AppendLine();
-                WriteConstructor(builder);
-                builder.AppendLine();
-                WriteFromValueMethod(builder);
-            }
-
-            builder.AppendLine("}");
+            WriteMembers(builder);
+            builder.AppendLine();
+            builder.AppendLine("public final int value");
+            builder.AppendLine();
+            WriteConstructor(builder);
+            builder.AppendLine();
+            WriteFromValueMethod(builder);
         }
 
         private void WriteMembers(IndentStringBuilder builder)
@@ -51,11 +36,12 @@ namespace CodeTranslator.Java
             bool first = true;
             foreach (var member in TypeContext.Node.Members)
             {
-                if (!first)
+                if (first)
+                    first = false;
+                else
                     builder.AppendLine(",");
 
                 WriteMember(builder, member);
-                first = false;
             }
 
             builder.AppendLine(";");
@@ -67,7 +53,7 @@ namespace CodeTranslator.Java
             if (_isFlag)
             {
                 builder.Append("(");
-                builder.Append(member.GetEnumValue(TypeContext).ToString());
+                builder.Append(member.GetEnumValue(this).ToString());
                 builder.Append(")");
             }
         }
@@ -137,6 +123,11 @@ namespace CodeTranslator.Java
                 }
             }
             builder.AppendLine("}");
+        }
+
+        public override string TypeDeclaration
+        {
+            get { return "emum"; }
         }
     }
 }

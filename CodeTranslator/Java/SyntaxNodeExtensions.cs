@@ -10,7 +10,7 @@ namespace CodeTranslator.Java
 {
     static class SyntaxNodeExtensions
     {
-        public static string GetJavaModifiersString(this EnumDeclarationSyntax node)
+        public static string GetJavaModifiersString(this BaseTypeDeclarationSyntax node)
         {
             return getJavaModifiersString(node.Modifiers);
         }

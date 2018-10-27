@@ -23,7 +23,7 @@ namespace ConsoleApp1
 
             //Solution solution = workspace.OpenSolutionAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet.sln").Result;
             //var conv = SolutionConverter.CreateFor<CSToJavaConversion>(solution);
-            Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj").Result;
+            Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNetTest.csproj").Result;
             var conv = ProjectConverter.CreateFor<CSToJavaConversion>(project);
             conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
             conv.ConvertAndWrite(genargs);
