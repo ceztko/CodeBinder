@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CodeTranslator.Shared;
 using Microsoft.CodeAnalysis;
 
-namespace CodeTranslator.Shared
+namespace CodeTranslator
 {
     public abstract class SolutionConverter : Converter
     {

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeTranslator
+namespace CodeTranslator.Shared
 {
     // NOTE: Don't add overloadings to access the cache here:
     // add them as extension methods

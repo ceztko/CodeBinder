@@ -1,12 +1,13 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
+using CodeTranslator.Shared;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace CodeTranslator.Shared
+namespace CodeTranslator
 {
     public class GeneratorArgs
     {

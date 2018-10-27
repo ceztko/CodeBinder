@@ -7,11 +7,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using CodeTranslator.Shared;
 using CodeTranslator.Util;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace CodeTranslator.Shared
+namespace CodeTranslator
 {
     public abstract class ProjectConverter : Converter
     {
@@ -108,14 +109,9 @@ namespace CodeTranslator.Shared
             foreach (var tree in _syntaxTreesToConvert)
             {
                 var treeFilePath = tree.FilePath ?? "";
-                try {
+                try
+                {
                     SingleFirstPass(tree, treeFilePath);
-                    var errorAnnotations = tree.GetRoot().GetAnnotations(AnnotationConstants.ConversionErrorAnnotationKind).ToList();
-                    if (errorAnnotations.Any()) {
-                        _errors.TryAdd(treeFilePath,
-                            string.Join(Environment.NewLine, errorAnnotations.Select(a => a.Data))
-                        );
-                    }
                 }
                 catch (Exception e)
                 {

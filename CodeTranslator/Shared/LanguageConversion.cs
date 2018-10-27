@@ -7,7 +7,7 @@ using System.Text;
 using CodeTranslator.Util;
 using Microsoft.CodeAnalysis;
 
-namespace CodeTranslator
+namespace CodeTranslator.Shared
 {
     public abstract class LanguageConversion
     {

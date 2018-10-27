@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeTranslator
+namespace CodeTranslator.Shared
 {
     public abstract class NodeVisitor<TSyntaxTreeContext>
         where TSyntaxTreeContext : SyntaxTreeContext

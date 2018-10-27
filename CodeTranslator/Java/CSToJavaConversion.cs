@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CodeTranslator.Shared;
 using CodeTranslator.Shared.CSharp;
 
 namespace CodeTranslator.Java
