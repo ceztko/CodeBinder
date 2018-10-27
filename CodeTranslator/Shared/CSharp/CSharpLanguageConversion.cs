@@ -9,18 +9,17 @@ namespace CodeTranslator.Shared.CSharp
     public abstract class CSharpLanguageConversion
         : LanguageConversion<CSharpSyntaxTreeContext, CSharpTypeContext, CSharpNodeVisitor>
     {
-        protected override sealed IEnumerable<CSharpTypeContext> SecondPass(CSharpSyntaxTreeContext context)
+        protected override sealed IEnumerable<CSharpTypeContext> SecondPass(CSharpSyntaxTreeContext treeContext)
         {
-            foreach (var node in context.Enums)
+            foreach (var node in treeContext.Enums)
             {
-                var enumContext = new CSharpEnumTypeContext(node, context);
-                enumContext.Conversion = GetEnumTypeConversion(enumContext);
-                yield return enumContext;
+                var conversion = GetEnumTypeConversion();
+                yield return new CSharpEnumTypeContext(node, treeContext, conversion);
             }
 
             yield break;
         }
 
-        protected abstract TypeConversion GetEnumTypeConversion(CSharpEnumTypeContext context);
+        protected abstract TypeConversion<CSharpEnumTypeContext> GetEnumTypeConversion();
     }
 }

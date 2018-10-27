@@ -10,14 +10,9 @@ namespace CodeTranslator
 {
     public abstract class TypeContext : ISemanticModelProvider
     {
-        public TypeConversion Conversion { get; internal set; }
-
-        public string ToFullString()
+        public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
-            var builder = new IndentStringBuilder();
-            builder.AppendLine(Conversion.GeneratedPreamble);
-            Conversion.Write(builder);
-            return builder.ToString();
+            return TreeContext.GetSemanticModel(tree);
         }
 
         public SyntaxTreeContext TreeContext
@@ -25,21 +20,13 @@ namespace CodeTranslator
             get { return GetTreeContext(); }
         }
 
-        public string FileName
+        public TypeConversion Conversion
         {
-            get { return Conversion.FileName; }
-        }
-
-        public string BasePath
-        {
-            get { return Conversion.BasePath; }
+            get { return GetConversion(); }
         }
 
         protected abstract SyntaxTreeContext GetTreeContext();
 
-        public SemanticModel GetSemanticModel(SyntaxTree tree)
-        {
-            return TreeContext.GetSemanticModel(tree);
-        }
+        protected abstract TypeConversion GetConversion();
     }
 }

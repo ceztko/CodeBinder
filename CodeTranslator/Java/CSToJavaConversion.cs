@@ -12,9 +12,9 @@ namespace CodeTranslator.Java
         /// <summary>Base namespace of the package, to be set outside</summary>
         public string BaseNamespace { get; set; }
 
-        protected override TypeConversion GetEnumTypeConversion(CSharpEnumTypeContext typeContext)
+        protected override TypeConversion<CSharpEnumTypeContext> GetEnumTypeConversion()
         {
-            var ret = new JavaEnumConversion(typeContext);
+            var ret = new JavaEnumConversion();
             ret.Namespace = BaseNamespace;
             return ret;
         }

@@ -15,15 +15,14 @@ namespace CodeTranslator.Java
     {
         bool _isFlag;
 
-        public JavaEnumConversion(CSharpEnumTypeContext typeContext)
-            : base(typeContext)
-        {
-            _isFlag = typeContext.Node.IsFlag(typeContext);
-        }
-
         public override string TypeName
         {
             get { return TypeContext.Node.GetName(); }
+        }
+
+        public override void InitWrite()
+        {
+            _isFlag = TypeContext.Node.IsFlag(TypeContext);
         }
 
         public override void WriteDeclaration(IndentStringBuilder builder)

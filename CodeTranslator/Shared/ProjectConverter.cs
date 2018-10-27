@@ -45,13 +45,14 @@ namespace CodeTranslator.Shared
                     ? new[] {nonFatalException}
                     : new string[0];
 
-                foreach (var unit in pair.Value)
+                foreach (var type in pair.Value)
                 {
-                    yield return new ConversionResult(unit.ToFullString())
+                    var conversion = type.Conversion;
+                    yield return new ConversionResult(conversion.ToFullString())
                     {
                         SourcePath = pair.Key,
-                        TargetFileName = unit.FileName,
-                        TargetBasePath = unit.BasePath,
+                        TargetFileName = conversion.FileName,
+                        TargetBasePath = conversion.BasePath,
                         Exceptions = errors
                     };
                 }

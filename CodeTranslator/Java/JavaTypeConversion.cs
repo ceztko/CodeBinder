@@ -9,7 +9,8 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class JavaTypeConversion : TypeConversion
+    abstract class JavaTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext>
+        where TTypeContext : CSharpTypeContext
     {
         string _Namespace;
         string _Basepath;
@@ -22,11 +23,6 @@ namespace CodeTranslator.Java
                 _Namespace = value;
                 _Basepath = value.Replace('.', Path.DirectorySeparatorChar);
             }
-        }
-
-        public CSharpTypeContext TypeContext
-        {
-            get { return GetTypeContext(); }
         }
 
         public override string BasePath
@@ -54,7 +50,7 @@ namespace CodeTranslator.Java
             get { yield break; }
         }
 
-        public override void Write(IndentStringBuilder builder)
+        public sealed override void Write(IndentStringBuilder builder)
         {
             builder.Append("package ");
             builder.Append(Namespace);
@@ -74,23 +70,5 @@ namespace CodeTranslator.Java
         }
 
         public abstract void WriteDeclaration(IndentStringBuilder builder);
-
-        protected abstract CSharpTypeContext GetTypeContext();
-    }
-
-    abstract class JavaTypeConversion<TTypeContext> : JavaTypeConversion
-        where TTypeContext : CSharpTypeContext
-    {
-        public new TTypeContext TypeContext { get; private set; }
-
-        protected JavaTypeConversion(TTypeContext typeContext)
-        {
-            TypeContext = typeContext;
-        }
-
-        protected override CSharpTypeContext GetTypeContext()
-        {
-            return TypeContext;
-        }
     }
 }

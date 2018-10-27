@@ -30,20 +30,29 @@ namespace CodeTranslator.Shared.CSharp
         protected abstract CSharpSyntaxNode GetNode();
     }
 
-    public class CSharpTypeContext<TNode> : CSharpTypeContext
+    public abstract class CSharpTypeContext<TTypeConversion, TNode> : CSharpTypeContext
+        where TTypeConversion : TypeConversion
         where TNode : CSharpSyntaxNode
     {
+        public new TTypeConversion Conversion { get; private set; }
+
         public new TNode Node { get; private set; }
 
-        protected CSharpTypeContext(TNode node, CSharpSyntaxTreeContext treeContext)
+        protected CSharpTypeContext(TNode node, CSharpSyntaxTreeContext treeContext, TTypeConversion conversion)
             : base(treeContext)
         {
             Node = node;
+            Conversion = conversion;
         }
 
         protected override CSharpSyntaxNode GetNode()
         {
             return Node;
+        }
+
+        protected override TypeConversion GetConversion()
+        {
+            return Conversion;
         }
     }
 }

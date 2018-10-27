@@ -9,9 +9,13 @@ using System.Text;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    public sealed class CSharpEnumTypeContext : CSharpTypeContext<EnumDeclarationSyntax>
+    public sealed class CSharpEnumTypeContext : CSharpTypeContext<TypeConversion<CSharpEnumTypeContext>, EnumDeclarationSyntax>
     {
-        public CSharpEnumTypeContext(EnumDeclarationSyntax node, CSharpSyntaxTreeContext treeContext)
-            : base(node, treeContext) { }
+        public CSharpEnumTypeContext(EnumDeclarationSyntax node, CSharpSyntaxTreeContext treeContext,
+            TypeConversion<CSharpEnumTypeContext> conversion)
+            : base(node, treeContext, conversion)
+        {
+            conversion.TypeContext = this;
+        }
     }
 }
