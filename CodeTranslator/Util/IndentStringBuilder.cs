@@ -7,7 +7,7 @@ using System.Text;
 namespace CodeTranslator.Util
 {
     // TODO: Add function to disable trim trailing whitespace
-    public class IndentStringBuilder
+    public class IndentStringBuilder : IDisposable
     {
         StringBuilder _builder;
         int _currentIndentLevel;
@@ -21,10 +21,17 @@ namespace CodeTranslator.Util
         }
 
         public IndentStringBuilder(StringBuilder builder)
+            : this(builder, true, 4, 0)
+        {
+        }
+
+        private IndentStringBuilder(StringBuilder builder, bool doIndent,
+            uint indentSpaces, int currentIndentLevel)
         {
             _builder = builder;
-            _doIndent = true;
-            IndentSpaces = 4;
+            _doIndent = doIndent;
+            IndentSpaces = indentSpaces;
+            _currentIndentLevel = currentIndentLevel;
         }
 
         public void Append(string str)
@@ -56,6 +63,17 @@ namespace CodeTranslator.Util
             _currentIndentLevel++;
         }
 
+        public IndentStringBuilder Indent()
+        {
+            IncreaseIndent();
+            return this;
+        }
+
+        public IndentStringBuilder Indented()
+        {
+            return new IndentStringBuilder(_builder, _doIndent, IndentSpaces, _currentIndentLevel + 1);
+        }
+
         public void DecreaseIndent()
         {
             if (_currentIndentLevel == 0)
@@ -83,6 +101,11 @@ namespace CodeTranslator.Util
         public override string ToString()
         {
             return _builder.ToString();
+        }
+
+        void IDisposable.Dispose()
+        {
+            DecreaseIndent();
         }
     }
 }

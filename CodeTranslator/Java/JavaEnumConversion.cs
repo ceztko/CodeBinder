@@ -37,16 +37,33 @@ namespace CodeTranslator.Java
             builder.Append("enum ");
             builder.Append(TypeName);
             builder.AppendLine(" {");
-            builder.IncreaseIndent();
-            WriteMembers(builder);
-            builder.DecreaseIndent();
+            using (builder = builder.Indent())
+            {
+                WriteMembers(builder);
+                builder.AppendLine();
+                builder.AppendLine("public final int value");
+                builder.AppendLine();
+                WriteConstructor(builder);
+                builder.AppendLine();
+                WriteFromValueMethod(builder);
+            }
+
             builder.AppendLine("}");
         }
 
         private void WriteMembers(IndentStringBuilder builder)
         {
+            bool first = true;
             foreach (var member in TypeContext.Node.Members)
+            {
+                if (!first)
+                    builder.AppendLine(",");
+
                 WriteMember(builder, member);
+                first = false;
+            }
+
+            builder.AppendLine(";");
         }
 
         private void WriteMember(IndentStringBuilder builder, EnumMemberDeclarationSyntax member)
@@ -58,8 +75,73 @@ namespace CodeTranslator.Java
                 builder.Append(member.GetEnumValue(TypeContext).ToString());
                 builder.Append(")");
             }
+        }
 
-            builder.AppendLine(",");
+        private void WriteConstructor(IndentStringBuilder builder)
+        {
+            builder.Append(TypeName);
+            if (_isFlag)
+            {
+                builder.AppendLine("(int value) {");
+                builder.IncreaseIndent();
+                builder.AppendLine("this.value = value;");
+            }
+            else
+            {
+                builder.AppendLine("() {");
+                builder.IncreaseIndent();
+                builder.AppendLine("value = this.ordinal();");
+            }
+
+            builder.DecreaseIndent();
+            builder.AppendLine("}");
+        }
+
+        private void WriteFromValueMethod(IndentStringBuilder builder)
+        {
+            builder.Append("public static ");
+            builder.Append(TypeName);
+            builder.AppendLine(" fromValue(int value) {");
+            using (builder = builder.Indent())
+            {
+                if (_isFlag)
+                {
+                    builder.Append(TypeName);
+                    builder.Append("[] values = ");
+                    builder.Append(TypeName);
+                    builder.AppendLine(".values();");
+                    builder.AppendLine("for (int i = 0; i < values.length; i++) {");
+                    using (builder = builder.Indent())
+                    {
+                        builder.Append(TypeName);
+                        builder.AppendLine(" envalue = values[i];");
+                        builder.AppendLine("if (envalue.value == value)");
+                        builder.Indented().AppendLine("return envalue;");
+                    }
+                    builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum ");
+                    builder.Append(TypeName);
+                    builder.AppendLine("\");");
+                }
+                else
+                {
+                    builder.AppendLine("try {");
+                    using (builder = builder.Indent())
+                    {
+                        builder.Append("return ");
+                        builder.Append(TypeName);
+                        builder.AppendLine(".values()[value];");
+                    }
+                    builder.AppendLine("} catch (Exception e) {");
+                    using (builder = builder.Indent())
+                    {
+                        builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum ");
+                        builder.Append(TypeName);
+                        builder.AppendLine("\");");
+                    }
+                    builder.AppendLine("}");
+                }
+            }
+            builder.AppendLine("}");
         }
     }
 }
