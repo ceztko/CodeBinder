@@ -2,6 +2,7 @@
 // This file is subject to the MIT license
 using CodeTranslator.Shared.CSharp;
 using CodeTranslator.Util;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -119,14 +120,24 @@ namespace CodeTranslator.Java
 
         private void WriteBaseType(IndentStringBuilder builder, BaseTypeSyntax type)
         {
-            string convertedKnowType;
-            if (IsKnownType(type, out convertedKnowType))
-                builder.Append(convertedKnowType);
+            string typeName;
+            bool isInterface;
+            if (!IsKnownType(type, out typeName, out isInterface))
+            {
+                typeName = type.GetName();
+                var typeInfo = type.GetTypeInfo(this);
+                isInterface = typeInfo.ConvertedType.TypeKind == TypeKind.Interface;
+            }
+
+            if (isInterface)
+                builder.Append("implements ");
             else
-                builder.Append(type.GetName());
+                builder.Append("extends ");
+
+            builder.Append(typeName);
         }
 
-        private bool IsKnownType(BaseTypeSyntax type, out string convertedKnowType)
+        private bool IsKnownType(BaseTypeSyntax type, out string convertedKnowType, out bool isInterface)
         {
             var fullname = type.GetFullMetadataName(this);
             switch (fullname)
@@ -134,11 +145,13 @@ namespace CodeTranslator.Java
                 case "System.IDisposable":
                 {
                     convertedKnowType = "AutoCloseable";
+                    isInterface = true;
                     return true;
                 }
                 default:
                 {
                     convertedKnowType = null;
+                    isInterface = false;
                     return false;
                 }
             }
