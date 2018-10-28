@@ -9,20 +9,81 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    public class CSharpSyntaxTreeContext : SyntaxTreeContext
+    public sealed class CSharpSyntaxTreeContext : SyntaxTreeContext<CSharpTypeContext>
     {
-        public List<InterfaceDeclarationSyntax> Interfaces { get; private set; }
-        public List<ClassDeclarationSyntax> Classes { get; private set; }
-        public List<StructDeclarationSyntax> Structs { get; private set; }
-        public List<EnumDeclarationSyntax> Enums { get; private set; }
+        private CSharpLanguageConversion _conversion;
 
-        public CSharpSyntaxTreeContext()
+        public CSharpSyntaxTreeContext(SourceCompilation compilation, CSharpLanguageConversion conversion)
+            : base(compilation)
         {
-            Interfaces = new List<InterfaceDeclarationSyntax>();
-            Classes = new List<ClassDeclarationSyntax>();
-            Structs = new List<StructDeclarationSyntax>();
-            Enums = new List<EnumDeclarationSyntax>();
-
+            _conversion = conversion;
         }
+
+        public override void Visit(SyntaxTree tree)
+        {
+            var walker = new Walker(this, _conversion);
+            walker.Visit(tree.GetRoot());
+        }
+
+        #region Support
+
+        class Walker : CSharpSyntaxWalker
+        {
+            public CSharpLanguageConversion _conversion;
+            public CSharpSyntaxTreeContext _context;
+            private Queue<CSharpTypeContext> _parents;
+
+            public Walker(CSharpSyntaxTreeContext context, CSharpLanguageConversion conversion)
+            {
+                _context = context;
+                _conversion = conversion;
+                _parents = new Queue<CSharpTypeContext>();
+            }
+
+            public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
+            {
+                var type = new CSharpInterfaceTypeContext(node, _context, _conversion.GetInterfaceTypeConversion());
+                _context.AddType(type, CurrentParent);
+                DefaultVisit(node);
+            }
+
+            public override void VisitClassDeclaration(ClassDeclarationSyntax node)
+            {
+                var type = new CSharpClassTypeContext(node, _context, _conversion.GetClassTypeConversion());
+                _context.AddType(type, CurrentParent);
+                _parents.Enqueue(type);
+                DefaultVisit(node);
+                _parents.Dequeue();
+            }
+
+            public override void VisitStructDeclaration(StructDeclarationSyntax node)
+            {
+                var type = new CSharpStructTypeContext(node, _context, _conversion.GetStructTypeConversion());
+                _context.AddType(type, CurrentParent);
+                _parents.Enqueue(type);
+                DefaultVisit(node);
+                _parents.Dequeue();
+            }
+
+            public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
+            {
+                var type = new CSharpEnumTypeContext(node, _context, _conversion.GetEnumTypeConversion());
+                _context.AddType(type, CurrentParent);
+                DefaultVisit(node);
+            }
+
+            public CSharpTypeContext CurrentParent
+            {
+                get
+                {
+                    if (_parents.Count == 0)
+                        return null;
+
+                    return _parents.Peek();
+                }
+            }
+        }
+
+        #endregion // Support
     }
 }

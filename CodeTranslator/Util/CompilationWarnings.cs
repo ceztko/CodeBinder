@@ -4,13 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CodeTranslator.Shared;
 using Microsoft.CodeAnalysis;
 
 namespace CodeTranslator.Util
 {
     internal static class CompilationWarnings
     {
-        public static string WarningsForCompilation(Compilation finalCompilation, string compilationDescription)
+        public static string WarningsForCompilation(SourceCompilation finalCompilation, string compilationDescription)
         {
             var targetErrors = GetDiagnostics(finalCompilation);
             return targetErrors.Any()
@@ -18,9 +19,9 @@ namespace CodeTranslator.Util
                 : null;
         }
 
-        private static List<string> GetDiagnostics(Compilation compilation)
+        private static List<string> GetDiagnostics(SourceCompilation compilation)
         {
-            var diagnostics = compilation.GetDiagnostics()
+            var diagnostics = compilation.Compilation.GetDiagnostics()
                 .Where(d => d.Severity == DiagnosticSeverity.Error)
                 .Select(d => $"{d.Id}: {d.GetMessage()}")
                 .ToList();

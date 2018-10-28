@@ -16,10 +16,9 @@ namespace CodeTranslator
 {
     public abstract class ProjectConverter : Converter
     {
-        private readonly Compilation _sourceCompilation;
+        private readonly SourceCompilation _compilation;
         private readonly IEnumerable<SyntaxTree> _syntaxTreesToConvert;
         private readonly ConcurrentDictionary<string, string> _errors = new ConcurrentDictionary<string, string>();
-        private readonly Dictionary<string, SyntaxTreeContext> _firstPassResults = new Dictionary<string, SyntaxTreeContext>();
 
         protected ProjectConverter(Project project)
         {
@@ -27,8 +26,7 @@ namespace CodeTranslator
             var solutionDir = Path.GetDirectoryName(solutionFilePath);
             var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
             var syntaxTrees = solutionDir == null ? compilation.SyntaxTrees : compilation.SyntaxTrees.Where(t => t.FilePath.StartsWith(solutionDir));
-
-            _sourceCompilation = compilation;
+            _compilation = new SourceCompilation(compilation);
             _syntaxTreesToConvert = syntaxTrees.ToList();
         }
 
@@ -67,64 +65,53 @@ namespace CodeTranslator
 
         private Dictionary<string, List<TypeContext>> convert()
         {
-            FirstPass();
-            var secondPassByFilePath = SecondPass();
-#if DEBUG && ShowCompilationErrors
-            AddProjectWarnings();
-#endif
-            return secondPassByFilePath;
-        }
-
-        private Dictionary<string, List<TypeContext>> SecondPass()
-        {
-            var secondPassByFilePath = new Dictionary<string, List<TypeContext>>();
-            foreach (var pair in _firstPassResults)
-            {
-                var treeFilePath = pair.Key;
-                List<TypeContext> units;
-                if (!secondPassByFilePath.TryGetValue(treeFilePath, out units))
-                {
-                    units = new List<TypeContext>();
-                    secondPassByFilePath.Add(treeFilePath, units);
-                }
-
-                foreach (var unit in Conversion.SecondPass(pair.Value))
-                    units.Add(unit);
-            }
-            return secondPassByFilePath;
-        }
-
-        private void AddProjectWarnings()
-        {
-            var nonFatalWarningsOrNull = Conversion.GetWarningsOrNull();
-            if (!string.IsNullOrWhiteSpace(nonFatalWarningsOrNull))
-            {
-                var warningsDescription = Path.Combine(_sourceCompilation.AssemblyName, "ConversionWarnings.txt");
-                _errors.TryAdd(warningsDescription, nonFatalWarningsOrNull);
-            }
-        }
-
-        private void FirstPass()
-        {
+            var syntaxTreeContexts = new Dictionary<string, SyntaxTreeContext>();
             foreach (var tree in _syntaxTreesToConvert)
             {
+                var syntaxTree = Conversion.GetSyntaxTreeContext(_compilation);
+
                 var treeFilePath = tree.FilePath ?? "";
                 try
                 {
-                    SingleFirstPass(tree, treeFilePath);
+                    syntaxTree.Visit(tree);
+                    syntaxTreeContexts.Add(treeFilePath, syntaxTree);
                 }
                 catch (Exception e)
                 {
                     _errors.TryAdd(treeFilePath, e.ToString());
                 }
             }
+
+            var ret = new Dictionary<string, List<TypeContext>>();
+            foreach (var pair in syntaxTreeContexts)
+            {
+                foreach (var type in pair.Value.GetRootTypes())
+                {
+                    List<TypeContext> types;
+                    if (!ret.TryGetValue(pair.Key, out types))
+                    {
+                        types = new List<TypeContext>();
+                        ret.Add(pair.Key, types);
+                    }
+
+                    types.Add(type);
+                }
+            }
+
+#if DEBUG
+            AddProjectWarnings();
+#endif
+            return ret;
         }
 
-        private void SingleFirstPass(SyntaxTree tree, string treeFilePath)
+        private void AddProjectWarnings()
         {
-            var currentSourceCompilation = _sourceCompilation;
-            var convertedTree = Conversion.FirstPass(currentSourceCompilation, tree);
-            _firstPassResults.Add(treeFilePath, convertedTree);
+            var nonFatalWarningsOrNull = Conversion.GetWarningsOrNull(_compilation);
+            if (!string.IsNullOrWhiteSpace(nonFatalWarningsOrNull))
+            {
+                var warningsDescription = Path.Combine(_compilation.Compilation.AssemblyName, "ConversionWarnings.txt");
+                _errors.TryAdd(warningsDescription, nonFatalWarningsOrNull);
+            }
         }
     }
 

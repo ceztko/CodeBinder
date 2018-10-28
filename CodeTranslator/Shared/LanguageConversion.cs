@@ -11,49 +11,30 @@ namespace CodeTranslator.Shared
 {
     public abstract class LanguageConversion
     {
-        public Compilation Compilation { get; private set; }
+        internal LanguageConversion() { }
 
-        public SyntaxTreeContext FirstPass(Compilation compilation, SyntaxTree tree)
+        public abstract SyntaxTreeContext GetSyntaxTreeContext(SourceCompilation compilation);
+
+        public virtual string GetWarningsOrNull(SourceCompilation compilation)
         {
-            Compilation = compilation;
-            return firstPass(compilation, tree);
-        }
-
-        public abstract IEnumerable<TypeContext> SecondPass(SyntaxTreeContext context);
-
-        public virtual string GetWarningsOrNull()
-        {
-            return CompilationWarnings.WarningsForCompilation(Compilation, "source");
+            return CompilationWarnings.WarningsForCompilation(compilation, "source");
         }
 
         public virtual IEnumerable<ConversionResult> DefaultResults
         {
             get { yield break; }
         }
-
-        protected abstract SyntaxTreeContext firstPass(Compilation compilation, SyntaxTree tree);
     }
 
-    public abstract class LanguageConversion<TSyntaxTreeContext, TTypeContext, TNodeVisistor> : LanguageConversion
-        where TSyntaxTreeContext : SyntaxTreeContext, new()
-        where TTypeContext : TypeContext
-        where TNodeVisistor : NodeVisitor<TSyntaxTreeContext>, new()
+    public abstract class LanguageConversion<TSyntaxTreeContext, TTypeContext> : LanguageConversion
+        where TSyntaxTreeContext : SyntaxTreeContext<TTypeContext>
+        where TTypeContext : TypeContext<TTypeContext>
     {
-        protected sealed override SyntaxTreeContext firstPass(Compilation compilation, SyntaxTree tree)
+        public sealed override SyntaxTreeContext GetSyntaxTreeContext(SourceCompilation compilation)
         {
-            var context = new TSyntaxTreeContext();
-            context.Compilation = compilation;
-            var visitor = new TNodeVisistor();
-            visitor.Context = context;
-            visitor.Visit(tree.GetRoot());
-            return context;
+            return getSyntaxTreeContext(compilation);
         }
 
-        public sealed override IEnumerable<TypeContext> SecondPass(SyntaxTreeContext context)
-        {
-            return SecondPass(context as TSyntaxTreeContext);
-        }
-
-        protected abstract IEnumerable<TTypeContext> SecondPass(TSyntaxTreeContext context);
+        protected abstract TSyntaxTreeContext getSyntaxTreeContext(SourceCompilation compilation);
     }
 }

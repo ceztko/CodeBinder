@@ -10,14 +10,16 @@ namespace CodeTranslator.Shared
 {
     public abstract class TypeContext : ISemanticModelProvider
     {
+        internal TypeContext() { }
+
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
-            return TreeContext.GetSemanticModel(tree);
+            return TreeContext.Compilation.GetSemanticModel(tree);
         }
 
         public SyntaxTreeContext TreeContext
         {
-            get { return GetTreeContext(); }
+            get { return GetCompilationContext(); }
         }
 
         public TypeConversion Conversion
@@ -25,8 +27,41 @@ namespace CodeTranslator.Shared
             get { return GetConversion(); }
         }
 
-        protected abstract SyntaxTreeContext GetTreeContext();
+        public IEnumerable<TypeContext> Children
+        {
+            get { return GetChildren(); }
+        }
+
+        protected abstract SyntaxTreeContext GetCompilationContext();
 
         protected abstract TypeConversion GetConversion();
+
+        protected abstract IEnumerable<TypeContext> GetChildren();
+    }
+
+    public abstract class TypeContext<TTypeContext> : TypeContext
+        where TTypeContext : TypeContext
+    {
+        private List<TTypeContext> _Children;
+
+        protected TypeContext()
+        {
+            _Children = new List<TTypeContext>();
+        }
+
+        internal void AddChild(TTypeContext child)
+        {
+            _Children.Add(child);
+        }
+
+        public new IEnumerable<TTypeContext> Children
+        {
+            get { return _Children; }
+        }
+
+        protected override IEnumerable<TypeContext> GetChildren()
+        {
+            return _Children;
+        }
     }
 }

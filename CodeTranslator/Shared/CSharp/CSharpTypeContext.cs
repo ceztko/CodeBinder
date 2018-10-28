@@ -9,7 +9,7 @@ using System.Text;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    public abstract class CSharpTypeContext : TypeContext
+    public abstract class CSharpTypeContext : TypeContext<CSharpTypeContext>
     {
         public new CSharpSyntaxTreeContext TreeContext { get; private set; }
 
@@ -23,7 +23,7 @@ namespace CodeTranslator.Shared.CSharp
             get { return GetNode(); }
         }
 
-        protected override SyntaxTreeContext GetTreeContext()
+        protected override SyntaxTreeContext GetCompilationContext()
         {
             return TreeContext;
         }

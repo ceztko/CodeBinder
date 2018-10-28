@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class JavaTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext>
+    abstract class JavaTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext>, IJavaConversion
         where TTypeContext : CSharpTypeContext
     {
         string _Namespace;
@@ -145,5 +145,10 @@ namespace CodeTranslator.Java
         }
 
         public abstract void WriteTypeBody(IndentStringBuilder builder);
+    }
+
+    public interface IJavaConversion
+    {
+        string Namespace { get; set; }
     }
 }

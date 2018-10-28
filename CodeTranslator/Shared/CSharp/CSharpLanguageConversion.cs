@@ -3,35 +3,24 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace CodeTranslator.Shared.CSharp
 {
     public abstract class CSharpLanguageConversion
-        : LanguageConversion<CSharpSyntaxTreeContext, CSharpTypeContext, CSharpNodeVisitor>
+        : LanguageConversion<CSharpSyntaxTreeContext, CSharpTypeContext>
     {
-        protected override sealed IEnumerable<CSharpTypeContext> SecondPass(CSharpSyntaxTreeContext treeContext)
+        protected override CSharpSyntaxTreeContext getSyntaxTreeContext(SourceCompilation compilation)
         {
-            foreach (var node in treeContext.Interfaces)
-                yield return new CSharpInterfaceTypeContext(node, treeContext, GetInterfaceTypeConversion());
-
-            foreach (var node in treeContext.Classes)
-                yield return new CSharpClassTypeContext(node, treeContext, GetClassTypeConversion());
-
-            foreach (var node in treeContext.Structs)
-                yield return new CSharpStructTypeContext(node, treeContext, GetStructTypeConversion());
-
-            foreach (var node in treeContext.Enums)
-                yield return new CSharpEnumTypeContext(node, treeContext, GetEnumTypeConversion());
-
-            yield break;
+            return new CSharpSyntaxTreeContext(compilation, this);
         }
 
-        protected abstract TypeConversion<CSharpInterfaceTypeContext> GetInterfaceTypeConversion();
+        public abstract TypeConversion<CSharpClassTypeContext> GetClassTypeConversion();
 
-        protected abstract TypeConversion<CSharpClassTypeContext> GetClassTypeConversion();
+        public abstract TypeConversion<CSharpInterfaceTypeContext> GetInterfaceTypeConversion();
 
-        protected abstract TypeConversion<CSharpStructTypeContext> GetStructTypeConversion();
+        public abstract TypeConversion<CSharpStructTypeContext> GetStructTypeConversion();
 
-        protected abstract TypeConversion<CSharpEnumTypeContext> GetEnumTypeConversion();
+        public abstract TypeConversion<CSharpEnumTypeContext> GetEnumTypeConversion();
     }
 }

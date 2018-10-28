@@ -10,6 +10,8 @@ namespace CodeTranslator.Shared
 {
     public abstract class TypeConversion : ISemanticModelProvider
     {
+        internal TypeConversion() { }
+
         public string ToFullString()
         {
             var builder = new IndentStringBuilder();
