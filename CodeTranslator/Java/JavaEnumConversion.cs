@@ -20,7 +20,7 @@ namespace CodeTranslator.Java
             _isFlag = TypeContext.Node.IsFlag(this);
         }
 
-        public override void WriteTypeBody(IndentStringBuilder builder)
+        protected override void WriteTypeMembers(IndentStringBuilder builder, BaseTypeDeclarationSyntax type)
         {
             WriteMembers(builder);
             builder.AppendLine();
@@ -123,11 +123,6 @@ namespace CodeTranslator.Java
                 }
             }
             builder.AppendLine("}");
-        }
-
-        public override string TypeDeclaration
-        {
-            get { return "emum"; }
         }
     }
 }

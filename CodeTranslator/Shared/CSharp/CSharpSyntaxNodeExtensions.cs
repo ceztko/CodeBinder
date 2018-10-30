@@ -67,5 +67,10 @@ namespace CodeTranslator.Shared.CSharp
         {
             return node.Identifier.Text;
         }
+
+        public static string GetName(this MethodDeclarationSyntax node)
+        {
+            return node.Identifier.Text;
+        }
     }
 }

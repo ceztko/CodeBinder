@@ -8,8 +8,30 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    static class SyntaxNodeExtensions
+    static class JavaExtensions
     {
+        public static string GetJavaTypeDeclaration(this BaseTypeDeclarationSyntax node)
+        {
+            switch (node.GetType().Name)
+            {
+                case nameof(InterfaceDeclarationSyntax):
+                    return "interface";
+                case nameof(ClassDeclarationSyntax):
+                    return "class";
+                case nameof(StructDeclarationSyntax):
+                    return "class";
+                case nameof(EnumDeclarationSyntax):
+                    return "enum";
+                default:
+                    throw new Exception("Unsupported");
+            }
+        }
+
+        public static string GetJavaModifiersString(this BaseMethodDeclarationSyntax node)
+        {
+            return getJavaModifiersString(node.Modifiers);
+        }
+
         public static string GetJavaModifiersString(this BaseTypeDeclarationSyntax node)
         {
             return getJavaModifiersString(node.Modifiers);
@@ -41,6 +63,19 @@ namespace CodeTranslator.Java
                         break;
                     case "internal":
                         javaModifier = "";
+                        break;
+                    // TODO: fare una cosa specifica per tipi e per metodi?
+                    case "virtual":
+                        javaModifier = "";
+                        break;
+                    case "static":
+                        javaModifier = "static";
+                        break;
+                    case "override":
+                        javaModifier = "";
+                        break;
+                    case "extern":
+                        javaModifier = "native";
                         break;
                     default:
                         throw new Exception();

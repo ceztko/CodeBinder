@@ -8,13 +8,5 @@ namespace CodeTranslator.Java
 {
     class JavaInterfaceConversion : JavaTypeConversion<CSharpInterfaceTypeContext>
     {
-        public override void WriteTypeBody(IndentStringBuilder builder)
-        {
-        }
-
-        public override string TypeDeclaration
-        {
-            get { return "interface"; }
-        }
     }
 }

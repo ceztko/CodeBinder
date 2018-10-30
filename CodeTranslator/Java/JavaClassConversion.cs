@@ -10,14 +10,5 @@ namespace CodeTranslator.Java
 {
     class JavaClassConversion : JavaTypeConversion<CSharpClassTypeContext>
     {
-        public override void WriteTypeBody(IndentStringBuilder builder)
-        {
-
-        }
-
-        public override string TypeDeclaration
-        {
-            get { return "class"; }
-        }
     }
 }

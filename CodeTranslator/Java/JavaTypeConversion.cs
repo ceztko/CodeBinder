@@ -3,6 +3,7 @@
 using CodeTranslator.Shared.CSharp;
 using CodeTranslator.Util;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class JavaTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext>, IJavaConversion
+    abstract partial class JavaTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext>, IJavaConversion
         where TTypeContext : CSharpTypeContext
     {
         string _Namespace;
@@ -52,11 +53,6 @@ namespace CodeTranslator.Java
             get { yield break; }
         }
 
-        public abstract string TypeDeclaration
-        {
-            get;
-        }
-
         public sealed override void Write(IndentStringBuilder builder)
         {
             builder.Append("package ");
@@ -73,37 +69,39 @@ namespace CodeTranslator.Java
             if (hasImports)
                 builder.AppendLine();
 
-            WriteType(builder);
+            WriteType(builder, TypeContext.Node);
         }
 
-        public void WriteType(IndentStringBuilder builder)
+        private void WriteType(IndentStringBuilder builder, BaseTypeDeclarationSyntax type)
         {
-            var modifiers = TypeContext.Node.GetJavaModifiersString();
+            var modifiers = type.GetJavaModifiersString();
             if (modifiers != string.Empty)
             {
                 builder.Append(modifiers);
                 builder.Append(" ");
             }
 
-            builder.Append(TypeDeclaration);
+            builder.Append(type.GetJavaTypeDeclaration());
             builder.Append(" ");
-            builder.Append(TypeName);
-            WriteTypeBaseList(builder);
+            builder.Append(type.GetName());
+            if (type.BaseList != null)
+                WriteTypeBaseList(builder, type.BaseList);
             builder.AppendLine(" {");
             using (builder = builder.Indent())
             {
-                WriteTypeBody(builder);
+                WriteTypeMembers(builder, type);
             }
 
             builder.AppendLine("}");
         }
 
-        private void WriteTypeBaseList(IndentStringBuilder builder)
+        protected virtual void WriteTypeMembers(IndentStringBuilder builder, BaseTypeDeclarationSyntax type)
         {
-            var baseList = TypeContext.Node.BaseList;
-            if (baseList == null)
-                return;
+            WriteTypeMembers(builder, (type as TypeDeclarationSyntax).Members);
+        }
 
+        private void WriteTypeBaseList(IndentStringBuilder builder, BaseListSyntax baseList)
+        {
             builder.Append(": ");
 
             bool first = true;
@@ -157,7 +155,56 @@ namespace CodeTranslator.Java
             }
         }
 
-        public abstract void WriteTypeBody(IndentStringBuilder builder);
+        private void WriteTypeMembers(IndentStringBuilder builder, SyntaxList<MemberDeclarationSyntax> members)
+        {
+            bool first = true;
+            foreach (var member in members)
+            {
+                if (first)
+                    first = false;
+                else
+                    builder.AppendLine();
+
+                var kind = member.Kind();
+                switch (kind)
+                {
+                    case SyntaxKind.ConstructorDeclaration:
+                        new ConstructorWriter(member as ConstructorDeclarationSyntax, this).Write(builder);
+                        break;
+                    case SyntaxKind.DestructorDeclaration:
+                        new DestructorWriter(member as DestructorDeclarationSyntax, this).Write(builder);
+                        break;
+                    case SyntaxKind.MethodDeclaration:
+                        new MethodWriter(member as MethodDeclarationSyntax, this).Write(builder);
+                        break;
+                    case SyntaxKind.PropertyDeclaration:
+                    case SyntaxKind.IndexerDeclaration:
+                        WriteProperty(builder, member as BasePropertyDeclarationSyntax);
+                        break;
+                    case SyntaxKind.FieldDeclaration:
+                        WriteField(builder, member as FieldDeclarationSyntax);
+                        break;
+                    case SyntaxKind.InterfaceDeclaration:
+                    case SyntaxKind.ClassDeclaration:
+                    case SyntaxKind.StructKeyword:
+                    case SyntaxKind.EnumDeclaration:
+                        WriteType(builder, member as BaseTypeDeclarationSyntax);
+                        break;
+                    default:
+                        throw new Exception();
+                }
+            }
+        }
+
+        void WriteField(IndentStringBuilder builder, FieldDeclarationSyntax field)
+        {
+
+        }
+
+        void WriteProperty(IndentStringBuilder builder, BasePropertyDeclarationSyntax property)
+        {
+
+        }
     }
 
     public interface IJavaConversion

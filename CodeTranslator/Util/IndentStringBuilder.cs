@@ -34,12 +34,13 @@ namespace CodeTranslator.Util
             _currentIndentLevel = currentIndentLevel;
         }
 
-        public void Append(string str)
+        public IndentStringBuilder Append(string str)
         {
             if (str == string.Empty)
-                return;
+                return this;
 
             append(str);
+            return this;
         }
 
         // TODO: Support custom newline neding
@@ -51,16 +52,27 @@ namespace CodeTranslator.Util
                 _doIndent = true;
         }
 
-        public void AppendLine(string str = "")
+        public IndentStringBuilder AppendLine(string str = "")
         {
             appendIndent(str, true);
             _builder.AppendLine(str);
             _doIndent = true;
+            return this;
         }
 
-        public void IncreaseIndent()
+        public IndentStringBuilder IncreaseIndent()
         {
             _currentIndentLevel++;
+            return this;
+        }
+
+        public IndentStringBuilder DecreaseIndent()
+        {
+            if (_currentIndentLevel == 0)
+                throw new Exception("Can't decrease indent more");
+
+            _currentIndentLevel--;
+            return this;
         }
 
         public IndentStringBuilder Indent()
@@ -72,14 +84,6 @@ namespace CodeTranslator.Util
         public IndentStringBuilder Indented()
         {
             return new IndentStringBuilder(_builder, _doIndent, IndentSpaces, _currentIndentLevel + 1);
-        }
-
-        public void DecreaseIndent()
-        {
-            if (_currentIndentLevel == 0)
-                throw new Exception("Can't decrease indent more");
-
-            _currentIndentLevel--;
         }
 
         private void appendIndent(string str, bool appendLine)
