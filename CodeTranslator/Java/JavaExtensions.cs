@@ -10,6 +10,8 @@ namespace CodeTranslator.Java
 {
     static class JavaExtensions
     {
+        delegate bool ModifierGetter(string modifier, out string javaModifier);
+
         public static string GetJavaTypeDeclaration(this BaseTypeDeclarationSyntax node)
         {
             switch (node.GetType().Name)
@@ -29,61 +31,90 @@ namespace CodeTranslator.Java
 
         public static string GetJavaModifiersString(this BaseMethodDeclarationSyntax node)
         {
-            return getJavaModifiersString(node.Modifiers);
+            return getJavaModifiersString(node.Modifiers, getJavaMethodModifier);
         }
 
         public static string GetJavaModifiersString(this BaseTypeDeclarationSyntax node)
         {
-            return getJavaModifiersString(node.Modifiers);
+            return getJavaModifiersString(node.Modifiers, getJavaTypeModifier);
         }
 
-        private static string getJavaModifiersString(this SyntaxTokenList tokenList)
+        private static string getJavaModifiersString(this SyntaxTokenList tokenList, ModifierGetter getJavaModifier)
         {
             StringBuilder builder = new StringBuilder();
             bool first = true;
             foreach (var token in tokenList)
             {
-                if (!first)
-                {
-                    builder.Append(" ");
-                    first = false;
-                }
-
                 string javaModifier;
-                switch (token.Text)
-                {
-                    case "public":
-                        javaModifier = "public";
-                        break;
-                    case "protected":
-                        javaModifier = "protected";
-                        break;
-                    case "private":
-                        javaModifier = "private";
-                        break;
-                    case "internal":
-                        javaModifier = "";
-                        break;
-                    // TODO: fare una cosa specifica per tipi e per metodi?
-                    case "virtual":
-                        javaModifier = "";
-                        break;
-                    case "static":
-                        javaModifier = "static";
-                        break;
-                    case "override":
-                        javaModifier = "";
-                        break;
-                    case "extern":
-                        javaModifier = "native";
-                        break;
-                    default:
-                        throw new Exception();
-                }
+                if (!getJavaModifier(token.Text, out javaModifier))
+                    continue;
+
+                if (first)
+                    first = false;
+                else
+                    builder.Append(" ");
+
                 builder.Append(javaModifier);
             }
 
             return builder.ToString();
+        }
+
+        private static bool getJavaTypeModifier(string modifier, out string javaModifier)
+        {
+            switch (modifier)
+            {
+                case "public":
+                    javaModifier = "public";
+                    return true;
+                case "protected":
+                    javaModifier = "protected";
+                    return true;
+                case "private":
+                    javaModifier = "private";
+                    return true;
+                case "internal":
+                    javaModifier = null;
+                    return false;
+                default:
+                    throw new Exception("Unsupported");
+            }
+        }
+
+        private static bool getJavaMethodModifier(string modifier, out string javaModifier)
+        {
+            switch (modifier)
+            {
+                case "public":
+                    javaModifier = "public";
+                    return true;
+                case "protected":
+                    javaModifier = "protected";
+                    return true;
+                case "private":
+                    javaModifier = "private";
+                    return true;
+                case "internal":
+                    javaModifier = null;
+                    return false;
+                case "static":
+                    javaModifier = "static";
+                    return true;
+                case "virtual":
+                    javaModifier = null;
+                    return false;
+                case "override":
+                    javaModifier = null;
+                    return false;
+                case "sealed":
+                    javaModifier = "final";
+                    return true;
+                case "extern":
+                    javaModifier = "native";
+                    return true;
+                default:
+                    throw new Exception("Unsupported");
+            }
         }
     }
 }
