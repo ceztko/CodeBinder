@@ -10,5 +10,20 @@ namespace CodeTranslator.Java
 {
     class JavaClassConversion : JavaTypeConversion<CSharpClassTypeContext>
     {
+        protected override TypeWriter GetTypeWriter()
+        {
+            return new ClassTypeWriter(TypeContext.Node, this);
+        }
+    }
+
+    class ClassTypeWriter : TypeWriter<ClassDeclarationSyntax>
+    {
+        public ClassTypeWriter(ClassDeclarationSyntax node, ISemanticModelProvider context)
+            : base(node, context) { }
+
+        protected override void WriteTypeMembers()
+        {
+            WriteTypeMembers(Type.Members);
+        }
     }
 }

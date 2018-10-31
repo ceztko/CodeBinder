@@ -1,5 +1,6 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
+using CodeTranslator.Shared;
 using CodeTranslator.Shared.CSharp;
 using CodeTranslator.Util;
 using Microsoft.CodeAnalysis;
@@ -12,7 +13,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract partial class JavaTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext>, IJavaConversion
+    abstract partial class JavaTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext>
         where TTypeContext : CSharpTypeContext
     {
         string _Namespace;
@@ -35,12 +36,7 @@ namespace CodeTranslator.Java
 
         public override string FileName
         {
-            get { return TypeName + ".java"; }
-        }
-
-        public virtual string TypeName
-        {
-            get { return TypeContext.Node.GetName(); }
+            get { return TypeContext.Node.GetName() + ".java"; }
         }
 
         public override string GeneratedPreamble
@@ -69,40 +65,44 @@ namespace CodeTranslator.Java
             if (hasImports)
                 builder.AppendLine();
 
-            WriteType(builder, TypeContext.Node);
+            GetTypeWriter().Write(builder);
         }
 
-        private void WriteType(IndentStringBuilder builder, BaseTypeDeclarationSyntax type)
+        protected abstract TypeWriter GetTypeWriter();
+    }
+
+    abstract class TypeWriter : BaseWriter
+    {
+        protected TypeWriter(ISemanticModelProvider context)
+            : base(context) { }
+
+        protected override void Write()
         {
-            var modifiers = type.GetJavaModifiersString();
+            var modifiers = Type.GetJavaModifiersString();
             if (modifiers != string.Empty)
             {
-                builder.Append(modifiers);
-                builder.Append(" ");
+                Builder.Append(modifiers);
+                Builder.Append(" ");
             }
 
-            builder.Append(type.GetJavaTypeDeclaration());
-            builder.Append(" ");
-            builder.Append(type.GetName());
-            if (type.BaseList != null)
-                WriteTypeBaseList(builder, type.BaseList);
-            builder.AppendLine(" {");
-            using (builder = builder.Indent())
+            Builder.Append(Type.GetJavaTypeDeclaration());
+            Builder.Append(" ");
+            Builder.Append(TypeName);
+            if (Type.BaseList != null)
+                WriteTypeBaseList(Type.BaseList);
+            Builder.AppendLine(" {");
+            using (Builder.Indent())
             {
-                WriteTypeMembers(builder, type);
+                WriteTypeMembers();
             }
-
-            builder.AppendLine("}");
+            Builder.AppendLine("}");
         }
 
-        protected virtual void WriteTypeMembers(IndentStringBuilder builder, BaseTypeDeclarationSyntax type)
-        {
-            WriteTypeMembers(builder, (type as TypeDeclarationSyntax).Members);
-        }
+        protected abstract void WriteTypeMembers();
 
-        private void WriteTypeBaseList(IndentStringBuilder builder, BaseListSyntax baseList)
+        private void WriteTypeBaseList(BaseListSyntax baseList)
         {
-            builder.Append(": ");
+            Builder.Append(": ");
 
             bool first = true;
             foreach (var type in baseList.Types)
@@ -110,13 +110,13 @@ namespace CodeTranslator.Java
                 if (first)
                     first = false;
                 else
-                    builder.Append(", ");
+                    Builder.Append(", ");
 
-                WriteBaseType(builder, type);
+                WriteBaseType(type);
             }
         }
 
-        private void WriteBaseType(IndentStringBuilder builder, BaseTypeSyntax type)
+        private void WriteBaseType(BaseTypeSyntax type)
         {
             string typeName;
             bool isInterface;
@@ -128,11 +128,11 @@ namespace CodeTranslator.Java
             }
 
             if (isInterface)
-                builder.Append("implements ");
+                Builder.Append("implements ");
             else
-                builder.Append("extends ");
+                Builder.Append("extends ");
 
-            builder.Append(typeName);
+            Builder.Append(typeName);
         }
 
         private bool IsKnownType(BaseTypeSyntax type, out string convertedKnowType, out bool isInterface)
@@ -155,7 +155,7 @@ namespace CodeTranslator.Java
             }
         }
 
-        private void WriteTypeMembers(IndentStringBuilder builder, SyntaxList<MemberDeclarationSyntax> members)
+        protected void WriteTypeMembers(SyntaxList<MemberDeclarationSyntax> members)
         {
             bool first = true;
             foreach (var member in members)
@@ -163,32 +163,38 @@ namespace CodeTranslator.Java
                 if (first)
                     first = false;
                 else
-                    builder.AppendLine();
+                    Builder.AppendLine();
 
                 var kind = member.Kind();
                 switch (kind)
                 {
                     case SyntaxKind.ConstructorDeclaration:
-                        new ConstructorWriter(member as ConstructorDeclarationSyntax, this).Write(builder);
+                        new ConstructorWriter(member as ConstructorDeclarationSyntax, this).Write(Builder);
                         break;
                     case SyntaxKind.DestructorDeclaration:
-                        new DestructorWriter(member as DestructorDeclarationSyntax, this).Write(builder);
+                        new DestructorWriter(member as DestructorDeclarationSyntax, this).Write(Builder);
                         break;
                     case SyntaxKind.MethodDeclaration:
-                        new MethodWriter(member as MethodDeclarationSyntax, this).Write(builder);
+                        new MethodWriter(member as MethodDeclarationSyntax, this).Write(Builder);
                         break;
                     case SyntaxKind.PropertyDeclaration:
                     case SyntaxKind.IndexerDeclaration:
-                        WriteProperty(builder, member as BasePropertyDeclarationSyntax);
+                        WriteProperty(member as BasePropertyDeclarationSyntax);
                         break;
                     case SyntaxKind.FieldDeclaration:
-                        WriteField(builder, member as FieldDeclarationSyntax);
+                        WriteField(member as FieldDeclarationSyntax);
                         break;
                     case SyntaxKind.InterfaceDeclaration:
+                        new InterfaceTypeWriter(member as InterfaceDeclarationSyntax, this).Write(Builder);
+                        break;
                     case SyntaxKind.ClassDeclaration:
+                        new ClassTypeWriter(member as ClassDeclarationSyntax, this).Write(Builder);
+                        break;
                     case SyntaxKind.StructKeyword:
+                        new StructTypeWriter(member as StructDeclarationSyntax, this).Write(Builder);
+                        break;
                     case SyntaxKind.EnumDeclaration:
-                        WriteType(builder, member as BaseTypeDeclarationSyntax);
+                        new EnumTypeWriter(member as EnumDeclarationSyntax, this).Write(Builder);
                         break;
                     default:
                         throw new Exception();
@@ -196,19 +202,43 @@ namespace CodeTranslator.Java
             }
         }
 
-        void WriteField(IndentStringBuilder builder, FieldDeclarationSyntax field)
+        void WriteField(FieldDeclarationSyntax field)
         {
 
         }
 
-        void WriteProperty(IndentStringBuilder builder, BasePropertyDeclarationSyntax property)
+        void WriteProperty(BasePropertyDeclarationSyntax property)
         {
 
         }
+
+        public virtual string TypeName
+        {
+            get { return Type.GetName(); }
+        }
+
+        public BaseTypeDeclarationSyntax Type
+        {
+            get { return GetBaseType(); }
+        }
+
+        protected abstract BaseTypeDeclarationSyntax GetBaseType();
     }
 
-    public interface IJavaConversion
+    abstract class TypeWriter<TBaseType> : TypeWriter
+        where TBaseType : BaseTypeDeclarationSyntax
     {
-        string Namespace { get; set; }
+        public new TBaseType Type { get; private set; }
+
+        protected TypeWriter(TBaseType type, ISemanticModelProvider context)
+            : base(context)
+        {
+            Type = type;
+        }
+
+        protected override BaseTypeDeclarationSyntax GetBaseType()
+        {
+            return Type;
+        }
     }
 }

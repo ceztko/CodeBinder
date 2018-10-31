@@ -8,32 +8,28 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class BaseMethodWriter
+    abstract class BaseMethodWriter : BaseWriter
     {
-        public ISemanticModelProvider Context { get; private set; }
-
         protected BaseMethodWriter(ISemanticModelProvider context)
-        {
-            Context = context;
-        }
+            : base(context) { }
 
-        public void Write(IndentStringBuilder builder)
+        protected override void Write()
         {
-            builder.Append(Method.GetJavaModifiersString());
-            builder.Append(" ");
-            WriteReturnType(builder);
-            WriteMethodName(builder);
-            builder.AppendLine("(");
-            using (builder = builder.Indent())
+            Builder.Append(Method.GetJavaModifiersString());
+            Builder.Append(" ");
+            WriteReturnType();
+            WriteMethodName();
+            Builder.AppendLine("(");
+            using (Builder.Indent())
             {
                 WriteParameters(Method.ParameterList);
-                builder.AppendLine(")");
+                Builder.AppendLine(")");
             }
-            builder.Append("{");
-            builder.Append("}");
+            Builder.AppendLine("{");
+            Builder.AppendLine("}");
         }
 
-        protected abstract void WriteMethodName(IndentStringBuilder builder);
+        protected abstract void WriteMethodName();
 
         private void WriteParameters(ParameterListSyntax list)
         {
@@ -46,7 +42,7 @@ namespace CodeTranslator.Java
 
         }
 
-        protected virtual void WriteReturnType(IndentStringBuilder builder) { }
+        protected virtual void WriteReturnType() { }
 
         public BaseMethodDeclarationSyntax Method
         {
@@ -78,14 +74,14 @@ namespace CodeTranslator.Java
         public MethodWriter(MethodDeclarationSyntax method, ISemanticModelProvider context)
             : base(method, context) { }
 
-        protected override void WriteReturnType(IndentStringBuilder builder)
+        protected override void WriteReturnType()
         {
             WriteType(Method.ReturnType);
         }
 
-        protected override void WriteMethodName(IndentStringBuilder builder)
+        protected override void WriteMethodName()
         {
-            builder.Append(Method.GetName());
+            Builder.Append(Method.GetName());
         }
     }
 
@@ -94,7 +90,7 @@ namespace CodeTranslator.Java
         public ConstructorWriter(ConstructorDeclarationSyntax method, ISemanticModelProvider context)
             : base(method, context) { }
 
-        protected override void WriteMethodName(IndentStringBuilder builder)
+        protected override void WriteMethodName()
         {
 
         }
@@ -105,7 +101,7 @@ namespace CodeTranslator.Java
         public DestructorWriter(DestructorDeclarationSyntax method, ISemanticModelProvider context)
             : base(method, context) { }
 
-        protected override void WriteMethodName(IndentStringBuilder builder)
+        protected override void WriteMethodName()
         {
 
         }

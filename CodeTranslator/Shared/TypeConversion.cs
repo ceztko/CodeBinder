@@ -15,7 +15,6 @@ namespace CodeTranslator.Shared
         public string ToFullString()
         {
             var builder = new IndentStringBuilder();
-            InitWrite();
             builder.AppendLine(GeneratedPreamble);
             Write(builder);
             return builder.ToString();
@@ -23,10 +22,8 @@ namespace CodeTranslator.Shared
 
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
-            return TypeContext.TreeContext.GetSemanticModel(tree);
+            return TypeContext.TreeContext.Compilation.GetSemanticModel(tree);
         }
-
-        public virtual void InitWrite() { /* Do nothing */ }
 
         public abstract void Write(IndentStringBuilder builder);
 

@@ -13,116 +13,125 @@ namespace CodeTranslator.Java
 {
     class JavaEnumConversion : JavaTypeConversion<CSharpEnumTypeContext>
     {
+        protected override TypeWriter GetTypeWriter()
+        {
+            return new EnumTypeWriter(TypeContext.Node, this);
+        }
+    }
+
+    class EnumTypeWriter : TypeWriter<EnumDeclarationSyntax>
+    {
         bool _isFlag;
 
-        public override void InitWrite()
+        public EnumTypeWriter(EnumDeclarationSyntax node, ISemanticModelProvider context)
+            : base(node, context)
         {
-            _isFlag = TypeContext.Node.IsFlag(this);
+            _isFlag = Type.IsFlag(this);
         }
 
-        protected override void WriteTypeMembers(IndentStringBuilder builder, BaseTypeDeclarationSyntax type)
+        protected override void WriteTypeMembers()
         {
-            WriteMembers(builder);
-            builder.AppendLine();
-            builder.AppendLine("public final int value");
-            builder.AppendLine();
-            WriteConstructor(builder);
-            builder.AppendLine();
-            WriteFromValueMethod(builder);
+            WriteEnumMembers();
+            Builder.AppendLine();
+            Builder.AppendLine("public final int value");
+            Builder.AppendLine();
+            WriteConstructor();
+            Builder.AppendLine();
+            WriteFromValueMethod();
         }
 
-        private void WriteMembers(IndentStringBuilder builder)
+        private void WriteEnumMembers()
         {
             bool first = true;
-            foreach (var member in TypeContext.Node.Members)
+            foreach (var member in Type.Members)
             {
                 if (first)
                     first = false;
                 else
-                    builder.AppendLine(",");
+                    Builder.AppendLine(",");
 
-                WriteMember(builder, member);
+                WriteMember(member);
             }
 
-            builder.AppendLine(";");
+            Builder.AppendLine(";");
         }
 
-        private void WriteMember(IndentStringBuilder builder, EnumMemberDeclarationSyntax member)
+        private void WriteMember(EnumMemberDeclarationSyntax member)
         {
-            builder.Append(member.GetName());
+            Builder.Append(member.GetName());
             if (_isFlag)
             {
-                builder.Append("(");
-                builder.Append(member.GetEnumValue(this).ToString());
-                builder.Append(")");
+                Builder.Append("(");
+                Builder.Append(member.GetEnumValue(this).ToString());
+                Builder.Append(")");
             }
         }
 
-        private void WriteConstructor(IndentStringBuilder builder)
+        private void WriteConstructor()
         {
-            builder.Append(TypeName);
+            Builder.Append(TypeName);
             if (_isFlag)
             {
-                builder.AppendLine("(int value) {");
-                builder.IncreaseIndent();
-                builder.AppendLine("this.value = value;");
+                Builder.AppendLine("(int value) {");
+                Builder.IncreaseIndent();
+                Builder.AppendLine("this.value = value;");
             }
             else
             {
-                builder.AppendLine("() {");
-                builder.IncreaseIndent();
-                builder.AppendLine("value = this.ordinal();");
+                Builder.AppendLine("() {");
+                Builder.IncreaseIndent();
+                Builder.AppendLine("value = this.ordinal();");
             }
 
-            builder.DecreaseIndent();
-            builder.AppendLine("}");
+            Builder.DecreaseIndent();
+            Builder.AppendLine("}");
         }
 
-        private void WriteFromValueMethod(IndentStringBuilder builder)
+        private void WriteFromValueMethod()
         {
-            builder.Append("public static ");
-            builder.Append(TypeName);
-            builder.AppendLine(" fromValue(int value) {");
-            using (builder = builder.Indent())
+            Builder.Append("public static ");
+            Builder.Append(TypeName);
+            Builder.AppendLine(" fromValue(int value) {");
+            using (Builder.Indent())
             {
                 if (_isFlag)
                 {
-                    builder.Append(TypeName);
-                    builder.Append("[] values = ");
-                    builder.Append(TypeName);
-                    builder.AppendLine(".values();");
-                    builder.AppendLine("for (int i = 0; i < values.length; i++) {");
-                    using (builder = builder.Indent())
+                    Builder.Append(TypeName);
+                    Builder.Append("[] values = ");
+                    Builder.Append(TypeName);
+                    Builder.AppendLine(".values();");
+                    Builder.AppendLine("for (int i = 0; i < values.length; i++) {");
+                    using (Builder.Indent())
                     {
-                        builder.Append(TypeName);
-                        builder.AppendLine(" envalue = values[i];");
-                        builder.AppendLine("if (envalue.value == value)");
-                        builder.Indented().AppendLine("return envalue;");
+                        Builder.Append(TypeName);
+                        Builder.AppendLine(" envalue = values[i];");
+                        Builder.AppendLine("if (envalue.value == value)");
+                        Builder.Indented().AppendLine("return envalue;");
                     }
-                    builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum ");
-                    builder.Append(TypeName);
-                    builder.AppendLine("\");");
+                    Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum ");
+                    Builder.Append(TypeName);
+                    Builder.AppendLine("\");");
                 }
                 else
                 {
-                    builder.AppendLine("try {");
-                    using (builder = builder.Indent())
+                    Builder.AppendLine("try {");
+                    using (Builder.Indent())
                     {
-                        builder.Append("return ");
-                        builder.Append(TypeName);
-                        builder.AppendLine(".values()[value];");
+                        Builder.Append("return ");
+                        Builder.Append(TypeName);
+                        Builder.AppendLine(".values()[value];");
                     }
-                    builder.AppendLine("} catch (Exception e) {");
-                    using (builder = builder.Indent())
+                    Builder.AppendLine("} catch (Exception e) {");
+                    using (Builder.Indent())
                     {
-                        builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum ");
-                        builder.Append(TypeName);
-                        builder.AppendLine("\");");
+                        Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum ");
+                        Builder.Append(TypeName);
+                        Builder.AppendLine("\");");
                     }
-                    builder.AppendLine("}");
+                    Builder.AppendLine("}");
                 }
             }
-            builder.AppendLine("}");
+            Builder.AppendLine("}");
         }
     }
 }
