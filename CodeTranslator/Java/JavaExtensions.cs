@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using CodeTranslator.Shared.CSharp;
 
 namespace CodeTranslator.Java
 {
@@ -31,22 +32,24 @@ namespace CodeTranslator.Java
 
         public static string GetJavaModifiersString(this BaseMethodDeclarationSyntax node)
         {
-            return getJavaModifiersString(node.Modifiers, getJavaMethodModifier);
+            var modifiers = node.GetCSharpModifierStrings();
+            return getJavaModifiersString(modifiers, getJavaMethodModifier);
         }
 
         public static string GetJavaModifiersString(this BaseTypeDeclarationSyntax node)
         {
-            return getJavaModifiersString(node.Modifiers, getJavaTypeModifier);
+            var modifiers = node.GetCSharpModifierStrings();
+            return getJavaModifiersString(modifiers, getJavaTypeModifier);
         }
 
-        private static string getJavaModifiersString(this SyntaxTokenList tokenList, ModifierGetter getJavaModifier)
+        private static string getJavaModifiersString(List<string> modifiers, ModifierGetter getJavaModifier)
         {
             StringBuilder builder = new StringBuilder();
             bool first = true;
-            foreach (var token in tokenList)
+            foreach (var modifier in modifiers)
             {
                 string javaModifier;
-                if (!getJavaModifier(token.Text, out javaModifier))
+                if (!getJavaModifier(modifier, out javaModifier))
                     continue;
 
                 if (first)
@@ -77,7 +80,7 @@ namespace CodeTranslator.Java
                     javaModifier = null;
                     return false;
                 default:
-                    throw new Exception("Unsupported");
+                    throw new Exception();
             }
         }
 
@@ -113,7 +116,7 @@ namespace CodeTranslator.Java
                     javaModifier = "native";
                     return true;
                 default:
-                    throw new Exception("Unsupported");
+                    throw new Exception();
             }
         }
     }

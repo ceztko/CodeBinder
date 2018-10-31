@@ -29,6 +29,70 @@ namespace CodeTranslator.Shared.CSharp
             return node.EqualsValue.Value.GetValue<int>(provider);
         }
 
+        public static List<string> GetCSharpModifierStrings(this BaseTypeDeclarationSyntax node)
+        {
+            bool explicitAccessibility = false;
+            foreach (var modifier in node.Modifiers)
+            {
+                switch (modifier.Text)
+                {
+                    case "public":
+                    case "internal":
+                    case "protected":
+                    case "private":
+                        explicitAccessibility = true;
+                        break;
+                    default:
+                        throw new Exception();
+                }
+            }
+
+            var ret = new List<string>();
+
+            if (!explicitAccessibility)
+                ret.Add("internal");
+
+            foreach (var modifier in node.Modifiers)
+                ret.Add(modifier.Text);
+
+            return ret;
+        }
+
+        public static List<string> GetCSharpModifierStrings(this BaseMethodDeclarationSyntax node)
+        {
+            bool explicitAccessibility = false;
+            foreach (var modifier in node.Modifiers)
+            {
+                switch (modifier.Text)
+                {
+                    case "public":
+                    case "internal":
+                    case "protected":
+                    case "private":
+                        explicitAccessibility = true;
+                        break;
+                    case "static":
+                    case "virtual":
+                    case "override":
+                    case "sealed":
+                    case "extern":
+                        break;
+                    default:
+                        throw new Exception();
+                }
+            }
+
+            var ret = new List<string>();
+
+            if (!explicitAccessibility)
+                ret.Add("private");
+
+            foreach (var modifier in node.Modifiers)
+                ret.Add(modifier.Text);
+
+            return ret;
+        }
+
         public static IEnumerable<AttributeSyntax> GetAttributes(this EnumDeclarationSyntax node)
         {
             foreach (var list in node.AttributeLists)
