@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CodeTranslator.Shared
 {
-    static class RoslynExtensions
+    static class RoslynMethodExtensions
     {
         public static string GetFullMetadataName(this SyntaxNode node, ICompilationContextProvider provider)
         {

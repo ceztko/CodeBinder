@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    static class CSharpSyntaxNodeExtensions
+    static class CSharpMethodExtensions
     {
         const string FLAG_ATTRIBUTE_FULLANAME = "System.FlagsAttribute";
 

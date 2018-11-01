@@ -10,7 +10,7 @@ using CodeTranslator.Util;
 
 namespace CodeTranslator.Java
 {
-    static class JavaExtensions
+    static class JavaMethodExtensions
     {
         delegate bool ModifierGetter(string modifier, out string javaModifier);
 
