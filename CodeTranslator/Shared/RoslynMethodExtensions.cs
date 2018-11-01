@@ -11,14 +11,20 @@ namespace CodeTranslator.Shared
     {
         public static string GetFullMetadataName(this SyntaxNode node, ICompilationContextProvider provider)
         {
-            var info = node.GetTypeInfo(provider);
-            return info.GetFullMetadataName();
+            var symbol = node.GetTypeSymbol(provider);
+            return symbol.GetFullMetadataName();
         }
 
         public static TypeInfo GetTypeInfo(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = node.GetSemanticModel(provider);
             return model.GetTypeInfo(node);
+        }
+
+        public static ITypeSymbol GetTypeSymbol(this SyntaxNode node, ICompilationContextProvider provider)
+        {
+            var info = node.GetTypeInfo(provider);
+            return info.ConvertedType;
         }
 
         public static SemanticModel GetSemanticModel(this SyntaxNode node, ICompilationContextProvider provider)
@@ -36,11 +42,6 @@ namespace CodeTranslator.Shared
         {
             var model = provider.GetSemanticModel(node.SyntaxTree);
             return (T)model.GetConstantValue(node).Value;
-        }
-
-        public static string GetFullMetadataName(ref this TypeInfo info)
-        {
-            return info.ConvertedType.GetFullMetadataName();
         }
 
         // Reference: https://stackoverflow.com/a/27106959/213871

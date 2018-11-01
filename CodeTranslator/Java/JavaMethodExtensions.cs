@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using CodeTranslator.Shared.CSharp;
 using CodeTranslator.Util;
+using CodeTranslator.Shared;
 
 namespace CodeTranslator.Java
 {
@@ -41,6 +42,12 @@ namespace CodeTranslator.Java
                 default:
                     throw new Exception("Unsupported");
             }
+        }
+
+        public static string GetJavaType(this TypeSyntax type, ICompilationContextProvider provider)
+        {
+            var symbol = type.GetTypeSymbol(provider);
+            return getJavaType(symbol);
         }
 
         public static string GetJavaModifiersString(this BaseMethodDeclarationSyntax node)
@@ -131,6 +138,125 @@ namespace CodeTranslator.Java
                 default:
                     throw new Exception();
             }
+        }
+
+
+        private static string getJavaType(ITypeSymbol type)
+        {
+            /*
+            if (type.IsEnum)
+            {
+                writer.Write("int");
+                return;
+            }
+
+            if (type.IsByRef && !type.IsPrimitive)
+            {
+                writer.Write("long");
+                return;
+            }
+            */
+
+            string typeName = type.Name;
+            string javaArraySuffix = String.Empty;
+            /*
+            if (type.IsArray)
+            {
+                typeName = typeName.Substring(0, typeName.Length - 2);
+                javaArraySuffix = "[]";
+            }
+            */
+            string javaTypeName;
+            switch (typeName)
+            {
+                case "Void":
+                {
+                    javaTypeName = "void";
+                    break;
+                }
+                case nameof(Object):
+                {
+                    javaTypeName = "Object";
+                    break;
+                }
+                case nameof(IntPtr):
+                {
+                    javaTypeName = "long";
+                    break;
+                }
+                case nameof(Boolean):
+                {
+                    javaTypeName = "boolean";
+                    break;
+                }
+                case nameof(Char):
+                {
+                    javaTypeName =  "char";
+                    break;
+                }
+                case nameof(String):
+                {
+                    javaTypeName =  "String";
+                    break;
+                }
+                case nameof(Byte):
+                {
+                    javaTypeName = "byte";
+                    break;
+                }
+                case nameof(SByte):
+                {
+                    javaTypeName = "byte";
+                    break;
+                }
+                case nameof(Int16):
+                {
+                    javaTypeName =  "short";
+                    break;
+                }
+                case nameof(UInt16):
+                {
+                    javaTypeName = "short";
+                    break;
+                }
+                case nameof(Int32):
+                {
+                    javaTypeName = "int";
+                    break;
+                }
+                case nameof(UInt32):
+                {
+                    javaTypeName = "int";
+                    break;
+                }
+                case nameof(Int64):
+                {
+                    javaTypeName = "long";
+                    break;
+                }
+                case nameof(UInt64):
+                {
+                    javaTypeName = "long";
+                    break;
+                }
+                case nameof(Single):
+                {
+                    javaTypeName =  "float";
+                    break;
+                }
+                case nameof(Double):
+                {
+                    javaTypeName = "double";
+                    break;
+                }
+                default:
+                {
+                    javaTypeName = typeName;
+                    break;
+                }
+            }
+
+            return javaTypeName + javaArraySuffix;
         }
     }
 }

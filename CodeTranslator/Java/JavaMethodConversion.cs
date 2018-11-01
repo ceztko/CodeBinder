@@ -38,13 +38,27 @@ namespace CodeTranslator.Java
 
         private void WriteParameters(ParameterListSyntax list)
         {
+            bool first = true;
             foreach (var parameter in list.Parameters)
-                WriteType(parameter.Type);
+            {
+                if (first)
+                    first = false;
+                else
+                    Builder.Append(", ");
+
+                WriteParameter(parameter);
+            }
+        }
+
+        private void WriteParameter(ParameterSyntax parameter)
+        {
+            WriteType(parameter.Type);
+            Builder.Append(" ").Append(parameter.Identifier.Text);
         }
 
         protected void WriteType(TypeSyntax type)
         {
-
+            Builder.Append(type.GetJavaType(this));
         }
 
         protected virtual void WriteReturnType() { }
@@ -113,119 +127,4 @@ namespace CodeTranslator.Java
             get { return "finalize"; }
         }
     }
-
-    /*
-    private void WriteTypeJava(StreamWriter writer, Type type)
-    {
-        if (type.IsEnum)
-        {
-            writer.Write("int");
-            return;
-        }
-
-        if (type.IsByRef && !type.IsPrimitive)
-        {
-            writer.Write("long");
-            return;
-        }
-
-        string typeName = type.Name;
-        string typeSuffix = String.Empty;
-        if (type.IsArray)
-        {
-            typeName = typeName.Substring(0, typeName.Length - 2);
-            typeSuffix = "[]";
-        }
-
-        switch (typeName)
-        {
-            case "Void":
-            {
-                writer.Write("void");
-                break;
-            }
-            case nameof(Object):
-            {
-                writer.Write("Object");
-                break;
-            }
-            case nameof(IntPtr):
-            {
-                writer.Write("long");
-                break;
-            }
-            case nameof(Boolean):
-            {
-                writer.Write("boolean");
-                break;
-            }
-            case nameof(Char):
-            {
-                writer.Write("char");
-                break;
-            }
-            case nameof(String):
-            {
-                writer.Write("String");
-                break;
-            }
-            case nameof(Byte):
-            {
-                writer.Write("byte");
-                break;
-            }
-            case nameof(SByte):
-            {
-                writer.Write("byte");
-                break;
-            }
-            case nameof(Int16):
-            {
-                writer.Write("short");
-                break;
-            }
-            case nameof(UInt16):
-            {
-                writer.Write("short");
-                break;
-            }
-            case nameof(Int32):
-            {
-                writer.Write("int");
-                break;
-            }
-            case nameof(UInt32):
-            {
-                writer.Write("int");
-                break;
-            }
-            case nameof(Int64):
-            {
-                writer.Write("long");
-                break;
-            }
-            case nameof(UInt64):
-            {
-                writer.Write("long");
-                break;
-            }
-            case nameof(Single):
-            {
-                writer.Write("float");
-                break;
-            }
-            case nameof(Double):
-            {
-                writer.Write("double");
-                break;
-            }
-            default:
-            {
-                throw new Exception("Unsupported type " + type.Name);
-            }
-        }
-
-        writer.Write(typeSuffix);
-    }
-    */
 }
