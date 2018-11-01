@@ -49,7 +49,7 @@ namespace CodeTranslator.Java
             get { yield break; }
         }
 
-        public sealed override void Write(IndentStringBuilder builder)
+        public sealed override void Write(CodeBuilder builder)
         {
             builder.Append("package ");
             builder.Append(Namespace);

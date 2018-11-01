@@ -9,14 +9,14 @@ namespace CodeTranslator.Shared
     public abstract class BaseWriter : ISemanticModelProvider
     {
         public ISemanticModelProvider Context { get; private set; }
-        public IndentStringBuilder Builder { get; private set; }
+        public CodeBuilder Builder { get; private set; }
 
         protected BaseWriter(ISemanticModelProvider context)
         {
             Context = context;
         }
 
-        public void Write(IndentStringBuilder builder)
+        public void Write(CodeBuilder builder)
         {
             Builder = builder;
             Write();

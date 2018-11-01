@@ -14,13 +14,13 @@ namespace CodeTranslator.Java
     {
         delegate bool ModifierGetter(string modifier, out string javaModifier);
 
-        public static IndentStringBuilder BeginBlock(this IndentStringBuilder builder, bool appendLine = true)
+        public static CodeBuilder BeginBlock(this CodeBuilder builder, bool appendLine = true)
         {
             builder.AppendLine("{");
             return builder.Indent("}", appendLine);
         }
 
-        public static IndentStringBuilder BeginParameterList(this IndentStringBuilder builder, bool appendLine = true)
+        public static CodeBuilder BeginParameterList(this CodeBuilder builder, bool appendLine = true)
         {
             builder.AppendLine("(");
             return builder.Indent(")", false);
