@@ -12,6 +12,8 @@ namespace CodeTranslator.Util
         StringBuilder _builder;
         int _currentIndentLevel;
         bool _doIndent;
+        string _disposeAppendString;
+        bool _disposeAppendLine;
 
         public uint IndentSpaces { get; set; }
 
@@ -21,12 +23,13 @@ namespace CodeTranslator.Util
         }
 
         public IndentStringBuilder(StringBuilder builder)
-            : this(builder, true, 4, 0)
+            : this(builder, true, 4, 0, null, false)
         {
         }
 
         private IndentStringBuilder(StringBuilder builder, bool doIndent,
-            uint indentSpaces, int currentIndentLevel)
+            uint indentSpaces, int currentIndentLevel, string disposeAppendString,
+            bool disposeAppendLine)
         {
             _builder = builder;
             _doIndent = doIndent;
@@ -75,15 +78,17 @@ namespace CodeTranslator.Util
             return this;
         }
 
-        public IndentStringBuilder Indent()
+        public IndentStringBuilder Indent(string disposeAppendString = null, bool disposeAppendLine = true)
         {
             IncreaseIndent();
+            _disposeAppendString = disposeAppendString;
+            _disposeAppendLine = disposeAppendLine;
             return this;
         }
 
-        public IndentStringBuilder Indented()
+        public IndentStringBuilder Indented(string disposeAppendString = null, bool disposeAppendLine = true)
         {
-            return new IndentStringBuilder(_builder, _doIndent, IndentSpaces, _currentIndentLevel + 1);
+            return new IndentStringBuilder(_builder, _doIndent, IndentSpaces, _currentIndentLevel + 1, disposeAppendString, disposeAppendLine);
         }
 
         private void appendIndent(string str, bool appendLine)
@@ -110,6 +115,13 @@ namespace CodeTranslator.Util
         void IDisposable.Dispose()
         {
             DecreaseIndent();
+            if (_disposeAppendString != null)
+            {
+                if (_disposeAppendLine)
+                    AppendLine(_disposeAppendString);
+                else
+                    Append(_disposeAppendString);
+            }
         }
     }
 }

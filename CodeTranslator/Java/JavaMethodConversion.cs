@@ -18,18 +18,23 @@ namespace CodeTranslator.Java
             Builder.Append(Method.GetJavaModifiersString());
             Builder.Append(" ");
             WriteReturnType();
-            WriteMethodName();
-            Builder.AppendLine("(");
-            using (Builder.Indent())
+            Builder.Append(MethodName);
+            if (Method.ParameterList.Parameters.Count == 0)
             {
-                WriteParameters(Method.ParameterList);
-                Builder.AppendLine(")");
+                Builder.Append("()");
             }
-            Builder.AppendLine("{");
-            Builder.AppendLine("}");
-        }
+            else
+            {
+                using (Builder.BeginParameterList())
+                {
+                    WriteParameters(Method.ParameterList);
+                }
+            }
+            using (Builder.Append(" ").BeginBlock())
+            {
 
-        protected abstract void WriteMethodName();
+            }
+        }
 
         private void WriteParameters(ParameterListSyntax list)
         {
@@ -48,6 +53,8 @@ namespace CodeTranslator.Java
         {
             get { return GetMethod(); }
         }
+
+        public abstract string MethodName { get; }
 
         protected abstract BaseMethodDeclarationSyntax GetMethod();
     }
@@ -79,9 +86,9 @@ namespace CodeTranslator.Java
             WriteType(Method.ReturnType);
         }
 
-        protected override void WriteMethodName()
+        public override string MethodName
         {
-            Builder.Append(Method.GetName());
+            get { return Method.GetName(); }
         }
     }
 
@@ -90,9 +97,9 @@ namespace CodeTranslator.Java
         public ConstructorWriter(ConstructorDeclarationSyntax method, ISemanticModelProvider context)
             : base(method, context) { }
 
-        protected override void WriteMethodName()
+        public override string MethodName
         {
-
+            get { return (Method.Parent as BaseTypeDeclarationSyntax).GetName();}
         }
     }
 
@@ -101,9 +108,9 @@ namespace CodeTranslator.Java
         public DestructorWriter(DestructorDeclarationSyntax method, ISemanticModelProvider context)
             : base(method, context) { }
 
-        protected override void WriteMethodName()
+        public override string MethodName
         {
-
+            get { return "finalize"; }
         }
     }
 

@@ -90,12 +90,10 @@ namespace CodeTranslator.Java
             Builder.Append(TypeName);
             if (Type.BaseList != null)
                 WriteTypeBaseList(Type.BaseList);
-            Builder.AppendLine(" {");
-            using (Builder.Indent())
+            using (Builder.Append(" ").BeginBlock())
             {
                 WriteTypeMembers();
             }
-            Builder.AppendLine("}");
         }
 
         protected abstract void WriteTypeMembers();

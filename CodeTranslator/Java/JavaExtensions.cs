@@ -6,12 +6,25 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using CodeTranslator.Shared.CSharp;
+using CodeTranslator.Util;
 
 namespace CodeTranslator.Java
 {
     static class JavaExtensions
     {
         delegate bool ModifierGetter(string modifier, out string javaModifier);
+
+        public static IndentStringBuilder BeginBlock(this IndentStringBuilder builder, bool appendLine = true)
+        {
+            builder.AppendLine("{");
+            return builder.Indent("}", appendLine);
+        }
+
+        public static IndentStringBuilder BeginParameterList(this IndentStringBuilder builder, bool appendLine = true)
+        {
+            builder.AppendLine("(");
+            return builder.Indent(")", false);
+        }
 
         public static string GetJavaTypeDeclaration(this BaseTypeDeclarationSyntax node)
         {

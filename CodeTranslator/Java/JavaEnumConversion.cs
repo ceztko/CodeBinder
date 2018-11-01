@@ -33,7 +33,7 @@ namespace CodeTranslator.Java
         {
             WriteEnumMembers();
             Builder.AppendLine();
-            Builder.AppendLine("public final int value");
+            Builder.AppendLine("public final int value;");
             Builder.AppendLine();
             WriteConstructor();
             Builder.AppendLine();
@@ -71,28 +71,25 @@ namespace CodeTranslator.Java
         {
             Builder.Append(TypeName);
             if (_isFlag)
-            {
-                Builder.AppendLine("(int value) {");
-                Builder.IncreaseIndent();
-                Builder.AppendLine("this.value = value;");
-            }
+                Builder.Append("(int value) ");
             else
-            {
-                Builder.AppendLine("() {");
-                Builder.IncreaseIndent();
-                Builder.AppendLine("value = this.ordinal();");
-            }
+                Builder.Append("() ");
 
-            Builder.DecreaseIndent();
-            Builder.AppendLine("}");
+            using (Builder.BeginBlock())
+            {
+                if (_isFlag)
+                    Builder.AppendLine("this.value = value;");
+                else
+                    Builder.AppendLine("value = this.ordinal();");
+            }
         }
 
         private void WriteFromValueMethod()
         {
             Builder.Append("public static ");
             Builder.Append(TypeName);
-            Builder.AppendLine(" fromValue(int value) {");
-            using (Builder.Indent())
+            Builder.Append(" fromValue(int value) ");
+            using (Builder.BeginBlock())
             {
                 if (_isFlag)
                 {
@@ -100,8 +97,8 @@ namespace CodeTranslator.Java
                     Builder.Append("[] values = ");
                     Builder.Append(TypeName);
                     Builder.AppendLine(".values();");
-                    Builder.AppendLine("for (int i = 0; i < values.length; i++) {");
-                    using (Builder.Indent())
+                    Builder.Append("for (int i = 0; i < values.length; i++) ");
+                    using (Builder.BeginBlock())
                     {
                         Builder.Append(TypeName);
                         Builder.AppendLine(" envalue = values[i];");
@@ -114,24 +111,22 @@ namespace CodeTranslator.Java
                 }
                 else
                 {
-                    Builder.AppendLine("try {");
-                    using (Builder.Indent())
+                    Builder.Append("try ");
+                    using (Builder.BeginBlock(false))
                     {
                         Builder.Append("return ");
                         Builder.Append(TypeName);
                         Builder.AppendLine(".values()[value];");
                     }
-                    Builder.AppendLine("} catch (Exception e) {");
-                    using (Builder.Indent())
+                    Builder.Append(" catch (Exception e) ");
+                    using (Builder.BeginBlock())
                     {
                         Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum ");
                         Builder.Append(TypeName);
                         Builder.AppendLine("\");");
                     }
-                    Builder.AppendLine("}");
                 }
             }
-            Builder.AppendLine("}");
         }
     }
 }
