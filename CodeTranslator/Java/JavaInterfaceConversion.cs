@@ -18,7 +18,7 @@ namespace CodeTranslator.Java
 
     class InterfaceTypeWriter : TypeWriter<InterfaceDeclarationSyntax>
     {
-        public InterfaceTypeWriter(InterfaceDeclarationSyntax node, ISemanticModelProvider context)
+        public InterfaceTypeWriter(InterfaceDeclarationSyntax node, ICompilationContextProvider context)
             : base(node, context) { }
 
         protected override void WriteTypeMembers()

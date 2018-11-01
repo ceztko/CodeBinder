@@ -6,7 +6,7 @@ using System.Text;
 namespace CodeTranslator.Shared
 {
     // TODO: Make it language agnostic
-    public class SourceCompilation : ISemanticModelProvider
+    public class CompilationContext : ICompilationContextProvider
     {
         private Dictionary<SyntaxTree, SemanticModel> _modelCache;
         public Compilation Compilation { get; private set; }
@@ -23,10 +23,15 @@ namespace CodeTranslator.Shared
             return model;
         }
 
-        public SourceCompilation(Compilation compilation)
+        public CompilationContext(Compilation compilation)
         {
             _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
             Compilation = compilation;
+        }
+
+        CompilationContext ICompilationContextProvider.Compilation
+        {
+            get { return this; }
         }
     }
 }

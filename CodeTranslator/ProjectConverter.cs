@@ -16,7 +16,7 @@ namespace CodeTranslator
 {
     public abstract class ProjectConverter : Converter
     {
-        private readonly SourceCompilation _compilation;
+        private readonly CompilationContext _compilation;
         private readonly IEnumerable<SyntaxTree> _syntaxTreesToConvert;
         private readonly ConcurrentDictionary<string, string> _errors = new ConcurrentDictionary<string, string>();
 
@@ -26,7 +26,7 @@ namespace CodeTranslator
             var solutionDir = Path.GetDirectoryName(solutionFilePath);
             var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
             var syntaxTrees = solutionDir == null ? compilation.SyntaxTrees : compilation.SyntaxTrees.Where(t => t.FilePath.StartsWith(solutionDir));
-            _compilation = new SourceCompilation(compilation);
+            _compilation = new CompilationContext(compilation);
             _syntaxTreesToConvert = syntaxTrees.ToList();
         }
 

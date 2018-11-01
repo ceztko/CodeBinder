@@ -6,14 +6,16 @@ using System.Text;
 
 namespace CodeTranslator.Shared
 {
-    public abstract class BaseWriter : ISemanticModelProvider
+    public abstract class BaseWriter : ICompilationContextProvider
     {
-        public ISemanticModelProvider Context { get; private set; }
+        public CompilationContext Compilation { get; private set; }
         public CodeBuilder Builder { get; private set; }
 
-        protected BaseWriter(ISemanticModelProvider context)
+        protected BaseWriter(ICompilationContextProvider provider)
         {
-            Context = context;
+            // Slightly optimize getting semantic model by
+            // storing CompilationContext
+            Compilation = provider.Compilation;
         }
 
         public void Write(CodeBuilder builder)
@@ -27,7 +29,7 @@ namespace CodeTranslator.Shared
 
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
-            return Context.GetSemanticModel(tree);
+            return Compilation.GetSemanticModel(tree);
         }
     }
 }

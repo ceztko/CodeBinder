@@ -73,7 +73,7 @@ namespace CodeTranslator.Java
 
     abstract class TypeWriter : BaseWriter
     {
-        protected TypeWriter(ISemanticModelProvider context)
+        protected TypeWriter(ICompilationContextProvider context)
             : base(context) { }
 
         protected override void Write()
@@ -228,7 +228,7 @@ namespace CodeTranslator.Java
     {
         public new TBaseType Type { get; private set; }
 
-        protected TypeWriter(TBaseType type, ISemanticModelProvider context)
+        protected TypeWriter(TBaseType type, ICompilationContextProvider context)
             : base(context)
         {
             Type = type;

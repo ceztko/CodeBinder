@@ -10,7 +10,7 @@ namespace CodeTranslator.Java
 {
     abstract class BaseMethodWriter : BaseWriter
     {
-        protected BaseMethodWriter(ISemanticModelProvider context)
+        protected BaseMethodWriter(ICompilationContextProvider context)
             : base(context) { }
 
         protected override void Write()
@@ -64,7 +64,7 @@ namespace CodeTranslator.Java
     {
         public new TMethod Method { get; private set; }
 
-        protected MethodWriter(TMethod method, ISemanticModelProvider context)
+        protected MethodWriter(TMethod method, ICompilationContextProvider context)
             : base(context)
         {
             Method = method;
@@ -78,7 +78,7 @@ namespace CodeTranslator.Java
 
     class MethodWriter : MethodWriter<MethodDeclarationSyntax>
     {
-        public MethodWriter(MethodDeclarationSyntax method, ISemanticModelProvider context)
+        public MethodWriter(MethodDeclarationSyntax method, ICompilationContextProvider context)
             : base(method, context) { }
 
         protected override void WriteReturnType()
@@ -94,7 +94,7 @@ namespace CodeTranslator.Java
 
     class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
     {
-        public ConstructorWriter(ConstructorDeclarationSyntax method, ISemanticModelProvider context)
+        public ConstructorWriter(ConstructorDeclarationSyntax method, ICompilationContextProvider context)
             : base(method, context) { }
 
         public override string MethodName
@@ -105,7 +105,7 @@ namespace CodeTranslator.Java
 
     class DestructorWriter : MethodWriter<DestructorDeclarationSyntax>
     {
-        public DestructorWriter(DestructorDeclarationSyntax method, ISemanticModelProvider context)
+        public DestructorWriter(DestructorDeclarationSyntax method, ICompilationContextProvider context)
             : base(method, context) { }
 
         public override string MethodName

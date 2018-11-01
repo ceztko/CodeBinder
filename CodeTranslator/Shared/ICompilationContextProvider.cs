@@ -5,8 +5,9 @@ using System.Text;
 
 namespace CodeTranslator.Shared
 {
-    public interface ISemanticModelProvider
+    public interface ICompilationContextProvider
     {
         SemanticModel GetSemanticModel(SyntaxTree tree);
+        CompilationContext Compilation { get; }
     }
 }

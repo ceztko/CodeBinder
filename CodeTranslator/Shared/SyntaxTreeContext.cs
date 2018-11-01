@@ -7,13 +7,13 @@ using System.Text;
 
 namespace CodeTranslator.Shared
 {
-    public abstract class SyntaxTreeContext : ISemanticModelProvider
+    public abstract class SyntaxTreeContext : ICompilationContextProvider
     {
-        public SourceCompilation Compilation { get; private set; }
+        public CompilationContext Compilation { get; private set; }
 
         public SyntaxTree SyntaxTree { get; private set; }
 
-        public SyntaxTreeContext(SourceCompilation compilation)
+        public SyntaxTreeContext(CompilationContext compilation)
         {
             Compilation = compilation;
         }
@@ -33,7 +33,7 @@ namespace CodeTranslator.Shared
     {
         public List<TTypeContext> _RootTypes;
 
-        public SyntaxTreeContext(SourceCompilation compilation)
+        public SyntaxTreeContext(CompilationContext compilation)
             : base(compilation)
         {
             _RootTypes = new List<TTypeContext>();

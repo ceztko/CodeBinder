@@ -13,7 +13,7 @@ namespace CodeTranslator.Shared.CSharp
     {
         const string FLAG_ATTRIBUTE_FULLANAME = "System.FlagsAttribute";
 
-        public static bool IsFlag(this EnumDeclarationSyntax node, ISemanticModelProvider provider)
+        public static bool IsFlag(this EnumDeclarationSyntax node, ICompilationContextProvider provider)
         {
             foreach (var attribute in GetAttributes(node))
             {
@@ -24,7 +24,7 @@ namespace CodeTranslator.Shared.CSharp
             return false;
         }
 
-        public static int GetEnumValue(this EnumMemberDeclarationSyntax node, ISemanticModelProvider provider)
+        public static int GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider provider)
         {
             return node.EqualsValue.Value.GetValue<int>(provider);
         }
@@ -102,12 +102,12 @@ namespace CodeTranslator.Shared.CSharp
             }
         }
 
-        public static TypeInfo GetTypeInfo(this BaseTypeSyntax type, ISemanticModelProvider provider)
+        public static TypeInfo GetTypeInfo(this BaseTypeSyntax type, ICompilationContextProvider provider)
         {
             return type.Type.GetTypeInfo(provider);
         }
 
-        public static string GetFullMetadataName(this BaseTypeSyntax type, ISemanticModelProvider provider)
+        public static string GetFullMetadataName(this BaseTypeSyntax type, ICompilationContextProvider provider)
         {
             return type.Type.GetFullMetadataName(provider);
         }

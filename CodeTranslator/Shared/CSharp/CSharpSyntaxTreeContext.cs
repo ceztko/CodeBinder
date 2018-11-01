@@ -13,7 +13,7 @@ namespace CodeTranslator.Shared.CSharp
     {
         private CSharpLanguageConversion _conversion;
 
-        public CSharpSyntaxTreeContext(SourceCompilation compilation, CSharpLanguageConversion conversion)
+        public CSharpSyntaxTreeContext(CompilationContext compilation, CSharpLanguageConversion conversion)
             : base(compilation)
         {
             _conversion = conversion;

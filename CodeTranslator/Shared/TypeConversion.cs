@@ -8,7 +8,7 @@ using System.Text;
 
 namespace CodeTranslator.Shared
 {
-    public abstract class TypeConversion : ISemanticModelProvider
+    public abstract class TypeConversion : ICompilationContextProvider
     {
         internal TypeConversion() { }
 
@@ -22,7 +22,7 @@ namespace CodeTranslator.Shared
 
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
-            return TypeContext.TreeContext.Compilation.GetSemanticModel(tree);
+            return Compilation.GetSemanticModel(tree);
         }
 
         public abstract void Write(CodeBuilder builder);
@@ -45,6 +45,11 @@ namespace CodeTranslator.Shared
         public TypeContext TypeContext
         {
             get { return GetTypeContext(); }
+        }
+
+        public CompilationContext Compilation
+        {
+            get { return TypeContext.TreeContext.Compilation; }
         }
 
         protected abstract TypeContext GetTypeContext();

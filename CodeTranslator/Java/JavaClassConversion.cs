@@ -18,7 +18,7 @@ namespace CodeTranslator.Java
 
     class ClassTypeWriter : TypeWriter<ClassDeclarationSyntax>
     {
-        public ClassTypeWriter(ClassDeclarationSyntax node, ISemanticModelProvider context)
+        public ClassTypeWriter(ClassDeclarationSyntax node, ICompilationContextProvider context)
             : base(node, context) { }
 
         protected override void WriteTypeMembers()

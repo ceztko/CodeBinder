@@ -11,7 +11,7 @@ namespace CodeTranslator.Util
 {
     internal static class CompilationWarnings
     {
-        public static string WarningsForCompilation(SourceCompilation finalCompilation, string compilationDescription)
+        public static string WarningsForCompilation(CompilationContext finalCompilation, string compilationDescription)
         {
             var targetErrors = GetDiagnostics(finalCompilation);
             return targetErrors.Any()
@@ -19,7 +19,7 @@ namespace CodeTranslator.Util
                 : null;
         }
 
-        private static List<string> GetDiagnostics(SourceCompilation compilation)
+        private static List<string> GetDiagnostics(CompilationContext compilation)
         {
             var diagnostics = compilation.Compilation.GetDiagnostics()
                 .Where(d => d.Severity == DiagnosticSeverity.Error)

@@ -8,18 +8,18 @@ using System.Text;
 
 namespace CodeTranslator.Shared
 {
-    public abstract class TypeContext : ISemanticModelProvider
+    public abstract class TypeContext : ICompilationContextProvider
     {
         internal TypeContext() { }
 
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
-            return TreeContext.Compilation.GetSemanticModel(tree);
+            return Compilation.GetSemanticModel(tree);
         }
 
         public SyntaxTreeContext TreeContext
         {
-            get { return GetCompilationContext(); }
+            get { return GetSyntaxTreeContext(); }
         }
 
         public TypeConversion Conversion
@@ -32,7 +32,12 @@ namespace CodeTranslator.Shared
             get { return GetChildren(); }
         }
 
-        protected abstract SyntaxTreeContext GetCompilationContext();
+        public CompilationContext Compilation
+        {
+            get { return TreeContext.Compilation; }
+        }
+
+        protected abstract SyntaxTreeContext GetSyntaxTreeContext();
 
         protected abstract TypeConversion GetConversion();
 

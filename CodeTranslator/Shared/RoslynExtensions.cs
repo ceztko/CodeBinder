@@ -9,30 +9,30 @@ namespace CodeTranslator.Shared
 {
     static class RoslynExtensions
     {
-        public static string GetFullMetadataName(this SyntaxNode node, ISemanticModelProvider provider)
+        public static string GetFullMetadataName(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var info = node.GetTypeInfo(provider);
             return info.GetFullMetadataName();
         }
 
-        public static TypeInfo GetTypeInfo(this SyntaxNode node, ISemanticModelProvider provider)
+        public static TypeInfo GetTypeInfo(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = node.GetSemanticModel(provider);
             return model.GetTypeInfo(node);
         }
 
-        public static SemanticModel GetSemanticModel(this SyntaxNode node, ISemanticModelProvider provider)
+        public static SemanticModel GetSemanticModel(this SyntaxNode node, ICompilationContextProvider provider)
         {
             return provider.GetSemanticModel(node.SyntaxTree);
         }
 
-        public static object GetValue(this SyntaxNode node, ISemanticModelProvider provider)
+        public static object GetValue(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = provider.GetSemanticModel(node.SyntaxTree);
             return model.GetConstantValue(node).Value;
         }
 
-        public static T GetValue<T>(this SyntaxNode node, ISemanticModelProvider provider)
+        public static T GetValue<T>(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = provider.GetSemanticModel(node.SyntaxTree);
             return (T)model.GetConstantValue(node).Value;

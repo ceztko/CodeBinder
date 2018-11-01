@@ -18,7 +18,7 @@ namespace CodeTranslator.Java
 
     class StructTypeWriter : TypeWriter<StructDeclarationSyntax>
     {
-        public StructTypeWriter(StructDeclarationSyntax node, ISemanticModelProvider context)
+        public StructTypeWriter(StructDeclarationSyntax node, ICompilationContextProvider context)
             : base(node, context) { }
 
         protected override void WriteTypeMembers()

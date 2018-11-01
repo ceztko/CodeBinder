@@ -13,9 +13,9 @@ namespace CodeTranslator.Shared
     {
         internal LanguageConversion() { }
 
-        public abstract SyntaxTreeContext GetSyntaxTreeContext(SourceCompilation compilation);
+        public abstract SyntaxTreeContext GetSyntaxTreeContext(CompilationContext compilation);
 
-        public virtual string GetWarningsOrNull(SourceCompilation compilation)
+        public virtual string GetWarningsOrNull(CompilationContext compilation)
         {
             return CompilationWarnings.WarningsForCompilation(compilation, "source");
         }
@@ -30,11 +30,11 @@ namespace CodeTranslator.Shared
         where TSyntaxTreeContext : SyntaxTreeContext<TTypeContext>
         where TTypeContext : TypeContext<TTypeContext>
     {
-        public sealed override SyntaxTreeContext GetSyntaxTreeContext(SourceCompilation compilation)
+        public sealed override SyntaxTreeContext GetSyntaxTreeContext(CompilationContext compilation)
         {
             return getSyntaxTreeContext(compilation);
         }
 
-        protected abstract TSyntaxTreeContext getSyntaxTreeContext(SourceCompilation compilation);
+        protected abstract TSyntaxTreeContext getSyntaxTreeContext(CompilationContext compilation);
     }
 }

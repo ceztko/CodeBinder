@@ -23,7 +23,7 @@ namespace CodeTranslator.Java
     {
         bool _isFlag;
 
-        public EnumTypeWriter(EnumDeclarationSyntax node, ISemanticModelProvider context)
+        public EnumTypeWriter(EnumDeclarationSyntax node, ICompilationContextProvider context)
             : base(node, context)
         {
             _isFlag = Type.IsFlag(this);

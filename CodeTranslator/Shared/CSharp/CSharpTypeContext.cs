@@ -23,7 +23,7 @@ namespace CodeTranslator.Shared.CSharp
             get { return GetNode(); }
         }
 
-        protected override SyntaxTreeContext GetCompilationContext()
+        protected override SyntaxTreeContext GetSyntaxTreeContext()
         {
             return TreeContext;
         }
