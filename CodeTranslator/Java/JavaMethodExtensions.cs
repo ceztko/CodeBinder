@@ -164,12 +164,12 @@ namespace CodeTranslator.Java
             string javaTypeName;
             switch (typeName)
             {
-                case "Void":
+                case "System.Void":
                 {
                     javaTypeName = "void";
                     break;
                 }
-                case "Object":
+                case "System.Object":
                 {
                     javaTypeName = "Object";
                     break;
