@@ -135,7 +135,7 @@ namespace CodeTranslator.Java
 
         private bool IsKnownType(BaseTypeSyntax type, out string convertedKnowType, out bool isInterface)
         {
-            var fullname = type.GetFullMetadataName(this);
+            var fullname = type.GetFullName(this);
             switch (fullname)
             {
                 case "System.IDisposable":

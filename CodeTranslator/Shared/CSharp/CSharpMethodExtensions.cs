@@ -17,7 +17,7 @@ namespace CodeTranslator.Shared.CSharp
         {
             foreach (var attribute in GetAttributes(node))
             {
-                var fullName = attribute.GetFullMetadataName(provider);
+                var fullName = attribute.GetFullName(provider);
                 if (fullName == FLAG_ATTRIBUTE_FULLANAME)
                     return true;
             }
@@ -107,9 +107,9 @@ namespace CodeTranslator.Shared.CSharp
             return type.Type.GetTypeInfo(provider);
         }
 
-        public static string GetFullMetadataName(this BaseTypeSyntax type, ICompilationContextProvider provider)
+        public static string GetFullName(this BaseTypeSyntax type, ICompilationContextProvider provider)
         {
-            return type.Type.GetFullMetadataName(provider);
+            return type.Type.GetFullName(provider);
         }
 
         public static string GetName(this BaseTypeSyntax type)

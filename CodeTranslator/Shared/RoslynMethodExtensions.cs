@@ -1,6 +1,7 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,10 +10,15 @@ namespace CodeTranslator.Shared
 {
     static class RoslynMethodExtensions
     {
-        public static string GetFullMetadataName(this SyntaxNode node, ICompilationContextProvider provider)
+        private static readonly SymbolDisplayFormat Format = new SymbolDisplayFormat(
+            SymbolDisplayGlobalNamespaceStyle.Omitted,
+            SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            miscellaneousOptions: SymbolDisplayMiscellaneousOptions.ExpandNullable);
+
+        public static string GetFullName(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var symbol = node.GetTypeSymbol(provider);
-            return symbol.GetFullMetadataName();
+            return symbol.GetFullName();
         }
 
         public static TypeInfo GetTypeInfo(this SyntaxNode node, ICompilationContextProvider provider)
@@ -44,43 +50,41 @@ namespace CodeTranslator.Shared
             return (T)model.GetConstantValue(node).Value;
         }
 
-        // Reference: https://stackoverflow.com/a/27106959/213871
-        // Also look for support in Roslyn https://github.com/dotnet/roslyn/issues/1891
-        public static string GetFullMetadataName(this ISymbol symbol)
+        // Reference https://github.com/dotnet/roslyn/blob/master/src/Compilers/Core/Portable/SymbolDisplay/SymbolDisplayFormat.cs
+        static readonly SymbolDisplayFormat DisplayFormat = new SymbolDisplayFormat(
+            globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            propertyStyle: SymbolDisplayPropertyStyle.ShowReadWriteDescriptor,
+            localOptions: SymbolDisplayLocalOptions.IncludeType,
+            genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters | SymbolDisplayGenericsOptions.IncludeVariance,
+            memberOptions:
+                SymbolDisplayMemberOptions.IncludeParameters |
+                SymbolDisplayMemberOptions.IncludeContainingType |
+                SymbolDisplayMemberOptions.IncludeType |
+                SymbolDisplayMemberOptions.IncludeRef |
+                SymbolDisplayMemberOptions.IncludeExplicitInterface,
+            kindOptions:
+                SymbolDisplayKindOptions.IncludeMemberKeyword,
+            parameterOptions:
+                SymbolDisplayParameterOptions.IncludeOptionalBrackets |
+                SymbolDisplayParameterOptions.IncludeDefaultValue |
+                SymbolDisplayParameterOptions.IncludeParamsRefOut |
+                SymbolDisplayParameterOptions.IncludeExtensionThis |
+                SymbolDisplayParameterOptions.IncludeType |
+                SymbolDisplayParameterOptions.IncludeName,
+            miscellaneousOptions:
+                SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
+                SymbolDisplayMiscellaneousOptions.UseErrorTypeSymbolName |
+                SymbolDisplayMiscellaneousOptions.ExpandNullable
+        );
+
+        // Other implementations:
+        // * https://github.com/GuOrg/Gu.Roslyn.Extensions/blob/master/Gu.Roslyn.AnalyzerExtensions/Symbols/INamedTypeSymbolExtensions.cs
+        // * https://stackoverflow.com/a/27106959/213871
+        // Reference: https://github.com/dotnet/roslyn/issues/1891
+        public static string GetFullName(this ISymbol symbol)
         {
-            if (symbol == null || IsRootNamespace(symbol))
-            {
-                return string.Empty;
-            }
-
-            var sb = new StringBuilder(symbol.MetadataName);
-            var last = symbol;
-
-            symbol = symbol.ContainingSymbol;
-
-            while (!IsRootNamespace(symbol))
-            {
-                if (symbol is ITypeSymbol && last is ITypeSymbol)
-                {
-                    sb.Insert(0, '+');
-                }
-                else
-                {
-                    sb.Insert(0, '.');
-                }
-
-                sb.Insert(0, symbol.OriginalDefinition.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat));
-                //sb.Insert(0, s.MetadataName);
-                symbol = symbol.ContainingSymbol;
-            }
-
-            return sb.ToString();
-        }
-
-        private static bool IsRootNamespace(ISymbol symbol)
-        {
-            INamespaceSymbol s = null;
-            return ((s = symbol as INamespaceSymbol) != null) && s.IsGlobalNamespace;
+            return SymbolDisplay.ToDisplayString(symbol, DisplayFormat);
         }
     }
 }

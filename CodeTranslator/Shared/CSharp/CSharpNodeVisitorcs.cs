@@ -76,6 +76,14 @@ namespace CodeTranslator.Shared.CSharp
 
         // TODO: Add more unsupported syntax
 
+        public override void VisitArrayRankSpecifier(ArrayRankSpecifierSyntax node)
+        {
+            if (node.Rank > 1)
+                Unsupported(node);
+
+            DefaultVisit(node);
+        }
+
         public override void VisitEventDeclaration(EventDeclarationSyntax node)
         {
             Unsupported(node);

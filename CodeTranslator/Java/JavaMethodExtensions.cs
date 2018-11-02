@@ -141,31 +141,26 @@ namespace CodeTranslator.Java
         }
 
 
-        private static string getJavaType(ITypeSymbol type)
+        private static string getJavaType(ITypeSymbol type, bool nativeMethods = false)
         {
-            /*
-            if (type.IsEnum)
-            {
-                writer.Write("int");
-                return;
-            }
+            if (nativeMethods && type.TypeKind == TypeKind.Enum)
+                return "int";
 
-            if (type.IsByRef && !type.IsPrimitive)
+            string typeName;
+            string javaArraySuffix;
+            if (type.TypeKind == TypeKind.Array)
             {
-                writer.Write("long");
-                return;
-            }
-            */
+                var arrayType = type as IArrayTypeSymbol;
 
-            string typeName = type.Name;
-            string javaArraySuffix = String.Empty;
-            /*
-            if (type.IsArray)
-            {
-                typeName = typeName.Substring(0, typeName.Length - 2);
+                typeName = arrayType.ElementType.GetFullName();
                 javaArraySuffix = "[]";
             }
-            */
+            else
+            {
+                typeName = type.GetFullName();
+                javaArraySuffix = string.Empty;
+            }
+
             string javaTypeName;
             switch (typeName)
             {
@@ -174,77 +169,77 @@ namespace CodeTranslator.Java
                     javaTypeName = "void";
                     break;
                 }
-                case nameof(Object):
+                case "Object":
                 {
                     javaTypeName = "Object";
                     break;
                 }
-                case nameof(IntPtr):
+                case "System.IntPtr":
                 {
                     javaTypeName = "long";
                     break;
                 }
-                case nameof(Boolean):
+                case "System.Boolean":
                 {
                     javaTypeName = "boolean";
                     break;
                 }
-                case nameof(Char):
+                case "System.Char":
                 {
                     javaTypeName =  "char";
                     break;
                 }
-                case nameof(String):
+                case "System.String":
                 {
                     javaTypeName =  "String";
                     break;
                 }
-                case nameof(Byte):
+                case "System.Byte":
                 {
                     javaTypeName = "byte";
                     break;
                 }
-                case nameof(SByte):
+                case "System.SByte":
                 {
                     javaTypeName = "byte";
                     break;
                 }
-                case nameof(Int16):
+                case "System.Int16":
                 {
                     javaTypeName =  "short";
                     break;
                 }
-                case nameof(UInt16):
+                case "System.UInt16":
                 {
                     javaTypeName = "short";
                     break;
                 }
-                case nameof(Int32):
+                case "System.Int32":
                 {
                     javaTypeName = "int";
                     break;
                 }
-                case nameof(UInt32):
+                case "System.UInt32":
                 {
                     javaTypeName = "int";
                     break;
                 }
-                case nameof(Int64):
+                case "System.Int64":
                 {
                     javaTypeName = "long";
                     break;
                 }
-                case nameof(UInt64):
+                case "System.UInt64":
                 {
                     javaTypeName = "long";
                     break;
                 }
-                case nameof(Single):
+                case "System.Single":
                 {
                     javaTypeName =  "float";
                     break;
                 }
-                case nameof(Double):
+                case "System.Double":
                 {
                     javaTypeName = "double";
                     break;
