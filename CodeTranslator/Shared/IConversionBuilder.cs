@@ -9,6 +9,8 @@ namespace CodeTranslator.Shared
     {
         void Write(CodeBuilder builder);
 
+        string GeneratedPreamble { get; }
+
         string FileName { get; }
 
         string BasePath { get; }

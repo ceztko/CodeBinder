@@ -17,10 +17,7 @@ namespace CodeTranslator.Shared
             return Compilation.GetSemanticModel(tree);
         }
 
-        public virtual void Write(CodeBuilder builder)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void Write(CodeBuilder builder);
 
         public virtual string GeneratedPreamble
         {
@@ -32,14 +29,11 @@ namespace CodeTranslator.Shared
             get { yield return this; }
         }
 
-        public virtual string FileName
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public abstract string FileName { get; }
 
         public virtual string BasePath
         {
-            get { return ""; }
+            get { return string.Empty; }
         }
 
         public TypeContext TypeContext

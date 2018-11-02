@@ -51,8 +51,9 @@ namespace CodeTranslator
 
         private void write(TextWriter writer)
         {
-            var builder = new CodeBuilder(writer);
-            _builder.Write(builder);
+            var codeBuilder = new CodeBuilder(writer);
+            codeBuilder.AppendLine(_builder.GeneratedPreamble);
+            _builder.Write(codeBuilder);
         }
     }
 }
