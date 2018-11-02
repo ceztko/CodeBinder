@@ -36,30 +36,22 @@ namespace CodeTranslator
             return new ProjectConverter<TLanguageConversion>(project, new TLanguageConversion());
         }
 
-        public override IEnumerable<ConversionResult> Convert()
+        public override IEnumerable<ConversionDelegate> Convert()
         {
             foreach (var pair in convert())
             {
-                var errors = _errors.TryRemove(pair.Key, out var nonFatalException)
-                    ? new[] {nonFatalException}
+                var errors = _errors.TryGetValue(pair.Key, out var nonFatalException)
+                    ? new[] { nonFatalException }
                     : new string[0];
 
                 foreach (var type in pair.Value)
                 {
                     var conversion = type.Conversion;
-                    yield return new ConversionResult(conversion.ToFullString())
+                    foreach (var builder in conversion.Builders)
                     {
-                        SourcePath = pair.Key,
-                        TargetFileName = conversion.FileName,
-                        TargetBasePath = conversion.BasePath,
-                        Exceptions = errors
-                    };
+                        yield return new ConversionDelegate(pair.Key, builder, errors);
+                    }
                 }
-            }
-
-            foreach (var error in _errors)
-            {
-                yield return new ConversionResult {SourcePath = error.Key, Exceptions = new []{ error.Value } };
             }
         }
 

@@ -23,16 +23,22 @@ namespace CodeTranslator
 
         protected abstract LanguageConversion GetConversion();
 
-        public abstract IEnumerable<ConversionResult> Convert();
+        public abstract IEnumerable<ConversionDelegate> Convert();
 
         public void ConvertAndWrite(GeneratorArgs args)
         {
-            foreach (var result in Convert().Concat(Conversion.DefaultResults))
+            foreach (var conversion in Convert().Concat(Conversion.DefaultResults))
             {
-                var basepath = Path.Combine(args.SourceRootPath, result.TargetBasePath);
+                var basepath = Path.Combine(args.SourceRootPath, conversion.TargetBasePath);
                 Directory.CreateDirectory(basepath);
-                var filepath = Path.Combine(basepath, result.TargetFileName);
-                File.WriteAllText(filepath, result.ConvertedCode);
+                var filepath = Path.Combine(basepath, conversion.TargetFileName);
+                File.WriteAllText(filepath, conversion.ToFullString());
+                /* ENABLE Later
+                using (var filestream = new FileStream(filepath, FileMode.OpenOrCreate))
+                {
+                    conversion.Write(filestream);
+                }
+                */
             }
         }
     }

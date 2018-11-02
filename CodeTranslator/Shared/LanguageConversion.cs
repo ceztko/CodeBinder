@@ -20,7 +20,7 @@ namespace CodeTranslator.Shared
             return CompilationWarnings.WarningsForCompilation(compilation, "source");
         }
 
-        public virtual IEnumerable<ConversionResult> DefaultResults
+        public virtual IEnumerable<ConversionDelegate> DefaultResults
         {
             get { yield break; }
         }

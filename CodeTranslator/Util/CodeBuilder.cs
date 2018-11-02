@@ -17,11 +17,6 @@ namespace CodeTranslator.Util
 
         public uint IndentSpaces { get; set; }
 
-        public CodeBuilder()
-            : this(new StringWriter())
-        {
-        }
-
         public CodeBuilder(TextWriter writer)
             : this(writer, true, 4, 0, null, false)
         {

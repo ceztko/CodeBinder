@@ -8,33 +8,33 @@ using System.Text;
 
 namespace CodeTranslator.Shared
 {
-    public abstract class TypeConversion : ICompilationContextProvider
+    public abstract class TypeConversion : IConversionBuilder, ICompilationContextProvider
     {
         internal TypeConversion() { }
-
-        public string ToFullString()
-        {
-            var builder = new CodeBuilder();
-            builder.AppendLine(GeneratedPreamble);
-            Write(builder);
-            return builder.ToString();
-        }
 
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
             return Compilation.GetSemanticModel(tree);
         }
 
-        public abstract void Write(CodeBuilder builder);
+        public virtual void Write(CodeBuilder builder)
+        {
+            throw new NotImplementedException();
+        }
 
         public virtual string GeneratedPreamble
         {
             get { return string.Empty; }
         }
 
-        public abstract string FileName
+        public virtual IEnumerable<IConversionBuilder> Builders
         {
-            get;
+            get { yield return this; }
+        }
+
+        public virtual string FileName
+        {
+            get { throw new NotImplementedException(); }
         }
 
         public virtual string BasePath

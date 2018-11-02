@@ -48,12 +48,12 @@ namespace CodeTranslator
             return new SolutionConverter<TLanguageConversion>(solution, projectsToConvert, progress, new TLanguageConversion());
         }
 
-        public override IEnumerable<ConversionResult> Convert()
+        public override IEnumerable<ConversionDelegate> Convert()
         {
             return _projectsToConvert.SelectMany(project => ConvertProject(project));
         }
 
-        private IEnumerable<ConversionResult> ConvertProject(Project project)
+        private IEnumerable<ConversionDelegate> ConvertProject(Project project)
         {
             _progress.Report($"Converting {project.Name}, this may take a some time...");
             return new ProjectConverterSimple(project, Conversion).Convert();
