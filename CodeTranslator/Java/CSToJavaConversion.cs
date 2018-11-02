@@ -16,30 +16,22 @@ namespace CodeTranslator.Java
 
         public override TypeConversion<CSharpClassTypeContext> GetClassTypeConversion()
         {
-            var ret = new JavaClassConversion();
-            ret.Namespace = BaseNamespace;
-            return ret;
+            return new JavaClassConversion(this);
         }
 
         public override TypeConversion<CSharpInterfaceTypeContext> GetInterfaceTypeConversion()
         {
-            var ret = new JavaInterfaceConversion();
-            ret.Namespace = BaseNamespace;
-            return ret;
+            return new JavaInterfaceConversion(this);
         }
 
         public override TypeConversion<CSharpStructTypeContext> GetStructTypeConversion()
         {
-            var ret = new JavaStructConversion();
-            ret.Namespace = BaseNamespace;
-            return ret;
+            return new JavaStructConversion(this);
         }
 
         public override TypeConversion<CSharpEnumTypeContext> GetEnumTypeConversion()
         {
-            var ret = new JavaEnumConversion();
-            ret.Namespace = BaseNamespace;
-            return ret;
+            return new JavaEnumConversion(this);
         }
     }
 }

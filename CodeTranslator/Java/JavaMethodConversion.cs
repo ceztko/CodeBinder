@@ -98,6 +98,7 @@ namespace CodeTranslator.Java
         protected override void WriteReturnType()
         {
             WriteType(Method.ReturnType);
+            Builder.Append(" ");
         }
 
         public override string MethodName

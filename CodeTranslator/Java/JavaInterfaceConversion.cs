@@ -10,6 +10,9 @@ namespace CodeTranslator.Java
 {
     class JavaInterfaceConversion : JavaTypeConversion<CSharpInterfaceTypeContext>
     {
+        public JavaInterfaceConversion(CSToJavaConversion conversion)
+            : base(conversion) { }
+
         protected override TypeWriter GetTypeWriter()
         {
             return new InterfaceTypeWriter(TypeContext.Node, this);

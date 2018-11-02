@@ -10,6 +10,9 @@ namespace CodeTranslator.Java
 {
     class JavaStructConversion : JavaTypeConversion<CSharpStructTypeContext>
     {
+        public JavaStructConversion(CSToJavaConversion conversion)
+            : base(conversion) { }
+
         protected override TypeWriter GetTypeWriter()
         {
             return new StructTypeWriter(TypeContext.Node, this);

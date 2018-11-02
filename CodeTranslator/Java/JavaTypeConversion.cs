@@ -13,20 +13,17 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract partial class JavaTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext>
+    abstract partial class JavaTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext, CSToJavaConversion>
         where TTypeContext : CSharpTypeContext
     {
-        string _Namespace;
+        public string Namespace { get; private set; }
         string _Basepath;
 
-        public string Namespace
+        protected JavaTypeConversion(CSToJavaConversion conversion)
+            : base(conversion)
         {
-            get { return _Namespace; }
-            set
-            {
-                _Namespace = value;
-                _Basepath = value.Replace('.', Path.DirectorySeparatorChar);
-            }
+            Namespace = conversion.BaseNamespace;
+            _Basepath = string.IsNullOrEmpty(Namespace) ? null : Namespace.Replace('.', Path.DirectorySeparatorChar);
         }
 
         public override string BasePath

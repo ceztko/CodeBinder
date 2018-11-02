@@ -52,15 +52,23 @@ namespace CodeTranslator.Shared
     public abstract class TypeConversion<TTypeContext> : TypeConversion
         where TTypeContext : TypeContext
     {
-        public new TTypeContext TypeContext
-        {
-            get;
-            internal set;
-        }
+        public new TTypeContext TypeContext { get; internal set; }
 
         protected override TypeContext GetTypeContext()
         {
             return TypeContext;
+        }
+    }
+
+    public abstract class TypeConversion<TTypeContext, TLanguageConversion> : TypeConversion<TTypeContext>
+        where TTypeContext : TypeContext
+        where TLanguageConversion : LanguageConversion
+    {
+        public TLanguageConversion Conversion { get; private set; }
+
+        protected TypeConversion(TLanguageConversion conversion)
+        {
+            Conversion = conversion;
         }
     }
 }
