@@ -13,7 +13,7 @@ namespace CodeTranslator.Java
         public JavaClassConversion(CSToJavaConversion conversion)
             : base(conversion) { }
 
-        protected override TypeWriter GetTypeWriter()
+        protected override ISyntaxWriter GetTypeWriter()
         {
             return new ClassTypeWriter(TypeContext.Node, this);
         }
@@ -21,12 +21,12 @@ namespace CodeTranslator.Java
 
     class ClassTypeWriter : TypeWriter<ClassDeclarationSyntax>
     {
-        public ClassTypeWriter(ClassDeclarationSyntax node, ICompilationContextProvider context)
-            : base(node, context) { }
+        public ClassTypeWriter(ClassDeclarationSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
 
         protected override void WriteTypeMembers()
         {
-            WriteTypeMembers(Type.Members);
+            WriteTypeMembers(Syntax.Members);
         }
     }
 }

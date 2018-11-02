@@ -13,7 +13,7 @@ namespace CodeTranslator.Java
         public JavaStructConversion(CSToJavaConversion conversion)
             : base(conversion) { }
 
-        protected override TypeWriter GetTypeWriter()
+        protected override ISyntaxWriter GetTypeWriter()
         {
             return new StructTypeWriter(TypeContext.Node, this);
         }
@@ -21,12 +21,12 @@ namespace CodeTranslator.Java
 
     class StructTypeWriter : TypeWriter<StructDeclarationSyntax>
     {
-        public StructTypeWriter(StructDeclarationSyntax node, ICompilationContextProvider context)
-            : base(node, context) { }
+        public StructTypeWriter(StructDeclarationSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
 
         protected override void WriteTypeMembers()
         {
-            WriteTypeMembers(Type.Members);
+            WriteTypeMembers(Syntax.Members);
         }
     }
 }

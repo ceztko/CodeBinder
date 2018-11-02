@@ -1,20 +1,23 @@
-﻿using CodeTranslator.Util;
+﻿using CodeTranslator.Shared;
+using CodeTranslator.Util;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeTranslator.Shared
+namespace CodeTranslator.Util
 {
-    public abstract class BaseWriter : ICompilationContextProvider
+    public abstract class SyntaxWriter<TSyntax> : ISyntaxWriter
     {
+        protected CodeBuilder Builder { get; private set; }
         public CompilationContext Compilation { get; private set; }
-        public CodeBuilder Builder { get; private set; }
+        public TSyntax Syntax { get; private set; }
 
-        protected BaseWriter(ICompilationContextProvider provider)
+        protected SyntaxWriter(TSyntax syntax, ICompilationContextProvider provider)
         {
             // Slightly optimize getting semantic model by
             // storing CompilationContext
+            Syntax = syntax;
             Compilation = provider.Compilation;
         }
 
@@ -31,5 +34,10 @@ namespace CodeTranslator.Shared
         {
             return Compilation.GetSemanticModel(tree);
         }
+    }
+
+    public interface ISyntaxWriter : ICompilationContextProvider
+    {
+        void Write(CodeBuilder builder);
     }
 }

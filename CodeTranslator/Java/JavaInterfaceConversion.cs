@@ -13,7 +13,7 @@ namespace CodeTranslator.Java
         public JavaInterfaceConversion(CSToJavaConversion conversion)
             : base(conversion) { }
 
-        protected override TypeWriter GetTypeWriter()
+        protected override ISyntaxWriter GetTypeWriter()
         {
             return new InterfaceTypeWriter(TypeContext.Node, this);
         }
@@ -21,12 +21,12 @@ namespace CodeTranslator.Java
 
     class InterfaceTypeWriter : TypeWriter<InterfaceDeclarationSyntax>
     {
-        public InterfaceTypeWriter(InterfaceDeclarationSyntax node, ICompilationContextProvider context)
-            : base(node, context) { }
+        public InterfaceTypeWriter(InterfaceDeclarationSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
 
         protected override void WriteTypeMembers()
         {
-            WriteTypeMembers(Type.Members);
+            WriteTypeMembers(Syntax.Members);
         }
     }
 }

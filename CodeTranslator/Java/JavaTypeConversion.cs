@@ -65,28 +65,29 @@ namespace CodeTranslator.Java
             GetTypeWriter().Write(builder);
         }
 
-        protected abstract TypeWriter GetTypeWriter();
+        protected abstract ISyntaxWriter GetTypeWriter();
     }
 
-    abstract class TypeWriter : BaseWriter
+    abstract class TypeWriter<TBaseType> : SyntaxWriter<TBaseType>
+        where TBaseType: BaseTypeDeclarationSyntax
     {
-        protected TypeWriter(ICompilationContextProvider context)
-            : base(context) { }
+        protected TypeWriter(TBaseType syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
 
         protected override void Write()
         {
-            var modifiers = Type.GetJavaModifiersString();
+            var modifiers = Syntax.GetJavaModifiersString();
             if (modifiers != string.Empty)
             {
                 Builder.Append(modifiers);
                 Builder.Append(" ");
             }
 
-            Builder.Append(Type.GetJavaTypeDeclaration());
+            Builder.Append(Syntax.GetJavaTypeDeclaration());
             Builder.Append(" ");
             Builder.Append(TypeName);
-            if (Type.BaseList != null)
-                WriteTypeBaseList(Type.BaseList);
+            if (Syntax.BaseList != null)
+                WriteTypeBaseList(Syntax.BaseList);
             using (Builder.Append(" ").BeginBlock())
             {
                 WriteTypeMembers();
@@ -209,31 +210,7 @@ namespace CodeTranslator.Java
 
         public virtual string TypeName
         {
-            get { return Type.GetName(); }
-        }
-
-        public BaseTypeDeclarationSyntax Type
-        {
-            get { return GetBaseType(); }
-        }
-
-        protected abstract BaseTypeDeclarationSyntax GetBaseType();
-    }
-
-    abstract class TypeWriter<TBaseType> : TypeWriter
-        where TBaseType : BaseTypeDeclarationSyntax
-    {
-        public new TBaseType Type { get; private set; }
-
-        protected TypeWriter(TBaseType type, ICompilationContextProvider context)
-            : base(context)
-        {
-            Type = type;
-        }
-
-        protected override BaseTypeDeclarationSyntax GetBaseType()
-        {
-            return Type;
+            get { return Syntax.GetName(); }
         }
     }
 }

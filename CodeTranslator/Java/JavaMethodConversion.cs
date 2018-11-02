@@ -8,18 +8,19 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class BaseMethodWriter : BaseWriter
+    abstract class MethodWriter<TMethod> : SyntaxWriter<TMethod>
+        where TMethod : BaseMethodDeclarationSyntax
     {
-        protected BaseMethodWriter(ICompilationContextProvider context)
-            : base(context) { }
+        protected MethodWriter(TMethod method, ICompilationContextProvider context)
+            : base(method, context) { }
 
         protected override void Write()
         {
-            Builder.Append(Method.GetJavaModifiersString());
+            Builder.Append(Syntax.GetJavaModifiersString());
             Builder.Append(" ");
             WriteReturnType();
             Builder.Append(MethodName);
-            if (Method.ParameterList.Parameters.Count == 0)
+            if (Syntax.ParameterList.Parameters.Count == 0)
             {
                 Builder.Append("()");
             }
@@ -27,7 +28,7 @@ namespace CodeTranslator.Java
             {
                 using (Builder.BeginParameterList())
                 {
-                    WriteParameters(Method.ParameterList);
+                    WriteParameters(Syntax.ParameterList);
                 }
             }
             using (Builder.Append(" ").BeginBlock())
@@ -63,31 +64,7 @@ namespace CodeTranslator.Java
 
         protected virtual void WriteReturnType() { }
 
-        public BaseMethodDeclarationSyntax Method
-        {
-            get { return GetMethod(); }
-        }
-
         public abstract string MethodName { get; }
-
-        protected abstract BaseMethodDeclarationSyntax GetMethod();
-    }
-
-    abstract class MethodWriter<TMethod> : BaseMethodWriter
-        where TMethod : BaseMethodDeclarationSyntax
-    {
-        public new TMethod Method { get; private set; }
-
-        protected MethodWriter(TMethod method, ICompilationContextProvider context)
-            : base(context)
-        {
-            Method = method;
-        }
-
-        protected override BaseMethodDeclarationSyntax GetMethod()
-        {
-            return Method;
-        }
     }
 
     class MethodWriter : MethodWriter<MethodDeclarationSyntax>
@@ -97,13 +74,13 @@ namespace CodeTranslator.Java
 
         protected override void WriteReturnType()
         {
-            WriteType(Method.ReturnType);
+            WriteType(Syntax.ReturnType);
             Builder.Append(" ");
         }
 
         public override string MethodName
         {
-            get { return Method.GetName(); }
+            get { return Syntax.GetName(); }
         }
     }
 
@@ -114,7 +91,7 @@ namespace CodeTranslator.Java
 
         public override string MethodName
         {
-            get { return (Method.Parent as BaseTypeDeclarationSyntax).GetName();}
+            get { return (Syntax.Parent as BaseTypeDeclarationSyntax).GetName();}
         }
     }
 
