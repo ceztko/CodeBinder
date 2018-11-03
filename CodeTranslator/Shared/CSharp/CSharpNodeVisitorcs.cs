@@ -7,10 +7,8 @@ using System.Text;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    class CSharpNodeVisitor : CSharpSyntaxWalker
+    class CSharpNodeVisitor : CSharpNodeVisitor<CSharpSyntaxTreeContext, CSharpLanguageConversion>
     {
-        public CSharpLanguageConversion _conversion;
-        public CSharpSyntaxTreeContext _context;
         private Queue<CSharpTypeContext> _parents;
 
         public CSharpTypeContext CurrentParent
@@ -32,23 +30,22 @@ namespace CodeTranslator.Shared.CSharp
         #region Supported types
 
         public CSharpNodeVisitor(CSharpSyntaxTreeContext context, CSharpLanguageConversion conversion)
+            : base(context, conversion)
         {
-            _context = context;
-            _conversion = conversion;
             _parents = new Queue<CSharpTypeContext>();
         }
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
-            var type = new CSharpInterfaceTypeContext(node, _context, _conversion.GetInterfaceTypeConversion());
-            _context.AddType(type, CurrentParent);
+            var type = new CSharpInterfaceTypeContext(node, TreeContext, Conversion.GetInterfaceTypeConversion());
+            TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            var type = new CSharpClassTypeContext(node, _context, _conversion.GetClassTypeConversion());
-            _context.AddType(type, CurrentParent);
+            var type = new CSharpClassTypeContext(node, TreeContext, Conversion.GetClassTypeConversion());
+            TreeContext.AddType(type, CurrentParent);
             _parents.Enqueue(type);
             DefaultVisit(node);
             _parents.Dequeue();
@@ -56,8 +53,8 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitStructDeclaration(StructDeclarationSyntax node)
         {
-            var type = new CSharpStructTypeContext(node, _context, _conversion.GetStructTypeConversion());
-            _context.AddType(type, CurrentParent);
+            var type = new CSharpStructTypeContext(node, TreeContext, Conversion.GetStructTypeConversion());
+            TreeContext.AddType(type, CurrentParent);
             _parents.Enqueue(type);
             DefaultVisit(node);
             _parents.Dequeue();
@@ -65,8 +62,8 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
-            var type = new CSharpEnumTypeContext(node, _context, _conversion.GetEnumTypeConversion());
-            _context.AddType(type, CurrentParent);
+            var type = new CSharpEnumTypeContext(node, TreeContext, Conversion.GetEnumTypeConversion());
+            TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
         }
 
@@ -115,5 +112,19 @@ namespace CodeTranslator.Shared.CSharp
         }
 
         #endregion // Unsupported syntax
+    }
+
+    public class CSharpNodeVisitor<TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker
+        where TSyntaxTree : SyntaxTreeContext
+        where TLanguageConversion : LanguageConversion
+    {
+        public TLanguageConversion Conversion { get; private set; }
+        public TSyntaxTree TreeContext { get; private set; }
+
+        public CSharpNodeVisitor(TSyntaxTree treeContext, TLanguageConversion conversion)
+        {
+            TreeContext = treeContext;
+            Conversion = conversion;
+        }
     }
 }

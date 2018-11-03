@@ -13,7 +13,7 @@ namespace CodeTranslator.Shared
 
         public SyntaxTree SyntaxTree { get; private set; }
 
-        public SyntaxTreeContext(CompilationContext compilation)
+        internal SyntaxTreeContext(CompilationContext compilation)
         {
             Compilation = compilation;
         }
@@ -33,7 +33,7 @@ namespace CodeTranslator.Shared
     {
         public List<TTypeContext> _RootTypes;
 
-        public SyntaxTreeContext(CompilationContext compilation)
+        internal SyntaxTreeContext(CompilationContext compilation)
             : base(compilation)
         {
             _RootTypes = new List<TTypeContext>();
@@ -50,6 +50,19 @@ namespace CodeTranslator.Shared
         public override IEnumerable<TypeContext> GetRootTypes()
         {
             return _RootTypes;
+        }
+    }
+
+    public abstract class SyntaxTreeContext<TTypeContext, TLanguageConversion> : SyntaxTreeContext<TTypeContext>
+        where TTypeContext : TypeContext<TTypeContext>
+        where TLanguageConversion : LanguageConversion
+    {
+        public TLanguageConversion Conversion { get; private set; }
+
+        protected SyntaxTreeContext(CompilationContext compilation, TLanguageConversion conversion)
+            : base(compilation)
+        {
+            Conversion = conversion;
         }
     }
 }

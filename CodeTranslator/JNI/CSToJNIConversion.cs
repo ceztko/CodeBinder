@@ -6,32 +6,23 @@ using System.Linq;
 using CodeTranslator.Shared;
 using CodeTranslator.Shared.CSharp;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeTranslator.JNI
 {
-    public class CSToJNIConversion : CSharpLanguageConversion
+    public class CSToJNIConversion : LanguageConversion<JNISyntaxTreeContext, JNIModuleContext>
     {
         /// <summary>Base namespace of the package, to be set outside</summary>
         public string BaseNamespace { get; set; }
 
-        public override TypeConversion<CSharpClassTypeContext> GetClassTypeConversion()
+        protected override JNISyntaxTreeContext getSyntaxTreeContext(CompilationContext compilation)
         {
-            return new JNIClassConversion(this);
+            return new JNISyntaxTreeContext(compilation, this);
         }
 
-        public override TypeConversion<CSharpStructTypeContext> GetStructTypeConversion()
+        internal void AddNativeMethod(string module, MethodDeclarationSyntax method)
         {
-            return new JNIStructConversion(this);
-        }
 
-        public override TypeConversion<CSharpInterfaceTypeContext> GetInterfaceTypeConversion()
-        {
-            return new NullTypeConversion<CSharpInterfaceTypeContext>();
-        }
-
-        public override TypeConversion<CSharpEnumTypeContext> GetEnumTypeConversion()
-        {
-            return new NullTypeConversion<CSharpEnumTypeContext>();
         }
     }
 }

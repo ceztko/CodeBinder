@@ -9,19 +9,14 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    public sealed class CSharpSyntaxTreeContext : SyntaxTreeContext<CSharpTypeContext>
+    public sealed class CSharpSyntaxTreeContext : SyntaxTreeContext<CSharpTypeContext, CSharpLanguageConversion>
     {
-        private CSharpLanguageConversion _conversion;
-
         public CSharpSyntaxTreeContext(CompilationContext compilation, CSharpLanguageConversion conversion)
-            : base(compilation)
-        {
-            _conversion = conversion;
-        }
+            : base(compilation, conversion) { }
 
         public override void Visit(SyntaxTree tree)
         {
-            var walker = new CSharpNodeVisitor(this, _conversion);
+            var walker = new CSharpNodeVisitor(this, Conversion);
             walker.Visit(tree.GetRoot());
         }
     }

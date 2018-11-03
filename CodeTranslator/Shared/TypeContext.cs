@@ -49,7 +49,7 @@ namespace CodeTranslator.Shared
     {
         private List<TTypeContext> _Children;
 
-        protected TypeContext()
+        internal TypeContext()
         {
             _Children = new List<TTypeContext>();
         }
@@ -67,6 +67,23 @@ namespace CodeTranslator.Shared
         protected override IEnumerable<TypeContext> GetChildren()
         {
             return _Children;
+        }
+    }
+
+    public abstract class TypeContext<TTypeContext, TTreeContext> : TypeContext<TTypeContext>
+        where TTypeContext : TypeContext
+        where TTreeContext : SyntaxTreeContext
+    {
+        public new TTreeContext TreeContext { get; private set; }
+
+        protected TypeContext(TTreeContext treeContext)
+        {
+            TreeContext = treeContext;
+        }
+
+        protected override SyntaxTreeContext GetSyntaxTreeContext()
+        {
+            return TreeContext;
         }
     }
 }

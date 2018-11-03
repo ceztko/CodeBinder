@@ -9,23 +9,14 @@ using System.Text;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    public abstract class CSharpTypeContext : TypeContext<CSharpTypeContext>
+    public abstract class CSharpTypeContext : TypeContext<CSharpTypeContext, CSharpSyntaxTreeContext>
     {
-        public new CSharpSyntaxTreeContext TreeContext { get; private set; }
-
         protected CSharpTypeContext(CSharpSyntaxTreeContext treeContext)
-        {
-            TreeContext = treeContext;
-        }
+            : base(treeContext) { }
 
         public BaseTypeDeclarationSyntax Node
         {
             get { return GetNode(); }
-        }
-
-        protected override SyntaxTreeContext GetSyntaxTreeContext()
-        {
-            return TreeContext;
         }
 
         protected abstract BaseTypeDeclarationSyntax GetNode();

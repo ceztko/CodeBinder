@@ -13,13 +13,12 @@ using System.Text;
 
 namespace CodeTranslator.JNI
 {
-    abstract class JNITypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext, CSToJNIConversion>
-        where TTypeContext : CSharpTypeContext
+    abstract class JNIModuleConversion<TTypeContext> : TypeConversion<JNIModuleContext, CSToJNIConversion>
     {
         public string Namespace { get; private set; }
         string _Basepath;
 
-        protected JNITypeConversion(CSToJNIConversion langConversion)
+        protected JNIModuleConversion(CSToJNIConversion langConversion)
             : base(langConversion)
         {
             Namespace = langConversion.BaseNamespace;
@@ -35,32 +34,5 @@ namespace CodeTranslator.JNI
         {
             throw new NotImplementedException();
         }
-
-        public override IEnumerable<IConversionBuilder> Builders
-        {
-
-            get
-            {
-                visitMembers();
-                yield break;
-            }
-        }
-
-        private void visitMembers()
-        {
-            foreach (var member in Members)
-            {
-                if (member.Kind() != SyntaxKind.MethodDeclaration)
-                    continue;
-
-                var method = member as MethodDeclarationSyntax;
-            }
-        }
-
-        protected abstract SyntaxList<MemberDeclarationSyntax> Members
-        {
-            get;
-        }
-
     }
 }

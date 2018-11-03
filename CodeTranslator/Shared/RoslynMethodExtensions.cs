@@ -4,6 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Text;
 
 namespace CodeTranslator.Shared
@@ -25,6 +26,18 @@ namespace CodeTranslator.Shared
         {
             var model = node.GetSemanticModel(provider);
             return model.GetTypeInfo(node);
+        }
+
+        public static ImmutableArray<AttributeData> GetAttributes(this SyntaxNode node, ICompilationContextProvider provider)
+        {
+            var symbolInfo = node.GetSymbolInfo(provider);
+            return symbolInfo.Symbol.GetAttributes();
+        }
+
+        public static SymbolInfo GetSymbolInfo(this SyntaxNode node, ICompilationContextProvider provider)
+        {
+            var model = node.GetSemanticModel(provider);
+            return model.GetSymbolInfo(node);
         }
 
         public static ITypeSymbol GetTypeSymbol(this SyntaxNode node, ICompilationContextProvider provider)
@@ -84,6 +97,7 @@ namespace CodeTranslator.Shared
         // Reference: https://github.com/dotnet/roslyn/issues/1891
         public static string GetFullName(this ISymbol symbol)
         {
+            var test = symbol.GetAttributes();
             return SymbolDisplay.ToDisplayString(symbol, DisplayFormat);
         }
     }

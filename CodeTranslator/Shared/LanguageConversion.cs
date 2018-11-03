@@ -28,7 +28,7 @@ namespace CodeTranslator.Shared
 
     public abstract class LanguageConversion<TSyntaxTreeContext, TTypeContext> : LanguageConversion
         where TSyntaxTreeContext : SyntaxTreeContext<TTypeContext>
-        where TTypeContext : TypeContext<TTypeContext>
+        where TTypeContext : TypeContext<TTypeContext, TSyntaxTreeContext>
     {
         public sealed override SyntaxTreeContext GetSyntaxTreeContext(CompilationContext compilation)
         {
