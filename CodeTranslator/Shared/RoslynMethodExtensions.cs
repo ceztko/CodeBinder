@@ -16,6 +16,12 @@ namespace CodeTranslator.Shared
             SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
             miscellaneousOptions: SymbolDisplayMiscellaneousOptions.ExpandNullable);
 
+        public static bool IsAttribute<TAttribute>(this AttributeData attribute)
+            where TAttribute : Attribute
+        {
+            return attribute.AttributeClass.GetFullName() == typeof(TAttribute).FullName;
+        }
+
         public static string GetFullName(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var symbol = node.GetTypeSymbol(provider);
@@ -30,14 +36,14 @@ namespace CodeTranslator.Shared
 
         public static ImmutableArray<AttributeData> GetAttributes(this SyntaxNode node, ICompilationContextProvider provider)
         {
-            var symbolInfo = node.GetSymbolInfo(provider);
-            return symbolInfo.Symbol.GetAttributes();
+            var symbol = node.GetDeclaredSymbol(provider);
+            return symbol.GetAttributes();
         }
 
-        public static SymbolInfo GetSymbolInfo(this SyntaxNode node, ICompilationContextProvider provider)
+        public static ISymbol GetDeclaredSymbol(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = node.GetSemanticModel(provider);
-            return model.GetSymbolInfo(node);
+            return model.GetDeclaredSymbol(node);
         }
 
         public static ITypeSymbol GetTypeSymbol(this SyntaxNode node, ICompilationContextProvider provider)

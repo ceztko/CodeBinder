@@ -11,7 +11,7 @@ namespace CodeTranslator.Shared.CSharp
 {
     public abstract class CSharpTypeContext : TypeContext<CSharpTypeContext, CSharpSyntaxTreeContext>
     {
-        protected CSharpTypeContext(CSharpSyntaxTreeContext treeContext)
+        internal CSharpTypeContext(CSharpSyntaxTreeContext treeContext)
             : base(treeContext) { }
 
         public BaseTypeDeclarationSyntax Node

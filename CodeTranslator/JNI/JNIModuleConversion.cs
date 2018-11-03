@@ -13,12 +13,12 @@ using System.Text;
 
 namespace CodeTranslator.JNI
 {
-    abstract class JNIModuleConversion<TTypeContext> : TypeConversion<JNIModuleContext, CSToJNIConversion>
+    public class JNIModuleConversion : TypeConversion<JNIModuleContext, CSToJNIConversion>
     {
         public string Namespace { get; private set; }
         string _Basepath;
 
-        protected JNIModuleConversion(CSToJNIConversion langConversion)
+        public JNIModuleConversion(CSToJNIConversion langConversion)
             : base(langConversion)
         {
             Namespace = langConversion.BaseNamespace;

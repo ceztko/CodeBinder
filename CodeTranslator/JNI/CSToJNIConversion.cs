@@ -4,9 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CodeTranslator.Shared;
-using CodeTranslator.Shared.CSharp;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeTranslator.JNI
 {
@@ -18,11 +15,6 @@ namespace CodeTranslator.JNI
         protected override JNISyntaxTreeContext getSyntaxTreeContext(CompilationContext compilation)
         {
             return new JNISyntaxTreeContext(compilation, this);
-        }
-
-        internal void AddNativeMethod(string module, MethodDeclarationSyntax method)
-        {
-
         }
     }
 }

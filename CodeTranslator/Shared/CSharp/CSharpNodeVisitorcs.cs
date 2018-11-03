@@ -114,17 +114,27 @@ namespace CodeTranslator.Shared.CSharp
         #endregion // Unsupported syntax
     }
 
-    public class CSharpNodeVisitor<TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker
+    public class CSharpNodeVisitor<TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker, ICompilationContextProvider
         where TSyntaxTree : SyntaxTreeContext
         where TLanguageConversion : LanguageConversion
     {
         public TLanguageConversion Conversion { get; private set; }
         public TSyntaxTree TreeContext { get; private set; }
 
+        public CompilationContext Compilation
+        {
+            get { return TreeContext.Compilation; }
+        }
+
         public CSharpNodeVisitor(TSyntaxTree treeContext, TLanguageConversion conversion)
         {
             TreeContext = treeContext;
             Conversion = conversion;
+        }
+
+        public SemanticModel GetSemanticModel(SyntaxTree tree)
+        {
+            return TreeContext.Compilation.GetSemanticModel(tree);
         }
     }
 }

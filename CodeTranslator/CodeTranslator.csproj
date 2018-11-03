@@ -29,5 +29,8 @@
   <ItemGroup Condition="'$(SignAssembly)'=='True'">
     <Compile Remove="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CodeTranslatorAttributes\CodeTranslatorAttributes.csproj" />
+  </ItemGroup>
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>
