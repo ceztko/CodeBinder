@@ -16,6 +16,7 @@ namespace CodeTranslator.Attributes
         public string Name { get; private set; }
     }
 
+    // TODO: Remove me
     [Obsolete]
     [Conditional("DEBUG")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
@@ -29,6 +30,8 @@ namespace CodeTranslator.Attributes
         public string Name { get; private set; }
     }
 
+    // TODO: Remove me
+    [Obsolete]
     [Conditional("DEBUG")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class ImportAttribute : Attribute

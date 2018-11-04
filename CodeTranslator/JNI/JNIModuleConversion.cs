@@ -74,7 +74,7 @@ namespace CodeTranslator.JNI
 
         private void WriteParameters(CodeBuilder builder, ParameterListSyntax parameterList)
         {
-            builder.Append("JNIEnv *, jclass ");
+            builder.Append("JNIEnv *, jclass");
             foreach (var parameter in parameterList.Parameters)
                 WriteParameter(builder, parameter);
         }
@@ -82,11 +82,14 @@ namespace CodeTranslator.JNI
         private void WriteParameter(CodeBuilder builder, ParameterSyntax parameter)
         {
             builder.Append(", ");
+            bool isRef = parameter.IsRef() || parameter.IsOut();
+            WriteType(builder, parameter.Type, isRef);
             builder.Append(parameter.Identifier.Text);
         }
 
-        private void WriteType(CodeBuilder builder, TypeSyntax returnType)
+        private void WriteType(CodeBuilder builder, TypeSyntax type, bool isRef = false)
         {
+            builder.Append(type.GetJNIType(isRef, this)).Append(" ");
         }
 
         public override string GeneratedPreamble

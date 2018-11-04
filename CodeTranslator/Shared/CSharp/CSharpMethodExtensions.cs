@@ -24,6 +24,28 @@ namespace CodeTranslator.Shared.CSharp
             return false;
         }
 
+        public static bool IsRef(this ParameterSyntax parameter)
+        {
+            foreach (var modifier in parameter.Modifiers)
+            {
+                if (modifier.Text == "ref")
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsOut(this ParameterSyntax parameter)
+        {
+            foreach (var modifier in parameter.Modifiers)
+            {
+                if (modifier.Text == "out")
+                    return true;
+            }
+
+            return false;
+        }
+
         public static int GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider provider)
         {
             return node.EqualsValue.Value.GetValue<int>(provider);
