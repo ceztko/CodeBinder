@@ -18,16 +18,21 @@ namespace CodeTranslator.JNI
         public string Namespace { get; private set; }
         string _Basepath;
 
-        public JNIModuleConversion(CSToJNIConversion langConversion)
-            : base(langConversion)
+        public JNIModuleConversion(CSToJNIConversion conversion)
+            : base(conversion)
         {
-            Namespace = langConversion.BaseNamespace;
+            Namespace = conversion.BaseNamespace;
             _Basepath = string.IsNullOrEmpty(Namespace) ? null : Namespace.Replace('.', Path.DirectorySeparatorChar);
         }
 
         public override string FileName
         {
-            get { return "JNI" + TypeContext.ModuleName + ".h"; }
+            get { return JNIModuelName + ".h"; }
+        }
+
+        public string JNIModuelName
+        {
+            get { return "JNI" + TypeContext.ModuleName; }
         }
 
         public sealed override void Write(CodeBuilder builder)
@@ -39,12 +44,49 @@ namespace CodeTranslator.JNI
             builder.AppendLine("extern \"C\"");
             builder.AppendLine("{");
             builder.AppendLine("#endif");
-            builder.IncreaseIndent();
-            builder.DecreaseIndent();
-
+            builder.AppendLine();
+            WriteMethods(builder);
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("}");
             builder.AppendLine("#endif");
+        }
+
+        private void WriteMethods(CodeBuilder builder)
+        {
+            foreach (var method in TypeContext.Methods)
+                WriteMethod(builder, method);
+        }
+
+        private void WriteMethod(CodeBuilder builder, MethodDeclarationSyntax method)
+        {
+            builder.Append("JNIEXPORT ");
+            WriteType(builder, method.ReturnType);
+            builder.Append("JNICALL ");
+            builder.Append("Java_").Append(Namespace.Replace('.', '_')).Append("_")
+                .Append(JNIModuelName)
+                .Append("_").Append(method.GetName()).AppendLine("(");
+            builder.IncreaseIndent();
+            WriteParameters(builder, method.ParameterList);
+            builder.AppendLine(");");
+            builder.DecreaseIndent();
+            builder.AppendLine();
+        }
+
+        private void WriteParameters(CodeBuilder builder, ParameterListSyntax parameterList)
+        {
+            builder.Append("JNIEnv *, jclass ");
+            foreach (var parameter in parameterList.Parameters)
+                WriteParameter(builder, parameter);
+        }
+
+        private void WriteParameter(CodeBuilder builder, ParameterSyntax parameter)
+        {
+            builder.Append(", ");
+            builder.Append(parameter.Identifier.Text);
+        }
+
+        private void WriteType(CodeBuilder builder, TypeSyntax returnType)
+        {
         }
 
         public override string GeneratedPreamble
