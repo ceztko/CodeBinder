@@ -20,7 +20,9 @@ namespace CodeTranslator.JNI
 
         protected override TypeConversion GetConversion()
         {
-            return new JNIModuleConversion(TreeContext.Conversion);
+            var ret = new JNIModuleConversion(TreeContext.Conversion);
+            ret.TypeContext = this;
+            return ret;
         }
 
         internal void AddNativeMethod(MethodDeclarationSyntax method)

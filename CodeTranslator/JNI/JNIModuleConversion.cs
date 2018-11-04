@@ -27,12 +27,29 @@ namespace CodeTranslator.JNI
 
         public override string FileName
         {
-            get { throw new NotImplementedException(); }
+            get { return "JNI" + TypeContext.ModuleName + ".h"; }
         }
 
         public sealed override void Write(CodeBuilder builder)
         {
-            throw new NotImplementedException();
+            builder.AppendLine("#pragma once");
+            builder.AppendLine();
+            builder.AppendLine("#include <jni.h>");
+            builder.AppendLine("#ifdef __cplusplus");
+            builder.AppendLine("extern \"C\"");
+            builder.AppendLine("{");
+            builder.AppendLine("#endif");
+            builder.IncreaseIndent();
+            builder.DecreaseIndent();
+
+            builder.AppendLine("#ifdef __cplusplus");
+            builder.AppendLine("}");
+            builder.AppendLine("#endif");
+        }
+
+        public override string GeneratedPreamble
+        {
+            get { return "/* This file was generated. DO NOT EDIT! */"; }
         }
     }
 }

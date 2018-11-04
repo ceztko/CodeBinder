@@ -20,18 +20,19 @@ namespace ConsoleApp1
             MSBuildWorkspace workspace = MSBuildWorkspace.Create();
 
             GeneratorArgs genargs = new GeneratorArgs();
-            genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\alt\java";
 
             //Solution solution = workspace.OpenSolutionAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet.sln").Result;
             //var conv = SolutionConverter.CreateFor<CSToJavaConversion>(solution);
-            Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNetTest.csproj").Result;
+            Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdfNetTest.csproj").Result;
 
             //var conv = ProjectConverter.CreateFor<CSToJavaConversion>(project);
             //conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
+            //genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\alt\java";
             //conv.ConvertAndWrite(genargs);
 
             var conv2 = ProjectConverter.CreateFor<CSToJNIConversion>(project);
-            conv2.Conversion.BaseNamespace = "com.euronovate.libpdf";
+            conv2.Conversion.BaseNamespace = "com.euronovate.libpdf.reserved";
+            genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJni";
             conv2.ConvertAndWrite(genargs);
         }
     }

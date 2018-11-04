@@ -16,6 +16,7 @@ namespace CodeTranslator.Attributes
         public string Name { get; private set; }
     }
 
+    [Obsolete]
     [Conditional("DEBUG")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
     public sealed class NamespaceAttribute: Attribute
