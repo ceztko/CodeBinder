@@ -11,6 +11,13 @@ using CodeTranslator.Shared;
 
 namespace CodeTranslator.Java
 {
+    enum JavaMethodFlags
+    {
+        None = 0,
+        Native,
+        IsByRef
+    }
+
     static class JavaMethodExtensions
     {
         delegate bool ModifierGetter(string modifier, out string javaModifier);
@@ -44,10 +51,10 @@ namespace CodeTranslator.Java
             }
         }
 
-        public static string GetJavaType(this TypeSyntax type, ICompilationContextProvider provider)
+        public static string GetJavaType(this TypeSyntax type, JavaMethodFlags flags, ICompilationContextProvider provider)
         {
             var symbol = type.GetTypeSymbol(provider);
-            return getJavaType(symbol);
+            return getJavaType(type, symbol, flags);
         }
 
         public static string GetJavaModifiersString(this BaseMethodDeclarationSyntax node)
@@ -141,117 +148,108 @@ namespace CodeTranslator.Java
         }
 
 
-        private static string getJavaType(ITypeSymbol type, bool nativeMethods = false)
+        private static string getJavaType(TypeSyntax syntax, ITypeSymbol symbol, JavaMethodFlags flags)
         {
-            if (nativeMethods && type.TypeKind == TypeKind.Enum)
+            if (flags.HasFlag(JavaMethodFlags.Native) && symbol.TypeKind == TypeKind.Enum)
                 return "int";
 
-            string typeName;
+            string netFullName;
             string javaArraySuffix;
-            if (type.TypeKind == TypeKind.Array)
+            if (symbol.TypeKind == TypeKind.Array)
             {
-                var arrayType = type as IArrayTypeSymbol;
-
-                typeName = arrayType.ElementType.GetFullName();
+                var arrayType = symbol as IArrayTypeSymbol;
+                netFullName = arrayType.ElementType.GetFullName();
                 javaArraySuffix = "[]";
             }
             else
             {
-                typeName = type.GetFullName();
+                netFullName = symbol.GetFullName();
                 javaArraySuffix = string.Empty;
             }
 
             string javaTypeName;
-            switch (typeName)
-            {
-                case "System.Void":
-                {
-                    javaTypeName = "void";
-                    break;
-                }
-                case "System.Object":
-                {
-                    javaTypeName = "Object";
-                    break;
-                }
-                case "System.IntPtr":
-                {
-                    javaTypeName = "long";
-                    break;
-                }
-                case "System.Boolean":
-                {
-                    javaTypeName = "boolean";
-                    break;
-                }
-                case "System.Char":
-                {
-                    javaTypeName =  "char";
-                    break;
-                }
-                case "System.String":
-                {
-                    javaTypeName =  "String";
-                    break;
-                }
-                case "System.Byte":
-                {
-                    javaTypeName = "byte";
-                    break;
-                }
-                case "System.SByte":
-                {
-                    javaTypeName = "byte";
-                    break;
-                }
-                case "System.Int16":
-                {
-                    javaTypeName =  "short";
-                    break;
-                }
-                case "System.UInt16":
-                {
-                    javaTypeName = "short";
-                    break;
-                }
-                case "System.Int32":
-                {
-                    javaTypeName = "int";
-                    break;
-                }
-                case "System.UInt32":
-                {
-                    javaTypeName = "int";
-                    break;
-                }
-                case "System.Int64":
-                {
-                    javaTypeName = "long";
-                    break;
-                }
-                case "System.UInt64":
-                {
-                    javaTypeName = "long";
-                    break;
-                }
-                case "System.Single":
-                {
-                    javaTypeName =  "float";
-                    break;
-                }
-                case "System.Double":
-                {
-                    javaTypeName = "double";
-                    break;
-                }
-                default:
-                {
-                    javaTypeName = typeName;
-                    break;
-                }
-            }
+            if (flags.HasFlag(JavaMethodFlags.IsByRef))
+                javaTypeName = getJavaByRefType(syntax, netFullName);
+            else
+                javaTypeName = getJavaType(syntax, netFullName);
 
             return javaTypeName + javaArraySuffix;
+        }
+
+        static string getJavaType(TypeSyntax syntax, string netFullName)
+        {
+            switch (netFullName)
+            {
+                case "System.Void":
+                    return "void";
+                case "System.Object":
+                    return "Object";
+                case "System.IntPtr":
+                    return "long";
+                case "System.Boolean":
+                    return "boolean";
+                case "System.Char":
+                    return "char";
+                case "System.String":
+                    return "String";
+                case "System.Byte":
+                    return "byte";
+                case "System.SByte":
+                    return "byte";
+                case "System.Int16":
+                    return "short";
+                case "System.UInt16":
+                    return "short";
+                case "System.Int32":
+                    return "int";
+                case "System.UInt32":
+                    return "int";
+                case "System.Int64":
+                    return "long";
+                case "System.UInt64":
+                    return "long";
+                case "System.Single":
+                    return "float";
+                case "System.Double":
+                    return "double";
+                default:
+                    return syntax.GetTypeIdentifier();
+            }
+        }
+
+        static string getJavaByRefType(TypeSyntax syntax, string netFullName)
+        {
+            switch (netFullName)
+            {
+                case "System.Boolean":
+                    return "BooleanBox";
+                case "System.Char":
+                    return "CharBox";
+                case "System.Byte":
+                    return "ByteBox";
+                case "System.SByte":
+                    return "ByteBox";
+                case "System.Int16":
+                    return "ShortBox";
+                case "System.UInt16":
+                    return "ShortBox";
+                case "System.Int32":
+                    return "IntBox";
+                case "System.UInt32":
+                    return "IntBox";
+                case "System.Int64":
+                    return "LongBox";
+                case "System.UInt64":
+                    return "LongBox";
+                case "System.Single":
+                    return "FloatBox";
+                case "System.Double":
+                    return "DoubleBox";
+                case "System.IntPtr":
+                    return "LongBox";
+                default:
+                    return syntax.GetTypeIdentifier();
+            }
         }
     }
 }

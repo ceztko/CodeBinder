@@ -1,5 +1,6 @@
 ﻿using CodeTranslator.Shared;
 using CodeTranslator.Util;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using CodeTranslator.Shared.CSharp;
 using System;
@@ -53,18 +54,25 @@ namespace CodeTranslator.Java
 
         private void WriteParameter(ParameterSyntax parameter)
         {
-            WriteType(parameter.Type);
+            var flags = IsNative ? JavaMethodFlags.Native : JavaMethodFlags.None;
+            bool isRef = parameter.IsRef() | parameter.IsOut();
+            if (isRef)
+                flags |= JavaMethodFlags.IsByRef;
+
+            WriteType(parameter.Type, flags);
             Builder.Append(" ").Append(parameter.Identifier.Text);
         }
 
-        protected void WriteType(TypeSyntax type)
+        protected void WriteType(TypeSyntax type, JavaMethodFlags flags)
         {
-            Builder.Append(type.GetJavaType(this));
+            Builder.Append(type.GetJavaType(flags, this));
         }
 
         protected virtual void WriteReturnType() { }
 
         public abstract string MethodName { get; }
+
+        public abstract bool IsNative { get; }
     }
 
     class MethodWriter : MethodWriter<MethodDeclarationSyntax>
@@ -74,13 +82,18 @@ namespace CodeTranslator.Java
 
         protected override void WriteReturnType()
         {
-            WriteType(Syntax.ReturnType);
+            WriteType(Syntax.ReturnType, IsNative ? JavaMethodFlags.Native : JavaMethodFlags.None);
             Builder.Append(" ");
         }
 
         public override string MethodName
         {
             get { return Syntax.GetName(); }
+        }
+
+        public override bool IsNative
+        {
+            get { return Syntax.IsNative(this); }
         }
     }
 
@@ -93,6 +106,11 @@ namespace CodeTranslator.Java
         {
             get { return (Syntax.Parent as BaseTypeDeclarationSyntax).GetName();}
         }
+
+        public override bool IsNative
+        {
+            get { return false; }
+        }
     }
 
     class DestructorWriter : MethodWriter<DestructorDeclarationSyntax>
@@ -103,6 +121,11 @@ namespace CodeTranslator.Java
         public override string MethodName
         {
             get { return "finalize"; }
+        }
+
+        public override bool IsNative
+        {
+            get { return false; }
         }
     }
 }

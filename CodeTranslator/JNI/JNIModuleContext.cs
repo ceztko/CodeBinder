@@ -30,6 +30,9 @@ namespace CodeTranslator.JNI
             _methods.Add(method);
         }
 
-        public IReadOnlyList<MethodDeclarationSyntax> Methods { get => _methods; }
+        public IReadOnlyList<MethodDeclarationSyntax> Methods
+        {
+            get { return _methods; }
+        }
     }
 }

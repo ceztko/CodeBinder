@@ -43,7 +43,7 @@ namespace CodeTranslator.Java
 
         public virtual IEnumerable<string> Imports
         {
-            get { yield break; }
+            get { yield return "Java.util.*"; }
         }
 
         public sealed override void Write(CodeBuilder builder)
@@ -55,7 +55,7 @@ namespace CodeTranslator.Java
             bool hasImports = false;
             foreach (var import in Imports)
             {
-                builder.AppendLine();
+                builder.Append("import ").AppendLine(import);
                 hasImports = true;
             }
 

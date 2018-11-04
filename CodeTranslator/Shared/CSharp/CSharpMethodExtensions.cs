@@ -1,49 +1,56 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace CodeTranslator.Shared.CSharp
 {
     static class CSharpMethodExtensions
     {
-        const string FLAG_ATTRIBUTE_FULLANAME = "System.FlagsAttribute";
+        public static string GetTypeIdentifier(this TypeSyntax type)
+        {
+            var kind = type.Kind();
+            switch (kind)
+            {
+                case SyntaxKind.PredefinedType:
+                    return (type as PredefinedTypeSyntax).Keyword.Text;
+                case SyntaxKind.IdentifierName:
+                    return (type as IdentifierNameSyntax).Identifier.Text;
+                case SyntaxKind.NullableType:
+                    return (type as NullableTypeSyntax).ElementType.GetTypeIdentifier();
+                default:
+                    return "unsupported";
+                    //throw new Exception();
+            }
+        }
+
+        public static bool IsNative(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        {
+            if (!method.HasAttribute<DllImportAttribute>(provider))
+                return false;
+
+            return method.Modifiers.HasModifier("extern");
+        }
 
         public static bool IsFlag(this EnumDeclarationSyntax node, ICompilationContextProvider provider)
         {
-            foreach (var attribute in GetAttributes(node))
-            {
-                var fullName = attribute.GetFullName(provider);
-                if (fullName == FLAG_ATTRIBUTE_FULLANAME)
-                    return true;
-            }
-            return false;
+            return node.HasAttribute<FlagsAttribute>(provider);
         }
 
         public static bool IsRef(this ParameterSyntax parameter)
         {
-            foreach (var modifier in parameter.Modifiers)
-            {
-                if (modifier.Text == "ref")
-                    return true;
-            }
-
-            return false;
+            return parameter.Modifiers.HasModifier("ref");
         }
 
         public static bool IsOut(this ParameterSyntax parameter)
         {
-            foreach (var modifier in parameter.Modifiers)
-            {
-                if (modifier.Text == "out")
-                    return true;
-            }
-
-            return false;
+            return parameter.Modifiers.HasModifier("out");
         }
 
         public static int GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider provider)
@@ -115,13 +122,15 @@ namespace CodeTranslator.Shared.CSharp
             return ret;
         }
 
-        public static IEnumerable<AttributeSyntax> GetAttributes(this EnumDeclarationSyntax node)
+        public static bool HasModifier(this SyntaxTokenList modifiers, string modifierStr)
         {
-            foreach (var list in node.AttributeLists)
+            foreach (var modifier in modifiers)
             {
-                foreach (var attribute in list.Attributes)
-                    yield return attribute;
+                if (modifier.Text == modifierStr)
+                    return true;
             }
+
+            return false;
         }
 
         public static TypeInfo GetTypeInfo(this BaseTypeSyntax type, ICompilationContextProvider provider)

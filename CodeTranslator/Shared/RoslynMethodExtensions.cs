@@ -34,6 +34,19 @@ namespace CodeTranslator.Shared
             return model.GetTypeInfo(node);
         }
 
+        public static bool HasAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider)
+            where TAttribute : Attribute
+        {
+            var symbol = node.GetDeclaredSymbol(provider);
+            var attributes = symbol.GetAttributes();
+            foreach (var attribute in attributes)
+            {
+                if (attribute.IsAttribute<TAttribute>())
+                    return true;
+            }
+            return false;
+        }
+
         public static ImmutableArray<AttributeData> GetAttributes(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var symbol = node.GetDeclaredSymbol(provider);

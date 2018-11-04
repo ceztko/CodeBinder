@@ -16,123 +16,123 @@ namespace CodeTranslator.JNI
         public static string GetJNIType(this TypeSyntax type, bool isRef, ICompilationContextProvider provider)
         {
             var symbol = type.GetTypeSymbol(provider);
-            return getJNIType(symbol, isRef);
+            return getJNIType(type, symbol, isRef);
         }
 
-        private static string getJNIType(ITypeSymbol type, bool isRef)
+        private static string getJNIType(TypeSyntax syntax, ITypeSymbol symbol, bool isRef)
         {
-            if (type.TypeKind == TypeKind.Enum)
+            if (symbol.TypeKind == TypeKind.Enum)
                 return "jint";
 
-            string typeName;
+            string fullTypeName;
             string javaArraySuffix;
-            if (type.TypeKind == TypeKind.Array)
+            if (symbol.TypeKind == TypeKind.Array)
             {
-                var arrayType = type as IArrayTypeSymbol;
+                var arrayType = symbol as IArrayTypeSymbol;
 
-                typeName = arrayType.ElementType.GetFullName();
+                fullTypeName = arrayType.ElementType.GetFullName();
                 javaArraySuffix = "Array";
             }
             else
             {
-                typeName = type.GetFullName();
+                fullTypeName = symbol.GetFullName();
                 javaArraySuffix = string.Empty;
             }
 
-            string javaTypeName;
-            switch (typeName)
+            string jniTypeName;
+            switch (fullTypeName)
             {
                 case "System.Void":
                 {
-                    javaTypeName = "void";
+                    jniTypeName = "void";
                     break;
                 }
                 case "System.Object":
                 {
-                    javaTypeName = "jobject";
+                    jniTypeName = "jobject";
                     break;
                 }
                 case "System.IntPtr":
                 {
-                    javaTypeName = "jlong";
+                    jniTypeName = "jlong";
                     break;
                 }
                 case "System.Boolean":
                 {
-                    javaTypeName = "jboolean";
+                    jniTypeName = "jboolean";
                     break;
                 }
                 case "System.Char":
                 {
-                    javaTypeName = "jchar";
+                    jniTypeName = "jchar";
                     break;
                 }
                 case "System.String":
                 {
-                    javaTypeName = "jstring";
+                    jniTypeName = "jstring";
                     break;
                 }
                 case "System.Byte":
                 {
-                    javaTypeName = "jbyte";
+                    jniTypeName = "jbyte";
                     break;
                 }
                 case "System.SByte":
                 {
-                    javaTypeName = "jbyte";
+                    jniTypeName = "jbyte";
                     break;
                 }
                 case "System.Int16":
                 {
-                    javaTypeName = "jshort";
+                    jniTypeName = "jshort";
                     break;
                 }
                 case "System.UInt16":
                 {
-                    javaTypeName = "jshort";
+                    jniTypeName = "jshort";
                     break;
                 }
                 case "System.Int32":
                 {
-                    javaTypeName = "jint";
+                    jniTypeName = "jint";
                     break;
                 }
                 case "System.UInt32":
                 {
-                    javaTypeName = "jint";
+                    jniTypeName = "jint";
                     break;
                 }
                 case "System.Int64":
                 {
-                    javaTypeName = "jlong";
+                    jniTypeName = "jlong";
                     break;
                 }
                 case "System.UInt64":
                 {
-                    javaTypeName = "jlong";
+                    jniTypeName = "jlong";
                     break;
                 }
                 case "System.Single":
                 {
-                    javaTypeName =  "jfloat";
+                    jniTypeName =  "jfloat";
                     break;
                 }
                 case "System.Double":
                 {
-                    javaTypeName = "jdouble";
+                    jniTypeName = "jdouble";
                     break;
                 }
                 default:
                 {
                     if (isRef)
-                        javaTypeName = "jlong";
+                        jniTypeName = "jlong";
                     else
-                        javaTypeName = typeName;
+                        jniTypeName = syntax.GetTypeIdentifier();
                     break;
                 }
             }
 
-            return javaTypeName + javaArraySuffix;
+            return jniTypeName + javaArraySuffix;
         }
     }
 }
