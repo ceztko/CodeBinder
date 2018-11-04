@@ -5,13 +5,6 @@ using System.Runtime.CompilerServices;
 namespace CodeTranslator.Attributes
 {
     [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.Enum)]
-    public sealed class EnumAttribute : Attribute
-    {
-
-    }
-
-    [Conditional("DEBUG")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class ModuleAttribute : Attribute
     {
@@ -60,7 +53,7 @@ namespace CodeTranslator.Attributes
     }
 
     [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
     public sealed class IgnoreAttribute : Attribute
     {
 
