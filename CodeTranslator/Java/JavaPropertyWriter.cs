@@ -14,12 +14,14 @@ namespace CodeTranslator.Java
     {
         List<string> _modifiers;
         bool _isAutoProperty;
+        public bool IsInterface { get; private set; }
 
-        protected PropertyWriter(TProperty syntax, ICompilationContextProvider context)
+        protected PropertyWriter(TProperty syntax, bool isInterface, ICompilationContextProvider context)
             : base(syntax, context)
         {
             _modifiers = Syntax.GetCSharpModifierStrings();
             _isAutoProperty = true;
+            IsInterface = isInterface;
             if (Syntax.AccessorList != null)
             {
                 foreach (var accessor in Syntax.AccessorList.Accessors)
@@ -41,7 +43,7 @@ namespace CodeTranslator.Java
 
         private void WriteUnderlyingField()
         {
-            if (!_isAutoProperty)
+            if (!_isAutoProperty || IsInterface)
                 return;
 
             Builder.Append("private").Space();
@@ -74,16 +76,24 @@ namespace CodeTranslator.Java
         {
             var modifiers = getSetterModifiers(accessor);
             Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(modifiers)).Space();
+            Builder.Append(JavaType).Space();
             Builder.Append(SetterName).Append("(").Append(JavaType).Space().Append("value").Append(")");
-            using (Builder.BeginBlock())
+            if (IsInterface)
             {
-                if (_isAutoProperty)
+                Builder.EndOfLine();
+            }
+            else
+            {
+                using (Builder.Space().BeginBlock())
                 {
-                    Builder.Append(UnderlyingFieldName).Append(" = value").EndOfLine();
-                }
-                else
-                {
+                    if (_isAutoProperty)
+                    {
+                        Builder.Append(UnderlyingFieldName).Append(" = value").EndOfLine();
+                    }
+                    else
+                    {
 
+                    }
                 }
             }
         }
@@ -91,16 +101,25 @@ namespace CodeTranslator.Java
         private void WriteGetter(AccessorDeclarationSyntax accessor)
         {
             Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(_modifiers)).Space();
-            Builder.Append(GetterName).Append("()").Space();
-            using (Builder.BeginBlock())
+            Builder.Append(JavaType).Space();
+            Builder.Append(GetterName).Append("()");
+            if (IsInterface)
             {
-                if (_isAutoProperty)
-                {
-                    Builder.Append("return").Space().Append(UnderlyingFieldName).EndOfLine();
-                }
-                else
-                {
+                Builder.EndOfLine();
 
+            }
+            else
+            {
+                using (Builder.Space().BeginBlock())
+                {
+                    if (_isAutoProperty)
+                    {
+                        Builder.Append("return").Space().Append(UnderlyingFieldName).EndOfLine();
+                    }
+                    else
+                    {
+
+                    }
                 }
             }
         }
@@ -138,8 +157,8 @@ namespace CodeTranslator.Java
 
     class PropertyWriter : PropertyWriter<PropertyDeclarationSyntax>
     {
-        public PropertyWriter(PropertyDeclarationSyntax syntax, ICompilationContextProvider context)
-            : base(syntax, context) { }
+        public PropertyWriter(PropertyDeclarationSyntax syntax, bool isInterface, ICompilationContextProvider context)
+            : base(syntax, isInterface, context) { }
 
         public override string PropertyName
         {
@@ -149,8 +168,8 @@ namespace CodeTranslator.Java
 
     class IndexerWriter : PropertyWriter<IndexerDeclarationSyntax>
     {
-        public IndexerWriter(IndexerDeclarationSyntax syntax, ICompilationContextProvider context)
-            : base(syntax, context) { }
+        public IndexerWriter(IndexerDeclarationSyntax syntax, bool isInterface, ICompilationContextProvider context)
+            : base(syntax, isInterface, context) { }
 
         public override string PropertyName
         {

@@ -36,7 +36,7 @@ namespace CodeTranslator.Java
 
         protected virtual void WriteMethodBody()
         {
-            using (Builder.Append(" ").BeginBlock())
+            using (Builder.Space().BeginBlock())
             {
 
             }
@@ -45,7 +45,7 @@ namespace CodeTranslator.Java
         protected virtual void WriteModifiers()
         {
             Builder.Append(Syntax.GetJavaModifiersString());
-            Builder.Append(" ");
+            Builder.Space();
         }
 
         private void WriteParameters(ParameterListSyntax list)
@@ -70,7 +70,7 @@ namespace CodeTranslator.Java
                 flags |= JavaTypeFlags.IsByRef;
 
             WriteType(parameter.Type, flags);
-            Builder.Append(" ").Append(parameter.Identifier.Text);
+            Builder.Space().Append(parameter.Identifier.Text);
         }
 
         protected void WriteType(TypeSyntax type, JavaTypeFlags flags)
@@ -95,10 +95,18 @@ namespace CodeTranslator.Java
             _isIntefaceMethod = isIntefaceMethod;
         }
 
+        protected override void WriteModifiers()
+        {
+            if (_isIntefaceMethod)
+                return;
+
+            base.WriteModifiers();
+        }
+
         protected override void WriteReturnType()
         {
             WriteType(Syntax.ReturnType, IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None);
-            Builder.Append(" ");
+            Builder.Space();
         }
 
         protected override void WriteMethodBody()

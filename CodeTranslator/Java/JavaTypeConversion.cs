@@ -179,10 +179,10 @@ namespace CodeTranslator.Java
                         writer = new MethodWriter(member as MethodDeclarationSyntax, IsInterface, this);
                         break;
                     case SyntaxKind.PropertyDeclaration:
-                        writer = new PropertyWriter(member as PropertyDeclarationSyntax, this);
+                        writer = new PropertyWriter(member as PropertyDeclarationSyntax, IsInterface, this);
                         break;
                     case SyntaxKind.IndexerDeclaration:
-                        writer = new IndexerWriter(member as IndexerDeclarationSyntax, this);
+                        writer = new IndexerWriter(member as IndexerDeclarationSyntax, IsInterface, this);
                         break;
                     case SyntaxKind.FieldDeclaration:
                         writer = new FieldWriter(member as FieldDeclarationSyntax, this);
