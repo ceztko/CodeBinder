@@ -36,7 +36,7 @@ namespace CodeTranslator.Java
         {
             WriteEnumMembers();
             Builder.AppendLine();
-            Builder.AppendLine("public final int value;");
+            Builder.Append("public final int value").EndOfLine();
             Builder.AppendLine();
             WriteConstructor();
             Builder.AppendLine();
@@ -74,59 +74,57 @@ namespace CodeTranslator.Java
         {
             Builder.Append(TypeName);
             if (_isFlag)
-                Builder.Append("(int value) ");
+                Builder.Append("(int value)").Space();
             else
-                Builder.Append("() ");
+                Builder.Append("()").Space();
 
             using (Builder.BeginBlock())
             {
                 if (_isFlag)
-                    Builder.AppendLine("this.value = value;");
+                    Builder.Append("this.value = value").EndOfLine();
                 else
-                    Builder.AppendLine("value = this.ordinal();");
+                    Builder.Append("value = this.ordinal()").EndOfLine();
             }
         }
 
         private void WriteFromValueMethod()
         {
-            Builder.Append("public static ");
+            Builder.Append("public static").Space();
             Builder.Append(TypeName);
-            Builder.Append(" fromValue(int value) ");
+            Builder.Append(" fromValue(int value)").Space();
             using (Builder.BeginBlock())
             {
                 if (_isFlag)
                 {
                     Builder.Append(TypeName);
-                    Builder.Append("[] values = ");
+                    Builder.Append("[] values =").Space();
                     Builder.Append(TypeName);
-                    Builder.AppendLine(".values();");
-                    Builder.Append("for (int i = 0; i < values.length; i++) ");
+                    Builder.Append(".values()").EndOfLine();
+                    Builder.Append("for (int i = 0; i < values.length; i++)").Space();
                     using (Builder.BeginBlock())
                     {
-                        Builder.Append(TypeName);
-                        Builder.AppendLine(" envalue = values[i];");
-                        Builder.AppendLine("if (envalue.value == value)");
-                        Builder.Indented().AppendLine("return envalue;");
+                        Builder.Append(TypeName).Space();
+                        Builder.Append("envalue = values[i];").EndOfLine();
+                        Builder.Append("if (envalue.value == value)");
+                        Builder.Indented().Append("return envalue").EndOfLine();
                     }
-                    Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum ");
-                    Builder.Append(TypeName);
-                    Builder.AppendLine("\");");
+                    Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum").Space()
+                        .Append(TypeName).Append("\")").EndOfLine();
                 }
                 else
                 {
-                    Builder.Append("try ");
+                    Builder.Append("try").Space();
                     using (Builder.BeginBlock(false))
                     {
-                        Builder.Append("return ");
+                        Builder.Append("return").Space();
                         Builder.Append(TypeName);
-                        Builder.AppendLine(".values()[value];");
+                        Builder.Append(".values()[value]").EndOfLine();
                     }
-                    Builder.Append(" catch (Exception e) ");
+                    Builder.Space().Append("catch (Exception e)").Space();
                     using (Builder.BeginBlock())
                     {
-                        Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum ");
-                        Builder.Append(TypeName);
-                        Builder.AppendLine("\");");
+                        Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum").Space()
+                            .Append(TypeName).Append("\")").EndOfLine();
                     }
                 }
             }

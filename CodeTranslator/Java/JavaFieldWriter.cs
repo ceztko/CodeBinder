@@ -15,12 +15,10 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append(Syntax.GetJavaModifiersString());
-            Builder.Append(" ");
-            Builder.Append(Syntax.Declaration.Type.GetJavaType(this));
-            Builder.Append(" ");
+            Builder.Append(Syntax.GetJavaModifiersString()).Space();
+            Builder.Append(Syntax.Declaration.Type.GetJavaType(this)).Space();
             WriteVariableDeclaration(Syntax.Declaration.Variables);
-            Builder.AppendLine(";");
+            Builder.EndOfLine();
         }
 
         private void WriteVariableDeclaration(SeparatedSyntaxList<VariableDeclaratorSyntax> variables)

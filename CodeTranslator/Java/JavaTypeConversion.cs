@@ -49,14 +49,14 @@ namespace CodeTranslator.Java
 
         public sealed override void Write(CodeBuilder builder)
         {
-            builder.Append("package ");
+            builder.Append("package").Space();
             builder.Append(Namespace);
             builder.AppendLine(";");
             builder.AppendLine();
             bool hasImports = false;
             foreach (var import in Imports)
             {
-                builder.Append("import ").AppendLine(import);
+                builder.Append("import").Space().AppendLine(import);
                 hasImports = true;
             }
 
@@ -79,17 +79,13 @@ namespace CodeTranslator.Java
         {
             var modifiers = Syntax.GetJavaModifiersString();
             if (modifiers != string.Empty)
-            {
-                Builder.Append(modifiers);
-                Builder.Append(" ");
-            }
+                Builder.Append(modifiers).Space();
 
-            Builder.Append(Syntax.GetJavaTypeDeclaration());
-            Builder.Append(" ");
+            Builder.Append(Syntax.GetJavaTypeDeclaration()).Space();
             Builder.Append(TypeName);
             if (Syntax.BaseList != null)
                 WriteTypeBaseList(Syntax.BaseList);
-            using (Builder.Append(" ").BeginBlock())
+            using (Builder.Space().BeginBlock())
             {
                 WriteTypeMembers();
             }
@@ -99,7 +95,7 @@ namespace CodeTranslator.Java
 
         private void WriteTypeBaseList(BaseListSyntax baseList)
         {
-            Builder.Append(": ");
+            Builder.Append(":").Space();
 
             bool first = true;
             foreach (var type in baseList.Types)
@@ -107,7 +103,7 @@ namespace CodeTranslator.Java
                 if (first)
                     first = false;
                 else
-                    Builder.Append(", ");
+                    Builder.Append(",").Space();
 
                 WriteBaseType(type);
             }
@@ -125,9 +121,9 @@ namespace CodeTranslator.Java
             }
 
             if (isInterface)
-                Builder.Append("implements ");
+                Builder.Append("implements").Space();
             else
-                Builder.Append("extends ");
+                Builder.Append("extends").Space();
 
             Builder.Append(typeName);
         }

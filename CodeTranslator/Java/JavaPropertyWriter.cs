@@ -84,16 +84,16 @@ namespace CodeTranslator.Java
             }
             else
             {
-                using (Builder.Space().BeginBlock())
+                if (_isAutoProperty)
                 {
-                    if (_isAutoProperty)
+                    using (Builder.Space().BeginBlock())
                     {
-                        Builder.Append(UnderlyingFieldName).Append(" = value").EndOfLine();
+                        Builder.Append(UnderlyingFieldName).Space().Append("= value").EndOfLine();
                     }
-                    else
-                    {
-
-                    }
+                }
+                else
+                {
+                    new BlockWriter(accessor.Body, this).Write(Builder.Space());
                 }
             }
         }
@@ -110,16 +110,16 @@ namespace CodeTranslator.Java
             }
             else
             {
-                using (Builder.Space().BeginBlock())
+                if (_isAutoProperty)
                 {
-                    if (_isAutoProperty)
+                    using (Builder.Space().BeginBlock())
                     {
                         Builder.Append("return").Space().Append(UnderlyingFieldName).EndOfLine();
                     }
-                    else
-                    {
-
-                    }
+                }
+                else
+                {
+                    new BlockWriter(accessor.Body, this).Write(Builder.Space());
                 }
             }
         }

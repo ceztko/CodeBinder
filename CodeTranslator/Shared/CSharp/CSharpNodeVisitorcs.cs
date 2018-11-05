@@ -97,9 +97,8 @@ namespace CodeTranslator.Shared.CSharp
 
         #endregion Supported types
 
-        #region Unsupported syntax
-
         // TODO: Add more unsupported syntax
+        #region Unsupported syntax
 
         public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         {
@@ -107,6 +106,11 @@ namespace CodeTranslator.Shared.CSharp
                 Unsupported(node, "Unsupported property with no accessor definied: use \"get\" or \"set\"");
 
             DefaultVisit(node);
+        }
+
+        public override void VisitArrowExpressionClause(ArrowExpressionClauseSyntax node)
+        {
+            Unsupported(node);
         }
 
         public override void VisitArrayRankSpecifier(ArrayRankSpecifierSyntax node)
