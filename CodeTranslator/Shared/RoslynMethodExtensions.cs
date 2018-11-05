@@ -38,6 +38,9 @@ namespace CodeTranslator.Shared
             where TAttribute : Attribute
         {
             var symbol = node.GetDeclaredSymbol(provider);
+            if (symbol == null)
+                return false;
+
             var attributes = symbol.GetAttributes();
             foreach (var attribute in attributes)
             {

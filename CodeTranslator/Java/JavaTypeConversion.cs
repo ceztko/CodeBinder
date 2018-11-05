@@ -1,5 +1,6 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
+using CodeTranslator.Attributes;
 using CodeTranslator.Shared;
 using CodeTranslator.Shared.CSharp;
 using CodeTranslator.Util;
@@ -161,51 +162,58 @@ namespace CodeTranslator.Java
                 else
                     Builder.AppendLine();
 
+                if (member.HasAttribute<IgnoreAttribute>(this))
+                    continue;
+
                 var kind = member.Kind();
+                ISyntaxWriter writer;
                 switch (kind)
                 {
                     case SyntaxKind.ConstructorDeclaration:
-                        new ConstructorWriter(member as ConstructorDeclarationSyntax, this).Write(Builder);
+                        writer = new ConstructorWriter(member as ConstructorDeclarationSyntax, this);
                         break;
                     case SyntaxKind.DestructorDeclaration:
-                        new DestructorWriter(member as DestructorDeclarationSyntax, this).Write(Builder);
+                        writer = new DestructorWriter(member as DestructorDeclarationSyntax, this);
                         break;
                     case SyntaxKind.MethodDeclaration:
-                        new MethodWriter(member as MethodDeclarationSyntax, this).Write(Builder);
+                        writer = new MethodWriter(member as MethodDeclarationSyntax, IsInterface, this);
                         break;
                     case SyntaxKind.PropertyDeclaration:
+                        writer = new PropertyWriter(member as PropertyDeclarationSyntax, this);
+                        break;
                     case SyntaxKind.IndexerDeclaration:
-                        WriteProperty(member as BasePropertyDeclarationSyntax);
+                        writer = new IndexerWriter(member as IndexerDeclarationSyntax, this);
                         break;
                     case SyntaxKind.FieldDeclaration:
-                        WriteField(member as FieldDeclarationSyntax);
+                        writer = new FieldWriter(member as FieldDeclarationSyntax, this);
                         break;
                     case SyntaxKind.InterfaceDeclaration:
-                        new InterfaceTypeWriter(member as InterfaceDeclarationSyntax, this).Write(Builder);
+                        writer = new InterfaceTypeWriter(member as InterfaceDeclarationSyntax, this);
                         break;
                     case SyntaxKind.ClassDeclaration:
-                        new ClassTypeWriter(member as ClassDeclarationSyntax, this).Write(Builder);
+                        writer = new ClassTypeWriter(member as ClassDeclarationSyntax, this);
                         break;
                     case SyntaxKind.StructKeyword:
-                        new StructTypeWriter(member as StructDeclarationSyntax, this).Write(Builder);
+                        writer = new StructTypeWriter(member as StructDeclarationSyntax, this);
                         break;
                     case SyntaxKind.EnumDeclaration:
-                        new EnumTypeWriter(member as EnumDeclarationSyntax, this).Write(Builder);
+                        writer = new EnumTypeWriter(member as EnumDeclarationSyntax, this);
                         break;
+                    case SyntaxKind.OperatorDeclaration:
+                        // TODO
+                        continue;
                     default:
                         throw new Exception();
                 }
+
+                if (writer != null)
+                    writer.Write(Builder);
             }
         }
 
-        void WriteField(FieldDeclarationSyntax field)
+        public virtual bool IsInterface
         {
-
-        }
-
-        void WriteProperty(BasePropertyDeclarationSyntax property)
-        {
-
+            get { return false; }
         }
 
         public virtual string TypeName

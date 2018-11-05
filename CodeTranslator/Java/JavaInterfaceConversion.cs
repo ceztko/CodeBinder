@@ -24,6 +24,11 @@ namespace CodeTranslator.Java
         public InterfaceTypeWriter(InterfaceDeclarationSyntax syntax, ICompilationContextProvider context)
             : base(syntax, context) { }
 
+        public override bool IsInterface
+        {
+            get { return true; }
+        }
+
         protected override void WriteTypeMembers()
         {
             WriteTypeMembers(Syntax.Members);

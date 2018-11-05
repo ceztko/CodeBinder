@@ -58,6 +58,38 @@ namespace CodeTranslator.Shared.CSharp
             return node.EqualsValue.Value.GetValue<int>(provider);
         }
 
+        public static List<string> GetCSharpModifierStrings(this BaseFieldDeclarationSyntax node)
+        {
+            bool explicitAccessibility = false;
+            foreach (var modifier in node.Modifiers)
+            {
+                switch (modifier.Text)
+                {
+                    case "public":
+                    case "internal":
+                    case "protected":
+                    case "private":
+                        explicitAccessibility = true;
+                        break;
+                    case "new":
+                    case "const":
+                        break;
+                    default:
+                        throw new Exception();
+                }
+            }
+
+            var ret = new List<string>();
+
+            if (!explicitAccessibility)
+                ret.Add("internal");
+
+            foreach (var modifier in node.Modifiers)
+                ret.Add(modifier.Text);
+
+            return ret;
+        }
+
         public static List<string> GetCSharpModifierStrings(this BaseTypeDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
@@ -70,6 +102,9 @@ namespace CodeTranslator.Shared.CSharp
                     case "protected":
                     case "private":
                         explicitAccessibility = true;
+                        break;
+                    case "abstract":
+                    case "static":
                         break;
                     default:
                         throw new Exception();
@@ -102,9 +137,11 @@ namespace CodeTranslator.Shared.CSharp
                         break;
                     case "static":
                     case "virtual":
+                    case "abstract":
                     case "override":
                     case "sealed":
                     case "extern":
+                    case "new":
                         break;
                     default:
                         throw new Exception();
@@ -118,6 +155,62 @@ namespace CodeTranslator.Shared.CSharp
 
             foreach (var modifier in node.Modifiers)
                 ret.Add(modifier.Text);
+
+            return ret;
+        }
+
+        public static List<string> GetCSharpModifierStrings(this BasePropertyDeclarationSyntax node)
+        {
+            bool explicitAccessibility = false;
+            foreach (var modifier in node.Modifiers)
+            {
+                switch (modifier.Text)
+                {
+                    case "public":
+                    case "internal":
+                    case "protected":
+                    case "private":
+                        explicitAccessibility = true;
+                        break;
+                    case "static":
+                    case "virtual":
+                    case "abstract":
+                    case "override":
+                    case "sealed":
+                    case "new":
+                        break;
+                    default:
+                        throw new Exception();
+                }
+            }
+
+            var ret = new List<string>();
+
+            if (!explicitAccessibility)
+                ret.Add("private");
+
+            foreach (var modifier in node.Modifiers)
+                ret.Add(modifier.Text);
+
+            return ret;
+        }
+
+        public static List<string> GetCSharpModifierStrings(this AccessorDeclarationSyntax node)
+        {
+            var ret = new List<string>();
+            foreach (var modifier in node.Modifiers)
+            {
+                switch (modifier.Text)
+                {
+                    case "internal":
+                    case "protected":
+                    case "private":
+                        ret.Add(modifier.Text);
+                        break;
+                    default:
+                        throw new Exception();
+                }
+            }
 
             return ret;
         }
@@ -145,7 +238,11 @@ namespace CodeTranslator.Shared.CSharp
 
         public static string GetName(this BaseTypeSyntax type)
         {
-            return (type.Type as IdentifierNameSyntax).GetName();
+            var idenfitifier = type.Type as IdentifierNameSyntax;
+            if (idenfitifier != null)
+                return idenfitifier.GetName();
+
+            return "unsupported";
         }
 
         public static string GetName(this IdentifierNameSyntax node)

@@ -57,7 +57,7 @@ namespace CodeTranslator.Attributes
     }
 
     [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
+    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
     public sealed class IgnoreAttribute : Attribute
     {
 

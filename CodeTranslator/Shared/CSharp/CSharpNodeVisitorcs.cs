@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using CodeTranslator.Attributes;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -22,9 +23,12 @@ namespace CodeTranslator.Shared.CSharp
             }
         }
 
-        private void Unsupported(SyntaxNode node)
+        private void Unsupported(SyntaxNode node, string message = "")
         {
-            throw new Exception("Unsupported node: " + node);
+            if (string.IsNullOrEmpty(message))
+                throw new Exception("Unsupported node: " + node);
+            else
+                throw new Exception("Unsupported node: " + node + ", " + message);
         }
 
         #region Supported types
@@ -37,6 +41,12 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
+            if (node.HasAttribute<IgnoreAttribute>(this))
+            {
+                DefaultVisit(node);
+                return;
+            }
+
             var type = new CSharpInterfaceTypeContext(node, TreeContext, Conversion.GetInterfaceTypeConversion());
             TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
@@ -44,6 +54,12 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
+            if (node.HasAttribute<IgnoreAttribute>(this))
+            {
+                DefaultVisit(node);
+                return;
+            }
+
             var type = new CSharpClassTypeContext(node, TreeContext, Conversion.GetClassTypeConversion());
             TreeContext.AddType(type, CurrentParent);
             _parents.Enqueue(type);
@@ -53,6 +69,12 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitStructDeclaration(StructDeclarationSyntax node)
         {
+            if (node.HasAttribute<IgnoreAttribute>(this))
+            {
+                DefaultVisit(node);
+                return;
+            }
+
             var type = new CSharpStructTypeContext(node, TreeContext, Conversion.GetStructTypeConversion());
             TreeContext.AddType(type, CurrentParent);
             _parents.Enqueue(type);
@@ -62,6 +84,12 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
+            if (node.HasAttribute<IgnoreAttribute>(this))
+            {
+                DefaultVisit(node);
+                return;
+            }
+
             var type = new CSharpEnumTypeContext(node, TreeContext, Conversion.GetEnumTypeConversion());
             TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
@@ -73,10 +101,18 @@ namespace CodeTranslator.Shared.CSharp
 
         // TODO: Add more unsupported syntax
 
+        public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node)
+        {
+            if (node.AccessorList == null)
+                Unsupported(node, "Unsupported property with no accessor definied: use \"get\" or \"set\"");
+
+            DefaultVisit(node);
+        }
+
         public override void VisitArrayRankSpecifier(ArrayRankSpecifierSyntax node)
         {
             if (node.Rank > 1)
-                Unsupported(node);
+                Unsupported(node, "Unsupported array with rank > 1");
 
             DefaultVisit(node);
         }

@@ -11,16 +11,26 @@ using CodeTranslator.Shared;
 
 namespace CodeTranslator.Java
 {
-    enum JavaMethodFlags
+    enum JavaTypeFlags
     {
         None = 0,
-        Native,
+        NativeMethod,
         IsByRef
     }
 
-    static class JavaMethodExtensions
+    static class JavaExtensions
     {
         delegate bool ModifierGetter(string modifier, out string javaModifier);
+
+        public static CodeBuilder EndOfLine(this CodeBuilder builder)
+        {
+            return builder.AppendLine(";");
+        }
+
+        public static CodeBuilder Space(this CodeBuilder builder)
+        {
+            return builder.Append(" ");
+        }
 
         public static CodeBuilder BeginBlock(this CodeBuilder builder, bool appendLine = true)
         {
@@ -51,22 +61,60 @@ namespace CodeTranslator.Java
             }
         }
 
-        public static string GetJavaType(this TypeSyntax type, JavaMethodFlags flags, ICompilationContextProvider provider)
+        public static string GetJavaType(this TypeSyntax type, ICompilationContextProvider provider)
+        {
+            var symbol = type.GetTypeSymbol(provider);
+            return getJavaType(type, symbol, JavaTypeFlags.None);
+        }
+
+        public static string GetJavaType(this TypeSyntax type, JavaTypeFlags flags, ICompilationContextProvider provider)
         {
             var symbol = type.GetTypeSymbol(provider);
             return getJavaType(type, symbol, flags);
         }
 
-        public static string GetJavaModifiersString(this BaseMethodDeclarationSyntax node)
+        public static string GetJavaModifiersString(this FieldDeclarationSyntax node)
         {
             var modifiers = node.GetCSharpModifierStrings();
-            return getJavaModifiersString(modifiers, getJavaMethodModifier);
+            return GetJavaFieldModifiersString(modifiers);
         }
 
         public static string GetJavaModifiersString(this BaseTypeDeclarationSyntax node)
         {
             var modifiers = node.GetCSharpModifierStrings();
+            return GetJavaTypeModifiersString(modifiers);
+        }
+
+        public static string GetJavaModifiersString(this BaseMethodDeclarationSyntax node)
+        {
+            var modifiers = node.GetCSharpModifierStrings();
+            return GetJavaMethodModifiersString(modifiers);
+        }
+
+        public static string GetJavaModifiersString(this BasePropertyDeclarationSyntax node)
+        {
+            var modifiers = node.GetCSharpModifierStrings();
+            return GetJavaPropertyModifiersString(modifiers);
+        }
+
+        public static string GetJavaFieldModifiersString(List<string> modifiers)
+        {
+            return getJavaModifiersString(modifiers, getJavaFieldModifier);
+        }
+
+        public static string GetJavaTypeModifiersString(List<string> modifiers)
+        {
             return getJavaModifiersString(modifiers, getJavaTypeModifier);
+        }
+
+        public static string GetJavaMethodModifiersString(List<string> modifiers)
+        {
+            return getJavaModifiersString(modifiers, getJavaMethodModifier);
+        }
+
+        public static string GetJavaPropertyModifiersString(List<string> modifiers)
+        {
+            return getJavaModifiersString(modifiers, getJavaMethodModifier);
         }
 
         private static string getJavaModifiersString(List<string> modifiers, ModifierGetter getJavaModifier)
@@ -90,6 +138,36 @@ namespace CodeTranslator.Java
             return builder.ToString();
         }
 
+        private static bool getJavaFieldModifier(string modifier, out string javaModifier)
+        {
+            switch (modifier)
+            {
+                case "public":
+                    javaModifier = "public";
+                    return true;
+                case "protected":
+                    javaModifier = "protected";
+                    return true;
+                case "private":
+                    javaModifier = "private";
+                    return true;
+                case "readonly":
+                    javaModifier = "final";
+                    return true;
+                case "const":
+                    javaModifier = "final";
+                    return true;
+                case "new":
+                    javaModifier = null;
+                    return false;
+                case "internal":
+                    javaModifier = null;
+                    return false;
+                default:
+                    throw new Exception();
+            }
+        }
+
         private static bool getJavaTypeModifier(string modifier, out string javaModifier)
         {
             switch (modifier)
@@ -103,7 +181,16 @@ namespace CodeTranslator.Java
                 case "private":
                     javaModifier = "private";
                     return true;
+                case "sealed":
+                    javaModifier = "final";
+                    return true;
                 case "internal":
+                    javaModifier = null;
+                    return false;
+                case "abstract":
+                    javaModifier = null;
+                    return false;
+                case "static":
                     javaModifier = null;
                     return false;
                 default:
@@ -124,33 +211,78 @@ namespace CodeTranslator.Java
                 case "private":
                     javaModifier = "private";
                     return true;
-                case "internal":
-                    javaModifier = null;
-                    return false;
                 case "static":
                     javaModifier = "static";
                     return true;
-                case "virtual":
-                    javaModifier = null;
-                    return false;
-                case "override":
-                    javaModifier = null;
-                    return false;
                 case "sealed":
                     javaModifier = "final";
                     return true;
                 case "extern":
                     javaModifier = "native";
                     return true;
+                case "new":
+                    javaModifier = null;
+                    return false;
+                case "internal":
+                    javaModifier = null;
+                    return false;
+                case "virtual":
+                    javaModifier = null;
+                    return false;
+                case "abstract":
+                    javaModifier = null;
+                    return false;
+                case "override":
+                    javaModifier = null;
+                    return false;
+                default:
+                    throw new Exception();
+            }
+        }
+
+        private static bool getJavaPropertyModifier(string modifier, out string javaModifier)
+        {
+            switch (modifier)
+            {
+                case "public":
+                    javaModifier = "public";
+                    return true;
+                case "protected":
+                    javaModifier = "protected";
+                    return true;
+                case "private":
+                    javaModifier = "private";
+                    return true;
+                case "static":
+                    javaModifier = "static";
+                    return true;
+                case "sealed":
+                    javaModifier = "final";
+                    return true;
+                case "new":
+                    javaModifier = null;
+                    return false;
+                case "internal":
+                    javaModifier = null;
+                    return false;
+                case "virtual":
+                    javaModifier = null;
+                    return false;
+                case "abstract":
+                    javaModifier = null;
+                    return false;
+                case "override":
+                    javaModifier = null;
+                    return false;
                 default:
                     throw new Exception();
             }
         }
 
 
-        private static string getJavaType(TypeSyntax syntax, ITypeSymbol symbol, JavaMethodFlags flags)
+        private static string getJavaType(TypeSyntax syntax, ITypeSymbol symbol, JavaTypeFlags flags)
         {
-            if (flags.HasFlag(JavaMethodFlags.Native) && symbol.TypeKind == TypeKind.Enum)
+            if (flags.HasFlag(JavaTypeFlags.NativeMethod) && symbol.TypeKind == TypeKind.Enum)
                 return "int";
 
             string netFullName;
@@ -168,7 +300,7 @@ namespace CodeTranslator.Java
             }
 
             string javaTypeName;
-            if (flags.HasFlag(JavaMethodFlags.IsByRef))
+            if (flags.HasFlag(JavaTypeFlags.IsByRef))
                 javaTypeName = getJavaByRefType(syntax, netFullName);
             else
                 javaTypeName = getJavaType(syntax, netFullName);
@@ -250,6 +382,14 @@ namespace CodeTranslator.Java
                 default:
                     return syntax.GetTypeIdentifier();
             }
+        }
+
+        public static string ToJavaCase(this string text)
+        {
+            if (string.IsNullOrEmpty(text) || char.IsLower(text, 0))
+                return text;
+
+            return char.ToLowerInvariant(text[0]) + text.Substring(1);
         }
     }
 }

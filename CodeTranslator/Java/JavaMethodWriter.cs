@@ -17,8 +17,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append(Syntax.GetJavaModifiersString());
-            Builder.Append(" ");
+            WriteModifiers();
             WriteReturnType();
             Builder.Append(MethodName);
             if (Syntax.ParameterList.Parameters.Count == 0)
@@ -32,10 +31,21 @@ namespace CodeTranslator.Java
                     WriteParameters(Syntax.ParameterList);
                 }
             }
+            WriteMethodBody();
+        }
+
+        protected virtual void WriteMethodBody()
+        {
             using (Builder.Append(" ").BeginBlock())
             {
 
             }
+        }
+
+        protected virtual void WriteModifiers()
+        {
+            Builder.Append(Syntax.GetJavaModifiersString());
+            Builder.Append(" ");
         }
 
         private void WriteParameters(ParameterListSyntax list)
@@ -54,16 +64,16 @@ namespace CodeTranslator.Java
 
         private void WriteParameter(ParameterSyntax parameter)
         {
-            var flags = IsNative ? JavaMethodFlags.Native : JavaMethodFlags.None;
+            var flags = IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None;
             bool isRef = parameter.IsRef() | parameter.IsOut();
             if (isRef)
-                flags |= JavaMethodFlags.IsByRef;
+                flags |= JavaTypeFlags.IsByRef;
 
             WriteType(parameter.Type, flags);
             Builder.Append(" ").Append(parameter.Identifier.Text);
         }
 
-        protected void WriteType(TypeSyntax type, JavaMethodFlags flags)
+        protected void WriteType(TypeSyntax type, JavaTypeFlags flags)
         {
             Builder.Append(type.GetJavaType(flags, this));
         }
@@ -77,13 +87,26 @@ namespace CodeTranslator.Java
 
     class MethodWriter : MethodWriter<MethodDeclarationSyntax>
     {
-        public MethodWriter(MethodDeclarationSyntax method, ICompilationContextProvider context)
-            : base(method, context) { }
+        bool _isIntefaceMethod;
+
+        public MethodWriter(MethodDeclarationSyntax method, bool isIntefaceMethod, ICompilationContextProvider context)
+            : base(method, context)
+        {
+            _isIntefaceMethod = isIntefaceMethod;
+        }
 
         protected override void WriteReturnType()
         {
-            WriteType(Syntax.ReturnType, IsNative ? JavaMethodFlags.Native : JavaMethodFlags.None);
+            WriteType(Syntax.ReturnType, IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None);
             Builder.Append(" ");
+        }
+
+        protected override void WriteMethodBody()
+        {
+            if (_isIntefaceMethod)
+                Builder.EndOfLine();
+            else
+                base.WriteMethodBody();
         }
 
         public override string MethodName
@@ -117,6 +140,16 @@ namespace CodeTranslator.Java
     {
         public DestructorWriter(DestructorDeclarationSyntax method, ICompilationContextProvider context)
             : base(method, context) { }
+
+        protected override void WriteModifiers()
+        {
+            Builder.Append("protected ");
+        }
+
+        protected override void WriteReturnType()
+        {
+            Builder.Append("void ");
+        }
 
         public override string MethodName
         {
