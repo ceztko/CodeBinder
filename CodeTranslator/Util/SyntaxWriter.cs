@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CodeTranslator.Util
 {
-    public abstract class SyntaxWriter<TSyntax> : ISyntaxWriter
+    public abstract class SyntaxWriter<TSyntax> : ISyntaxWriter, ICompilationContextProvider
     {
         protected CodeBuilder Builder { get; private set; }
         public CompilationContext Compilation { get; private set; }
@@ -36,7 +36,15 @@ namespace CodeTranslator.Util
         }
     }
 
-    public interface ISyntaxWriter : ICompilationContextProvider
+    public class NullSyntaxWriter : ISyntaxWriter
+    {
+        public void Write(CodeBuilder builder)
+        {
+            builder.AppendLine("NULL");
+        }
+    }
+
+    public interface ISyntaxWriter
     {
         void Write(CodeBuilder builder);
     }

@@ -1,5 +1,7 @@
 ﻿using CodeTranslator.Shared;
+using CodeTranslator.Shared.CSharp;
 using CodeTranslator.Util;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -8,40 +10,6 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    class BlockWriter : SyntaxWriter<BlockSyntax>
-    {
-        public BlockWriter(BlockSyntax syntax, ICompilationContextProvider context)
-            : base(syntax, context) { }
-
-        protected override void Write()
-        {
-            using (Builder.BeginBlock())
-            {
-                foreach (var expression in Syntax.Statements)
-                {
-                    var kind = expression.Kind();
-                    ISyntaxWriter writer = null;
-                    switch (kind)
-                    {
-                        case SyntaxKind.ExpressionStatement:
-                            writer = new ExpressionStamentWriter(expression as ExpressionStatementSyntax, this);
-                            break;
-                        default:
-                            continue; // CHANGE-ME
-                    }
-                    writer.Write(Builder);
-                }
-            }
-        }
-    }
-
-    abstract class StatementWriter<TStatement> : SyntaxWriter<TStatement>
-        where TStatement : StatementSyntax
-    {
-        public StatementWriter(TStatement syntax, ICompilationContextProvider context)
-            : base(syntax, context) { }
-    }
-
     abstract class ExpressiontWriter<TExpression> : SyntaxWriter<TExpression>
         where TExpression : ExpressionSyntax
     {
@@ -56,29 +24,39 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-
+            if (Syntax.Left.Kind() == SyntaxKind.IdentifierName)
+            {
+                var symbol = Syntax.Left.GetSymbolInfo(this);
+                if (symbol.Symbol.Kind == SymbolKind.Property)
+                {
+                    var operatorKind = Syntax.OperatorToken.Kind();
+                    switch (operatorKind)
+                    {
+                        case SyntaxKind.EqualsToken:
+                            Builder.Append("set").Append((Syntax.Left as IdentifierNameSyntax).Identifier.Text)
+                                .Append("(").Append(Syntax.Right.GetWriter(this)).Append(")");
+                            break;
+                        default:
+                            break;
+                    }
+                    return;
+                }
+            }
+            Syntax.Left.GetWriter(this).Write(Builder);
+            Builder.Space().Append(Syntax.OperatorToken.Text).Space();
+            Syntax.Right.GetWriter(this).Write(Builder);
         }
     }
 
-    class ExpressionStamentWriter : StatementWriter<ExpressionStatementSyntax>
+    class IdenfitiferNameWriter : ExpressiontWriter<IdentifierNameSyntax>
     {
-        public ExpressionStamentWriter(ExpressionStatementSyntax syntax, ICompilationContextProvider context)
+        public IdenfitiferNameWriter(IdentifierNameSyntax syntax, ICompilationContextProvider context)
             : base(syntax, context) { }
 
         protected override void Write()
         {
-            var kind = Syntax.Expression.Kind();
-            ISyntaxWriter writer = null;
-            switch (kind)
-            {
-                case SyntaxKind.SimpleAssignmentExpression:
-                    writer = new AssignmentExpressionWriter(Syntax.Expression as AssignmentExpressionSyntax, this);
-                    break;
-                default:
-                    return; // CHANGE-ME
-            }
-
-            writer.Write(Builder);
+            var symbol = Syntax.GetSymbolInfo(this);
+            Builder.Append(Syntax.Identifier.Text);
         }
     }
 }

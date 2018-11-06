@@ -56,6 +56,12 @@ namespace CodeTranslator.Shared
             return symbol.GetAttributes();
         }
 
+        public static SymbolInfo GetSymbolInfo(this SyntaxNode node, ICompilationContextProvider provider)
+        {
+            var model = node.GetSemanticModel(provider);
+            return model.GetSymbolInfo(node);
+        }
+
         public static ISymbol GetDeclaredSymbol(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = node.GetSemanticModel(provider);

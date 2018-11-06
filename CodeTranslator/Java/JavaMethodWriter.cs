@@ -85,17 +85,12 @@ namespace CodeTranslator.Java
 
     class MethodWriter : MethodWriter<MethodDeclarationSyntax>
     {
-        bool _isIntefaceMethod;
-
-        public MethodWriter(MethodDeclarationSyntax method, bool isIntefaceMethod, ICompilationContextProvider context)
-            : base(method, context)
-        {
-            _isIntefaceMethod = isIntefaceMethod;
-        }
+        public MethodWriter(MethodDeclarationSyntax method, ICompilationContextProvider context)
+            : base(method, context) { }
 
         protected override void WriteModifiers()
         {
-            if (_isIntefaceMethod)
+            if (IsParentInterface)
                 return;
 
             base.WriteModifiers();
@@ -109,10 +104,15 @@ namespace CodeTranslator.Java
 
         protected override void WriteMethodBody()
         {
-            if (_isIntefaceMethod)
+            if (IsParentInterface)
                 Builder.EndOfLine();
             else
                 base.WriteMethodBody();
+        }
+
+        public bool IsParentInterface
+        {
+            get { return Syntax.Parent.Kind() == SyntaxKind.InterfaceDeclaration; }
         }
 
         public override string MethodName

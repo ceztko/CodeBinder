@@ -161,49 +161,7 @@ namespace CodeTranslator.Java
                 if (member.HasAttribute<IgnoreAttribute>(this))
                     continue;
 
-                var kind = member.Kind();
-                ISyntaxWriter writer;
-                switch (kind)
-                {
-                    case SyntaxKind.ConstructorDeclaration:
-                        writer = new ConstructorWriter(member as ConstructorDeclarationSyntax, this);
-                        break;
-                    case SyntaxKind.DestructorDeclaration:
-                        writer = new DestructorWriter(member as DestructorDeclarationSyntax, this);
-                        break;
-                    case SyntaxKind.MethodDeclaration:
-                        writer = new MethodWriter(member as MethodDeclarationSyntax, IsInterface, this);
-                        break;
-                    case SyntaxKind.PropertyDeclaration:
-                        writer = new PropertyWriter(member as PropertyDeclarationSyntax, IsInterface, this);
-                        break;
-                    case SyntaxKind.IndexerDeclaration:
-                        writer = new IndexerWriter(member as IndexerDeclarationSyntax, IsInterface, this);
-                        break;
-                    case SyntaxKind.FieldDeclaration:
-                        writer = new FieldWriter(member as FieldDeclarationSyntax, this);
-                        break;
-                    case SyntaxKind.InterfaceDeclaration:
-                        writer = new InterfaceTypeWriter(member as InterfaceDeclarationSyntax, this);
-                        break;
-                    case SyntaxKind.ClassDeclaration:
-                        writer = new ClassTypeWriter(member as ClassDeclarationSyntax, this);
-                        break;
-                    case SyntaxKind.StructKeyword:
-                        writer = new StructTypeWriter(member as StructDeclarationSyntax, this);
-                        break;
-                    case SyntaxKind.EnumDeclaration:
-                        writer = new EnumTypeWriter(member as EnumDeclarationSyntax, this);
-                        break;
-                    case SyntaxKind.OperatorDeclaration:
-                        // TODO
-                        continue;
-                    default:
-                        throw new Exception();
-                }
-
-                if (writer != null)
-                    writer.Write(Builder);
+                member.GetWriter(this).Write(Builder);
             }
         }
 

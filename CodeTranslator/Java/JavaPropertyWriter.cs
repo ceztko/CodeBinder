@@ -1,6 +1,7 @@
 ﻿using CodeTranslator.Shared;
 using CodeTranslator.Shared.CSharp;
 using CodeTranslator.Util;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
@@ -14,14 +15,12 @@ namespace CodeTranslator.Java
     {
         List<string> _modifiers;
         bool _isAutoProperty;
-        public bool IsInterface { get; private set; }
 
-        protected PropertyWriter(TProperty syntax, bool isInterface, ICompilationContextProvider context)
+        protected PropertyWriter(TProperty syntax, ICompilationContextProvider context)
             : base(syntax, context)
         {
             _modifiers = Syntax.GetCSharpModifierStrings();
             _isAutoProperty = true;
-            IsInterface = isInterface;
             if (Syntax.AccessorList != null)
             {
                 foreach (var accessor in Syntax.AccessorList.Accessors)
@@ -43,7 +42,7 @@ namespace CodeTranslator.Java
 
         private void WriteUnderlyingField()
         {
-            if (!_isAutoProperty || IsInterface)
+            if (!_isAutoProperty || IsParentInterface)
                 return;
 
             Builder.Append("private").Space();
@@ -78,7 +77,7 @@ namespace CodeTranslator.Java
             Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(modifiers)).Space();
             Builder.Append(JavaType).Space();
             Builder.Append(SetterName).Append("(").Append(JavaType).Space().Append("value").Append(")");
-            if (IsInterface)
+            if (IsParentInterface)
             {
                 Builder.EndOfLine();
             }
@@ -103,7 +102,7 @@ namespace CodeTranslator.Java
             Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(_modifiers)).Space();
             Builder.Append(JavaType).Space();
             Builder.Append(GetterName).Append("()");
-            if (IsInterface)
+            if (IsParentInterface)
             {
                 Builder.EndOfLine();
 
@@ -132,6 +131,11 @@ namespace CodeTranslator.Java
             return ret;
         }
 
+        public bool IsParentInterface
+        {
+            get { return Syntax.Parent.Kind() == SyntaxKind.InterfaceDeclaration; }
+        }
+
         public string UnderlyingFieldName
         {
             get { return "__" + PropertyName.ToJavaCase() + "__"; }
@@ -157,8 +161,8 @@ namespace CodeTranslator.Java
 
     class PropertyWriter : PropertyWriter<PropertyDeclarationSyntax>
     {
-        public PropertyWriter(PropertyDeclarationSyntax syntax, bool isInterface, ICompilationContextProvider context)
-            : base(syntax, isInterface, context) { }
+        public PropertyWriter(PropertyDeclarationSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
 
         public override string PropertyName
         {
@@ -168,8 +172,8 @@ namespace CodeTranslator.Java
 
     class IndexerWriter : PropertyWriter<IndexerDeclarationSyntax>
     {
-        public IndexerWriter(IndexerDeclarationSyntax syntax, bool isInterface, ICompilationContextProvider context)
-            : base(syntax, isInterface, context) { }
+        public IndexerWriter(IndexerDeclarationSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
 
         public override string PropertyName
         {

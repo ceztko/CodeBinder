@@ -41,20 +41,26 @@ namespace CodeTranslator.Util
             return this;
         }
 
-        // TODO: Support custom newline neding
-        private void append(string str)
-        {
-            appendIndent(str, false);
-            _writer.Write(str);
-            if (str.EndsWith(Environment.NewLine))
-                _doIndent = true;
-        }
-
         public CodeBuilder AppendLine(string str = "")
         {
             appendIndent(str, true);
             _writer.WriteLine(str);
             _doIndent = true;
+            return this;
+        }
+
+
+        public CodeBuilder Append(ISyntaxWriter writer)
+        {
+            writer.Write(this);
+            return this;
+        }
+
+
+        public CodeBuilder AppendLine(ISyntaxWriter writer)
+        {
+            writer.Write(this);
+            AppendLine();
             return this;
         }
 
@@ -84,6 +90,15 @@ namespace CodeTranslator.Util
         public CodeBuilder Indented(string disposeAppendString = null, bool disposeAppendLine = true)
         {
             return new CodeBuilder(_writer, _doIndent, IndentSpaces, _currentIndentLevel + 1, disposeAppendString, disposeAppendLine);
+        }
+
+        // TODO: Support custom newline neding
+        private void append(string str)
+        {
+            appendIndent(str, false);
+            _writer.Write(str);
+            if (str.EndsWith(Environment.NewLine))
+                _doIndent = true;
         }
 
         private void appendIndent(string str, bool appendLine)
