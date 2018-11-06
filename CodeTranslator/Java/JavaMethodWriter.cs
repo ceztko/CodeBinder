@@ -37,7 +37,7 @@ namespace CodeTranslator.Java
         protected virtual void WriteMethodBody()
         {
             if (Syntax.Body != null)
-                new BlockWriter(Syntax.Body, this).Write(Builder.Space());
+                Builder.Space().Append(new BlockWriter(Syntax.Body, this));
         }
 
         protected virtual void WriteModifiers()

@@ -42,9 +42,10 @@ namespace CodeTranslator.Java
                     return;
                 }
             }
-            Syntax.Left.GetWriter(this).Write(Builder);
+
+            Builder.Append(Syntax.Left.GetWriter(this));
             Builder.Space().Append(Syntax.OperatorToken.Text).Space();
-            Syntax.Right.GetWriter(this).Write(Builder);
+            Builder.Append(Syntax.Right.GetWriter(this));
         }
     }
 

@@ -22,7 +22,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Syntax.Expression.GetWriter(this).Write(Builder);
+            Builder.Append(Syntax.Expression.GetWriter(this));
         }
     }
 
@@ -37,8 +37,7 @@ namespace CodeTranslator.Java
             {
                 foreach (var statement in Syntax.Statements)
                 {
-                    statement.GetWriter(this).Write(Builder);
-                    Builder.EndOfLine();
+                    Builder.Append(statement.GetWriter(this)).EndOfLine();
                 }
             }
         }

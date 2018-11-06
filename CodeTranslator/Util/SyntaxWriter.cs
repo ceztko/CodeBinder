@@ -21,7 +21,8 @@ namespace CodeTranslator.Util
             Compilation = provider.Compilation;
         }
 
-        public void Write(CodeBuilder builder)
+        // Append an ISyntaxWriter with CodeBuilder
+        void ISyntaxWriter.Write(CodeBuilder builder)
         {
             Builder = builder;
             Write();

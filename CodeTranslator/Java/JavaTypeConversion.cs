@@ -63,7 +63,7 @@ namespace CodeTranslator.Java
             if (hasImports)
                 builder.AppendLine();
 
-            GetTypeWriter().Write(builder);
+            builder.Append(GetTypeWriter());
         }
 
         protected abstract ISyntaxWriter GetTypeWriter();
@@ -161,7 +161,7 @@ namespace CodeTranslator.Java
                 if (member.HasAttribute<IgnoreAttribute>(this))
                     continue;
 
-                member.GetWriter(this).Write(Builder);
+                Builder.Append(member.GetWriter(this));
             }
         }
 
