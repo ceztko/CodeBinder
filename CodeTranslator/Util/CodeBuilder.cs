@@ -12,24 +12,23 @@ namespace CodeTranslator.Util
         TextWriter _writer;
         int _currentIndentLevel;
         bool _doIndent;
-        string _disposeAppendString;
-        bool _disposeAppendLine;
+        List<DisposeContext> _disposeContexts;
 
         public uint IndentSpaces { get; set; }
 
         public CodeBuilder(TextWriter writer)
-            : this(writer, true, 4, 0, null, false)
+            : this(writer, true, 4, 0)
         {
         }
 
         private CodeBuilder(TextWriter writer, bool doIndent,
-            uint indentSpaces, int currentIndentLevel, string disposeAppendString,
-            bool disposeAppendLine)
+            uint indentSpaces, int currentIndentLevel)
         {
             _writer = writer;
             _doIndent = doIndent;
             IndentSpaces = indentSpaces;
             _currentIndentLevel = currentIndentLevel;
+            _disposeContexts = new List<DisposeContext>();
         }
 
         public CodeBuilder Append(string str)
@@ -79,17 +78,23 @@ namespace CodeTranslator.Util
             return this;
         }
 
-        public CodeBuilder Indent(string disposeAppendString = null, bool disposeAppendLine = true)
+        public CodeBuilder Indent(string appendString = null, bool appendLine = true)
         {
-            IncreaseIndent();
-            _disposeAppendString = disposeAppendString;
-            _disposeAppendLine = disposeAppendLine;
+            return Indent(1, appendString, appendLine);
+        }
+
+        public CodeBuilder Indent(uint indentCount, string appendString = null, bool appendLine = true)
+        {
+            for (uint i = 0; i < indentCount; i++)
+                IncreaseIndent();
+
+            _disposeContexts.Add(new DisposeContext() { IndentCount = indentCount, AppendString = appendString, AppendLine = appendLine });
             return this;
         }
 
-        public CodeBuilder Indented(string disposeAppendString = null, bool disposeAppendLine = true)
+        public CodeBuilder Indented()
         {
-            return new CodeBuilder(_writer, _doIndent, IndentSpaces, _currentIndentLevel + 1, disposeAppendString, disposeAppendLine);
+            return new CodeBuilder(_writer, _doIndent, IndentSpaces, _currentIndentLevel + 1);
         }
 
         // TODO: Support custom newline neding
@@ -124,14 +129,37 @@ namespace CodeTranslator.Util
 
         void IDisposable.Dispose()
         {
-            DecreaseIndent();
-            if (_disposeAppendString != null)
+            int contextCount = _disposeContexts.Count;
+            if (contextCount > 0)
             {
-                if (_disposeAppendLine)
-                    AppendLine(_disposeAppendString);
-                else
-                    Append(_disposeAppendString);
+                disposeContext(_disposeContexts[contextCount - 1]);
+                _disposeContexts.RemoveAt(contextCount - 1);
             }
         }
+
+        private void disposeContext(DisposeContext context)
+        {
+            for (int i = 0; i < context.IndentCount; i++)
+                DecreaseIndent();
+
+            if (context.AppendString != null)
+            {
+                if (context.AppendLine)
+                    AppendLine(context.AppendString);
+                else
+                    Append(context.AppendString);
+            }
+        }
+
+        #region Support
+
+        class DisposeContext
+        {
+            public uint IndentCount;
+            public string AppendString;
+            public bool AppendLine;
+        }
+
+        #endregion // Support
     }
 }

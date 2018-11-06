@@ -138,7 +138,7 @@ namespace CodeTranslator.Java
 
         public string UnderlyingFieldName
         {
-            get { return "__" + PropertyName.ToJavaCase() + "__"; }
+            get { return "__" + PropertyName.ToJavaCase(); }
         }
 
         public string GetterName

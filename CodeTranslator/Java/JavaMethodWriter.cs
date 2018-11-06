@@ -36,7 +36,9 @@ namespace CodeTranslator.Java
 
         protected virtual void WriteMethodBody()
         {
-            if (Syntax.Body != null)
+            if (Syntax.Body == null)
+                Builder.EndOfLine();
+            else
                 Builder.Space().Append(new BlockWriter(Syntax.Body, this));
         }
 
@@ -54,7 +56,7 @@ namespace CodeTranslator.Java
                 if (first)
                     first = false;
                 else
-                    Builder.Append(",").Space();
+                    Builder.Append(",").AppendLine();
 
                 WriteParameter(parameter);
             }

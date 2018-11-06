@@ -25,8 +25,7 @@ namespace CodeTranslator.Shared.CSharp
                 case SyntaxKind.NullableType:
                     return (type as NullableTypeSyntax).ElementType.GetTypeIdentifier();
                 default:
-                    return "unsupported";
-                    //throw new Exception();
+                    return "NULL";
             }
         }
 
@@ -242,7 +241,7 @@ namespace CodeTranslator.Shared.CSharp
             if (idenfitifier != null)
                 return idenfitifier.GetName();
 
-            return "unsupported";
+            return "NULL";
         }
 
         public static string GetName(this IdentifierNameSyntax node)

@@ -41,7 +41,7 @@ namespace CodeTranslator.Util
     {
         public void Write(CodeBuilder builder)
         {
-            builder.AppendLine("NULL");
+            builder.Append("NULL");
         }
     }
 

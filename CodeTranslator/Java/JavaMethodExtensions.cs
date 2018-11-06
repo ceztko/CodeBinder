@@ -41,7 +41,7 @@ namespace CodeTranslator.Java
         public static CodeBuilder BeginParameterList(this CodeBuilder builder, bool appendLine = true)
         {
             builder.AppendLine("(");
-            return builder.Indent(")", false);
+            return builder.Indent(2, ")", false);
         }
 
         public static string GetJavaTypeDeclaration(this BaseTypeDeclarationSyntax node)
