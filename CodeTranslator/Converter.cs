@@ -27,9 +27,9 @@ namespace CodeTranslator
 
         public void ConvertAndWrite(GeneratorArgs args)
         {
-            foreach (var conversion in Convert().Concat(Conversion.DefaultResults))
+            foreach (var conversion in Convert().Concat(Conversion.DefaultConversionDelegates))
             {
-                var basepath = Path.Combine(args.SourceRootPath, conversion.TargetBasePath);
+                var basepath = Path.Combine(args.SourceRootPath, conversion.TargetBasePath ?? "");
                 Directory.CreateDirectory(basepath);
                 var filepath = Path.Combine(basepath, conversion.TargetFileName);
                 File.WriteAllText(filepath, conversion.ToFullString());

@@ -39,7 +39,7 @@ namespace CodeTranslator.Java
 
         public override string GeneratedPreamble
         {
-            get { return "/* This file was generated. DO NOT EDIT! */"; }
+            get { return CSToJavaConversion.GeneratedPreamble; }
         }
 
         public virtual IEnumerable<string> Imports
@@ -49,10 +49,7 @@ namespace CodeTranslator.Java
 
         public sealed override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space();
-            builder.Append(Namespace);
-            builder.AppendLine(";");
-            builder.AppendLine();
+            builder.Append("package").Space().Append(Namespace).EndOfLine();
             bool hasImports = false;
             foreach (var import in Imports)
             {

@@ -19,6 +19,9 @@ namespace CodeTranslator
 
         public IReadOnlyList<string> Exceptions { get; private set; }
 
+        internal ConversionDelegate(ConversionBuilder builder)
+            : this(null, builder, null) { }
+
         internal ConversionDelegate(string sourcePath, IConversionBuilder builder, IReadOnlyList<string> exceptions)
         {
             SourcePath = sourcePath;
@@ -52,7 +55,10 @@ namespace CodeTranslator
         private void write(TextWriter writer)
         {
             var codeBuilder = new CodeBuilder(writer);
-            codeBuilder.AppendLine(_builder.GeneratedPreamble);
+            string preamble = _builder.GeneratedPreamble;
+            if (!string.IsNullOrEmpty(preamble))
+                codeBuilder.AppendLine(preamble);
+
             _builder.Write(codeBuilder);
         }
     }

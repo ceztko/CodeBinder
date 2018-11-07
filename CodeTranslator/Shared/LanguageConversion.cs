@@ -20,9 +20,18 @@ namespace CodeTranslator.Shared
             return CompilationWarnings.WarningsForCompilation(compilation, "source");
         }
 
-        public virtual IEnumerable<ConversionDelegate> DefaultResults
+        public virtual IEnumerable<ConversionBuilder> DefaultConversions
         {
             get { yield break; }
+        }
+
+        internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
+        {
+            get
+            {
+                foreach (var conversion in DefaultConversions)
+                    yield return new ConversionDelegate(conversion);
+            }
         }
     }
 
