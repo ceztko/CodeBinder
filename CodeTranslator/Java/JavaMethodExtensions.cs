@@ -356,7 +356,7 @@ namespace CodeTranslator.Java
                 case "System.Boolean":
                     return "BooleanBox";
                 case "System.Char":
-                    return "CharBox";
+                    return "CharacterBox";
                 case "System.Byte":
                     return "ByteBox";
                 case "System.SByte":
@@ -366,9 +366,9 @@ namespace CodeTranslator.Java
                 case "System.UInt16":
                     return "ShortBox";
                 case "System.Int32":
-                    return "IntBox";
+                    return "IntegerBox";
                 case "System.UInt32":
-                    return "IntBox";
+                    return "IntegerBox";
                 case "System.Int64":
                     return "LongBox";
                 case "System.UInt64":

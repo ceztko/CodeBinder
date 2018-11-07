@@ -44,7 +44,11 @@ namespace CodeTranslator.Java
 
         public virtual IEnumerable<string> Imports
         {
-            get { yield return "Java.util.*"; }
+            get
+            {
+                yield return "Java.util.*";
+                yield return "codetranslator.utils";
+            }
         }
 
         public sealed override void Write(CodeBuilder builder)

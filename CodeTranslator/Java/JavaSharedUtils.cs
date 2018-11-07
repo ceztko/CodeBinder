@@ -11,6 +11,7 @@ namespace CodeTranslator.Shared.Java
         Byte,
         Short,
         Integer,
+        Long,
         Float,
         Double,
     }
@@ -31,6 +32,8 @@ namespace CodeTranslator.Shared.Java
                     return "short";
                 case JavaPrimitiveType.Integer:
                     return "int";
+                case JavaPrimitiveType.Long:
+                    return "long";
                 case JavaPrimitiveType.Float:
                     return "float";
                 case JavaPrimitiveType.Double:
@@ -54,6 +57,8 @@ namespace CodeTranslator.Shared.Java
                     return JavaPrimitiveType.Short;
                 case "int":
                     return JavaPrimitiveType.Integer;
+                case "long":
+                    return JavaPrimitiveType.Long;
                 case "float":
                     return JavaPrimitiveType.Float;
                 case "double":

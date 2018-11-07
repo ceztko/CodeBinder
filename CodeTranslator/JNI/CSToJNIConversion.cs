@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CodeTranslator.Shared;
+using CodeTranslator.JNI.Resources;
+using CodeTranslator.Util;
 
 namespace CodeTranslator.JNI
 {
@@ -15,6 +17,18 @@ namespace CodeTranslator.JNI
         protected override JNISyntaxTreeContext getSyntaxTreeContext(CompilationContext compilation)
         {
             return new JNISyntaxTreeContext(compilation, this);
+        }
+
+        public override IEnumerable<ConversionBuilder> DefaultConversions
+        {
+            get
+            {
+                yield return new StringConversionBuilder("JNITypes.h", () => JNIResources.JNITypes);
+                yield return new StringConversionBuilder("JNITypesPrivate.h", () => JNIResources.JNITypesPrivate);
+                yield return new StringConversionBuilder("JNIBoxes.cpp", () => JNIResources.JNIBoxes_cpp);
+                yield return new StringConversionBuilder("JNIBoxes.h", () => JNIResources.JNIBoxes_h);
+                yield return new StringConversionBuilder("JNIBoxesTemplate.h", () => JNIResources.JNIBoxesTemplate);
+            }
         }
     }
 }

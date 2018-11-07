@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeTranslator.Shared
+namespace CodeTranslator.Util
 {
     public abstract class ConversionBuilder : IConversionBuilder
     {

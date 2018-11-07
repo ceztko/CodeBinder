@@ -46,6 +46,7 @@ namespace CodeTranslator.Java
                 yield return new PrimitiveBoxBuilder(JavaPrimitiveType.Byte);
                 yield return new PrimitiveBoxBuilder(JavaPrimitiveType.Short);
                 yield return new PrimitiveBoxBuilder(JavaPrimitiveType.Integer);
+                yield return new PrimitiveBoxBuilder(JavaPrimitiveType.Long);
                 yield return new PrimitiveBoxBuilder(JavaPrimitiveType.Float);
                 yield return new PrimitiveBoxBuilder(JavaPrimitiveType.Double);
             }

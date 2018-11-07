@@ -24,115 +24,105 @@ namespace CodeTranslator.JNI
             if (symbol.TypeKind == TypeKind.Enum)
                 return "jint";
 
-            string fullTypeName;
+            string netFullName;
             string javaArraySuffix;
             if (symbol.TypeKind == TypeKind.Array)
             {
                 var arrayType = symbol as IArrayTypeSymbol;
 
-                fullTypeName = arrayType.ElementType.GetFullName();
+                netFullName = arrayType.ElementType.GetFullName();
                 javaArraySuffix = "Array";
             }
             else
             {
-                fullTypeName = symbol.GetFullName();
+                netFullName = symbol.GetFullName();
                 javaArraySuffix = string.Empty;
             }
 
             string jniTypeName;
-            switch (fullTypeName)
-            {
-                case "System.Void":
-                {
-                    jniTypeName = "void";
-                    break;
-                }
-                case "System.Object":
-                {
-                    jniTypeName = "jobject";
-                    break;
-                }
-                case "System.IntPtr":
-                {
-                    jniTypeName = "jlong";
-                    break;
-                }
-                case "System.Boolean":
-                {
-                    jniTypeName = "jboolean";
-                    break;
-                }
-                case "System.Char":
-                {
-                    jniTypeName = "jchar";
-                    break;
-                }
-                case "System.String":
-                {
-                    jniTypeName = "jstring";
-                    break;
-                }
-                case "System.Byte":
-                {
-                    jniTypeName = "jbyte";
-                    break;
-                }
-                case "System.SByte":
-                {
-                    jniTypeName = "jbyte";
-                    break;
-                }
-                case "System.Int16":
-                {
-                    jniTypeName = "jshort";
-                    break;
-                }
-                case "System.UInt16":
-                {
-                    jniTypeName = "jshort";
-                    break;
-                }
-                case "System.Int32":
-                {
-                    jniTypeName = "jint";
-                    break;
-                }
-                case "System.UInt32":
-                {
-                    jniTypeName = "jint";
-                    break;
-                }
-                case "System.Int64":
-                {
-                    jniTypeName = "jlong";
-                    break;
-                }
-                case "System.UInt64":
-                {
-                    jniTypeName = "jlong";
-                    break;
-                }
-                case "System.Single":
-                {
-                    jniTypeName =  "jfloat";
-                    break;
-                }
-                case "System.Double":
-                {
-                    jniTypeName = "jdouble";
-                    break;
-                }
-                default:
-                {
-                    if (isRef)
-                        jniTypeName = "jlong";
-                    else
-                        jniTypeName = syntax.GetTypeIdentifier();
-                    break;
-                }
-            }
+            if (isRef)
+                jniTypeName = getJNIByRefType(netFullName);
+            else
+                jniTypeName = getJNIType(syntax, netFullName);
 
             return jniTypeName + javaArraySuffix;
+        }
+
+
+        static string getJNIType(TypeSyntax syntax, string netFullName)
+        {
+            switch (netFullName)
+            {
+                case "System.Void":
+                    return "void";
+                case "System.Object":
+                    return "jobject";
+                case "System.IntPtr":
+                    return "jlong";
+                case "System.Boolean":
+                    return "jboolean";
+                case "System.Char":
+                    return "jchar";
+                case "System.String":
+                    return "jstring";
+                case "System.Byte":
+                    return "jbyte";
+                case "System.SByte":
+                    return "jbyte";
+                case "System.Int16":
+                    return "jshort";
+                case "System.UInt16":
+                    return "jshort";
+                case "System.Int32":
+                    return "jint";
+                case "System.UInt32":
+                    return "jint";
+                case "System.Int64":
+                    return "jlong";
+                case "System.UInt64":
+                    return "jlong";
+                case "System.Single":
+                    return "jfloat";
+                case "System.Double":
+                    return "jdouble";
+                default:
+                    return syntax.GetTypeIdentifier();
+            }
+        }
+
+        static string getJNIByRefType(string netFullName)
+        {
+            switch (netFullName)
+            {
+                case "System.Boolean":
+                    return "jBooleanBox";
+                case "System.Char":
+                    return "jCharacterBox";
+                case "System.Byte":
+                    return "jByteBox";
+                case "System.SByte":
+                    return "jByteBox";
+                case "System.Int16":
+                    return "jShortBox";
+                case "System.UInt16":
+                    return "jShortBox";
+                case "System.Int32":
+                    return "jIntegerBox";
+                case "System.UInt32":
+                    return "jIntegerBox";
+                case "System.Int64":
+                    return "jLongBox";
+                case "System.UInt64":
+                    return "jLongBox";
+                case "System.Single":
+                    return "jFloatBox";
+                case "System.Double":
+                    return "jDoubleBox";
+                case "System.IntPtr":
+                    return "jLongBox";
+                default:
+                    throw new Exception();
+            }
         }
     }
 }
