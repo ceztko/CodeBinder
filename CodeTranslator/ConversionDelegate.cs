@@ -19,7 +19,7 @@ namespace CodeTranslator
 
         public IReadOnlyList<string> Exceptions { get; private set; }
 
-        internal ConversionDelegate(ConversionBuilder builder)
+        internal ConversionDelegate(IConversionBuilder builder)
             : this(null, builder, null) { }
 
         internal ConversionDelegate(string sourcePath, IConversionBuilder builder, IReadOnlyList<string> exceptions)
@@ -41,7 +41,7 @@ namespace CodeTranslator
 
         public void Write(Stream stream)
         {
-            var writer = new StreamWriter(stream);
+            var writer = new StreamWriter(stream, new UTF8Encoding(true));
             write(writer);
         }
 

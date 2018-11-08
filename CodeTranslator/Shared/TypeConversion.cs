@@ -43,7 +43,7 @@ namespace CodeTranslator.Shared
 
         public CompilationContext Compilation
         {
-            get { return TypeContext.TreeContext.Compilation; }
+            get { return TypeContext.Compilation; }
         }
 
         protected abstract TypeContext GetTypeContext();

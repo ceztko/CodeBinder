@@ -32,14 +32,15 @@ namespace CodeTranslator.JNI
 
         public string JNIModuelName
         {
-            get { return "JNI" + TypeContext.ModuleName; }
+            get { return "JNI" + TypeContext.Name; }
         }
 
         public sealed override void Write(CodeBuilder builder)
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
-            builder.AppendLine("#include <jni.h>");
+            builder.AppendLine("#include \"JNITypes.h\"");
+            builder.AppendLine();
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("extern \"C\"");
             builder.AppendLine("{");

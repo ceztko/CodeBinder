@@ -11,13 +11,8 @@ namespace CodeTranslator.JNI
 {
     class JNINodeVisitor : CSharpNodeVisitor<JNISyntaxTreeContext, CSToJNIConversion>
     {
-        Dictionary<string, JNIModuleContext> _modules;
-
         public JNINodeVisitor(JNISyntaxTreeContext treeContext, CSToJNIConversion conversion)
-            : base(treeContext, conversion)
-        {
-            _modules = new Dictionary<string, JNIModuleContext>();
-        }
+            : base(treeContext, conversion) { }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
@@ -31,16 +26,19 @@ namespace CodeTranslator.JNI
 
         private void visitType(TypeDeclarationSyntax type)
         {
-            JNIModuleContext module = null;
+            JNIModuleContextChild module = null;
             string moduleName;
             if (TryGetModule(type, out moduleName))
             {
-                if (!_modules.TryGetValue(moduleName, out module))
+                JNIModuleContextParent parent;
+                if (!Conversion.TryGetModule(moduleName, out parent))
                 {
-                    module = new JNIModuleContext(moduleName, TreeContext);
-                    TreeContext.AddType(module, null);
-                    _modules.Add(moduleName, module);
+                    parent = new JNIModuleContextParent(moduleName);
+                    Conversion.AddModule(parent);
                 }
+
+                module = new JNIModuleContextChild(TreeContext);
+                Conversion.AddModule(module, parent);
             }
 
             foreach (var member in type.Members)
@@ -50,7 +48,11 @@ namespace CodeTranslator.JNI
                 {
                     case SyntaxKind.MethodDeclaration:
                         if (module != null)
-                            module.AddNativeMethod(member as MethodDeclarationSyntax);
+                        {
+                            var method = member as MethodDeclarationSyntax;
+                            if (method.IsNative(this))
+                                module.AddNativeMethod(member as MethodDeclarationSyntax);
+                        }
                         break;
                     case SyntaxKind.ClassDeclaration:
                         visitType(member as ClassDeclarationSyntax);

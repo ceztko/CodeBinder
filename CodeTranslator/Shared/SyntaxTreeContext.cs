@@ -9,14 +9,11 @@ namespace CodeTranslator.Shared
 {
     public abstract class SyntaxTreeContext : ICompilationContextProvider
     {
-        public CompilationContext Compilation { get; private set; }
+        public CompilationContext Compilation { get; internal set; }
 
         public SyntaxTree SyntaxTree { get; private set; }
 
-        internal SyntaxTreeContext(CompilationContext compilation)
-        {
-            Compilation = compilation;
-        }
+        internal SyntaxTreeContext() { }
 
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
@@ -25,31 +22,53 @@ namespace CodeTranslator.Shared
 
         public abstract void Visit(SyntaxTree node);
 
-        public abstract IEnumerable<TypeContext> GetRootTypes();
+        public IEnumerable<TypeContext> RootTypes
+        {
+            get { return GetRootTypes(); }
+        }
+
+        internal static void AddRootType<TTypeContext>(List<TTypeContext> types, TTypeContext type, TTypeContext parent)
+            where TTypeContext : TypeContext<TTypeContext>
+        {
+            if (type.Parent != null)
+                throw new Exception("Can't re-add root type");
+
+            if (type == parent)
+                throw new Exception("The parent can't be same reference as the given type");
+
+            if (parent == null)
+            {
+                types.Add(type);
+            }
+            else
+            {
+                type.Parent = parent;
+                parent.AddChild(type);
+            }
+        }
+
+        protected abstract IEnumerable<TypeContext> GetRootTypes();
     }
 
     public abstract class SyntaxTreeContext<TTypeContext> : SyntaxTreeContext
         where TTypeContext : TypeContext<TTypeContext>
     {
-        public List<TTypeContext> _RootTypes;
+        public new List<TTypeContext> RootTypes { get; private set; }
 
-        internal SyntaxTreeContext(CompilationContext compilation)
-            : base(compilation)
+        internal SyntaxTreeContext()
         {
-            _RootTypes = new List<TTypeContext>();
+            RootTypes = new List<TTypeContext>();
         }
 
-        public void AddType(TTypeContext type, TTypeContext parent)
+        protected void AddType(TTypeContext type, TTypeContext parent)
         {
-            if (parent == null)
-                _RootTypes.Add(type);
-            else
-                parent.AddChild(type);
+            type.Compilation = Compilation;
+            AddRootType(RootTypes, type, parent);
         }
 
-        public override IEnumerable<TypeContext> GetRootTypes()
+        protected override IEnumerable<TypeContext> GetRootTypes()
         {
-            return _RootTypes;
+            return RootTypes;
         }
     }
 
@@ -59,8 +78,7 @@ namespace CodeTranslator.Shared
     {
         public TLanguageConversion Conversion { get; private set; }
 
-        protected SyntaxTreeContext(CompilationContext compilation, TLanguageConversion conversion)
-            : base(compilation)
+        protected SyntaxTreeContext(TLanguageConversion conversion)
         {
             Conversion = conversion;
         }

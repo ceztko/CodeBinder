@@ -10,9 +10,9 @@ namespace CodeTranslator.Shared.CSharp
     public abstract class CSharpLanguageConversion
         : LanguageConversion<CSharpSyntaxTreeContext, CSharpTypeContext>
     {
-        protected override CSharpSyntaxTreeContext getSyntaxTreeContext(CompilationContext compilation)
+        protected override CSharpSyntaxTreeContext getSyntaxTreeContext()
         {
-            return new CSharpSyntaxTreeContext(compilation, this);
+            return new CSharpSyntaxTreeContext(this);
         }
 
         public abstract TypeConversion<CSharpClassTypeContext> GetClassTypeConversion();

@@ -6,33 +6,87 @@ using System.Text;
 
 namespace CodeTranslator.JNI
 {
-    public class JNIModuleContext : TypeContext<JNIModuleContext, JNISyntaxTreeContext>
+    public abstract class JNIModuleContext : TypeContext<JNIModuleContext, JNISyntaxTreeContext>
     {
-        public string ModuleName { get; private set; }
-        private List<MethodDeclarationSyntax> _methods;
+        public CSToJNIConversion LanguageConversion { get; internal set; }
 
-        public JNIModuleContext(string moduleName, JNISyntaxTreeContext context)
-            : base(context)
+        protected JNIModuleContext(JNISyntaxTreeContext context)
+            : base(context) { }
+
+        public abstract string Name
         {
-            ModuleName = moduleName;
-            _methods = new List<MethodDeclarationSyntax>();
+            get;
+        }
+
+        public abstract IEnumerable<MethodDeclarationSyntax> Methods
+        {
+            get;
+        }
+    }
+
+    public class JNIModuleContextParent : JNIModuleContext
+    {
+        private string _Name;
+
+        public JNIModuleContextParent(string name)
+            : base(null)
+        {
+            _Name = name;
         }
 
         protected override TypeConversion GetConversion()
         {
-            var ret = new JNIModuleConversion(TreeContext.Conversion);
+            var ret = new JNIModuleConversion(LanguageConversion);
             ret.TypeContext = this;
             return ret;
         }
 
-        internal void AddNativeMethod(MethodDeclarationSyntax method)
+        public override IEnumerable<MethodDeclarationSyntax> Methods
+        {
+            get
+            {
+                foreach (var child in Children)
+                {
+                    foreach (var method in child.Methods)
+                        yield return method;
+                }
+            }
+        }
+
+        public override string Name
+        {
+            get { return _Name; }
+        }
+    }
+
+    public class JNIModuleContextChild : JNIModuleContext
+    {
+        private List<MethodDeclarationSyntax> _methods;
+
+        public JNIModuleContextChild(JNISyntaxTreeContext context)
+            : base(context)
+        {
+            _methods = new List<MethodDeclarationSyntax>();
+        }
+
+        public void AddNativeMethod(MethodDeclarationSyntax method)
         {
             _methods.Add(method);
         }
 
-        public IReadOnlyList<MethodDeclarationSyntax> Methods
+        protected override TypeConversion GetConversion()
+        {
+            return null;
+        }
+
+        public override IEnumerable<MethodDeclarationSyntax> Methods
         {
             get { return _methods; }
+        }
+
+        public override string Name
+        {
+            get { return Parent.Name; }
         }
     }
 }

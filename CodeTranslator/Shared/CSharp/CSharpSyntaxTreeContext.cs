@@ -11,13 +11,18 @@ namespace CodeTranslator.Shared.CSharp
 {
     public sealed class CSharpSyntaxTreeContext : SyntaxTreeContext<CSharpTypeContext, CSharpLanguageConversion>
     {
-        public CSharpSyntaxTreeContext(CompilationContext compilation, CSharpLanguageConversion conversion)
-            : base(compilation, conversion) { }
+        public CSharpSyntaxTreeContext(CSharpLanguageConversion conversion)
+            : base(conversion) { }
 
         public override void Visit(SyntaxTree tree)
         {
             var walker = new CSharpNodeVisitor(this, Conversion);
             walker.Visit(tree.GetRoot());
+        }
+
+        public new void AddType(CSharpTypeContext type, CSharpTypeContext parent)
+        {
+            base.AddType(type, parent);
         }
     }
 }

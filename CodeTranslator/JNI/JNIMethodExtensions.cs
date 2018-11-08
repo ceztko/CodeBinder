@@ -121,7 +121,7 @@ namespace CodeTranslator.JNI
                 case "System.IntPtr":
                     return "jLongBox";
                 default:
-                    throw new Exception();
+                    return "jlong"; // CHECK-ME
             }
         }
     }

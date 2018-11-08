@@ -11,12 +11,37 @@ namespace CodeTranslator.JNI
 {
     public class CSToJNIConversion : LanguageConversion<JNISyntaxTreeContext, JNIModuleContext>
     {
+        Dictionary<string, JNIModuleContextParent> _modules;
+
+        public CSToJNIConversion()
+        {
+            _modules = new Dictionary<string, JNIModuleContextParent>();
+        }
+
         /// <summary>Base namespace of the package, to be set outside</summary>
         public string BaseNamespace { get; set; }
 
-        protected override JNISyntaxTreeContext getSyntaxTreeContext(CompilationContext compilation)
+        public void AddModule(JNIModuleContextParent module)
         {
-            return new JNISyntaxTreeContext(compilation, this);
+            module.LanguageConversion = this;
+            _modules.Add(module.Name, module);
+            AddType(module, null);
+        }
+
+        public void AddModule(JNIModuleContextChild module, JNIModuleContextParent parent)
+        {
+            module.LanguageConversion = this;
+            AddType(module, parent);
+        }
+
+        public bool TryGetModule(string moduleName, out JNIModuleContextParent module)
+        {
+            return _modules.TryGetValue(moduleName, out module);
+        }
+
+        protected override JNISyntaxTreeContext getSyntaxTreeContext()
+        {
+            return new JNISyntaxTreeContext(this);
         }
 
         public override IEnumerable<ConversionBuilder> DefaultConversions

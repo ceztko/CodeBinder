@@ -12,6 +12,8 @@ namespace CodeTranslator
     public class GeneratorArgs
     {
         public string SourceRootPath;
+        /// <summary>Create string before writing to file. For DEBUG</summary>
+        public bool EagerStringConversion;
     }
 
     public abstract class Converter
@@ -32,13 +34,17 @@ namespace CodeTranslator
                 var basepath = Path.Combine(args.SourceRootPath, conversion.TargetBasePath ?? "");
                 Directory.CreateDirectory(basepath);
                 var filepath = Path.Combine(basepath, conversion.TargetFileName);
-                File.WriteAllText(filepath, conversion.ToFullString());
-                /* ENABLE Later
-                using (var filestream = new FileStream(filepath, FileMode.OpenOrCreate))
+                if (args.EagerStringConversion)
                 {
-                    conversion.Write(filestream);
+                    File.WriteAllText(filepath, conversion.ToFullString(), new UTF8Encoding(true));
                 }
-                */
+                else
+                {
+                    using (var filestream = new FileStream(filepath, FileMode.OpenOrCreate))
+                    {
+                        conversion.Write(filestream);
+                    }
+                }
             }
         }
     }

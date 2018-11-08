@@ -12,6 +12,8 @@ namespace CodeTranslator.Shared
     {
         internal TypeContext() { }
 
+        public CompilationContext Compilation { get; internal set; }
+
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
             return Compilation.GetSemanticModel(tree);
@@ -32,11 +34,6 @@ namespace CodeTranslator.Shared
             get { return GetChildren(); }
         }
 
-        public CompilationContext Compilation
-        {
-            get { return TreeContext.Compilation; }
-        }
-
         protected abstract SyntaxTreeContext GetSyntaxTreeContext();
 
         protected abstract TypeConversion GetConversion();
@@ -48,6 +45,8 @@ namespace CodeTranslator.Shared
         where TTypeContext : TypeContext
     {
         private List<TTypeContext> _Children;
+
+        public TTypeContext Parent { get; internal set; }
 
         internal TypeContext()
         {

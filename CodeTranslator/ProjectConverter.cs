@@ -16,7 +16,7 @@ namespace CodeTranslator
 {
     public abstract class ProjectConverter : Converter
     {
-        private readonly CompilationContext _compilation;
+        public CompilationContext Compilation { get; private set; }
         private readonly IEnumerable<SyntaxTree> _syntaxTreesToConvert;
         private readonly ConcurrentDictionary<string, string> _errors = new ConcurrentDictionary<string, string>();
 
@@ -26,7 +26,7 @@ namespace CodeTranslator
             var solutionDir = Path.GetDirectoryName(solutionFilePath);
             var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
             var syntaxTrees = solutionDir == null ? compilation.SyntaxTrees : compilation.SyntaxTrees.Where(t => t.FilePath.StartsWith(solutionDir));
-            _compilation = new CompilationContext(compilation);
+            Compilation = new CompilationContext(compilation);
             _syntaxTreesToConvert = syntaxTrees.ToList();
         }
 
@@ -38,7 +38,8 @@ namespace CodeTranslator
 
         public override IEnumerable<ConversionDelegate> Convert()
         {
-            foreach (var pair in convert())
+            var syntaxTreeContextTypes = getSyntaxTreeContextTypes();
+            foreach (var pair in syntaxTreeContextTypes)
             {
                 var errors = _errors.TryGetValue(pair.Key, out var nonFatalException)
                     ? new[] { nonFatalException }
@@ -46,21 +47,26 @@ namespace CodeTranslator
 
                 foreach (var type in pair.Value)
                 {
-                    var conversion = type.Conversion;
-                    foreach (var builder in conversion.Builders)
-                    {
+                    foreach (var builder in type.Conversion.Builders)
                         yield return new ConversionDelegate(pair.Key, builder, errors);
-                    }
                 }
+            }
+
+            // Convert also out-of-context types
+            foreach (var type in Conversion.RootTypes)
+            {
+                foreach (var builder in type.Conversion.Builders)
+                    yield return new ConversionDelegate(builder);
             }
         }
 
-        private Dictionary<string, List<TypeContext>> convert()
+        private Dictionary<string, List<TypeContext>> getSyntaxTreeContextTypes()
         {
             var syntaxTreeContexts = new Dictionary<string, SyntaxTreeContext>();
             foreach (var tree in _syntaxTreesToConvert)
             {
-                var syntaxTree = Conversion.GetSyntaxTreeContext(_compilation);
+                var syntaxTree = Conversion.GetSyntaxTreeContext();
+                syntaxTree.Compilation = Compilation;
 
                 var treeFilePath = tree.FilePath ?? "";
                 try
@@ -77,7 +83,7 @@ namespace CodeTranslator
             var ret = new Dictionary<string, List<TypeContext>>();
             foreach (var pair in syntaxTreeContexts)
             {
-                foreach (var type in pair.Value.GetRootTypes())
+                foreach (var type in pair.Value.RootTypes)
                 {
                     List<TypeContext> types;
                     if (!ret.TryGetValue(pair.Key, out types))
@@ -98,10 +104,10 @@ namespace CodeTranslator
 
         private void AddProjectWarnings()
         {
-            var nonFatalWarningsOrNull = Conversion.GetWarningsOrNull(_compilation);
+            var nonFatalWarningsOrNull = Conversion.GetWarningsOrNull();
             if (!string.IsNullOrWhiteSpace(nonFatalWarningsOrNull))
             {
-                var warningsDescription = Path.Combine(_compilation.Compilation.AssemblyName, "ConversionWarnings.txt");
+                var warningsDescription = Path.Combine(Compilation.Compilation.AssemblyName, "ConversionWarnings.txt");
                 _errors.TryAdd(warningsDescription, nonFatalWarningsOrNull);
             }
         }
@@ -115,6 +121,7 @@ namespace CodeTranslator
         internal ProjectConverter(Project project, TLanguageConversion conversion)
             : base(project)
         {
+            conversion.Compilation = Compilation;
             _Conversion = conversion;
         }
 

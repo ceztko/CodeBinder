@@ -11,19 +11,28 @@ namespace CodeTranslator.Shared
 {
     public abstract class LanguageConversion
     {
+        public CompilationContext Compilation { get; internal set; }
+
         internal LanguageConversion() { }
 
-        public abstract SyntaxTreeContext GetSyntaxTreeContext(CompilationContext compilation);
+        public abstract SyntaxTreeContext GetSyntaxTreeContext();
 
-        public virtual string GetWarningsOrNull(CompilationContext compilation)
+        public virtual string GetWarningsOrNull()
         {
-            return CompilationWarnings.WarningsForCompilation(compilation, "source");
+            return CompilationWarnings.WarningsForCompilation(Compilation, "source");
         }
 
         public virtual IEnumerable<ConversionBuilder> DefaultConversions
         {
             get { yield break; }
         }
+
+        public IEnumerable<TypeContext> RootTypes
+        {
+            get { return GetRootTypes(); }
+        }
+
+        protected abstract IEnumerable<TypeContext> GetRootTypes();
 
         internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
         {
@@ -39,11 +48,29 @@ namespace CodeTranslator.Shared
         where TSyntaxTreeContext : SyntaxTreeContext<TTypeContext>
         where TTypeContext : TypeContext<TTypeContext, TSyntaxTreeContext>
     {
-        public sealed override SyntaxTreeContext GetSyntaxTreeContext(CompilationContext compilation)
+        List<TTypeContext> m_rootTypes;
+
+        protected LanguageConversion()
         {
-            return getSyntaxTreeContext(compilation);
+            m_rootTypes = new List<TTypeContext>();
         }
 
-        protected abstract TSyntaxTreeContext getSyntaxTreeContext(CompilationContext compilation);
+        public sealed override SyntaxTreeContext GetSyntaxTreeContext()
+        {
+            return getSyntaxTreeContext();
+        }
+
+        protected abstract TSyntaxTreeContext getSyntaxTreeContext();
+
+        protected void AddType(TTypeContext type, TTypeContext parent)
+        {
+            type.Compilation = Compilation;
+            SyntaxTreeContext.AddRootType(m_rootTypes, type, parent);
+        }
+
+        protected override IEnumerable<TypeContext> GetRootTypes()
+        {
+            return m_rootTypes;
+        }
     }
 }
