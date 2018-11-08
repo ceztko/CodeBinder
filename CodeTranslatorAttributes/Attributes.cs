@@ -90,56 +90,39 @@ namespace CodeTranslator.Attributes
         {
             var ret = new MethodData();
             ret.Name = MethodName;
-            setParameter(ref ret.ReturnParam, ReturnType, null);
+            ret.ReturnParam.Set(ReturnType, null);
 
             if (_parameterTypes != null)
             {
-                ret.HaveArgsName = false;
+                ret.HasExplictParamsName = false;
                 ret.Parameters = new ParameterData[_parameterTypes.Length];
                 for (int i = 0; i < _parameterTypes.Length; i++)
-                    setParameter(ref ret.Parameters[i], _parameterTypes[i], "arg" + i);
+                    ret.Parameters[i].Set(_parameterTypes[i], "arg" + i);
             }
             else if (_parameterObjs != null)
             {
                 if (_parameterObjs.Length % 2 != 0)
                     throw new Exception();
 
-                ret.HaveArgsName = true;
+                ret.HasExplictParamsName = true;
                 int parameterCount = _parameterObjs.Length / 2;
                 ret.Parameters = new ParameterData[parameterCount];
                 for (int i = 0; i < parameterCount; i++)
-                    setParameter(ref ret.Parameters[i], _parameterObjs[i * 2 + 0], _parameterObjs[i * 2 + 1].ToString());
+                    ret.Parameters[i].Set(_parameterObjs[i * 2 + 0], _parameterObjs[i * 2 + 1].ToString());
             }
             else
             {
-                ret.HaveArgsName = true;
+                ret.HasExplictParamsName = true;
                 ret.Parameters = new ParameterData[0];
             }
 
             return ret;
         }
-
-        private void setParameter(ref ParameterData parameter, object parameterType, string parameterName)
-        {
-            if (parameterType == null)
-            {
-                parameter.Type = typeof(void);
-            }
-            else
-            {
-                var type = parameterType as Type;
-                if (type == null)
-                    parameter.CustomType = parameterType.ToString();
-                else
-                    parameter.Type = type;
-            }
-            parameter.Name = parameterName;
-        }
     }
 
     public class MethodData
     {
-        public bool HaveArgsName;
+        public bool HasExplictParamsName;
         public string Name;
         public ParameterData ReturnParam;
         public ParameterData[] Parameters;
@@ -147,8 +130,79 @@ namespace CodeTranslator.Attributes
 
     public struct ParameterData
     {
+        Type _Type;
+        string _TypeName;
+
         public string Name;
-        public Type Type;
-        public string CustomType;
+
+        public void Set(object typeObj, string name)
+        {
+            if (typeObj == null)
+            {
+                Type = null;
+            }
+            else
+            {
+                var type = typeObj as Type;
+                if (type == null)
+                    TypeName = typeObj.ToString();
+                else
+                    Type = type;
+            }
+
+            Name = name;
+        }
+
+        public void Set(string type, string name)
+        {
+            TypeName = type;
+            Name = name;
+        }
+
+        public void Set(Type type, string name)
+        {
+            Type = type;
+            Name = name;
+        }
+
+        public Type Type
+        {
+            get
+            {
+                if (_TypeName != null)
+                    throw new Exception("Explicit type name set");
+                else if (_Type != null)
+                    return _Type;
+                else
+                    return typeof(void);
+            }
+            set
+            {
+                _Type = value;
+                _TypeName = null;
+            }
+        }
+        public string TypeName
+        {
+            get
+            {
+                if (_TypeName != null)
+                    return _TypeName;
+                else if (_Type != null)
+                    return _Type.FullName;
+                else
+                    return typeof(void).FullName;
+            }
+            set
+            {
+                _TypeName = value;
+                _Type = null;
+            }
+        }
+
+        public bool HasExplicitTypeName
+        {
+            get { return _TypeName != null; }
+        }
     }
 }
