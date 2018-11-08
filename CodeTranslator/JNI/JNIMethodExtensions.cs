@@ -22,7 +22,12 @@ namespace CodeTranslator.JNI
         private static string getJNIType(TypeSyntax syntax, ITypeSymbol symbol, bool isRef)
         {
             if (symbol.TypeKind == TypeKind.Enum)
-                return "jint";
+            {
+                if (isRef)
+                    return "jIntegerBox";
+                else
+                    return "jint";
+            }
 
             string netFullName;
             string javaArraySuffix;
@@ -57,14 +62,14 @@ namespace CodeTranslator.JNI
                     return "void";
                 case "System.Object":
                     return "jobject";
+                case "System.String":
+                    return "jstring";
                 case "System.IntPtr":
                     return "jlong";
                 case "System.Boolean":
                     return "jboolean";
                 case "System.Char":
                     return "jchar";
-                case "System.String":
-                    return "jstring";
                 case "System.Byte":
                     return "jbyte";
                 case "System.SByte":
@@ -94,6 +99,8 @@ namespace CodeTranslator.JNI
         {
             switch (netFullName)
             {
+                case "System.IntPtr":
+                    return "jLongBox";
                 case "System.Boolean":
                     return "jBooleanBox";
                 case "System.Char":
@@ -118,10 +125,10 @@ namespace CodeTranslator.JNI
                     return "jFloatBox";
                 case "System.Double":
                     return "jDoubleBox";
-                case "System.IntPtr":
-                    return "jLongBox";
+                case "System.String":
+                    return "jStringBox";
                 default:
-                    return "jlong"; // CHECK-ME
+                    return "jLongBox"; // CHECK-ME
             }
         }
     }

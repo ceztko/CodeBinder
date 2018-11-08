@@ -127,10 +127,13 @@
   <data name="JNIBoxes_h" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>JNIBoxes.h;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="JNITypes" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>JNITypes.h;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
   <data name="JNITypesPrivate" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>JNITypesPrivate.h;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="JNITypes_cpp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>JNITypes.cpp;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="JNITypes_h" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>JNITypes.h;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
 </root>

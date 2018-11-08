@@ -377,6 +377,8 @@ namespace CodeTranslator.Java
                     return "FloatBox";
                 case "System.Double":
                     return "DoubleBox";
+                case "System.String":
+                    return "StringBox";
                 case "System.IntPtr":
                     return "LongBox";
                 default:

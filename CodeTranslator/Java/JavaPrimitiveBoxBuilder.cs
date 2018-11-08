@@ -10,9 +10,9 @@ namespace CodeTranslator.Java
 {
     class PrimitiveBoxBuilder : ConversionBuilder
     {
-        private JavaPrimitiveType _primitiveType;
+        private JavaInteropType _primitiveType;
 
-        public PrimitiveBoxBuilder(JavaPrimitiveType primitiveType)
+        public PrimitiveBoxBuilder(JavaInteropType primitiveType)
         {
             _primitiveType = primitiveType;
         }
@@ -29,7 +29,7 @@ namespace CodeTranslator.Java
             builder.Append("class").Space().Append(BoxTypeName).Space();
             using (builder.BeginBlock())
             {
-                builder.Append("private").Space().Append(JavaKeyword).Space().Append("value").EndOfLine();
+                builder.Append("public").Space().Append(JavaKeyword).Space().Append("value").EndOfLine();
                 builder.AppendLine();
 
                 builder.Append("public").Space().Append(BoxTypeName).Append("()").Space().AppendLine("{ }");
@@ -37,22 +37,6 @@ namespace CodeTranslator.Java
 
                 builder.Append("public").Space().Append(BoxTypeName).Append("(")
                     .Append(JavaKeyword).Space().Append("value )").Space();
-                using (builder.BeginBlock())
-                {
-                    builder.Append("this.value = value").EndOfLine();
-                }
-                builder.AppendLine();
-
-                builder.Append("public").Space().Append(JavaKeyword).Space().Append("getValue()").Space();
-                using (builder.BeginBlock())
-                {
-                    builder.Append("return value").EndOfLine();
-                }
-                builder.AppendLine();
-
-                builder.Append("public").Space().Append("void").Space().Append("setValue(")
-                    .Append(JavaKeyword).Space().Append("value )").Space();
-
                 using (builder.BeginBlock())
                 {
                     builder.Append("this.value = value").EndOfLine();

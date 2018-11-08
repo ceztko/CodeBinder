@@ -119,8 +119,6 @@ namespace CodeTranslator.JNI.Resources {
         ///    ~JB2NImpl();
         ///public:
         ///    inline operator T *() const { return &amp;Value; }
-        ///private:
-        ///    jfieldID getFieldId();
         ///public:
         ///    T Value;
         ///private:
@@ -129,12 +127,45 @@ namespace CodeTranslator.JNI.Resources {
         ///    bool m_commit;
         ///};
         ///
-        ///// Adapter class to link correct JNI methods
-        ///template &lt;typename TJBox, typena [rest of string was truncated]&quot;;.
+        ///template&lt;typename TJBox, typename T&gt;
+        ///JB2NImpl&lt;TJBox, T&gt;::JB2NImpl(JNIEnv *env, TJBox box, bool commit)
+        ///{
+        ///    m_en [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxesTemplate {
             get {
                 return ResourceManager.GetString("JNIBoxesTemplate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #include &quot;JNITypesPrivate.h&quot;
+        ///
+        ///const char * _jBooleanBoxBase::getFieldIdSignature()
+        ///{
+        ///    return &quot;Z&quot;;
+        ///}
+        ///
+        ///jboolean _jBooleanBoxBase::getValue(JNIEnv * env, jfieldID field) const
+        ///{
+        ///    return env-&gt;GetBooleanField((jobject)this, field);
+        ///}
+        ///
+        ///void _jBooleanBoxBase::setValue(JNIEnv * env, jfieldID field, jboolean value)
+        ///{
+        ///    env-&gt;SetBooleanField(this, field, value);
+        ///}
+        ///
+        ///const char * _jCharacterBoxBase::getFieldIdSignature()
+        ///{
+        ///    return &quot;C&quot;;
+        ///}
+        ///
+        ///jchar _jCharacterBoxBase::getValue(JNIEnv * env,  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string JNITypes_cpp {
+            get {
+                return ResourceManager.GetString("JNITypes_cpp", resourceCulture);
             }
         }
         
@@ -151,11 +182,12 @@ namespace CodeTranslator.JNI.Resources {
         ///#define jLongBox jobject
         ///#define jFloatBox jobject
         ///#define jDoubleBox jobject
+        ///#define jStringBox jobject
         ///.
         /// </summary>
-        internal static string JNITypes {
+        internal static string JNITypes_h {
             get {
-                return ResourceManager.GetString("JNITypes", resourceCulture);
+                return ResourceManager.GetString("JNITypes_h", resourceCulture);
             }
         }
         
@@ -172,15 +204,21 @@ namespace CodeTranslator.JNI.Resources {
         ///#undef jLongBox
         ///#undef jFloatBox
         ///#undef jDoubleBox
+        ///#undef jStringBox
         ///
-        ///class _jBooleanBox : public _jobject {};
-        ///class _jCharacterBox : public _jobject {};
-        ///class _jByteBox : public _jobject {};
-        ///class _jShortBox : public _jobject {};
-        ///class _jIntegerBox : public _jobject {};
-        ///class _jLongBox : public _jobject {};
-        ///class _jFloatBox : public _jobject {};
-        ///class _jDoubleBox : public _jobj [rest of string was truncated]&quot;;.
+        ///// Template for box types
+        ///template &lt;typename BaseT&gt;
+        ///class _jTypeBox : public BaseT
+        ///{
+        ///public:
+        ///    typename BaseT::Type GetValue(JNIEnv *env) const;
+        ///    void SetValue(JNIEnv *env, typename BaseT::Type value);
+        ///private:
+        ///    jfieldID getFieldId(JNIEnv *env) const;
+        ///};
+        ///
+        ///////////////////////
+        ///// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNITypesPrivate {
             get {

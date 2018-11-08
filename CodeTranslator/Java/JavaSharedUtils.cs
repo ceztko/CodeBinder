@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CodeTranslator.Shared.Java
 {
-    public enum JavaPrimitiveType
+    public enum JavaInteropType
     {
         Boolean,
         Character,
@@ -14,55 +14,60 @@ namespace CodeTranslator.Shared.Java
         Long,
         Float,
         Double,
+        String,
     }
 
     public static class JavaSharedUtils
     {
-        public static string ToJavaKeyword(JavaPrimitiveType type)
+        public static string ToJavaKeyword(JavaInteropType type)
         {
             switch (type)
             {
-                case JavaPrimitiveType.Boolean:
+                case JavaInteropType.Boolean:
                     return "boolean";
-                case JavaPrimitiveType.Character:
+                case JavaInteropType.Character:
                     return "char";
-                case JavaPrimitiveType.Byte:
+                case JavaInteropType.Byte:
                     return "byte";
-                case JavaPrimitiveType.Short:
+                case JavaInteropType.Short:
                     return "short";
-                case JavaPrimitiveType.Integer:
+                case JavaInteropType.Integer:
                     return "int";
-                case JavaPrimitiveType.Long:
+                case JavaInteropType.Long:
                     return "long";
-                case JavaPrimitiveType.Float:
+                case JavaInteropType.Float:
                     return "float";
-                case JavaPrimitiveType.Double:
+                case JavaInteropType.Double:
                     return "double";
+                case JavaInteropType.String:
+                    return "string";
                 default:
                     throw new Exception();
             }
         }
 
-        public static JavaPrimitiveType ToPrimitiveType(string keyword)
+        public static JavaInteropType ToInteropType(string javaKeyword)
         {
-            switch (keyword)
+            switch (javaKeyword)
             {
                 case "boolean":
-                    return JavaPrimitiveType.Boolean;
+                    return JavaInteropType.Boolean;
                 case "char":
-                    return JavaPrimitiveType.Character;
+                    return JavaInteropType.Character;
                 case "byte":
-                    return JavaPrimitiveType.Byte;
+                    return JavaInteropType.Byte;
                 case "short":
-                    return JavaPrimitiveType.Short;
+                    return JavaInteropType.Short;
                 case "int":
-                    return JavaPrimitiveType.Integer;
+                    return JavaInteropType.Integer;
                 case "long":
-                    return JavaPrimitiveType.Long;
+                    return JavaInteropType.Long;
                 case "float":
-                    return JavaPrimitiveType.Float;
+                    return JavaInteropType.Float;
                 case "double":
-                    return JavaPrimitiveType.Double;
+                    return JavaInteropType.Double;
+                case "string":
+                    return JavaInteropType.String;
                 default:
                     throw new Exception();
             }

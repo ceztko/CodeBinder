@@ -47,7 +47,7 @@ namespace CodeTranslator.JNI
                 switch (kind)
                 {
                     case SyntaxKind.MethodDeclaration:
-                        if (module != null)
+                        if (module != null && !member.HasAttribute<IgnoreAttribute>(this))
                         {
                             var method = member as MethodDeclarationSyntax;
                             if (method.IsNative(this))

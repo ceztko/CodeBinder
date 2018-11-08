@@ -10,3 +10,4 @@
 #define jLongBox jobject
 #define jFloatBox jobject
 #define jDoubleBox jobject
+#define jStringBox jobject
