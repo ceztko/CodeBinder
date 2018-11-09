@@ -1,4 +1,6 @@
 ﻿using System;
+using sim = System.ValueTuple;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
@@ -97,12 +99,12 @@ namespace CodeTranslator.Attributes
                 ret.HasExplictParamsName = false;
                 ret.Parameters = new ParameterData[_parameterTypes.Length];
                 for (int i = 0; i < _parameterTypes.Length; i++)
-                    ret.Parameters[i].Set(_parameterTypes[i], "arg" + i);
+                    ret.Parameters[i].Set(_parameterTypes[i], "param" + i);
             }
             else if (_parameterObjs != null)
             {
                 if (_parameterObjs.Length % 2 != 0)
-                    throw new Exception();
+                    throw new Exception("Parameter objects count must be divisible by two");
 
                 ret.HasExplictParamsName = true;
                 int parameterCount = _parameterObjs.Length / 2;
@@ -126,6 +128,40 @@ namespace CodeTranslator.Attributes
         public string Name;
         public ParameterData ReturnParam;
         public ParameterData[] Parameters;
+
+        /// <param name="hasExplictParamsName"></param>
+        public MethodData CreateFromParamStrings(string methodName, string returnType, IReadOnlyList<string> paramStrings, bool hasExplictParamsName = true)
+        {
+            var ret = new MethodData();
+            ret.Name = methodName;
+            ret.HasExplictParamsName = hasExplictParamsName;
+            ret.ReturnParam.TypeName = returnType;
+
+            var parameters = new List<ParameterData>();
+            foreach (var parameter in getParameters(paramStrings, hasExplictParamsName))
+                parameters.Add(new ParameterData() { Name = parameter.Name, TypeName = parameter.TypeName });
+
+            ret.Parameters = parameters.ToArray();
+            return ret;
+        }
+
+        IEnumerable<(string TypeName, string Name)> getParameters(IReadOnlyList<string> paramStrings, bool hasExplictParamsName)
+        {
+            if (hasExplictParamsName)
+            {
+                if (paramStrings.Count % 2 != 0)
+                    throw new Exception("String count with parameters name must be divisible by two");
+
+                int paramCount = paramStrings.Count / 2;
+                for (int i = 0; i < paramCount; i++)
+                    yield return (paramStrings[i * 2], paramStrings[i * 2 + 1]);
+            }
+            else
+            {
+                for (int i = 0; i < paramStrings.Count; i++)
+                    yield return (paramStrings[i], "param" + (i + 1));
+            }
+        }
     }
 
     public struct ParameterData
