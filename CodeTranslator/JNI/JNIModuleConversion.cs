@@ -60,6 +60,8 @@ namespace CodeTranslator.JNI
 
         private void WriteMethod(CodeBuilder builder, MethodDeclarationSyntax method)
         {
+            var methodSignatures = method.GetMethodSignatures(this);
+
             builder.Append("JNIEXPORT ");
             WriteType(builder, method.ReturnType);
             builder.Append("JNICALL ");

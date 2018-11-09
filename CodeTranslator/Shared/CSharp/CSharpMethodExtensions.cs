@@ -8,11 +8,77 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Runtime.InteropServices;
+using CodeTranslator.Attributes;
 
 namespace CodeTranslator.Shared.CSharp
 {
     static class CSharpMethodExtensions
     {
+        public static List<MethodSignature> GetMethodSignatures(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        {
+            var ret = new List<MethodSignature>();
+            var attributes = method.GetAttributes(provider);
+            foreach (var attribute in attributes)
+            {
+                if (attribute.IsAttribute<SignatureAttribute>())
+                {
+                    var methodData = getMethodDataFromConstructorParameter(method, attribute.ConstructorArguments[0]);
+                    ret.Add(methodData);
+                }
+            }
+            return ret;
+        }
+
+        private static MethodSignature getMethodDataFromConstructorParameter(MethodDeclarationSyntax method, TypedConstant constant)
+        {
+            string constructorParamTypeName = constant.Type.GetFullName();
+            var parameters = new List<string>();
+            switch (constructorParamTypeName)
+            {
+                case "System.Object[]":
+                {
+                    foreach (var param in constant.Values)
+                    {
+                        string paramTypeName = param.Type.GetFullName();
+                        switch (paramTypeName)
+                        {
+                            case "System.String":
+                            {
+                                parameters.Add(param.Value.ToString());
+                                break;
+                            }
+                            case "System.Type":
+                            {
+                                var type = param.Value as ITypeSymbol;
+                                parameters.Add(type.GetFullName());
+                                break;
+                            }
+                            default:
+                                throw new Exception();
+                        }
+                    }
+                    break;
+                }
+                case "System.Type[]":
+                {
+                    if (method.ParameterList.Parameters.Count != constant.Values.Length)
+                        throw new Exception("Method parameter count must be same as provided type count");
+
+                    for (int i = 0; i < constant.Values.Length; i++)
+                    {
+                        var type = constant.Values[0].Value as ITypeSymbol;
+                        parameters.Add(type.GetFullName());
+                        parameters.Add(method.ParameterList.Parameters[i].Identifier.Text);
+                    }
+                    break;
+                }
+                default:
+                    throw new Exception();
+            }
+
+            return MethodSignature.CreateFromParamStrings(method.Identifier.Text, null, parameters);
+        }
+
         public static string GetTypeIdentifier(this TypeSyntax type)
         {
             var kind = type.Kind();

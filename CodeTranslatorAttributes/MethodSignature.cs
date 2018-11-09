@@ -6,28 +6,28 @@ namespace CodeTranslator.Shared
 {
     public class MethodSignature
     {
-        public bool HasExplictParamsName;
+        public bool HasExplictParamNames;
         public string Name;
         public ParameterData ReturnParam;
         public ParameterData[] Parameters;
 
-        /// <param name="hasExplictParamsName"></param>
-        public MethodSignature CreateFromParamStrings(string methodName, string returnType, IReadOnlyList<string> paramStrings, bool hasExplictParamsName = true)
+        /// <param name="hasExplictParamNames"></param>
+        public static MethodSignature CreateFromParamStrings(string methodName, string returnType, IReadOnlyList<string> paramStrings, bool hasExplictParamNames = true)
         {
             var ret = new MethodSignature();
             ret.Name = methodName;
-            ret.HasExplictParamsName = hasExplictParamsName;
+            ret.HasExplictParamNames = hasExplictParamNames;
             ret.ReturnParam.TypeName = returnType;
 
             var parameters = new List<ParameterData>();
-            foreach (var parameter in getParameters(paramStrings, hasExplictParamsName))
+            foreach (var parameter in getParameters(paramStrings, hasExplictParamNames))
                 parameters.Add(new ParameterData() { Name = parameter.Name, TypeName = parameter.TypeName });
 
             ret.Parameters = parameters.ToArray();
             return ret;
         }
 
-        IEnumerable<(string TypeName, string Name)> getParameters(IReadOnlyList<string> paramStrings, bool hasExplictParamsName)
+        static IEnumerable<(string TypeName, string Name)> getParameters(IReadOnlyList<string> paramStrings, bool hasExplictParamsName)
         {
             if (hasExplictParamsName)
             {

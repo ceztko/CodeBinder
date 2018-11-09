@@ -97,7 +97,7 @@ namespace CodeTranslator.Attributes
 
             if (_parameterTypes != null)
             {
-                ret.HasExplictParamsName = false;
+                ret.HasExplictParamNames = false;
                 ret.Parameters = new ParameterData[_parameterTypes.Length];
                 for (int i = 0; i < _parameterTypes.Length; i++)
                     ret.Parameters[i].Set(_parameterTypes[i], "param" + i);
@@ -107,7 +107,7 @@ namespace CodeTranslator.Attributes
                 if (_parameterObjs.Length % 2 != 0)
                     throw new Exception("Parameter objects count must be divisible by two");
 
-                ret.HasExplictParamsName = true;
+                ret.HasExplictParamNames = true;
                 int parameterCount = _parameterObjs.Length / 2;
                 ret.Parameters = new ParameterData[parameterCount];
                 for (int i = 0; i < parameterCount; i++)
@@ -115,7 +115,7 @@ namespace CodeTranslator.Attributes
             }
             else
             {
-                ret.HasExplictParamsName = true;
+                ret.HasExplictParamNames = true;
                 ret.Parameters = new ParameterData[0];
             }
 
