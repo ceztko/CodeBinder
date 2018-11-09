@@ -22,22 +22,26 @@ namespace CodeTranslator.Shared.CSharp
             {
                 if (attribute.IsAttribute<SignatureAttribute>())
                 {
-                    var methodData = getMethodDataFromConstructorParameter(method, attribute.ConstructorArguments[0]);
+                    var methodData = getMethodDataFromConstructorParameter(method, attribute);
                     ret.Add(methodData);
                 }
             }
             return ret;
         }
 
-        private static MethodSignature getMethodDataFromConstructorParameter(MethodDeclarationSyntax method, TypedConstant constant)
+        private static MethodSignature getMethodDataFromConstructorParameter(MethodDeclarationSyntax method, AttributeData attribute)
         {
-            string constructorParamTypeName = constant.Type.GetFullName();
+            if (attribute.ConstructorArguments.Length != 1)
+                throw new Exception("SignatureAttribute must be constructed with single parameter");
+
+            var constructorParam = attribute.ConstructorArguments[0];
+            string constructorParamTypeName = constructorParam.Type.GetFullName();
             var parameters = new List<string>();
             switch (constructorParamTypeName)
             {
                 case "System.Object[]":
                 {
-                    foreach (var param in constant.Values)
+                    foreach (var param in constructorParam.Values)
                     {
                         string paramTypeName = param.Type.GetFullName();
                         switch (paramTypeName)
@@ -61,12 +65,12 @@ namespace CodeTranslator.Shared.CSharp
                 }
                 case "System.Type[]":
                 {
-                    if (method.ParameterList.Parameters.Count != constant.Values.Length)
+                    if (method.ParameterList.Parameters.Count != constructorParam.Values.Length)
                         throw new Exception("Method parameter count must be same as provided type count");
 
-                    for (int i = 0; i < constant.Values.Length; i++)
+                    for (int i = 0; i < constructorParam.Values.Length; i++)
                     {
-                        var type = constant.Values[0].Value as ITypeSymbol;
+                        var type = constructorParam.Values[0].Value as ITypeSymbol;
                         parameters.Add(type.GetFullName());
                         parameters.Add(method.ParameterList.Parameters[i].Identifier.Text);
                     }
@@ -76,7 +80,28 @@ namespace CodeTranslator.Shared.CSharp
                     throw new Exception();
             }
 
-            return MethodSignature.CreateFromParamStrings(method.Identifier.Text, null, parameters);
+            string returnType = null;
+            string methodName = method.Identifier.Text;
+            foreach (var namedArgument in attribute.NamedArguments)
+            {
+                switch (namedArgument.Key)
+                {
+                    case "ReturnType":
+                    {
+                        returnType = (namedArgument.Value.Value as ITypeSymbol)?.GetFullName();
+                        break;
+                    }
+                    case "MethodName":
+                    {
+                        methodName = namedArgument.Value.Value?.ToString() ?? methodName;
+                        break;
+                    }
+                    default:
+                        throw new Exception();
+                }
+            }
+
+            return MethodSignature.CreateFromParamStrings(methodName, returnType, parameters);
         }
 
         public static string GetTypeIdentifier(this TypeSyntax type)

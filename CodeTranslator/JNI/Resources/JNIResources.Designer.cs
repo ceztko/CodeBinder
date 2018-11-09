@@ -132,9 +132,9 @@ namespace CodeTranslator.JNI.Resources {
         ///{
         ///    m_en [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string JNIBoxesTemplate {
+        internal static string JNIBoxesTemplate_h {
             get {
-                return ResourceManager.GetString("JNIBoxesTemplate", resourceCulture);
+                return ResourceManager.GetString("JNIBoxesTemplate_h", resourceCulture);
             }
         }
         
@@ -220,9 +220,9 @@ namespace CodeTranslator.JNI.Resources {
         ///////////////////////
         ///// [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string JNITypesPrivate {
+        internal static string JNITypesPrivate_h {
             get {
-                return ResourceManager.GetString("JNITypesPrivate", resourceCulture);
+                return ResourceManager.GetString("JNITypesPrivate_h", resourceCulture);
             }
         }
     }
