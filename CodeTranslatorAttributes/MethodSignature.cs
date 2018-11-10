@@ -8,41 +8,57 @@ namespace CodeTranslator.Shared
     {
         public bool HasExplictParamNames;
         public string Name;
-        public ParameterData ReturnParam;
+        public ParameterData ReturnType;
         public ParameterData[] Parameters;
 
-        /// <param name="hasExplictParamNames"></param>
-        public static MethodSignature CreateFromParamStrings(string methodName, string returnType, IReadOnlyList<string> paramStrings, bool hasExplictParamNames = true)
+        public static MethodSignature Create()
+        {
+            var ret = new MethodSignature();
+            ret.HasExplictParamNames = true;
+            ret.Parameters = new ParameterData[0];
+            return ret;
+        }
+
+        public static MethodSignature Create(string methodName, object returnType, Type[] paramTypes)
+        {
+            return create(methodName, returnType, false, getParameters(paramTypes));
+        }
+
+        public static MethodSignature Create(string methodName, object returnType, object[] paramObjects)
+        {
+            return create(methodName, returnType, true, getParameters(paramObjects));
+        }
+
+        static MethodSignature create(string methodName, object returnType, bool hasExplictParamNames, ParameterData[] parameters)
         {
             var ret = new MethodSignature();
             ret.Name = methodName;
             ret.HasExplictParamNames = hasExplictParamNames;
-            ret.ReturnParam.TypeName = returnType;
-
-            var parameters = new List<ParameterData>();
-            foreach (var parameter in getParameters(paramStrings, hasExplictParamNames))
-                parameters.Add(new ParameterData() { Name = parameter.Name, TypeName = parameter.TypeName });
-
-            ret.Parameters = parameters.ToArray();
+            ret.ReturnType = new ParameterData(returnType, null);
+            ret.Parameters = parameters;
             return ret;
         }
 
-        static IEnumerable<(string TypeName, string Name)> getParameters(IReadOnlyList<string> paramStrings, bool hasExplictParamsName)
+        static ParameterData[] getParameters(object[] paramObjects)
         {
-            if (hasExplictParamsName)
-            {
-                if (paramStrings.Count % 2 != 0)
+            if (paramObjects.Length % 2 != 0)
                     throw new Exception("String count with parameters name must be divisible by two");
 
-                int paramCount = paramStrings.Count / 2;
-                for (int i = 0; i < paramCount; i++)
-                    yield return (paramStrings[i * 2], paramStrings[i * 2 + 1]);
-            }
-            else
-            {
-                for (int i = 0; i < paramStrings.Count; i++)
-                    yield return (paramStrings[i], "param" + (i + 1));
-            }
+            int paramCount = paramObjects.Length / 2;
+            var parameters = new ParameterData[paramCount];
+            for (int i = 0; i < paramCount; i++)
+                parameters[i] = new ParameterData(paramObjects[i * 2], paramObjects[i * 2 + 1].ToString());
+
+            return parameters;
+        }
+
+        static ParameterData[] getParameters(Type[] paramTypes)
+        {
+            var parameters = new ParameterData[paramTypes.Length];
+            for (int i = 0; i < paramTypes.Length; i++)
+                parameters[i] = new ParameterData(paramTypes[i], "param" + (i + 1));
+
+            return parameters;
         }
     }
 
@@ -53,33 +69,35 @@ namespace CodeTranslator.Shared
 
         public string Name;
 
-        public void Set(object typeObj, string name)
+        public ParameterData(object typeObj, string name)
         {
             if (typeObj == null)
             {
-                Type = null;
+                _Type = null;
+                _TypeName = null;
             }
             else
             {
                 var type = typeObj as Type;
                 if (type == null)
-                    TypeName = typeObj.ToString();
+                {
+                    _TypeName = typeObj.ToString();
+                    _Type = null;
+                }
                 else
-                    Type = type;
+                {
+                    _Type = type;
+                    _TypeName = null;
+                }
             }
 
             Name = name;
         }
 
-        public void Set(string type, string name)
+        public ParameterData(Type type, string name)
         {
-            TypeName = type;
-            Name = name;
-        }
-
-        public void Set(Type type, string name)
-        {
-            Type = type;
+            _Type = type;
+            _TypeName = null;
             Name = name;
         }
 

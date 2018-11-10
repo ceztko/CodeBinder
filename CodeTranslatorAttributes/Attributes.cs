@@ -91,35 +91,12 @@ namespace CodeTranslator.Attributes
         /// <summary>Returs parameters. Also includes return type int the first entry)</summary>
         public MethodSignature GetMethodSignature()
         {
-            var ret = new MethodSignature();
-            ret.Name = MethodName;
-            ret.ReturnParam.Set(ReturnType, null);
-
             if (_parameterTypes != null)
-            {
-                ret.HasExplictParamNames = false;
-                ret.Parameters = new ParameterData[_parameterTypes.Length];
-                for (int i = 0; i < _parameterTypes.Length; i++)
-                    ret.Parameters[i].Set(_parameterTypes[i], "param" + i);
-            }
+                return MethodSignature.Create(MethodName, ReturnType, _parameterTypes);
             else if (_parameterObjs != null)
-            {
-                if (_parameterObjs.Length % 2 != 0)
-                    throw new Exception("Parameter objects count must be divisible by two");
-
-                ret.HasExplictParamNames = true;
-                int parameterCount = _parameterObjs.Length / 2;
-                ret.Parameters = new ParameterData[parameterCount];
-                for (int i = 0; i < parameterCount; i++)
-                    ret.Parameters[i].Set(_parameterObjs[i * 2 + 0], _parameterObjs[i * 2 + 1].ToString());
-            }
+                return MethodSignature.Create(MethodName, ReturnType, _parameterObjs);
             else
-            {
-                ret.HasExplictParamNames = true;
-                ret.Parameters = new ParameterData[0];
-            }
-
-            return ret;
+                return MethodSignature.Create();
         }
     }
 }
