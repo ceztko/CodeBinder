@@ -42,7 +42,7 @@ namespace CodeTranslator.Shared
         static ParameterData[] getParameters(object[] paramObjects)
         {
             if (paramObjects.Length % 2 != 0)
-                    throw new Exception("String count with parameters name must be divisible by two");
+                    throw new Exception("Object count with parameters name must be divisible by two");
 
             int paramCount = paramObjects.Length / 2;
             var parameters = new ParameterData[paramCount];

@@ -14,9 +14,9 @@ namespace CodeTranslator.Shared.CSharp
 {
     static class CSharpMethodExtensions
     {
-        public static List<MethodSignature> GetMethodSignatures(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        public static List<MethodSignatureInfo> GetMethodSignatures(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
         {
-            var ret = new List<MethodSignature>();
+            var ret = new List<MethodSignatureInfo>();
             var attributes = method.GetAttributes(provider);
             foreach (var attribute in attributes)
             {
@@ -29,38 +29,33 @@ namespace CodeTranslator.Shared.CSharp
             return ret;
         }
 
-        private static MethodSignature getMethodDataFromConstructorParameter(MethodDeclarationSyntax method, AttributeData attribute)
+        private static MethodSignatureInfo getMethodDataFromConstructorParameter(MethodDeclarationSyntax method, AttributeData attribute)
         {
             if (attribute.ConstructorArguments.Length != 1)
                 throw new Exception("SignatureAttribute must be constructed with single parameter");
 
             var constructorParam = attribute.ConstructorArguments[0];
             string constructorParamTypeName = constructorParam.Type.GetFullName();
-            var parameters = new List<string>();
+            MethodParameterInfo[] parameters;
             switch (constructorParamTypeName)
             {
                 case "System.Object[]":
                 {
-                    foreach (var param in constructorParam.Values)
+                    if (constructorParam.Values.Length % 2 != 0)
+                        throw new Exception("Object count with parameters name must be divisible by two");
+
+                    int parameterCount = constructorParam.Values.Length / 2;
+                    parameters = new MethodParameterInfo[parameterCount];
+                    for (int i = 0; i < parameterCount; i++)
                     {
-                        string paramTypeName = param.Type.GetFullName();
-                        switch (paramTypeName)
-                        {
-                            case "System.String":
-                            {
-                                parameters.Add(param.Value.ToString());
-                                break;
-                            }
-                            case "System.Type":
-                            {
-                                var type = param.Value as ITypeSymbol;
-                                parameters.Add(type.GetFullName());
-                                break;
-                            }
-                            default:
-                                throw new Exception();
-                        }
+                        var typeConstant = constructorParam.Values[i * 2];
+                        string parameterName = constructorParam.Values[i * 2 + 1].Value as string;
+                        if (parameterName == null)
+                            throw new Exception("Parameter name must be a string");
+
+                        parameters[i] = new MethodParameterInfo(typeConstant, parameterName);
                     }
+
                     break;
                 }
                 case "System.Type[]":
@@ -68,11 +63,13 @@ namespace CodeTranslator.Shared.CSharp
                     if (method.ParameterList.Parameters.Count != constructorParam.Values.Length)
                         throw new Exception("Method parameter count must be same as provided type count");
 
-                    for (int i = 0; i < constructorParam.Values.Length; i++)
+                    int parameterCount = constructorParam.Values.Length;
+                    parameters = new MethodParameterInfo[parameterCount];
+                    for (int i = 0; i < parameterCount; i++)
                     {
-                        var type = constructorParam.Values[0].Value as ITypeSymbol;
-                        parameters.Add(type.GetFullName());
-                        parameters.Add(method.ParameterList.Parameters[i].Identifier.Text);
+                        var typeConstant = constructorParam.Values[i];
+                        string parameterName = method.ParameterList.Parameters[i].Identifier.Text;
+                        parameters[i] = new MethodParameterInfo(typeConstant, parameterName);
                     }
                     break;
                 }
@@ -80,7 +77,7 @@ namespace CodeTranslator.Shared.CSharp
                     throw new Exception();
             }
 
-            string returnType = null;
+            TypedConstant returnType = new TypedConstant();
             string methodName = method.Identifier.Text;
             foreach (var namedArgument in attribute.NamedArguments)
             {
@@ -88,7 +85,7 @@ namespace CodeTranslator.Shared.CSharp
                 {
                     case "ReturnType":
                     {
-                        returnType = (namedArgument.Value.Value as ITypeSymbol)?.GetFullName();
+                        returnType = namedArgument.Value;
                         break;
                     }
                     case "MethodName":
@@ -101,7 +98,11 @@ namespace CodeTranslator.Shared.CSharp
                 }
             }
 
-            return MethodSignature.CreateFromParamStrings(methodName, returnType, parameters);
+            var ret = new MethodSignatureInfo();
+            ret.MethodName = methodName;
+            ret.ReturnType = new MethodParameterInfo(returnType, null);
+            ret.Parameters = parameters;
+            return ret;
         }
 
         public static string GetTypeIdentifier(this TypeSyntax type)

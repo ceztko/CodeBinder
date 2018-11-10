@@ -13,17 +13,24 @@ namespace CodeTranslator.JNI
 {
     static class JNIMethodExtensions
     {
-        public static string GetJNIType(this TypeSyntax type, bool isRef, ICompilationContextProvider provider)
+        public static string GetJNITypeName(ref this MethodParameterInfo parameter)
         {
-            var symbol = type.GetTypeSymbol(provider);
-            return getJNIType(type, symbol, isRef);
+            ITypeSymbol typeSymbol;
+            string typeName = parameter.GetTypeName(out typeSymbol);
+            return getJNIType(typeName, typeSymbol);
         }
 
-        private static string getJNIType(TypeSyntax syntax, ITypeSymbol symbol, bool isRef)
+        public static string GetJNIType(this TypeSyntax type, bool isByRef, ICompilationContextProvider provider)
+        {
+            var symbol = type.GetTypeSymbol(provider);
+            return getJNIType(type, symbol, isByRef);
+        }
+
+        private static string getJNIType(TypeSyntax syntax, ITypeSymbol symbol, bool isByRef)
         {
             if (symbol.TypeKind == TypeKind.Enum)
             {
-                if (isRef)
+                if (isByRef)
                     return "jIntegerBox";
                 else
                     return "jint";
@@ -45,18 +52,18 @@ namespace CodeTranslator.JNI
             }
 
             string jniTypeName;
-            if (isRef)
-                jniTypeName = getJNIByRefType(netFullName);
+            if (isByRef)
+                jniTypeName = getJNIByRefType(netFullName, symbol);
             else
-                jniTypeName = getJNIType(syntax, netFullName);
+                jniTypeName = getJNIType(netFullName, symbol);
 
             return jniTypeName + javaArraySuffix;
         }
 
 
-        static string getJNIType(TypeSyntax syntax, string netFullName)
+        static string getJNIType(string typeName, ITypeSymbol symbol)
         {
-            switch (netFullName)
+            switch (typeName)
             {
                 case "System.Void":
                     return "void";
@@ -91,13 +98,24 @@ namespace CodeTranslator.JNI
                 case "System.Double":
                     return "jdouble";
                 default:
-                    return syntax.GetTypeIdentifier();
+                {
+                    if (symbol == null)
+                    {
+                        // This case happen with attribute types that are provided as strings
+                        return typeName;
+                    }
+
+                    if (symbol.TypeKind == TypeKind.Class)
+                        return "jobject";
+                    else
+                        throw new Exception("Unsupported by ref type " + typeName);
+                }
             }
         }
 
-        static string getJNIByRefType(string netFullName)
+        static string getJNIByRefType(string typeName, ITypeSymbol symbol)
         {
-            switch (netFullName)
+            switch (typeName)
             {
                 case "System.IntPtr":
                     return "jLongBox";
@@ -128,8 +146,23 @@ namespace CodeTranslator.JNI
                 case "System.String":
                     return "jStringBox";
                 default:
-                    return "jLongBox"; // CHECK-ME
+                {
+                    if (symbol.TypeKind == TypeKind.Struct)
+                        return "jlong";
+                    else
+                        throw new Exception("Unsupported by ref type " + typeName); 
+                }
             }
+        }
+
+        public static CodeBuilder EndOfLine(this CodeBuilder builder)
+        {
+            return builder.AppendLine(";");
+        }
+
+        public static CodeBuilder Space(this CodeBuilder builder)
+        {
+            return builder.Append(" ");
         }
     }
 }

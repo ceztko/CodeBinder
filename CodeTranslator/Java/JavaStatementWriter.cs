@@ -8,7 +8,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class StatementWriter<TStatement> : SyntaxWriter<TStatement>
+    abstract class StatementWriter<TStatement> : ContextWriter<TStatement>
         where TStatement : StatementSyntax
     {
         public StatementWriter(TStatement syntax, ICompilationContextProvider context)
@@ -22,7 +22,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append(Syntax.Expression.GetWriter(this));
+            Builder.Append(Context.Expression.GetWriter(this));
         }
     }
 
@@ -35,7 +35,7 @@ namespace CodeTranslator.Java
         {
             using (Builder.BeginBlock())
             {
-                foreach (var statement in Syntax.Statements)
+                foreach (var statement in Context.Statements)
                 {
                     Builder.Append(statement.GetWriter(this)).EndOfLine();
                 }

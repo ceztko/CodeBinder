@@ -171,10 +171,5 @@ namespace CodeTranslator.Shared.CSharp
             TreeContext = treeContext;
             Conversion = conversion;
         }
-
-        public SemanticModel GetSemanticModel(SyntaxTree tree)
-        {
-            return TreeContext.Compilation.GetSemanticModel(tree);
-        }
     }
 }

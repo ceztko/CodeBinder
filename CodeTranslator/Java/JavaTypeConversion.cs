@@ -67,10 +67,10 @@ namespace CodeTranslator.Java
             builder.Append(GetTypeWriter());
         }
 
-        protected abstract ISyntaxWriter GetTypeWriter();
+        protected abstract IContextWriter GetTypeWriter();
     }
 
-    abstract class TypeWriter<TBaseType> : SyntaxWriter<TBaseType>
+    abstract class TypeWriter<TBaseType> : ContextWriter<TBaseType>
         where TBaseType: BaseTypeDeclarationSyntax
     {
         protected TypeWriter(TBaseType syntax, ICompilationContextProvider context)
@@ -78,14 +78,14 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            var modifiers = Syntax.GetJavaModifiersString();
+            var modifiers = Context.GetJavaModifiersString();
             if (modifiers != string.Empty)
                 Builder.Append(modifiers).Space();
 
-            Builder.Append(Syntax.GetJavaTypeDeclaration()).Space();
+            Builder.Append(Context.GetJavaTypeDeclaration()).Space();
             Builder.Append(TypeName);
-            if (Syntax.BaseList != null)
-                WriteTypeBaseList(Syntax.BaseList);
+            if (Context.BaseList != null)
+                WriteTypeBaseList(Context.BaseList);
             using (Builder.Space().BeginBlock())
             {
                 WriteTypeMembers();
@@ -173,7 +173,7 @@ namespace CodeTranslator.Java
 
         public virtual string TypeName
         {
-            get { return Syntax.GetName(); }
+            get { return Context.GetName(); }
         }
     }
 }

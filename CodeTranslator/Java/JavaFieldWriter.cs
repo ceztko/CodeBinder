@@ -8,16 +8,16 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    public class FieldWriter : SyntaxWriter<FieldDeclarationSyntax>
+    public class FieldWriter : ContextWriter<FieldDeclarationSyntax>
     {
         public FieldWriter(FieldDeclarationSyntax syntax, ICompilationContextProvider context)
             : base(syntax, context) { }
 
         protected override void Write()
         {
-            Builder.Append(Syntax.GetJavaModifiersString()).Space();
-            Builder.Append(Syntax.Declaration.Type.GetJavaType(this)).Space();
-            WriteVariableDeclaration(Syntax.Declaration.Variables);
+            Builder.Append(Context.GetJavaModifiersString()).Space();
+            Builder.Append(Context.Declaration.Type.GetJavaType(this)).Space();
+            WriteVariableDeclaration(Context.Declaration.Variables);
             Builder.EndOfLine();
         }
 

@@ -15,11 +15,6 @@ namespace CodeTranslator.Shared
 
         internal SyntaxTreeContext() { }
 
-        public SemanticModel GetSemanticModel(SyntaxTree tree)
-        {
-            return Compilation.GetSemanticModel(tree);
-        }
-
         public abstract void Visit(SyntaxTree node);
 
         public IEnumerable<TypeContext> RootTypes

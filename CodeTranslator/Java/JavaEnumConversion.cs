@@ -16,7 +16,7 @@ namespace CodeTranslator.Java
         public JavaEnumConversion(CSToJavaConversion conversion)
             : base(conversion) { }
 
-        protected override ISyntaxWriter GetTypeWriter()
+        protected override IContextWriter GetTypeWriter()
         {
             return new EnumTypeWriter(TypeContext.Node, this);
         }
@@ -29,7 +29,7 @@ namespace CodeTranslator.Java
         public EnumTypeWriter(EnumDeclarationSyntax syntax, ICompilationContextProvider context)
             : base(syntax, context)
         {
-            _isFlag = Syntax.IsFlag(this);
+            _isFlag = Context.IsFlag(this);
         }
 
         protected override void WriteTypeMembers()
@@ -46,7 +46,7 @@ namespace CodeTranslator.Java
         private void WriteEnumMembers()
         {
             bool first = true;
-            foreach (var member in Syntax.Members)
+            foreach (var member in Context.Members)
             {
                 if (first)
                     first = false;

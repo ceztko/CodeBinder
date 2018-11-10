@@ -7,7 +7,6 @@ namespace CodeTranslator.Shared
 {
     public interface ICompilationContextProvider
     {
-        SemanticModel GetSemanticModel(SyntaxTree tree);
         CompilationContext Compilation { get; }
     }
 }

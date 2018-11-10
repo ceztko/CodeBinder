@@ -9,7 +9,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class MethodWriter<TMethod> : SyntaxWriter<TMethod>
+    abstract class MethodWriter<TMethod> : ContextWriter<TMethod>
         where TMethod : BaseMethodDeclarationSyntax
     {
         protected MethodWriter(TMethod method, ICompilationContextProvider context)
@@ -20,7 +20,7 @@ namespace CodeTranslator.Java
             WriteModifiers();
             WriteReturnType();
             Builder.Append(MethodName);
-            if (Syntax.ParameterList.Parameters.Count == 0)
+            if (Context.ParameterList.Parameters.Count == 0)
             {
                 Builder.Append("()");
             }
@@ -28,7 +28,7 @@ namespace CodeTranslator.Java
             {
                 using (Builder.BeginParameterList())
                 {
-                    WriteParameters(Syntax.ParameterList);
+                    WriteParameters(Context.ParameterList);
                 }
             }
             WriteMethodBody();
@@ -36,15 +36,15 @@ namespace CodeTranslator.Java
 
         protected virtual void WriteMethodBody()
         {
-            if (Syntax.Body == null)
+            if (Context.Body == null)
                 Builder.EndOfLine();
             else
-                Builder.Space().Append(new BlockWriter(Syntax.Body, this));
+                Builder.Space().Append(new BlockWriter(Context.Body, this));
         }
 
         protected virtual void WriteModifiers()
         {
-            Builder.Append(Syntax.GetJavaModifiersString());
+            Builder.Append(Context.GetJavaModifiersString());
             Builder.Space();
         }
 
@@ -100,7 +100,7 @@ namespace CodeTranslator.Java
 
         protected override void WriteReturnType()
         {
-            WriteType(Syntax.ReturnType, IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None);
+            WriteType(Context.ReturnType, IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None);
             Builder.Space();
         }
 
@@ -114,17 +114,17 @@ namespace CodeTranslator.Java
 
         public bool IsParentInterface
         {
-            get { return Syntax.Parent.Kind() == SyntaxKind.InterfaceDeclaration; }
+            get { return Context.Parent.Kind() == SyntaxKind.InterfaceDeclaration; }
         }
 
         public override string MethodName
         {
-            get { return Syntax.GetName(); }
+            get { return Context.GetName(); }
         }
 
         public override bool IsNative
         {
-            get { return Syntax.IsNative(this); }
+            get { return Context.IsNative(this); }
         }
     }
 
@@ -135,7 +135,7 @@ namespace CodeTranslator.Java
 
         public override string MethodName
         {
-            get { return (Syntax.Parent as BaseTypeDeclarationSyntax).GetName();}
+            get { return (Context.Parent as BaseTypeDeclarationSyntax).GetName();}
         }
 
         public override bool IsNative

@@ -16,6 +16,32 @@ namespace CodeTranslator.Shared
             SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
             miscellaneousOptions: SymbolDisplayMiscellaneousOptions.ExpandNullable);
 
+        public static string GetTypeName(ref this MethodParameterInfo parameter, out ITypeSymbol typeSymbol)
+        {
+            if (parameter.Type.Type == null)
+            {
+                typeSymbol = null; // TODO: Lookup for proper System.Void ITypeSymbol?
+                return "System.Void";
+            }
+
+            string constantTypeName = parameter.Type.Type.GetFullName();
+            switch (constantTypeName)
+            {
+                case "System.String":
+                {
+                    typeSymbol = null;
+                    return parameter.Type.Value.ToString();
+                }
+                case "System.Type":
+                {
+                    typeSymbol = parameter.Type.Value as ITypeSymbol;
+                    return typeSymbol.GetFullName();
+                }
+                default:
+                    throw new Exception();
+            }
+        }
+
         public static bool IsAttribute<TAttribute>(this AttributeData attribute)
             where TAttribute : Attribute
         {
@@ -89,6 +115,12 @@ namespace CodeTranslator.Shared
         {
             var model = provider.GetSemanticModel(node.SyntaxTree);
             return (T)model.GetConstantValue(node).Value;
+        }
+
+
+        public static SemanticModel GetSemanticModel(this ICompilationContextProvider provider, SyntaxTree tree)
+        {
+            return provider.Compilation.GetSemanticModel(tree);
         }
 
         // Reference https://github.com/dotnet/roslyn/blob/master/src/Compilers/Core/Portable/SymbolDisplay/SymbolDisplayFormat.cs

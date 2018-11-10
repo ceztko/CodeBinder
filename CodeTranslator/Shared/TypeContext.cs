@@ -14,11 +14,6 @@ namespace CodeTranslator.Shared
 
         public CompilationContext Compilation { get; internal set; }
 
-        public SemanticModel GetSemanticModel(SyntaxTree tree)
-        {
-            return Compilation.GetSemanticModel(tree);
-        }
-
         public SyntaxTreeContext TreeContext
         {
             get { return GetSyntaxTreeContext(); }

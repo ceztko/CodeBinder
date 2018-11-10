@@ -7,22 +7,22 @@ using System.Text;
 
 namespace CodeTranslator.Util
 {
-    public abstract class SyntaxWriter<TSyntax> : ISyntaxWriter, ICompilationContextProvider
+    public abstract class ContextWriter<TSyntax> : IContextWriter, ICompilationContextProvider
     {
         protected CodeBuilder Builder { get; private set; }
         public CompilationContext Compilation { get; private set; }
-        public TSyntax Syntax { get; private set; }
+        public TSyntax Context { get; private set; }
 
-        protected SyntaxWriter(TSyntax syntax, ICompilationContextProvider provider)
+        protected ContextWriter(TSyntax context, ICompilationContextProvider provider)
         {
             // Slightly optimize getting semantic model by
             // storing CompilationContext
-            Syntax = syntax;
+            Context = context;
             Compilation = provider.Compilation;
         }
 
         // Append an ISyntaxWriter with CodeBuilder
-        void ISyntaxWriter.Write(CodeBuilder builder)
+        void IContextWriter.Write(CodeBuilder builder)
         {
             Builder = builder;
             Write();
@@ -30,14 +30,9 @@ namespace CodeTranslator.Util
         }
 
         protected abstract void Write();
-
-        public SemanticModel GetSemanticModel(SyntaxTree tree)
-        {
-            return Compilation.GetSemanticModel(tree);
-        }
     }
 
-    public class NullSyntaxWriter : ISyntaxWriter
+    public class ContextWriterWriter : IContextWriter
     {
         public void Write(CodeBuilder builder)
         {
@@ -45,7 +40,7 @@ namespace CodeTranslator.Util
         }
     }
 
-    public interface ISyntaxWriter
+    public interface IContextWriter
     {
         void Write(CodeBuilder builder);
     }

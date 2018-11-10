@@ -49,14 +49,13 @@ namespace CodeTranslator.Util
         }
 
 
-        public CodeBuilder Append(ISyntaxWriter writer)
+        public CodeBuilder Append(IContextWriter writer)
         {
             writer.Write(this);
             return this;
         }
 
-
-        public CodeBuilder AppendLine(ISyntaxWriter writer)
+        public CodeBuilder AppendLine(IContextWriter writer)
         {
             writer.Write(this);
             AppendLine();

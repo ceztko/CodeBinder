@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class ExpressiontWriter<TExpression> : SyntaxWriter<TExpression>
+    abstract class ExpressiontWriter<TExpression> : ContextWriter<TExpression>
         where TExpression : ExpressionSyntax
     {
         public ExpressiontWriter(TExpression syntax, ICompilationContextProvider context)
@@ -24,17 +24,17 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            if (Syntax.Left.Kind() == SyntaxKind.IdentifierName)
+            if (Context.Left.Kind() == SyntaxKind.IdentifierName)
             {
-                var symbol = Syntax.Left.GetSymbolInfo(this);
+                var symbol = Context.Left.GetSymbolInfo(this);
                 if (symbol.Symbol.Kind == SymbolKind.Property)
                 {
-                    var operatorKind = Syntax.OperatorToken.Kind();
+                    var operatorKind = Context.OperatorToken.Kind();
                     switch (operatorKind)
                     {
                         case SyntaxKind.EqualsToken:
-                            Builder.Append("set").Append((Syntax.Left as IdentifierNameSyntax).Identifier.Text)
-                                .Append("(").Append(Syntax.Right.GetWriter(this)).Append(")");
+                            Builder.Append("set").Append((Context.Left as IdentifierNameSyntax).Identifier.Text)
+                                .Append("(").Append(Context.Right.GetWriter(this)).Append(")");
                             break;
                         default:
                             break;
@@ -43,9 +43,9 @@ namespace CodeTranslator.Java
                 }
             }
 
-            Builder.Append(Syntax.Left.GetWriter(this));
-            Builder.Space().Append(Syntax.OperatorToken.Text).Space();
-            Builder.Append(Syntax.Right.GetWriter(this));
+            Builder.Append(Context.Left.GetWriter(this));
+            Builder.Space().Append(Context.OperatorToken.Text).Space();
+            Builder.Append(Context.Right.GetWriter(this));
         }
     }
 
@@ -56,8 +56,8 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            var symbol = Syntax.GetSymbolInfo(this);
-            Builder.Append(Syntax.Identifier.Text);
+            var symbol = Context.GetSymbolInfo(this);
+            Builder.Append(Context.Identifier.Text);
         }
     }
 }

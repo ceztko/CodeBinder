@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class PropertyWriter<TProperty> : SyntaxWriter<TProperty>
+    abstract class PropertyWriter<TProperty> : ContextWriter<TProperty>
             where TProperty : BasePropertyDeclarationSyntax
     {
         List<string> _modifiers;
@@ -19,11 +19,11 @@ namespace CodeTranslator.Java
         protected PropertyWriter(TProperty syntax, ICompilationContextProvider context)
             : base(syntax, context)
         {
-            _modifiers = Syntax.GetCSharpModifierStrings();
+            _modifiers = Context.GetCSharpModifierStrings();
             _isAutoProperty = true;
-            if (Syntax.AccessorList != null)
+            if (Context.AccessorList != null)
             {
-                foreach (var accessor in Syntax.AccessorList.Accessors)
+                foreach (var accessor in Context.AccessorList.Accessors)
                 {
                     if (accessor.Body != null)
                     {
@@ -37,7 +37,7 @@ namespace CodeTranslator.Java
         protected override void Write()
         {
             WriteUnderlyingField();
-            WriteAccessors(Syntax.AccessorList);
+            WriteAccessors(Context.AccessorList);
         }
 
         private void WriteUnderlyingField()
@@ -133,7 +133,7 @@ namespace CodeTranslator.Java
 
         public bool IsParentInterface
         {
-            get { return Syntax.Parent.Kind() == SyntaxKind.InterfaceDeclaration; }
+            get { return Context.Parent.Kind() == SyntaxKind.InterfaceDeclaration; }
         }
 
         public string UnderlyingFieldName
@@ -153,7 +153,7 @@ namespace CodeTranslator.Java
 
         public string JavaType
         {
-            get { return Syntax.Type.GetJavaType(this); }
+            get { return Context.Type.GetJavaType(this); }
         }
 
         public abstract string PropertyName { get; }
@@ -166,7 +166,7 @@ namespace CodeTranslator.Java
 
         public override string PropertyName
         {
-            get { return Syntax.Identifier.Text; }
+            get { return Context.Identifier.Text; }
         }
     }
 

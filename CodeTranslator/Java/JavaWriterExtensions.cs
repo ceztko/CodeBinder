@@ -10,7 +10,7 @@ namespace CodeTranslator.Java
 {
     static class JavaWriterExtension
     {
-        public static ISyntaxWriter GetWriter(this MemberDeclarationSyntax member, ICompilationContextProvider context)
+        public static IContextWriter GetWriter(this MemberDeclarationSyntax member, ICompilationContextProvider context)
         {
             var kind = member.Kind();
             switch (kind)
@@ -36,11 +36,11 @@ namespace CodeTranslator.Java
                 case SyntaxKind.EnumDeclaration:
                     return new EnumTypeWriter(member as EnumDeclarationSyntax, context);
                 default:
-                    return new NullSyntaxWriter();
+                    return new ContextWriterWriter();
             }
         }
 
-        public static ISyntaxWriter GetWriter(this StatementSyntax statement, ICompilationContextProvider context)
+        public static IContextWriter GetWriter(this StatementSyntax statement, ICompilationContextProvider context)
         {
             var kind = statement.Kind();
             switch (kind)
@@ -48,11 +48,11 @@ namespace CodeTranslator.Java
                 case SyntaxKind.ExpressionStatement:
                     return new ExpressionStamentWriter(statement as ExpressionStatementSyntax, context);
                 default:
-                    return new NullSyntaxWriter();
+                    return new ContextWriterWriter();
             }
         }
 
-        public static ISyntaxWriter GetWriter(this ExpressionSyntax expression, ICompilationContextProvider context)
+        public static IContextWriter GetWriter(this ExpressionSyntax expression, ICompilationContextProvider context)
         {
             var kind = expression.Kind();
             switch (kind)
@@ -62,7 +62,7 @@ namespace CodeTranslator.Java
                 case SyntaxKind.IdentifierName:
                     return new IdenfitiferNameWriter(expression as IdentifierNameSyntax, context);
                 default:
-                    return new NullSyntaxWriter();
+                    return new ContextWriterWriter();
             }
         }
     }

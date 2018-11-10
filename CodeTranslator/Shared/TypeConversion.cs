@@ -12,11 +12,6 @@ namespace CodeTranslator.Shared
     {
         internal TypeConversion() { }
 
-        public SemanticModel GetSemanticModel(SyntaxTree tree)
-        {
-            return Compilation.GetSemanticModel(tree);
-        }
-
         public abstract void Write(CodeBuilder builder);
 
         public virtual string GeneratedPreamble
