@@ -13,19 +13,22 @@ namespace CodeTranslator.JNI
 {
     static class JNIMethodExtensions
     {
-        public static string GetJNIMethodName(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        public static string GetJNIMethodName(this MethodDeclarationSyntax method, JNIModuleContext module)
         {
-            StringBuilder builder = new StringBuilder();
-            var parentType = method.Parent.GetDeclaredSymbol(provider).GetFullName();
-            builder.Append("Java_").Append(parentType.Replace('.', '_')).Append("_").Append(method.GetName());
-            return builder.ToString();
+            return getJNIMethodName(method.GetName(), method, module);
         }
 
-        public static string GetJNIMethodName(this MethodSignatureInfo signature, MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        public static string GetJNIMethodName(this MethodSignatureInfo signature, MethodDeclarationSyntax method, JNIModuleContext module)
         {
+            return getJNIMethodName(signature.MethodName, method, module);
+        }
+
+        static string getJNIMethodName(string methodName, MethodDeclarationSyntax method, JNIModuleContext module)
+        {
+            var parentType = method.Parent.GetDeclaredSymbol(module);
             StringBuilder builder = new StringBuilder();
-            var parentType = method.Parent.GetDeclaredSymbol(provider).GetFullName();
-            builder.Append("Java_").Append(parentType.Replace('.', '_')).Append("_").Append("_").Append(signature.MethodName);
+            builder.Append("Java_").Append(module.LanguageConversion.BaseNamespace.Replace('.', '_')).Append("_")
+                .Append(parentType.GetName().Replace('.', '_')).Append("_").Append(methodName);
             return builder.ToString();
         }
 

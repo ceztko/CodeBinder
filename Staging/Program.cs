@@ -23,18 +23,27 @@ namespace ConsoleApp1
 
             //Solution solution = workspace.OpenSolutionAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet.sln").Result;
             //var conv = SolutionConverter.CreateFor<CSToJavaConversion>(solution);
-            Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdfNet.csproj").Result;
-            //Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj").Result;
+            //Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdfNet.csproj").Result;
+            Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj").Result;
 
-            var conv = ProjectConverter.CreateFor<CSToJavaConversion>(project);
-            conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
-            genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\alt\java";
-            conv.ConvertAndWrite(genargs);
-
-            //var conv2 = ProjectConverter.CreateFor<CSToJNIConversion>(project);
-            //conv2.Conversion.BaseNamespace = "com.euronovate.libpdf.reserved";
-            //genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJni";
-            //conv2.ConvertAndWrite(genargs);
+            if (false)
+            {
+                // Java conversion
+                var conv = ProjectConverter.CreateFor<CSToJavaConversion>(project);
+                conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
+                genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\alt\java";
+                genargs.EagerStringConversion = true;
+                conv.ConvertAndWrite(genargs);
+            }
+            else
+            {
+                // JNI conversion
+                var conv2 = ProjectConverter.CreateFor<CSToJNIConversion>(project);
+                conv2.Conversion.BaseNamespace = "com.euronovate.libpdf";
+                genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJni";
+                genargs.EagerStringConversion = true;
+                conv2.ConvertAndWrite(genargs);
+            }
         }
     }
 }

@@ -77,7 +77,7 @@ namespace CodeTranslator.JNI
 
             public override string MethodName
             {
-                get { return Context.Method.GetJNIMethodName(this); }
+                get { return Context.Method.GetJNIMethodName(Context.Module.TypeContext); }
             }
 
             private void WriteType(TypeSyntax type, bool isRef)
@@ -114,7 +114,7 @@ namespace CodeTranslator.JNI
 
             public override string MethodName
             {
-                get { return _signature.GetJNIMethodName(Context.Method, this); }
+                get { return _signature.GetJNIMethodName(Context.Method, Context.Module.TypeContext); }
             }
         }
     }
