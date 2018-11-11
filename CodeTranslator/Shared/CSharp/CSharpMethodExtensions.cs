@@ -14,6 +14,32 @@ namespace CodeTranslator.Shared.CSharp
 {
     static class CSharpMethodExtensions
     {
+        public static string GetTypeName(ref this MethodParameterInfo parameter, out ITypeSymbol typeSymbol)
+        {
+            if (parameter.Type.Type == null)
+            {
+                typeSymbol = null; // TODO: Lookup for proper System.Void ITypeSymbol?
+                return "System.Void";
+            }
+
+            string constantTypeName = parameter.Type.Type.GetFullName();
+            switch (constantTypeName)
+            {
+                case "System.String":
+                {
+                    typeSymbol = null;
+                    return parameter.Type.Value.ToString();
+                }
+                case "System.Type":
+                {
+                    typeSymbol = parameter.Type.Value as ITypeSymbol;
+                    return typeSymbol.GetFullName();
+                }
+                default:
+                    throw new Exception();
+            }
+        }
+
         public static List<MethodSignatureInfo> GetMethodSignatures(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
         {
             var ret = new List<MethodSignatureInfo>();
@@ -100,6 +126,7 @@ namespace CodeTranslator.Shared.CSharp
 
             var ret = new MethodSignatureInfo();
             ret.MethodName = methodName;
+            ret.Modifiers = method.GetCSharpModifiers();
             ret.ReturnType = new MethodParameterInfo(returnType, null);
             ret.Parameters = parameters;
             return ret;
@@ -149,161 +176,162 @@ namespace CodeTranslator.Shared.CSharp
             return node.EqualsValue.Value.GetValue<int>(provider);
         }
 
-        public static List<string> GetCSharpModifierStrings(this BaseFieldDeclarationSyntax node)
+        public static SyntaxKind[] GetCSharpModifiers(this BaseFieldDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
             foreach (var modifier in node.Modifiers)
             {
-                switch (modifier.Text)
+                switch (modifier.Kind())
                 {
-                    case "public":
-                    case "internal":
-                    case "protected":
-                    case "private":
+                    case SyntaxKind.PublicKeyword:
+                    case SyntaxKind.InternalKeyword:
+                    case SyntaxKind.ProtectedKeyword:
+                    case SyntaxKind.PrivateKeyword:
                         explicitAccessibility = true;
                         break;
-                    case "new":
-                    case "const":
+                    case SyntaxKind.NewKeyword:
+                    case SyntaxKind.ConstKeyword:
                         break;
                     default:
                         throw new Exception();
                 }
             }
 
-            var ret = new List<string>();
+            var ret = new List<SyntaxKind>();
 
             if (!explicitAccessibility)
-                ret.Add("internal");
+                ret.Add(SyntaxKind.InternalKeyword);
 
             foreach (var modifier in node.Modifiers)
-                ret.Add(modifier.Text);
+                ret.Add(modifier.Kind());
 
-            return ret;
+            return ret.ToArray();
         }
 
-        public static List<string> GetCSharpModifierStrings(this BaseTypeDeclarationSyntax node)
+        public static SyntaxKind[] GetCSharpModifiers(this BaseTypeDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
             foreach (var modifier in node.Modifiers)
             {
-                switch (modifier.Text)
+                switch (modifier.Kind())
                 {
-                    case "public":
-                    case "internal":
-                    case "protected":
-                    case "private":
+                    case SyntaxKind.PublicKeyword:
+                    case SyntaxKind.InternalKeyword:
+                    case SyntaxKind.ProtectedKeyword:
+                    case SyntaxKind.PrivateKeyword:
                         explicitAccessibility = true;
                         break;
-                    case "abstract":
-                    case "static":
+                    case SyntaxKind.AbstractKeyword:
+                    case SyntaxKind.StaticKeyword:
                         break;
                     default:
                         throw new Exception();
                 }
             }
 
-            var ret = new List<string>();
+            var ret = new List<SyntaxKind>();
 
             if (!explicitAccessibility)
-                ret.Add("internal");
+                ret.Add(SyntaxKind.InternalKeyword);
 
             foreach (var modifier in node.Modifiers)
-                ret.Add(modifier.Text);
+                ret.Add(modifier.Kind());
 
-            return ret;
+            return ret.ToArray();
         }
 
-        public static List<string> GetCSharpModifierStrings(this BaseMethodDeclarationSyntax node)
+        public static SyntaxKind[] GetCSharpModifiers(this BaseMethodDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
             foreach (var modifier in node.Modifiers)
             {
-                switch (modifier.Text)
+                switch (modifier.Kind())
                 {
-                    case "public":
-                    case "internal":
-                    case "protected":
-                    case "private":
+                    case SyntaxKind.PublicKeyword:
+                    case SyntaxKind.InternalKeyword:
+                    case SyntaxKind.ProtectedKeyword:
+                    case SyntaxKind.PrivateKeyword:
                         explicitAccessibility = true;
                         break;
-                    case "static":
-                    case "virtual":
-                    case "abstract":
-                    case "override":
-                    case "sealed":
-                    case "extern":
-                    case "new":
+                    case SyntaxKind.StaticKeyword:
+                    case SyntaxKind.VirtualKeyword:
+                    case SyntaxKind.AbstractKeyword:
+                    case SyntaxKind.OverrideKeyword:
+                    case SyntaxKind.SealedKeyword:
+                    case SyntaxKind.ExternKeyword:
+                    case SyntaxKind.NewKeyword:
                         break;
                     default:
                         throw new Exception();
                 }
             }
 
-            var ret = new List<string>();
+            var ret = new List<SyntaxKind>();
 
             if (!explicitAccessibility)
-                ret.Add("private");
+                ret.Add(SyntaxKind.PrivateKeyword);
 
             foreach (var modifier in node.Modifiers)
-                ret.Add(modifier.Text);
+                ret.Add(modifier.Kind());
 
-            return ret;
+            return ret.ToArray();
         }
 
-        public static List<string> GetCSharpModifierStrings(this BasePropertyDeclarationSyntax node)
+        public static SyntaxKind[] GetCSharpModifiers(this BasePropertyDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
             foreach (var modifier in node.Modifiers)
             {
-                switch (modifier.Text)
+                switch (modifier.Kind())
                 {
-                    case "public":
-                    case "internal":
-                    case "protected":
-                    case "private":
+                    case SyntaxKind.PublicKeyword:
+                    case SyntaxKind.InternalKeyword:
+                    case SyntaxKind.ProtectedKeyword:
+                    case SyntaxKind.PrivateKeyword:
                         explicitAccessibility = true;
                         break;
-                    case "static":
-                    case "virtual":
-                    case "abstract":
-                    case "override":
-                    case "sealed":
-                    case "new":
+                    case SyntaxKind.StaticKeyword:
+                    case SyntaxKind.VirtualKeyword:
+                    case SyntaxKind.AbstractKeyword:
+                    case SyntaxKind.OverrideKeyword:
+                    case SyntaxKind.SealedKeyword:
+                    case SyntaxKind.NewKeyword:
                         break;
                     default:
                         throw new Exception();
                 }
             }
 
-            var ret = new List<string>();
+            var ret = new List<SyntaxKind>();
 
             if (!explicitAccessibility)
-                ret.Add("private");
+                ret.Add(SyntaxKind.PrivateKeyword);
 
             foreach (var modifier in node.Modifiers)
-                ret.Add(modifier.Text);
+                ret.Add(modifier.Kind());
 
-            return ret;
+            return ret.ToArray();
         }
 
-        public static List<string> GetCSharpModifierStrings(this AccessorDeclarationSyntax node)
+        public static SyntaxKind[] GetCSharpModifiers(this AccessorDeclarationSyntax node)
         {
-            var ret = new List<string>();
+            var ret = new List<SyntaxKind>();
             foreach (var modifier in node.Modifiers)
             {
-                switch (modifier.Text)
+                var kind = modifier.Kind();
+                switch (kind)
                 {
-                    case "internal":
-                    case "protected":
-                    case "private":
-                        ret.Add(modifier.Text);
+                    case SyntaxKind.InternalKeyword:
+                    case SyntaxKind.ProtectedKeyword:
+                    case SyntaxKind.PrivateKeyword:
+                        ret.Add(kind);
                         break;
                     default:
                         throw new Exception();
                 }
             }
 
-            return ret;
+            return ret.ToArray();
         }
 
         public static bool HasModifier(this SyntaxTokenList modifiers, string modifierStr)

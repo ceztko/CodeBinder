@@ -100,7 +100,7 @@ namespace CodeTranslator.JNI
                     if (symbol == null || symbol.TypeKind == TypeKind.Class)
                         return "jobject";
                     else
-                        throw new Exception("Unsupported by ref type " + typeName);
+                        throw new Exception("Unsupported by type " + typeName);
                 }
             }
         }
@@ -139,7 +139,7 @@ namespace CodeTranslator.JNI
                     return "jStringBox";
                 default:
                 {
-                    if (symbol.TypeKind == TypeKind.Struct)
+                    if (symbol?.TypeKind == TypeKind.Struct)
                         return "jlong";
                     else
                         throw new Exception("Unsupported by ref type " + typeName); 

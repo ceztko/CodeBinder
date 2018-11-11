@@ -13,13 +13,13 @@ namespace CodeTranslator.Java
     abstract class PropertyWriter<TProperty> : ContextWriter<TProperty>
             where TProperty : BasePropertyDeclarationSyntax
     {
-        List<string> _modifiers;
+        SyntaxKind[] _modifiers;
         bool _isAutoProperty;
 
         protected PropertyWriter(TProperty syntax, ICompilationContextProvider context)
             : base(syntax, context)
         {
-            _modifiers = Context.GetCSharpModifierStrings();
+            _modifiers = Context.GetCSharpModifiers();
             _isAutoProperty = true;
             if (Context.AccessorList != null)
             {
@@ -123,11 +123,11 @@ namespace CodeTranslator.Java
             }
         }
 
-        List<string> getSetterModifiers(AccessorDeclarationSyntax accessor)
+        List<SyntaxKind> getSetterModifiers(AccessorDeclarationSyntax accessor)
         {
-            var ret = new List<string>();
+            var ret = new List<SyntaxKind>();
             ret.AddRange(_modifiers.Skip(1));
-            ret.AddRange(accessor.GetCSharpModifierStrings());
+            ret.AddRange(accessor.GetCSharpModifiers());
             return ret;
         }
 

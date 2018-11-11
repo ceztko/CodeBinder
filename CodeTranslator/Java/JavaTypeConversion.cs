@@ -154,15 +154,18 @@ namespace CodeTranslator.Java
             bool first = true;
             foreach (var member in members)
             {
-                if (first)
-                    first = false;
-                else
-                    Builder.AppendLine();
-
                 if (member.HasAttribute<IgnoreAttribute>(this))
                     continue;
 
-                Builder.Append(member.GetWriter(this));
+                foreach (var writer in member.GetWriters(this))
+                {
+                    if (first)
+                        first = false;
+                    else
+                        Builder.AppendLine();
+
+                    Builder.Append(writer);
+                }
             }
         }
 

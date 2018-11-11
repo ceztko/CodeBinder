@@ -20,6 +20,12 @@ namespace CodeTranslator.Java
             WriteModifiers();
             WriteReturnType();
             Builder.Append(MethodName);
+            WriteParameters();
+            WriteMethodBody();
+        }
+
+        protected virtual void WriteParameters()
+        {
             if (Context.ParameterList.Parameters.Count == 0)
             {
                 Builder.Append("()");
@@ -31,7 +37,6 @@ namespace CodeTranslator.Java
                     WriteParameters(Context.ParameterList);
                 }
             }
-            WriteMethodBody();
         }
 
         protected virtual void WriteMethodBody()
@@ -128,6 +133,53 @@ namespace CodeTranslator.Java
         }
     }
 
+    class SignatureMethodWriter : MethodWriter<MethodDeclarationSyntax>
+    {
+        MethodSignatureInfo _signature;
+
+        public SignatureMethodWriter(MethodSignatureInfo signature, MethodDeclarationSyntax method, ICompilationContextProvider context)
+            : base(method, context)
+        {
+            _signature = signature;
+        }
+
+        protected override void WriteModifiers()
+        {
+            Builder.Append(_signature.GetJavaModifiersString()).Space();
+        }
+
+        protected override void WriteReturnType()
+        {
+            Builder.Append(_signature.ReturnType.GetJavaTypeName(JavaTypeFlags.NativeMethod)).Space();
+        }
+
+        protected override void WriteMethodBody()
+        {
+            Builder.EndOfLine();
+        }
+
+        protected override void WriteParameters()
+        {
+            for (int i = 0; i < _signature.Parameters.Length; i++)
+                WriteParameter(ref _signature.Parameters[i]);
+        }
+
+        private void WriteParameter(ref MethodParameterInfo parameter)
+        {
+            Builder.Append(",").Space().Append(parameter.GetJavaTypeName(JavaTypeFlags.NativeMethod)).Space().Append(parameter.Name);
+        }
+
+        public override string MethodName
+        {
+            get { return _signature.MethodName; }
+        }
+
+        public override bool IsNative
+        {
+            get { return true; } // TODO: Check method native
+        }
+    }
+
     class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
     {
         public ConstructorWriter(ConstructorDeclarationSyntax method, ICompilationContextProvider context)
@@ -151,12 +203,12 @@ namespace CodeTranslator.Java
 
         protected override void WriteModifiers()
         {
-            Builder.Append("protected ");
+            Builder.Append("protected").Space();
         }
 
         protected override void WriteReturnType()
         {
-            Builder.Append("void ");
+            Builder.Append("void").Space();
         }
 
         public override string MethodName

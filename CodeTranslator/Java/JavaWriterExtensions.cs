@@ -1,4 +1,5 @@
 ﻿using CodeTranslator.Shared;
+using CodeTranslator.Shared.CSharp;
 using CodeTranslator.Util;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,33 +11,33 @@ namespace CodeTranslator.Java
 {
     static class JavaWriterExtension
     {
-        public static IContextWriter GetWriter(this MemberDeclarationSyntax member, ICompilationContextProvider context)
+        public static IEnumerable<IContextWriter> GetWriters(this MemberDeclarationSyntax member, ICompilationContextProvider context)
         {
             var kind = member.Kind();
             switch (kind)
             {
                 case SyntaxKind.ConstructorDeclaration:
-                    return new ConstructorWriter(member as ConstructorDeclarationSyntax, context);
+                    return new[] { new ConstructorWriter(member as ConstructorDeclarationSyntax, context) };
                 case SyntaxKind.DestructorDeclaration:
-                    return new DestructorWriter(member as DestructorDeclarationSyntax, context);
+                    return new[] { new DestructorWriter(member as DestructorDeclarationSyntax, context) };
                 case SyntaxKind.MethodDeclaration:
-                    return new MethodWriter(member as MethodDeclarationSyntax, context);
+                    return getMethodWriters(member as MethodDeclarationSyntax, context);
                 case SyntaxKind.PropertyDeclaration:
-                    return new PropertyWriter(member as PropertyDeclarationSyntax, context);
+                    return new[] { new PropertyWriter(member as PropertyDeclarationSyntax, context) };
                 case SyntaxKind.IndexerDeclaration:
-                    return new IndexerWriter(member as IndexerDeclarationSyntax, context);
+                    return new[] { new IndexerWriter(member as IndexerDeclarationSyntax, context) };
                 case SyntaxKind.FieldDeclaration:
-                    return new FieldWriter(member as FieldDeclarationSyntax, context);
+                    return new[] { new FieldWriter(member as FieldDeclarationSyntax, context) };
                 case SyntaxKind.InterfaceDeclaration:
-                    return new InterfaceTypeWriter(member as InterfaceDeclarationSyntax, context);
+                    return new[] { new InterfaceTypeWriter(member as InterfaceDeclarationSyntax, context) };
                 case SyntaxKind.ClassDeclaration:
-                    return new ClassTypeWriter(member as ClassDeclarationSyntax, context);
+                    return new[] { new ClassTypeWriter(member as ClassDeclarationSyntax, context) };
                 case SyntaxKind.StructKeyword:
-                    return new StructTypeWriter(member as StructDeclarationSyntax, context);
+                    return new[] { new StructTypeWriter(member as StructDeclarationSyntax, context) };
                 case SyntaxKind.EnumDeclaration:
-                    return new EnumTypeWriter(member as EnumDeclarationSyntax, context);
+                    return new[] { new EnumTypeWriter(member as EnumDeclarationSyntax, context) };
                 default:
-                    return new ContextWriterWriter();
+                    return new[] { new ContextWriterWriter() };
             }
         }
 
@@ -63,6 +64,20 @@ namespace CodeTranslator.Java
                     return new IdenfitiferNameWriter(expression as IdentifierNameSyntax, context);
                 default:
                     return new ContextWriterWriter();
+            }
+        }
+
+        static IEnumerable<IContextWriter> getMethodWriters(MethodDeclarationSyntax method, ICompilationContextProvider context)
+        {
+            var signatures = method.GetMethodSignatures(context);
+            if (signatures.Count == 0)
+            {
+                yield return new MethodWriter(method, context);
+            }
+            else
+            {
+                foreach (var signature in signatures)
+                    yield return new SignatureMethodWriter(signature, method, context);
             }
         }
     }

@@ -1,13 +1,15 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeTranslator.Shared
+namespace CodeTranslator.Shared.CSharp
 {
     public class MethodSignatureInfo
     {
         public string MethodName;
+        public SyntaxKind[] Modifiers;
         public MethodParameterInfo ReturnType;
         public MethodParameterInfo[] Parameters;
     }
