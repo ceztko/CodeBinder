@@ -11,6 +11,8 @@ namespace CodeTranslator.JNI
 {
     public class CSToJNIConversion : LanguageConversion<JNISyntaxTreeContext, JNIModuleContext>
     {
+        public const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
+
         Dictionary<string, JNIModuleContextParent> _modules;
 
         public CSToJNIConversion()
@@ -48,6 +50,7 @@ namespace CodeTranslator.JNI
         {
             get
             {
+                yield return new MethodInitWriter(this);
                 yield return new StringConversionBuilder("JNITypes.cpp", () => JNIResources.JNITypes_cpp);
                 yield return new StringConversionBuilder("JNITypesPrivate.h", () => JNIResources.JNITypesPrivate_h);
                 yield return new StringConversionBuilder("JNITypes.h", () => JNIResources.JNITypes_h);

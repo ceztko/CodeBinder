@@ -40,7 +40,7 @@ namespace CodeTranslator.Shared.CSharp
             }
         }
 
-        public static List<MethodSignatureInfo> GetMethodSignatures(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        public static MethodSignatureInfo[] GetMethodSignatures(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
         {
             var ret = new List<MethodSignatureInfo>();
             var attributes = method.GetAttributes(provider);
@@ -52,7 +52,7 @@ namespace CodeTranslator.Shared.CSharp
                     ret.Add(methodData);
                 }
             }
-            return ret;
+            return ret.ToArray();
         }
 
         private static MethodSignatureInfo getMethodDataFromConstructorParameter(MethodDeclarationSyntax method, AttributeData attribute)

@@ -31,8 +31,7 @@ namespace CodeTranslator.JNI
             Builder.Append("JNIEXPORT").Space();
             Builder.Append(ReturnType).Space();
             Builder.Append("JNICALL").Space();
-            Builder.Append("Java_").Append(Context.Module.Namespace.Replace('.', '_')).Append("_")
-                .Append(Context.Module.JNIModuleName).Append("_").Append(MethodName).AppendLine("(");
+            Builder.Append(MethodName).AppendLine("(");
             Builder.IncreaseIndent();
             Builder.Append("JNIEnv *, jclass");
             WriteParameters();
@@ -78,7 +77,7 @@ namespace CodeTranslator.JNI
 
             public override string MethodName
             {
-                get { return Context.Method.GetName(); }
+                get { return Context.Method.GetJNIMethodName(this); }
             }
 
             private void WriteType(TypeSyntax type, bool isRef)
@@ -115,7 +114,7 @@ namespace CodeTranslator.JNI
 
             public override string MethodName
             {
-                get { return _signature.MethodName; }
+                get { return _signature.GetJNIMethodName(Context.Method, this); }
             }
         }
     }

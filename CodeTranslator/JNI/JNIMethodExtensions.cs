@@ -13,6 +13,22 @@ namespace CodeTranslator.JNI
 {
     static class JNIMethodExtensions
     {
+        public static string GetJNIMethodName(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        {
+            StringBuilder builder = new StringBuilder();
+            var parentType = method.Parent.GetDeclaredSymbol(provider).GetFullName();
+            builder.Append("Java_").Append(parentType.Replace('.', '_')).Append("_").Append(method.GetName());
+            return builder.ToString();
+        }
+
+        public static string GetJNIMethodName(this MethodSignatureInfo signature, MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        {
+            StringBuilder builder = new StringBuilder();
+            var parentType = method.Parent.GetDeclaredSymbol(provider).GetFullName();
+            builder.Append("Java_").Append(parentType.Replace('.', '_')).Append("_").Append("_").Append(signature.MethodName);
+            return builder.ToString();
+        }
+
         public static string GetJNITypeName(ref this MethodParameterInfo parameter)
         {
             ITypeSymbol typeSymbol;

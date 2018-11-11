@@ -60,6 +60,11 @@ namespace CodeTranslator.Shared
             return getSyntaxTreeContext();
         }
 
+        public new IEnumerable<TTypeContext> RootTypes
+        {
+            get { return m_rootTypes; }
+        }
+
         protected abstract TSyntaxTreeContext getSyntaxTreeContext();
 
         protected void AddType(TTypeContext type, TTypeContext parent)
