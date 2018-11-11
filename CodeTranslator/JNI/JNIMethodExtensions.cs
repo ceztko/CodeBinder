@@ -17,18 +17,22 @@ namespace CodeTranslator.JNI
         {
             ITypeSymbol typeSymbol;
             string typeName = parameter.GetTypeName(out typeSymbol);
-            return getJNIType(typeName, typeSymbol);
+            return getJNIType(typeName, typeSymbol, false);
         }
 
         public static string GetJNIType(this TypeSyntax type, bool isByRef, ICompilationContextProvider provider)
         {
             var symbol = type.GetTypeSymbol(provider);
-            return getJNIType(type, symbol, isByRef);
+            return getJNIType(symbol, isByRef);
         }
 
-        private static string getJNIType(TypeSyntax syntax, ITypeSymbol symbol, bool isByRef)
+        private static string getJNIType(ITypeSymbol symbol, bool isByRef)
         {
-            if (symbol.TypeKind == TypeKind.Enum)
+            return getJNIType(symbol.GetFullName(), symbol, isByRef);
+        }
+        private static string getJNIType(string typeName, ITypeSymbol symbol, bool isByRef)
+        {
+            if (symbol?.TypeKind == TypeKind.Enum)
             {
                 if (isByRef)
                     return "jIntegerBox";
@@ -36,28 +40,22 @@ namespace CodeTranslator.JNI
                     return "jint";
             }
 
-            string netFullName;
-            string javaArraySuffix;
-            if (symbol.TypeKind == TypeKind.Array)
+            string jniTypeSuffix = string.Empty;
+            if (symbol?.TypeKind == TypeKind.Array)
             {
                 var arrayType = symbol as IArrayTypeSymbol;
 
-                netFullName = arrayType.ElementType.GetFullName();
-                javaArraySuffix = "Array";
-            }
-            else
-            {
-                netFullName = symbol.GetFullName();
-                javaArraySuffix = string.Empty;
+                typeName = arrayType.ElementType.GetFullName();
+                jniTypeSuffix = "Array";
             }
 
             string jniTypeName;
             if (isByRef)
-                jniTypeName = getJNIByRefType(netFullName, symbol);
+                jniTypeName = getJNIByRefType(typeName, symbol);
             else
-                jniTypeName = getJNIType(netFullName, symbol);
+                jniTypeName = getJNIType(typeName, symbol);
 
-            return jniTypeName + javaArraySuffix;
+            return jniTypeName + jniTypeSuffix;
         }
 
 
@@ -99,13 +97,7 @@ namespace CodeTranslator.JNI
                     return "jdouble";
                 default:
                 {
-                    if (symbol == null)
-                    {
-                        // This case happen with attribute types that are provided as strings
-                        return typeName;
-                    }
-
-                    if (symbol.TypeKind == TypeKind.Class)
+                    if (symbol == null || symbol.TypeKind == TypeKind.Class)
                         return "jobject";
                     else
                         throw new Exception("Unsupported by ref type " + typeName);
