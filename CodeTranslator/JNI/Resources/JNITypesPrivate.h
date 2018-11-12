@@ -142,18 +142,18 @@ typedef _jStringBox * jStringBox;
 template<typename BaseT>
 typename BaseT::Type _jTypeBox<BaseT>::GetValue(JNIEnv *env) const
 {
-    return getValue(env, getFieldId(env));
+    return this->getValue(env, getFieldId(env));
 }
 
 template<typename BaseT>
 void _jTypeBox<BaseT>::SetValue(JNIEnv *env, typename BaseT::Type value)
 {
-    setValue(env, getFieldId(env), value);
+    this->setValue(env, getFieldId(env), value);
 }
 
 template<typename BaseT>
 jfieldID _jTypeBox<BaseT>::getFieldId(JNIEnv *env) const
 {
     auto cls = env->GetObjectClass((jobject)this);
-    return env->GetFieldID(cls, "value", getFieldIdSignature());
+    return env->GetFieldID(cls, "value", this->getFieldIdSignature());
 }

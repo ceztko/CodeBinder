@@ -5,13 +5,16 @@
 
 // Wraps custom java box type
 template <typename TJBox, typename T>
-class JB2NImpl
+class BJ2NImpl
 {
 public:
-    JB2NImpl(JNIEnv *env, TJBox box, bool commit);
-    ~JB2NImpl();
+    BJ2NImpl(JNIEnv *env, TJBox box, bool commit);
+    ~BJ2NImpl();
 public:
-    inline operator T *() const { return &Value; }
+    inline T * ptr() { return &Value; }
+    inline T & ref() { return Value; }
+    inline operator T *() { return &Value; }
+    inline operator T &() { return Value; }
 public:
     T Value;
 private:
@@ -21,7 +24,7 @@ private:
 };
 
 template<typename TJBox, typename T>
-JB2NImpl<TJBox, T>::JB2NImpl(JNIEnv *env, TJBox box, bool commit)
+BJ2NImpl<TJBox, T>::BJ2NImpl(JNIEnv *env, TJBox box, bool commit)
 {
     m_env = env;
     m_box = box;
@@ -30,7 +33,7 @@ JB2NImpl<TJBox, T>::JB2NImpl(JNIEnv *env, TJBox box, bool commit)
 }
 
 template<typename TJBox, typename T>
-JB2NImpl<TJBox, T>::~JB2NImpl()
+BJ2NImpl<TJBox, T>::~BJ2NImpl()
 {
     if (m_commit)
         m_box->SetValue(m_env, Value);

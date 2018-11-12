@@ -2,11 +2,11 @@
 
 #include "JNIBoxesTemplate.h"
 
-JB2NImpl<jBooleanBox, jboolean> JB2N(JNIEnv *env, jBooleanBox box, bool commit = false);
-JB2NImpl<jCharacterBox, jchar> JB2N(JNIEnv *env, jCharacterBox box, bool commit = false);
-JB2NImpl<jByteBox, jbyte> JB2N(JNIEnv *env, jByteBox box, bool commit = false);
-JB2NImpl<jShortBox, jshort> JB2N(JNIEnv *env, jShortBox box, bool commit = false);
-JB2NImpl<jIntegerBox, jint> JB2N(JNIEnv *env, jIntegerBox box, bool commit = false);
-JB2NImpl<jLongBox, jlong> JB2N(JNIEnv *env, jLongBox box, bool commit = false);
-JB2NImpl<jFloatBox, jfloat> JB2N(JNIEnv *env, jFloatBox box, bool commit = false);
-JB2NImpl<jDoubleBox, jdouble> JB2N(JNIEnv *env, jDoubleBox box, bool commit = false);
+BJ2NImpl<jBooleanBox, jboolean> BJ2N(JNIEnv *env, jBooleanBox box, bool commit = true);
+BJ2NImpl<jCharacterBox, jchar> BJ2N(JNIEnv *env, jCharacterBox box, bool commit = true);
+BJ2NImpl<jByteBox, jbyte> BJ2N(JNIEnv *env, jByteBox box, bool commit = true);
+BJ2NImpl<jShortBox, jshort> BJ2N(JNIEnv *env, jShortBox box, bool commit = true);
+BJ2NImpl<jIntegerBox, jint> BJ2N(JNIEnv *env, jIntegerBox box, bool commit = true);
+BJ2NImpl<jLongBox, jlong> BJ2N(JNIEnv *env, jLongBox box, bool commit = true);
+BJ2NImpl<jFloatBox, jfloat> BJ2N(JNIEnv *env, jFloatBox box, bool commit = true);
+BJ2NImpl<jDoubleBox, jdouble> BJ2N(JNIEnv *env, jDoubleBox box, bool commit = true);

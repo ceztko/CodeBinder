@@ -17,6 +17,7 @@ namespace CodeTranslator.JNI
 
         public override void Write(CodeBuilder builder)
         {
+            builder.AppendLine("#include \"JNITypePrivate.h\"");
             foreach (var module in _conversion.RootTypes)
                 builder.Append("#include \"JNI").Append(module.Name).AppendLine(".h\"");
 

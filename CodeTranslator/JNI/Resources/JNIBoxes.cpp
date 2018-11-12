@@ -1,41 +1,41 @@
 ﻿#include "JNIBoxes.h"
 
-JB2NImpl<jBooleanBox, jboolean> JB2N(JNIEnv * env, jBooleanBox box, bool commit)
+BJ2NImpl<jBooleanBox, jboolean> BJ2N(JNIEnv * env, jBooleanBox box, bool commit)
 {
-    return JB2NImpl<jBooleanBox, jboolean>(env, box, commit);
+    return BJ2NImpl<jBooleanBox, jboolean>(env, box, commit);
 }
 
-JB2NImpl<jCharacterBox, jchar> JB2N(JNIEnv * env, jCharacterBox box, bool commit)
+BJ2NImpl<jCharacterBox, jchar> BJ2N(JNIEnv * env, jCharacterBox box, bool commit)
 {
-    return JB2NImpl<jCharacterBox, jchar>(env, box, commit);
+    return BJ2NImpl<jCharacterBox, jchar>(env, box, commit);
 }
 
-JB2NImpl<jByteBox, jbyte> JB2N(JNIEnv * env, jByteBox box, bool commit)
+BJ2NImpl<jByteBox, jbyte> BJ2N(JNIEnv * env, jByteBox box, bool commit)
 {
-    return JB2NImpl<jByteBox, jbyte>(env, box, commit);
+    return BJ2NImpl<jByteBox, jbyte>(env, box, commit);
 }
 
-JB2NImpl<jShortBox, jshort> JB2N(JNIEnv * env, jShortBox box, bool commit)
+BJ2NImpl<jShortBox, jshort> BJ2N(JNIEnv * env, jShortBox box, bool commit)
 {
-    return JB2NImpl<jShortBox, jshort>(env, box, commit);
+    return BJ2NImpl<jShortBox, jshort>(env, box, commit);
 }
 
-JB2NImpl<jIntegerBox, jint> JB2N(JNIEnv * env, jIntegerBox box, bool commit)
+BJ2NImpl<jIntegerBox, jint> BJ2N(JNIEnv * env, jIntegerBox box, bool commit)
 {
-    return JB2NImpl<jIntegerBox, jint>(env, box, commit);
+    return BJ2NImpl<jIntegerBox, jint>(env, box, commit);
 }
 
-JB2NImpl<jLongBox, jlong> JB2N(JNIEnv * env, jLongBox box, bool commit)
+BJ2NImpl<jLongBox, jlong> BJ2N(JNIEnv * env, jLongBox box, bool commit)
 {
-    return JB2NImpl<jLongBox, jlong>(env, box, commit);
+    return BJ2NImpl<jLongBox, jlong>(env, box, commit);
 }
 
-JB2NImpl<jFloatBox, jfloat> JB2N(JNIEnv * env, jFloatBox box, bool commit)
+BJ2NImpl<jFloatBox, jfloat> BJ2N(JNIEnv * env, jFloatBox box, bool commit)
 {
-    return JB2NImpl<jFloatBox, jfloat>(env, box, commit);
+    return BJ2NImpl<jFloatBox, jfloat>(env, box, commit);
 }
 
-JB2NImpl<jDoubleBox, jdouble> JB2N(JNIEnv * env, jDoubleBox box, bool commit)
+BJ2NImpl<jDoubleBox, jdouble> BJ2N(JNIEnv * env, jDoubleBox box, bool commit)
 {
-    return JB2NImpl<jDoubleBox, jdouble>(env, box, commit);
+    return BJ2NImpl<jDoubleBox, jdouble>(env, box, commit);
 }
