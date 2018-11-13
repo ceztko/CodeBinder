@@ -23,9 +23,15 @@ namespace CodeTranslator.Shared.CSharp
             }
         }
 
-        private void Unsupported(SyntaxNode node, string message = "")
+        private void Unsupported(SyntaxNode node, string message = null)
         {
-            if (string.IsNullOrEmpty(message))
+            if (node.HasAttribute<IgnoreAttribute>(this))
+            {
+                DefaultVisit(node);
+                return;
+            }
+
+            if (message == null)
                 throw new Exception("Unsupported node: " + node);
             else
                 throw new Exception("Unsupported node: " + node + ", " + message);
@@ -131,6 +137,11 @@ namespace CodeTranslator.Shared.CSharp
         }
 
         public override void VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitOperatorDeclaration(OperatorDeclarationSyntax node)
         {
             Unsupported(node);
         }

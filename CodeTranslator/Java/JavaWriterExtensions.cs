@@ -11,6 +11,296 @@ namespace CodeTranslator.Java
 {
     static class JavaWriterExtension
     {
+        public static IContextWriter GetWriter(this ConstructorDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return new ConstructorWriter(member, context);
+        }
+
+        public static IContextWriter GetWriter(this DestructorDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return new DestructorWriter(member, context);
+        }
+
+        public static IContextWriter GetWriter(this MethodDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return new MethodWriter(member, context);
+        }
+
+        public static IContextWriter GetWriter(this PropertyDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return new PropertyWriter(member, context);
+        }
+
+        public static IContextWriter GetWriter(this IndexerDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return new IndexerWriter(member, context);
+        }
+
+        public static IContextWriter GetWriter(this FieldDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return new FieldWriter(member, context);
+        }
+
+        public static IContextWriter GetWriter(this InterfaceDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return new InterfaceTypeWriter(member, context);
+        }
+
+        public static IContextWriter GetWriter(this ClassDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return new ClassTypeWriter(member, context);
+        }
+
+        public static IContextWriter GetWriter(this StructDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return new StructTypeWriter(member, context);
+        }
+
+        public static IContextWriter GetWriter(this EnumDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return new EnumTypeWriter(member, context);
+        }
+
+        public static IContextWriter GetWriter(this ArrayCreationExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new ArrayCreationExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this OmittedArraySizeExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new OmittedArraySizeExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this AssignmentExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new AssignmentExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this BinaryExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new BinaryExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this CastExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new CastExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this ConditionalExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new ConditionalExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this DeclarationExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new DeclarationExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this ElementAccessExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new ElementAccessExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this InitializerExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new InitializerExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this BaseExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new BaseExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this ThisExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new ThisExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this InvocationExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new InvocationExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this LiteralExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new LiteralExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this MemberAccessExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new MemberAccessExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this ObjectCreationExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new ObjectCreationExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this ParenthesizedExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new ParenthesizedExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this PostfixUnaryExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new PostfixUnaryExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this PrefixUnaryExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new PrefixUnaryExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this RefExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new RefExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this ThrowExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new ThrowExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this TypeOfExpressionSyntax expression, ICompilationContextProvider context)
+        {
+            return new TypeOfExpressionWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this ArrayTypeSyntax expression, ICompilationContextProvider context)
+        {
+            return new ArrayTypeWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this QualifiedNameSyntax expression, ICompilationContextProvider context)
+        {
+            return new QualifiedNameWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this GenericNameSyntax expression, ICompilationContextProvider context)
+        {
+            return new GenericNameWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this IdentifierNameSyntax expression, ICompilationContextProvider context)
+        {
+            return new IdenfitiferNameWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this NullableTypeSyntax expression, ICompilationContextProvider context)
+        {
+            return new NullableTypeWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this OmittedTypeArgumentSyntax expression, ICompilationContextProvider context)
+        {
+            return new OmittedTypeArgumentWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this PredefinedTypeSyntax expression, ICompilationContextProvider context)
+        {
+            return new PredefinedTypeWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this RefTypeSyntax expression, ICompilationContextProvider context)
+        {
+            return new RefTypeWriter(expression, context);
+        }
+
+        public static IContextWriter GetWriter(this BlockSyntax statement, ICompilationContextProvider context)
+        {
+            return new BlockStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this BreakStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new BreakStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this ForEachStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new ForEachStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this ForEachVariableStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new ForEachVariableStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this ContinueStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new ContinueStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this DoStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new DoStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this EmptyStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new EmptyStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this ExpressionStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new ExpressionStamentWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this ForStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new ForStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this IfStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new IfStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this LocalDeclarationStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new LocalDeclarationStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this LockStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new LockStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this ReturnStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new ReturnStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this SwitchStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new SwitchStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this ThrowStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new ThrowStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this TryStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new TryStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this UsingStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new UsingStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this WhileStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new WhileStatementWriter(statement, context);
+        }
+
+        public static IContextWriter GetWriter(this YieldStatementSyntax statement, ICompilationContextProvider context)
+        {
+            return new YieldStatementWriter(statement, context);
+        }
+
         public static IEnumerable<IContextWriter> GetWriters(this MemberDeclarationSyntax member, ICompilationContextProvider context)
         {
             var kind = member.Kind();
@@ -37,7 +327,7 @@ namespace CodeTranslator.Java
                 case SyntaxKind.EnumDeclaration:
                     return new[] { new EnumTypeWriter(member as EnumDeclarationSyntax, context) };
                 default:
-                    return new[] { new NullContextWriter() };
+                    throw new Exception();
             }
         }
 
@@ -85,6 +375,8 @@ namespace CodeTranslator.Java
                 case SyntaxKind.AsExpression:
                 case SyntaxKind.CoalesceExpression:
                     return new BinaryExpressionWriter(expression as BinaryExpressionSyntax, context);
+                case SyntaxKind.CastExpression:
+                    return new CastExpressionWriter(expression as CastExpressionSyntax, context);
                 case SyntaxKind.ConditionalExpression:
                     return new ConditionalExpressionWriter(expression as ConditionalExpressionSyntax, context);
                 case SyntaxKind.DeclarationExpression:

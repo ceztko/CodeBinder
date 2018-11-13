@@ -92,7 +92,7 @@ namespace CodeTranslator.Java
                 }
                 else
                 {
-                    Builder.Space().Append(new BlockStatementWriter(accessor.Body, this));
+                    Builder.Space().AppendLine(accessor.Body.GetWriter(this));
                 }
             }
         }
@@ -118,7 +118,7 @@ namespace CodeTranslator.Java
                 }
                 else
                 {
-                    Builder.Space().Append(new BlockStatementWriter(accessor.Body, this));
+                    Builder.Space().AppendLine(accessor.Body.GetWriter(this));
                 }
             }
         }

@@ -33,7 +33,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            using (Builder.BeginBlock())
+            using (Builder.BeginBlock(false))
             {
                 foreach (var statement in Context.Statements)
                 {

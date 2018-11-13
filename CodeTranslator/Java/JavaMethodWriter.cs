@@ -44,7 +44,7 @@ namespace CodeTranslator.Java
             if (Context.Body == null)
                 Builder.EndOfLine();
             else
-                Builder.Space().Append(new BlockStatementWriter(Context.Body, this));
+                Builder.Space().AppendLine(Context.Body.GetWriter(this));
         }
 
         protected virtual void WriteModifiers()
