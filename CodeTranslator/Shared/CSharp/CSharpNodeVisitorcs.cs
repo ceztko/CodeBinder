@@ -97,7 +97,6 @@ namespace CodeTranslator.Shared.CSharp
 
         #endregion Supported types
 
-        // TODO: Add more unsupported syntax
         #region Unsupported syntax
 
         public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node)
@@ -131,12 +130,27 @@ namespace CodeTranslator.Shared.CSharp
             Unsupported(node);
         }
 
-        public override void VisitAwaitExpression(AwaitExpressionSyntax node)
+        public override void VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
         {
             Unsupported(node);
         }
 
-        public override void VisitJoinClause(JoinClauseSyntax node)
+        #endregion // Unsupported syntax
+
+        #region Unsupported Linq
+
+
+        public override void VisitFromClause(FromClauseSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitWhereClause(WhereClauseSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitSelectClause(SelectClauseSyntax node)
         {
             Unsupported(node);
         }
@@ -146,12 +160,27 @@ namespace CodeTranslator.Shared.CSharp
             Unsupported(node);
         }
 
-        public override void VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
+        public override void VisitJoinIntoClause(JoinIntoClauseSyntax node)
         {
             Unsupported(node);
         }
 
-        #endregion // Unsupported syntax
+        public override void VisitOrderByClause(OrderByClauseSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitJoinClause(JoinClauseSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitLetClause(LetClauseSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        #endregion // Unsupported Linq
 
         #region Unsupported statements
 
@@ -186,6 +215,130 @@ namespace CodeTranslator.Shared.CSharp
         }
 
         #endregion // Unsupported statements
+
+        #region Unsupported expressions
+
+        public override void VisitDefaultExpression(DefaultExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitPointerType(PointerTypeSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitRefValueExpression(RefValueExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitRefTypeExpression(RefTypeExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitImplicitArrayCreationExpression(ImplicitArrayCreationExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitElementBindingExpression(ElementBindingExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitImplicitElementAccess(ImplicitElementAccessSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitMemberBindingExpression(MemberBindingExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitSizeOfExpression(SizeOfExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitMakeRefExpression(MakeRefExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitImplicitStackAllocArrayCreationExpression(ImplicitStackAllocArrayCreationExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitInterpolatedStringExpression(InterpolatedStringExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitAwaitExpression(AwaitExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitQueryExpression(QueryExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitStackAllocArrayCreationExpression(StackAllocArrayCreationExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitAnonymousObjectCreationExpression(AnonymousObjectCreationExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitTupleType(TupleTypeSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitTupleExpression(TupleExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitIsPatternExpression(IsPatternExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitCheckedExpression(CheckedExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        #endregion // Unsupported expressions
     }
 
     public class CSharpNodeVisitor<TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker, ICompilationContextProvider

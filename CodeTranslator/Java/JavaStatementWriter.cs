@@ -119,7 +119,6 @@ namespace CodeTranslator.Java
         }
     }
 
-
     class IfStatementWriter : StatementWriter<IfStatementSyntax>
     {
         public IfStatementWriter(IfStatementSyntax syntax, ICompilationContextProvider context)

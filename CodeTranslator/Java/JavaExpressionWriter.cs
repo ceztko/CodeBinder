@@ -17,6 +17,28 @@ namespace CodeTranslator.Java
             : base(syntax, context) { }
     }
 
+    class ArrayCreationExpressionWriter : ExpressiontWriter<ArrayCreationExpressionSyntax>
+    {
+        public ArrayCreationExpressionWriter(ArrayCreationExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class OmittedArraySizeExpressionWriter : ExpressiontWriter<OmittedArraySizeExpressionSyntax>
+    {
+        public OmittedArraySizeExpressionWriter(OmittedArraySizeExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
     class AssignmentExpressionWriter : ExpressiontWriter<AssignmentExpressionSyntax>
     {
         public AssignmentExpressionWriter(AssignmentExpressionSyntax syntax, ICompilationContextProvider context)
@@ -49,6 +71,250 @@ namespace CodeTranslator.Java
         }
     }
 
+    class BinaryExpressionWriter : ExpressiontWriter<BinaryExpressionSyntax>
+    {
+        public BinaryExpressionWriter(BinaryExpressionSyntax syntax, ICompilationContextProvider context) : base(syntax, context)
+        {
+        }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class CastExpressionWriter : ExpressiontWriter<CastExpressionSyntax>
+    {
+        public CastExpressionWriter(CastExpressionSyntax syntax, ICompilationContextProvider context) : base(syntax, context)
+        {
+        }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class ConditionalExpressionWriter : ExpressiontWriter<ConditionalExpressionSyntax>
+    {
+        public ConditionalExpressionWriter(ConditionalExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class DeclarationExpressionWriter : ExpressiontWriter<DeclarationExpressionSyntax>
+    {
+        public DeclarationExpressionWriter(DeclarationExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class DefaultExpressionWriter : ExpressiontWriter<DefaultExpressionSyntax>
+    {
+        public DefaultExpressionWriter(DefaultExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class ElementAccessExpressionWriter : ExpressiontWriter<ElementAccessExpressionSyntax>
+    {
+        public ElementAccessExpressionWriter(ElementAccessExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class InitializerExpressionWriter : ExpressiontWriter<InitializerExpressionSyntax>
+    {
+        public InitializerExpressionWriter(InitializerExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class BaseExpressionWriter : ExpressiontWriter<BaseExpressionSyntax>
+    {
+        public BaseExpressionWriter(BaseExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class ThisExpressionWriter : ExpressiontWriter<ThisExpressionSyntax>
+    {
+        public ThisExpressionWriter(ThisExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class InvocationExpressionWriter : ExpressiontWriter<InvocationExpressionSyntax>
+    {
+        public InvocationExpressionWriter(InvocationExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class LiteralExpressionWriter : ExpressiontWriter<LiteralExpressionSyntax>
+    {
+        public LiteralExpressionWriter(LiteralExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class MemberAccessExpressionWriter : ExpressiontWriter<MemberAccessExpressionSyntax>
+    {
+        public MemberAccessExpressionWriter(MemberAccessExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class ObjectCreationExpressionWriter : ExpressiontWriter<ObjectCreationExpressionSyntax>
+    {
+        public ObjectCreationExpressionWriter(ObjectCreationExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class ParenthesizedExpressionWriter : ExpressiontWriter<ParenthesizedExpressionSyntax>
+    {
+        public ParenthesizedExpressionWriter(ParenthesizedExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class PostfixUnaryExpressionWriter : ExpressiontWriter<PostfixUnaryExpressionSyntax>
+    {
+        public PostfixUnaryExpressionWriter(PostfixUnaryExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class PrefixUnaryExpressionWriter : ExpressiontWriter<PrefixUnaryExpressionSyntax>
+    {
+        public PrefixUnaryExpressionWriter(PrefixUnaryExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class RefExpressionWriter : ExpressiontWriter<RefExpressionSyntax>
+    {
+        public RefExpressionWriter(RefExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class ThrowExpressionWriter : ExpressiontWriter<ThrowExpressionSyntax>
+    {
+        public ThrowExpressionWriter(ThrowExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class TypeOfExpressionWriter : ExpressiontWriter<TypeOfExpressionSyntax>
+    {
+        public TypeOfExpressionWriter(TypeOfExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class ArrayTypeWriter : ExpressiontWriter<ArrayTypeSyntax>
+    {
+        public ArrayTypeWriter(ArrayTypeSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class QualifiedNameWriter : ExpressiontWriter<QualifiedNameSyntax>
+    {
+        public QualifiedNameWriter(QualifiedNameSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class GenericNameWriter : ExpressiontWriter<GenericNameSyntax>
+    {
+        public GenericNameWriter(GenericNameSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
     class IdenfitiferNameWriter : ExpressiontWriter<IdentifierNameSyntax>
     {
         public IdenfitiferNameWriter(IdentifierNameSyntax syntax, ICompilationContextProvider context)
@@ -58,6 +324,50 @@ namespace CodeTranslator.Java
         {
             var symbol = Context.GetSymbolInfo(this);
             Builder.Append(Context.Identifier.Text);
+        }
+    }
+
+    class NullableTypeWriter : ExpressiontWriter<NullableTypeSyntax>
+    {
+        public NullableTypeWriter(NullableTypeSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class OmittedTypeArgumentWriter : ExpressiontWriter<OmittedTypeArgumentSyntax>
+    {
+        public OmittedTypeArgumentWriter(OmittedTypeArgumentSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class PredefinedTypeWriter : ExpressiontWriter<PredefinedTypeSyntax>
+    {
+        public PredefinedTypeWriter(PredefinedTypeSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
+    }
+
+    class RefTypeWriter : ExpressiontWriter<RefTypeSyntax>
+    {
+        public RefTypeWriter(RefTypeSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
+
+        protected override void Write()
+        {
+            Builder.Append("NULL");
         }
     }
 }

@@ -69,15 +69,8 @@ namespace CodeTranslator
                 syntaxTree.Compilation = Compilation;
 
                 var treeFilePath = tree.FilePath ?? "";
-                try
-                {
-                    syntaxTree.Visit(tree);
-                    syntaxTreeContexts.Add(treeFilePath, syntaxTree);
-                }
-                catch (Exception e)
-                {
-                    _errors.TryAdd(treeFilePath, e.ToString());
-                }
+                syntaxTree.Visit(tree);
+                syntaxTreeContexts.Add(treeFilePath, syntaxTree);
             }
 
             var ret = new Dictionary<string, List<TypeContext>>();
