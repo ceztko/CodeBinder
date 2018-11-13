@@ -37,19 +37,7 @@ namespace CodeTranslator.Java
                 case SyntaxKind.EnumDeclaration:
                     return new[] { new EnumTypeWriter(member as EnumDeclarationSyntax, context) };
                 default:
-                    return new[] { new ContextWriterWriter() };
-            }
-        }
-
-        public static IContextWriter GetWriter(this StatementSyntax statement, ICompilationContextProvider context)
-        {
-            var kind = statement.Kind();
-            switch (kind)
-            {
-                case SyntaxKind.ExpressionStatement:
-                    return new ExpressionStamentWriter(statement as ExpressionStatementSyntax, context);
-                default:
-                    return new ContextWriterWriter();
+                    return new[] { new NullContextWriter() };
             }
         }
 
@@ -63,7 +51,55 @@ namespace CodeTranslator.Java
                 case SyntaxKind.IdentifierName:
                     return new IdenfitiferNameWriter(expression as IdentifierNameSyntax, context);
                 default:
-                    return new ContextWriterWriter();
+                    return new NullContextWriter();
+            }
+        }
+
+        public static IContextWriter GetWriter(this StatementSyntax statement, ICompilationContextProvider context)
+        {
+            var kind = statement.Kind();
+            switch (kind)
+            {
+                case SyntaxKind.Block:
+                    return new BlockStatementWriter(statement as BlockSyntax, context);
+                case SyntaxKind.BreakStatement:
+                    return new BreakStatementWriter(statement as BreakStatementSyntax, context);
+                case SyntaxKind.ForEachStatement:
+                    return new ForEachStatementWriter(statement as ForEachStatementSyntax, context);
+                case SyntaxKind.ForEachVariableStatement:
+                    return new ForEachVariableStatementWriter(statement as ForEachVariableStatementSyntax, context);
+                case SyntaxKind.ContinueStatement:
+                    return new ContinueStatementWriter(statement as ContinueStatementSyntax, context);
+                case SyntaxKind.DoStatement:
+                    return new DoStatementWriter(statement as DoStatementSyntax, context);
+                case SyntaxKind.EmptyStatement:
+                    return new EmptyStatementWriter(statement as EmptyStatementSyntax, context);
+                case SyntaxKind.ExpressionStatement:
+                    return new ExpressionStamentWriter(statement as ExpressionStatementSyntax, context);
+                case SyntaxKind.ForStatement:
+                    return new ForStatementWriter(statement as ForStatementSyntax, context);
+                case SyntaxKind.IfStatement:
+                    return new IfStatementWriter(statement as IfStatementSyntax, context);
+                case SyntaxKind.LocalDeclarationStatement:
+                    return new LocalDeclarationStatementWriter(statement as LocalDeclarationStatementSyntax, context);
+                case SyntaxKind.LockStatement:
+                    return new LockStatementWriter(statement as LockStatementSyntax, context);
+                case SyntaxKind.ReturnStatement:
+                    return new ReturnStatementWriter(statement as ReturnStatementSyntax, context);
+                case SyntaxKind.SwitchStatement:
+                    return new SwitchStatementWriter(statement as SwitchStatementSyntax, context);
+                case SyntaxKind.ThrowStatement:
+                    return new ThrowStatementWriter(statement as ThrowStatementSyntax, context);
+                case SyntaxKind.TryStatement:
+                    return new TryStatementWriter(statement as TryStatementSyntax, context);
+                case SyntaxKind.UsingStatement:
+                    return new UsingStatementWriter(statement as UsingStatementSyntax, context);
+                case SyntaxKind.WhileStatement:
+                    return new WhileStatementWriter(statement as WhileStatementSyntax, context);
+                case SyntaxKind.YieldReturnStatement:
+                    return new YieldStatementWriter(statement as YieldStatementSyntax, context);
+                default:
+                    throw new Exception();
             }
         }
 

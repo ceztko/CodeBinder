@@ -32,7 +32,7 @@ namespace CodeTranslator.Util
         protected abstract void Write();
     }
 
-    public class ContextWriterWriter : IContextWriter
+    public class NullContextWriter : IContextWriter
     {
         public void Write(CodeBuilder builder)
         {

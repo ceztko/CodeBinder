@@ -152,6 +152,40 @@ namespace CodeTranslator.Shared.CSharp
         }
 
         #endregion // Unsupported syntax
+
+        #region Unsupported statements
+
+        public override void VisitCheckedStatement(CheckedStatementSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitUnsafeStatement(UnsafeStatementSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitLabeledStatement(LabeledStatementSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitGotoStatement(GotoStatementSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitFixedStatement(FixedStatementSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        #endregion // Unsupported statements
     }
 
     public class CSharpNodeVisitor<TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker, ICompilationContextProvider
