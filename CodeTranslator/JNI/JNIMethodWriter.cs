@@ -32,11 +32,12 @@ namespace CodeTranslator.JNI
             Builder.Append(ReturnType).Space();
             Builder.Append("JNICALL").Space();
             Builder.Append(MethodName).AppendLine("(");
-            Builder.IncreaseIndent();
-            Builder.Append("JNIEnv *, jclass");
-            WriteParameters();
-            Builder.Append(")").EndOfLine();
-            Builder.DecreaseIndent();
+            using (Builder.Indent())
+            {
+                Builder.Append("JNIEnv *, jclass");
+                WriteParameters();
+                Builder.Append(")").EndOfLine();
+            }
         }
 
         public abstract string MethodName

@@ -33,6 +33,8 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
+            // Allows to not doubly indent single statements blocks, e.g after "if" statement
+            Builder.ResetIndented();
             using (Builder.BeginBlock(false))
             {
                 foreach (var statement in Context.Statements)
@@ -50,7 +52,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("break;");
+            Builder.Append("break").SemiColon();
         }
     }
 
@@ -94,11 +96,8 @@ namespace CodeTranslator.Java
         protected override void Write()
         {
             Builder.Append("do").AppendLine();
-            using (Builder.BeginBlock())
-            {
-
-            }
-            Builder.Append("while").Space();
+            Builder.Append(Context.Statement, this);
+            Builder.Append("while").Space().SemiColon();
         }
     }
 
@@ -109,7 +108,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("do ()");
+            Builder.SemiColon();
         }
     }
 
@@ -120,7 +119,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            using (Builder.Append("for").Space().BeginParenthesized(false))
+            using (Builder.Append("for").Space().BeginParenthesized())
             {
                 Builder.Append(Context.Declaration, this).SemiColonSeparator()
                 .Append(Context.Condition, this).SemiColonSeparator();
@@ -136,6 +135,7 @@ namespace CodeTranslator.Java
                     Builder.Append(incrementor, this);
                 }
             }
+            Builder.AppendLine().Indented().Append(Context.Statement, this);
         }
     }
 
@@ -146,10 +146,13 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            using (Builder.Append("if").Space().BeginParenthesized(false))
+            using (Builder.Append("if").Space().BeginParenthesized())
             {
                 Builder.Append(Context.Condition, this);
             }
+            Builder.AppendLine().Indented().Append(Context.Statement, this);
+            if (Context.Else != null)
+                Builder.Append(Context.Else, this);
         }
     }
 
@@ -171,7 +174,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("synchronize");
         }
     }
 
@@ -182,7 +185,10 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("return").Append(Context.Expression, this).SemiColon();
+            Builder.Append("return");
+            if (Context.Expression != null)
+                Builder.Space().Append(Context.Expression, this);
+            Builder.SemiColon();
         }
     }
 
@@ -204,7 +210,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("throw");
+            Builder.Append("throw").Space().SemiColon();
         }
     }
 

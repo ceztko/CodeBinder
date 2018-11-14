@@ -32,7 +32,7 @@ namespace CodeTranslator.Java
             }
             else
             {
-                using (Builder.BeginParenthesized())
+                using (Builder.BeginParenthesized(true))
                 {
                     WriteParameters(Context.ParameterList);
                 }

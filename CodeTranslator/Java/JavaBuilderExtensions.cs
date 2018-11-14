@@ -11,6 +11,11 @@ namespace CodeTranslator.Java
 {
     static class JavaWriterExtension
     {
+        public static CodeBuilder Append(this CodeBuilder builder, ElseClauseSyntax syntax, ICompilationContextProvider context)
+        {
+            return builder.Append(new NullContextWriter());
+        }
+
         public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, ICompilationContextProvider context)
         {
             return builder.Append(new NullContextWriter());
@@ -548,7 +553,7 @@ namespace CodeTranslator.Java
             return builder.Indent("}", appendLine);
         }
 
-        public static CodeBuilder BeginParenthesized(this CodeBuilder builder, bool indented = true)
+        public static CodeBuilder BeginParenthesized(this CodeBuilder builder, bool indented = false)
         {
             if (indented)
             {
@@ -558,7 +563,7 @@ namespace CodeTranslator.Java
             else
             {
                 builder.Append("(");
-                return builder.Disposable(")");
+                return builder.Using(")");
             }
         }
     }
