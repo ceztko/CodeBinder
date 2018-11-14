@@ -13,7 +13,7 @@ namespace CodeTranslator.Java
         public JavaInterfaceConversion(CSToJavaConversion conversion)
             : base(conversion) { }
 
-        protected override IContextWriter GetTypeWriter()
+        protected override ContextWriter GetTypeWriter()
         {
             return new InterfaceTypeWriter(TypeContext.Node, this);
         }

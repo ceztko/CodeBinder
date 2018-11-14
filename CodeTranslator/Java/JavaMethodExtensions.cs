@@ -389,27 +389,5 @@ namespace CodeTranslator.Java
 
             return char.ToLowerInvariant(text[0]) + text.Substring(1);
         }
-
-        public static CodeBuilder EndOfLine(this CodeBuilder builder)
-        {
-            return builder.AppendLine(";");
-        }
-
-        public static CodeBuilder Space(this CodeBuilder builder)
-        {
-            return builder.Append(" ");
-        }
-
-        public static CodeBuilder BeginBlock(this CodeBuilder builder, bool appendLine = true)
-        {
-            builder.AppendLine("{");
-            return builder.Indent("}", appendLine);
-        }
-
-        public static CodeBuilder BeginParameterList(this CodeBuilder builder, bool appendLine = true)
-        {
-            builder.AppendLine("(");
-            return builder.Indent(2, ")", false);
-        }
     }
 }

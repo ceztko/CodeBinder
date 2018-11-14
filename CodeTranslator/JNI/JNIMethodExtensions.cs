@@ -175,5 +175,10 @@ namespace CodeTranslator.JNI
         {
             return builder.Append(" ");
         }
+
+        public static CodeBuilder CommaSeparator(this CodeBuilder builder)
+        {
+            return builder.Append(", ");
+        }
     }
 }

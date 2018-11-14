@@ -49,16 +49,9 @@ namespace CodeTranslator.Util
         }
 
 
-        public CodeBuilder Append(IContextWriter writer)
+        public CodeBuilder Append(ContextWriter writer)
         {
             writer.Write(this);
-            return this;
-        }
-
-        public CodeBuilder AppendLine(IContextWriter writer)
-        {
-            writer.Write(this);
-            AppendLine();
             return this;
         }
 
@@ -77,18 +70,19 @@ namespace CodeTranslator.Util
             return this;
         }
 
+        public CodeBuilder Disposable(string appendString)
+        {
+            return disposable(0, appendString, false);
+        }
+
         public CodeBuilder Indent(string appendString = null, bool appendLine = true)
         {
-            return Indent(1, appendString, appendLine);
+            return disposable(1, appendString, appendLine);
         }
 
         public CodeBuilder Indent(uint indentCount, string appendString = null, bool appendLine = true)
         {
-            for (uint i = 0; i < indentCount; i++)
-                IncreaseIndent();
-
-            _disposeContexts.Add(new DisposeContext() { IndentCount = indentCount, AppendString = appendString, AppendLine = appendLine });
-            return this;
+            return disposable(indentCount, appendString, appendLine);
         }
 
         public CodeBuilder Indented()
@@ -124,6 +118,15 @@ namespace CodeTranslator.Util
         public override string ToString()
         {
             return _writer.ToString();
+        }
+
+        CodeBuilder disposable(uint indentCount, string appendString, bool appendLine)
+        {
+            for (uint i = 0; i < indentCount; i++)
+                IncreaseIndent();
+
+            _disposeContexts.Add(new DisposeContext() { IndentCount = indentCount, AppendString = appendString, AppendLine = appendLine });
+            return this;
         }
 
         void IDisposable.Dispose()

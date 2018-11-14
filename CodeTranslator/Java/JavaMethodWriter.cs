@@ -32,7 +32,7 @@ namespace CodeTranslator.Java
             }
             else
             {
-                using (Builder.BeginParameterList())
+                using (Builder.BeginParenthesized())
                 {
                     WriteParameters(Context.ParameterList);
                 }
@@ -42,9 +42,9 @@ namespace CodeTranslator.Java
         protected virtual void WriteMethodBody()
         {
             if (Context.Body == null)
-                Builder.EndOfLine();
+                Builder.EndOfStatement();
             else
-                Builder.Space().AppendLine(Context.Body.GetWriter(this));
+                Builder.AppendLine().Append(Context.Body, this).AppendLine();
         }
 
         protected virtual void WriteModifiers()
@@ -61,7 +61,7 @@ namespace CodeTranslator.Java
                 if (first)
                     first = false;
                 else
-                    Builder.Append(",").AppendLine();
+                    Builder.AppendLine(",");
 
                 WriteParameter(parameter);
             }
@@ -112,7 +112,7 @@ namespace CodeTranslator.Java
         protected override void WriteMethodBody()
         {
             if (IsParentInterface)
-                Builder.EndOfLine();
+                Builder.EndOfStatement();
             else
                 base.WriteMethodBody();
         }
@@ -155,7 +155,7 @@ namespace CodeTranslator.Java
 
         protected override void WriteMethodBody()
         {
-            Builder.EndOfLine();
+            Builder.EndOfStatement();
         }
 
         protected override void WriteParameters()
@@ -166,7 +166,7 @@ namespace CodeTranslator.Java
 
         private void WriteParameter(ref MethodParameterInfo parameter)
         {
-            Builder.Append(",").Space().Append(parameter.GetJavaTypeName(JavaTypeFlags.NativeMethod)).Space().Append(parameter.Name);
+            Builder.CommaSeparator().Append(parameter.GetJavaTypeName(JavaTypeFlags.NativeMethod)).Space().Append(parameter.Name);
         }
 
         public override string MethodName

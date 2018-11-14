@@ -53,7 +53,7 @@ namespace CodeTranslator.Java
 
         public sealed override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space().Append(Namespace).EndOfLine();
+            builder.Append("package").Space().Append(Namespace).EndOfStatement();
             bool hasImports = false;
             foreach (var import in Imports)
             {
@@ -67,7 +67,7 @@ namespace CodeTranslator.Java
             builder.Append(GetTypeWriter());
         }
 
-        protected abstract IContextWriter GetTypeWriter();
+        protected abstract ContextWriter GetTypeWriter();
     }
 
     abstract class TypeWriter<TBaseType> : ContextWriter<TBaseType>
@@ -86,7 +86,8 @@ namespace CodeTranslator.Java
             Builder.Append(TypeName);
             if (Context.BaseList != null)
                 WriteTypeBaseList(Context.BaseList);
-            using (Builder.Space().BeginBlock())
+            Builder.AppendLine();
+            using (Builder.BeginBlock())
             {
                 WriteTypeMembers();
             }
@@ -104,7 +105,7 @@ namespace CodeTranslator.Java
                 if (first)
                     first = false;
                 else
-                    Builder.Append(",").Space();
+                    Builder.CommaSeparator();
 
                 WriteBaseType(type);
             }

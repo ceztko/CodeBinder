@@ -56,7 +56,7 @@ namespace CodeTranslator.Java
                     {
                         case SyntaxKind.EqualsToken:
                             Builder.Append("set").Append((Context.Left as IdentifierNameSyntax).Identifier.Text)
-                                .Append("(").Append(Context.Right.GetWriter(this)).Append(")");
+                                .Append("(").Append(Context.Right, this).Append(")");
                             break;
                         default:
                             break;
@@ -65,9 +65,9 @@ namespace CodeTranslator.Java
                 }
             }
 
-            Builder.Append(Context.Left.GetWriter(this));
+            Builder.Append(Context.Left, this);
             Builder.Space().Append(Context.OperatorToken.Text).Space();
-            Builder.Append(Context.Right.GetWriter(this));
+            Builder.Append(Context.Right, this);
         }
     }
 

@@ -64,7 +64,7 @@ namespace CodeTranslator.JNI
 
             private void WriteParameter(ParameterSyntax parameter)
             {
-                Builder.Append(",").Space();
+                Builder.CommaSeparator();
                 bool isRef = parameter.IsRef() || parameter.IsOut();
                 WriteType(parameter.Type, isRef);
                 Builder.Append(parameter.Identifier.Text);
@@ -104,7 +104,7 @@ namespace CodeTranslator.JNI
 
             private void WriteParameter(ref MethodParameterInfo parameter)
             {
-                Builder.Append(",").Space().Append(parameter.GetJNITypeName()).Space().Append(parameter.Name);
+                Builder.CommaSeparator().Append(parameter.GetJNITypeName()).Space().Append(parameter.Name);
             }
 
             public override string ReturnType

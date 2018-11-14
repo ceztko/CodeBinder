@@ -24,22 +24,22 @@ namespace CodeTranslator.Java
 
         public override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space().Append("codentranslator.util").EndOfLine();
+            builder.Append("package").Space().Append("codentranslator.util").EndOfStatement();
             builder.AppendLine();
-            builder.Append("class").Space().Append(BoxTypeName).Space();
+            builder.Append("class").Space().Append(BoxTypeName).AppendLine();
             using (builder.BeginBlock())
             {
-                builder.Append("public").Space().Append(JavaKeyword).Space().Append("value").EndOfLine();
+                builder.Append("public").Space().Append(JavaKeyword).Space().Append("value").EndOfStatement();
                 builder.AppendLine();
 
                 builder.Append("public").Space().Append(BoxTypeName).Append("()").Space().AppendLine("{ }");
                 builder.AppendLine();
 
                 builder.Append("public").Space().Append(BoxTypeName).Append("(")
-                    .Append(JavaKeyword).Space().Append("value )").Space();
+                    .Append(JavaKeyword).Space().Append("value )").AppendLine();
                 using (builder.BeginBlock())
                 {
-                    builder.Append("this.value = value").EndOfLine();
+                    builder.Append("this.value = value").EndOfStatement();
                 }
             }
         }

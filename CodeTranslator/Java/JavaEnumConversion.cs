@@ -16,7 +16,7 @@ namespace CodeTranslator.Java
         public JavaEnumConversion(CSToJavaConversion conversion)
             : base(conversion) { }
 
-        protected override IContextWriter GetTypeWriter()
+        protected override ContextWriter GetTypeWriter()
         {
             return new EnumTypeWriter(TypeContext.Node, this);
         }
@@ -36,7 +36,7 @@ namespace CodeTranslator.Java
         {
             WriteEnumMembers();
             Builder.AppendLine();
-            Builder.Append("public final int value").EndOfLine();
+            Builder.Append("public final int value").EndOfStatement();
             Builder.AppendLine();
             WriteConstructor();
             Builder.AppendLine();
@@ -56,7 +56,7 @@ namespace CodeTranslator.Java
                 WriteMember(member);
             }
 
-            Builder.AppendLine(";");
+            Builder.EndOfStatement();
         }
 
         private void WriteMember(EnumMemberDeclarationSyntax member)
@@ -74,24 +74,24 @@ namespace CodeTranslator.Java
         {
             Builder.Append(TypeName);
             if (_isFlag)
-                Builder.Append("(int value)").Space();
+                Builder.Append("(int value)");
             else
-                Builder.Append("()").Space();
+                Builder.Append("()");
 
+            Builder.AppendLine();
             using (Builder.BeginBlock())
             {
                 if (_isFlag)
-                    Builder.Append("this.value = value").EndOfLine();
+                    Builder.Append("this.value = value").EndOfStatement();
                 else
-                    Builder.Append("value = this.ordinal()").EndOfLine();
+                    Builder.Append("value = this.ordinal()").EndOfStatement();
             }
         }
 
         private void WriteFromValueMethod()
         {
-            Builder.Append("public static").Space();
-            Builder.Append(TypeName);
-            Builder.Append(" fromValue(int value)").Space();
+            Builder.Append("public static").Space().Append(TypeName).Space()
+                .Append("fromValue(int value)").AppendLine();
             using (Builder.BeginBlock())
             {
                 if (_isFlag)
@@ -99,32 +99,32 @@ namespace CodeTranslator.Java
                     Builder.Append(TypeName);
                     Builder.Append("[] values =").Space();
                     Builder.Append(TypeName);
-                    Builder.Append(".values()").EndOfLine();
-                    Builder.Append("for (int i = 0; i < values.length; i++)").Space();
+                    Builder.Append(".values()").EndOfStatement();
+                    Builder.Append("for (int i = 0; i < values.length; i++)").AppendLine();
                     using (Builder.BeginBlock())
                     {
                         Builder.Append(TypeName).Space();
-                        Builder.Append("envalue = values[i];").EndOfLine();
+                        Builder.Append("envalue = values[i];").EndOfStatement();
                         Builder.Append("if (envalue.value == value)");
-                        Builder.Indented().Append("return envalue").EndOfLine();
+                        Builder.Indented().Append("return envalue").EndOfStatement();
                     }
                     Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum").Space()
-                        .Append(TypeName).Append("\")").EndOfLine();
+                        .Append(TypeName).Append("\")").EndOfStatement();
                 }
                 else
                 {
-                    Builder.Append("try").Space();
-                    using (Builder.BeginBlock(false))
+                    Builder.Append("try").AppendLine();
+                    using (Builder.BeginBlock())
                     {
                         Builder.Append("return").Space();
                         Builder.Append(TypeName);
-                        Builder.Append(".values()[value]").EndOfLine();
+                        Builder.Append(".values()[value]").EndOfStatement();
                     }
-                    Builder.Space().Append("catch (Exception e)").Space();
+                    Builder.Append("catch (Exception e)").AppendLine();
                     using (Builder.BeginBlock())
                     {
                         Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum").Space()
-                            .Append(TypeName).Append("\")").EndOfLine();
+                            .Append(TypeName).Append("\")").EndOfStatement();
                     }
                 }
             }

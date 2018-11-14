@@ -22,7 +22,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append(Context.Expression.GetWriter(this));
+            Builder.Append(Context.Expression, this);
         }
     }
 
@@ -37,7 +37,7 @@ namespace CodeTranslator.Java
             {
                 foreach (var statement in Context.Statements)
                 {
-                    Builder.Append(statement.GetWriter(this)).EndOfLine();
+                    Builder.Append(statement, this).AppendLine();
                 }
             }
         }
@@ -50,7 +50,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("break;");
         }
     }
 
@@ -61,7 +61,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("for ()");
         }
     }
 
@@ -83,7 +83,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("continue;");
         }
     }
     class DoStatementWriter : StatementWriter<DoStatementSyntax>
@@ -93,7 +93,12 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("do").AppendLine();
+            using (Builder.BeginBlock())
+            {
+
+            }
+            Builder.Append("while").Space();
         }
     }
 
@@ -104,7 +109,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("do ()");
         }
     }
 
@@ -115,7 +120,22 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            using (Builder.Append("for").Space().BeginParenthesized(false))
+            {
+                Builder.Append(Context.Declaration, this).SemiColonSeparator()
+                .Append(Context.Condition, this).SemiColonSeparator();
+
+                bool first = true;
+                foreach (var incrementor in Context.Incrementors)
+                {
+                    if (first)
+                        first = true;
+                    else
+                        Builder.CommaSeparator();
+
+                    Builder.Append(incrementor, this);
+                }
+            }
         }
     }
 
@@ -126,7 +146,10 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            using (Builder.Append("if").Space().BeginParenthesized(false))
+            {
+                Builder.Append(Context.Condition, this);
+            }
         }
     }
 
@@ -159,7 +182,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("return").Append(Context.Expression, this).SemiColon();
         }
     }
 
@@ -181,7 +204,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("throw");
         }
     }
 
@@ -193,7 +216,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("try");
         }
     }
 
@@ -216,7 +239,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("while");
         }
     }
 

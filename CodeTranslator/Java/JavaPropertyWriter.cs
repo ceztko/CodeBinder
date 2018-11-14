@@ -47,7 +47,7 @@ namespace CodeTranslator.Java
 
             Builder.Append("private").Space();
             Builder.Append(JavaType).Space();
-            Builder.Append(UnderlyingFieldName).EndOfLine();
+            Builder.Append(UnderlyingFieldName).EndOfStatement();
         }
 
         private void WriteAccessors(AccessorListSyntax accessorList)
@@ -79,20 +79,20 @@ namespace CodeTranslator.Java
             Builder.Append(SetterName).Append("(").Append(JavaType).Space().Append("value").Append(")");
             if (IsParentInterface)
             {
-                Builder.EndOfLine();
+                Builder.EndOfStatement();
             }
             else
             {
                 if (_isAutoProperty)
                 {
-                    using (Builder.Space().BeginBlock())
+                    using (Builder.AppendLine().BeginBlock())
                     {
-                        Builder.Append(UnderlyingFieldName).Space().Append("= value").EndOfLine();
+                        Builder.Append(UnderlyingFieldName).Space().Append("= value").EndOfStatement();
                     }
                 }
                 else
                 {
-                    Builder.Space().AppendLine(accessor.Body.GetWriter(this));
+                    Builder.Space().Append(accessor.Body, this).AppendLine();
                 }
             }
         }
@@ -104,21 +104,21 @@ namespace CodeTranslator.Java
             Builder.Append(GetterName).Append("()");
             if (IsParentInterface)
             {
-                Builder.EndOfLine();
+                Builder.EndOfStatement();
 
             }
             else
             {
                 if (_isAutoProperty)
                 {
-                    using (Builder.Space().BeginBlock())
+                    using (Builder.AppendLine().BeginBlock())
                     {
-                        Builder.Append("return").Space().Append(UnderlyingFieldName).EndOfLine();
+                        Builder.Append("return").Space().Append(UnderlyingFieldName).EndOfStatement();
                     }
                 }
                 else
                 {
-                    Builder.Space().AppendLine(accessor.Body.GetWriter(this));
+                    Builder.Space().Append(accessor.Body, this).AppendLine();
                 }
             }
         }

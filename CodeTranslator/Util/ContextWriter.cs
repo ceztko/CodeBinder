@@ -7,22 +7,12 @@ using System.Text;
 
 namespace CodeTranslator.Util
 {
-    public abstract class ContextWriter<TSyntax> : IContextWriter, ICompilationContextProvider
+    public abstract class ContextWriter
     {
         protected CodeBuilder Builder { get; private set; }
-        public CompilationContext Compilation { get; private set; }
-        public TSyntax Context { get; private set; }
-
-        protected ContextWriter(TSyntax context, ICompilationContextProvider provider)
-        {
-            // Slightly optimize getting semantic model by
-            // storing CompilationContext
-            Context = context;
-            Compilation = provider.Compilation;
-        }
 
         // Append an ISyntaxWriter with CodeBuilder
-        void IContextWriter.Write(CodeBuilder builder)
+        internal void Write(CodeBuilder builder)
         {
             Builder = builder;
             Write();
@@ -32,16 +22,23 @@ namespace CodeTranslator.Util
         protected abstract void Write();
     }
 
-    public class NullContextWriter : IContextWriter
+    public abstract class ContextWriter<TSyntax> : ContextWriter, ICompilationContextProvider
     {
-        public void Write(CodeBuilder builder)
+        public CompilationContext Compilation { get; private set; }
+        public TSyntax Context { get; private set; }
+
+        protected ContextWriter(TSyntax context, ICompilationContextProvider provider)
         {
-            builder.Append("NULL");
+            Context = context;
+            Compilation = provider.Compilation;
         }
     }
 
-    public interface IContextWriter
+    public class NullContextWriter : ContextWriter
     {
-        void Write(CodeBuilder builder);
+        protected override void Write()
+        {
+            Builder.Append("NULL");
+        }
     }
 }

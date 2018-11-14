@@ -18,7 +18,7 @@ namespace CodeTranslator.Java
             Builder.Append(Context.GetJavaModifiersString()).Space();
             Builder.Append(Context.Declaration.Type.GetJavaType(this)).Space();
             WriteVariableDeclaration(Context.Declaration.Variables);
-            Builder.EndOfLine();
+            Builder.EndOfStatement();
         }
 
         private void WriteVariableDeclaration(SeparatedSyntaxList<VariableDeclaratorSyntax> variables)
