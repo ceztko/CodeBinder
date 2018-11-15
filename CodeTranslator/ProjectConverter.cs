@@ -16,18 +16,11 @@ namespace CodeTranslator
 {
     public abstract class ProjectConverter : Converter
     {
-        public CompilationContext Compilation { get; private set; }
-        private readonly IEnumerable<SyntaxTree> _syntaxTreesToConvert;
-        private readonly ConcurrentDictionary<string, string> _errors = new ConcurrentDictionary<string, string>();
+        Project _project;
 
         protected ProjectConverter(Project project)
         {
-            var solutionFilePath = project.Solution.FilePath;
-            var solutionDir = Path.GetDirectoryName(solutionFilePath);
-            var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
-            var syntaxTrees = solutionDir == null ? compilation.SyntaxTrees : compilation.SyntaxTrees.Where(t => t.FilePath.StartsWith(solutionDir));
-            Compilation = new CompilationContext(compilation);
-            _syntaxTreesToConvert = syntaxTrees.ToList();
+            _project = project;
         }
 
         public static ProjectConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Project project, IProgress<string> progress = null)
@@ -36,37 +29,46 @@ namespace CodeTranslator
             return new ProjectConverter<TLanguageConversion>(project, new TLanguageConversion());
         }
 
-        public override IEnumerable<ConversionDelegate> Convert()
+        internal protected override IEnumerable<ConversionDelegate> Convert()
         {
-            var syntaxTreeContextTypes = getSyntaxTreeContextTypes();
+            var solutionFilePath = _project.Solution.FilePath;
+            var solutionDir = Path.GetDirectoryName(solutionFilePath);
+            var compilation = _project.GetCompilationAsync().GetAwaiter().GetResult();
+            if (!IgnoreCompilationErrors)
+            {
+                string errors = CompilationOuput.ErrorsForCompilation(compilation, "source");
+                if (!string.IsNullOrEmpty(errors))
+                    throw new Exception("Compilation errors: " + errors);
+            }
+
+            var syntaxTrees = solutionDir == null ? compilation.SyntaxTrees.ToArray() : compilation.SyntaxTrees.Where(t => t.FilePath.StartsWith(solutionDir)).ToArray();
+            var compilationContext = new CompilationContext(compilation);
+
+            var syntaxTreeContextTypes = getSyntaxTreeContextTypes(compilationContext, syntaxTrees);
             foreach (var pair in syntaxTreeContextTypes)
             {
-                var errors = _errors.TryGetValue(pair.Key, out var nonFatalException)
-                    ? new[] { nonFatalException }
-                    : new string[0];
-
                 foreach (var type in pair.Value)
                 {
                     foreach (var builder in type.Conversion.Builders)
-                        yield return new ConversionDelegate(pair.Key, builder, errors);
+                        yield return new ConversionDelegate(pair.Key, builder);
                 }
             }
 
             // Convert also out-of-context types
-            foreach (var type in Conversion.RootTypes)
+            foreach (var type in compilationContext.RootTypes)
             {
                 foreach (var builder in type.Conversion.Builders)
                     yield return new ConversionDelegate(builder);
             }
         }
 
-        private Dictionary<string, List<TypeContext>> getSyntaxTreeContextTypes()
+        private Dictionary<string, List<TypeContext>> getSyntaxTreeContextTypes(CompilationContext compilation, IEnumerable<SyntaxTree> syntaxTrees)
         {
             var syntaxTreeContexts = new Dictionary<string, SyntaxTreeContext>();
-            foreach (var tree in _syntaxTreesToConvert)
+            foreach (var tree in syntaxTrees)
             {
                 var syntaxTree = Conversion.GetSyntaxTreeContext();
-                syntaxTree.Compilation = Compilation;
+                syntaxTree.Compilation = compilation;
 
                 var treeFilePath = tree.FilePath ?? "";
                 syntaxTree.Visit(tree);
@@ -89,40 +91,24 @@ namespace CodeTranslator
                 }
             }
 
-#if DEBUG
-            AddProjectWarnings();
-#endif
             return ret;
-        }
-
-        private void AddProjectWarnings()
-        {
-            var nonFatalWarningsOrNull = Conversion.GetWarningsOrNull();
-            if (!string.IsNullOrWhiteSpace(nonFatalWarningsOrNull))
-            {
-                var warningsDescription = Path.Combine(Compilation.Compilation.AssemblyName, "ConversionWarnings.txt");
-                _errors.TryAdd(warningsDescription, nonFatalWarningsOrNull);
-            }
         }
     }
 
     public class ProjectConverter<TLanguageConversion> : ProjectConverter
             where TLanguageConversion : LanguageConversion
     {
-        TLanguageConversion _Conversion;
+        public new TLanguageConversion Conversion { get; private set; }
 
         internal ProjectConverter(Project project, TLanguageConversion conversion)
             : base(project)
         {
-            conversion.Compilation = Compilation;
-            _Conversion = conversion;
+            Conversion = conversion;
         }
-
-        public new TLanguageConversion Conversion => _Conversion;
 
         protected override LanguageConversion GetConversion()
         {
-            return _Conversion;
+            return Conversion;
         }
     }
 

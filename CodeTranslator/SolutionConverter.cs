@@ -48,7 +48,7 @@ namespace CodeTranslator
             return new SolutionConverter<TLanguageConversion>(solution, projectsToConvert, progress, new TLanguageConversion());
         }
 
-        public override IEnumerable<ConversionDelegate> Convert()
+        internal protected override IEnumerable<ConversionDelegate> Convert()
         {
             return _projectsToConvert.SelectMany(project => ConvertProject(project));
         }

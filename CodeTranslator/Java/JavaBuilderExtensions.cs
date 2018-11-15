@@ -13,12 +13,12 @@ namespace CodeTranslator.Java
     {
         public static CodeBuilder Append(this CodeBuilder builder, ElseClauseSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new NullContextWriter());
+            return builder.Append(ContextWriter.NullWriter());
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new NullContextWriter());
+            return builder.Append(ContextWriter.NullWriter());
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, ConstructorDeclarationSyntax member, ICompilationContextProvider context)
@@ -547,24 +547,29 @@ namespace CodeTranslator.Java
             return builder.Append(" ");
         }
 
+        public static CodeBuilder Parenthesized(this CodeBuilder builder, Action parenthesized)
+        {
+            builder.Append("(");
+            parenthesized();
+            return builder.Append(")");
+        }
+
+        public static CodeBuilder Parenthesized(this CodeBuilder builder)
+        {
+            builder.Append("(");
+            return builder.UsingChild(")");
+        }
+
         public static CodeBuilder BeginBlock(this CodeBuilder builder, bool appendLine = true)
         {
             builder.AppendLine("{");
             return builder.Indent("}", appendLine);
         }
 
-        public static CodeBuilder BeginParenthesized(this CodeBuilder builder, bool indented = false)
+        public static CodeBuilder BeginParameterList(this CodeBuilder builder)
         {
-            if (indented)
-            {
-                builder.AppendLine("(");
-                return builder.Indent(2, ")", false);
-            }
-            else
-            {
-                builder.Append("(");
-                return builder.Using(")");
-            }
+            builder.AppendLine("(");
+            return builder.Indent(2, ")", false);
         }
     }
 }

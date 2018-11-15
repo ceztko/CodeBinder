@@ -41,15 +41,15 @@ namespace CodeTranslator.Java
         {
             get
             {
-                yield return new PrimitiveBoxBuilder(JavaInteropType.Boolean);
-                yield return new PrimitiveBoxBuilder(JavaInteropType.Character);
-                yield return new PrimitiveBoxBuilder(JavaInteropType.Byte);
-                yield return new PrimitiveBoxBuilder(JavaInteropType.Short);
-                yield return new PrimitiveBoxBuilder(JavaInteropType.Integer);
-                yield return new PrimitiveBoxBuilder(JavaInteropType.Long);
-                yield return new PrimitiveBoxBuilder(JavaInteropType.Float);
-                yield return new PrimitiveBoxBuilder(JavaInteropType.Double);
-                yield return new PrimitiveBoxBuilder(JavaInteropType.String);
+                yield return new InteropBoxBuilder(JavaInteropType.Boolean);
+                yield return new InteropBoxBuilder(JavaInteropType.Character);
+                yield return new InteropBoxBuilder(JavaInteropType.Byte);
+                yield return new InteropBoxBuilder(JavaInteropType.Short);
+                yield return new InteropBoxBuilder(JavaInteropType.Integer);
+                yield return new InteropBoxBuilder(JavaInteropType.Long);
+                yield return new InteropBoxBuilder(JavaInteropType.Float);
+                yield return new InteropBoxBuilder(JavaInteropType.Double);
+                yield return new InteropBoxBuilder(JavaInteropType.String);
             }
         }
     }

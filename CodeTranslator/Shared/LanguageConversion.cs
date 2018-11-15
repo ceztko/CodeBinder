@@ -11,28 +11,14 @@ namespace CodeTranslator.Shared
 {
     public abstract class LanguageConversion
     {
-        public CompilationContext Compilation { get; internal set; }
-
         internal LanguageConversion() { }
 
         public abstract SyntaxTreeContext GetSyntaxTreeContext();
-
-        public virtual string GetWarningsOrNull()
-        {
-            return CompilationWarnings.WarningsForCompilation(Compilation, "source");
-        }
 
         public virtual IEnumerable<ConversionBuilder> DefaultConversions
         {
             get { yield break; }
         }
-
-        public IEnumerable<TypeContext> RootTypes
-        {
-            get { return GetRootTypes(); }
-        }
-
-        protected abstract IEnumerable<TypeContext> GetRootTypes();
 
         internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
         {
@@ -48,34 +34,35 @@ namespace CodeTranslator.Shared
         where TSyntaxTreeContext : SyntaxTreeContext<TTypeContext>
         where TTypeContext : TypeContext<TTypeContext, TSyntaxTreeContext>
     {
-        List<TTypeContext> m_rootTypes;
-
-        protected LanguageConversion()
-        {
-            m_rootTypes = new List<TTypeContext>();
-        }
+        protected LanguageConversion() { }
 
         public sealed override SyntaxTreeContext GetSyntaxTreeContext()
         {
             return getSyntaxTreeContext();
         }
 
-        public new IEnumerable<TTypeContext> RootTypes
-        {
-            get { return m_rootTypes; }
-        }
-
         protected abstract TSyntaxTreeContext getSyntaxTreeContext();
 
-        protected void AddType(TTypeContext type, TTypeContext parent)
+        // TODO: Find a method to have types directly on CompilationContext
+        // e.g., by having just CompilationContext generic and TypeContext subclass inside
+        protected void AddType(CompilationContext compilation, TTypeContext type, TTypeContext parent)
         {
-            type.Compilation = Compilation;
-            SyntaxTreeContext.AddRootType(m_rootTypes, type, parent);
-        }
+            if (type.Parent != null)
+                throw new Exception("Can't re-add root type");
 
-        protected override IEnumerable<TypeContext> GetRootTypes()
-        {
-            return m_rootTypes;
+            if (type == parent)
+                throw new Exception("The parent can't be same reference as the given type");
+
+            type.Compilation = compilation;
+            if (parent == null)
+            {
+                compilation.AddRootType(type);
+            }
+            else
+            {
+                type.Parent = parent;
+                parent.AddChild(type);
+            }
         }
     }
 }

@@ -20,6 +20,19 @@ namespace CodeTranslator.Util
         }
 
         protected abstract void Write();
+
+        public static ContextWriter NullWriter()
+        {
+            return new NullContextWriter();
+        }
+
+        class NullContextWriter : ContextWriter
+        {
+            protected override void Write()
+            {
+                Builder.Append("NULL");
+            }
+        }
     }
 
     public abstract class ContextWriter<TSyntax> : ContextWriter, ICompilationContextProvider
@@ -31,14 +44,6 @@ namespace CodeTranslator.Util
         {
             Context = context;
             Compilation = provider.Compilation;
-        }
-    }
-
-    public class NullContextWriter : ContextWriter
-    {
-        protected override void Write()
-        {
-            Builder.Append("NULL");
         }
     }
 }

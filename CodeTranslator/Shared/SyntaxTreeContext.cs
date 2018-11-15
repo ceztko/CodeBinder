@@ -22,8 +22,20 @@ namespace CodeTranslator.Shared
             get { return GetRootTypes(); }
         }
 
-        internal static void AddRootType<TTypeContext>(List<TTypeContext> types, TTypeContext type, TTypeContext parent)
-            where TTypeContext : TypeContext<TTypeContext>
+        protected abstract IEnumerable<TypeContext> GetRootTypes();
+    }
+
+    public abstract class SyntaxTreeContext<TTypeContext> : SyntaxTreeContext
+        where TTypeContext : TypeContext<TTypeContext>
+    {
+        List<TTypeContext> _rootTypes;
+
+        internal SyntaxTreeContext()
+        {
+            _rootTypes = new List<TTypeContext>();
+        }
+
+        protected void AddType(TTypeContext type, TTypeContext parent)
         {
             if (type.Parent != null)
                 throw new Exception("Can't re-add root type");
@@ -31,9 +43,10 @@ namespace CodeTranslator.Shared
             if (type == parent)
                 throw new Exception("The parent can't be same reference as the given type");
 
+            type.Compilation = Compilation;
             if (parent == null)
             {
-                types.Add(type);
+                _rootTypes.Add(type);
             }
             else
             {
@@ -42,23 +55,9 @@ namespace CodeTranslator.Shared
             }
         }
 
-        protected abstract IEnumerable<TypeContext> GetRootTypes();
-    }
-
-    public abstract class SyntaxTreeContext<TTypeContext> : SyntaxTreeContext
-        where TTypeContext : TypeContext<TTypeContext>
-    {
-        public new List<TTypeContext> RootTypes { get; private set; }
-
-        internal SyntaxTreeContext()
+        public new IEnumerable<TypeContext> RootTypes
         {
-            RootTypes = new List<TTypeContext>();
-        }
-
-        protected void AddType(TTypeContext type, TTypeContext parent)
-        {
-            type.Compilation = Compilation;
-            AddRootType(RootTypes, type, parent);
+            get { return _rootTypes; }
         }
 
         protected override IEnumerable<TypeContext> GetRootTypes()

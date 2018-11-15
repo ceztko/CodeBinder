@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 
@@ -104,6 +105,14 @@ namespace CodeTranslator.Shared.CSharp
         #endregion Supported types
 
         #region Unsupported syntax
+
+        public override void VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
+        {
+            if (node.Modifiers.Any((token) => token.Kind() != SyntaxKind.ConstKeyword))
+                Unsupported(node, "Variable declaration with unsupported modifiers");
+
+            DefaultVisit(node);
+        }
 
         public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         {

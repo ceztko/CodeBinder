@@ -9,19 +9,19 @@ using Microsoft.CodeAnalysis;
 
 namespace CodeTranslator.Util
 {
-    internal static class CompilationWarnings
+    internal static class CompilationOuput
     {
-        public static string WarningsForCompilation(CompilationContext finalCompilation, string compilationDescription)
+        public static string ErrorsForCompilation(Compilation compilation, string compilationDescription)
         {
-            var targetErrors = GetDiagnostics(finalCompilation);
+            var targetErrors = GetDiagnostics(compilation);
             return targetErrors.Any()
                 ? $"{targetErrors.Count} {compilationDescription} compilation errors:{Environment.NewLine}{String.Join(Environment.NewLine, targetErrors)}"
                 : null;
         }
 
-        private static List<string> GetDiagnostics(CompilationContext compilation)
+        private static List<string> GetDiagnostics(Compilation compilation)
         {
-            var diagnostics = compilation.Compilation.GetDiagnostics()
+            var diagnostics = compilation.GetDiagnostics()
                 .Where(d => d.Severity == DiagnosticSeverity.Error)
                 .Select(d => $"{d.Id}: {d.GetMessage()}")
                 .ToList();

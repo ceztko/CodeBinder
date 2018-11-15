@@ -34,11 +34,11 @@ namespace CodeTranslator.JNI
                 if (!Conversion.TryGetModule(moduleName, out parent))
                 {
                     parent = new JNIModuleContextParent(moduleName);
-                    Conversion.AddModule(parent);
+                    Conversion.AddModule(Compilation, parent);
                 }
 
                 module = new JNIModuleContextChild(TreeContext);
-                Conversion.AddModule(module, parent);
+                Conversion.AddModule(Compilation, module, parent);
             }
 
             foreach (var member in type.Members)

@@ -23,9 +23,11 @@ namespace CodeTranslator
             get { return GetConversion(); }
         }
 
+        public bool IgnoreCompilationErrors { get; set; }
+
         protected abstract LanguageConversion GetConversion();
 
-        public abstract IEnumerable<ConversionDelegate> Convert();
+        internal protected abstract IEnumerable<ConversionDelegate> Convert();
 
         public void ConvertAndWrite(GeneratorArgs args)
         {

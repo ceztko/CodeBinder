@@ -18,14 +18,14 @@ namespace CodeTranslator.JNI
         public override void Write(CodeBuilder builder)
         {
             builder.AppendLine("#include \"JNITypesPrivate.h\"");
-            foreach (var module in _conversion.RootTypes)
+            foreach (var module in _conversion.Modules)
                 builder.Append("#include \"JNI").Append(module.Name).AppendLine(".h\"");
 
             builder.AppendLine();
             builder.AppendLine("static void* funcs[] = {");
             using (builder.Indent())
             {
-                foreach (var module in _conversion.RootTypes)
+                foreach (var module in _conversion.Modules)
                 {
                     foreach (var method in module.Methods)
                     {

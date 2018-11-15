@@ -8,8 +8,16 @@ namespace CodeTranslator.Shared
     // TODO: Make it language agnostic
     public class CompilationContext : ICompilationContextProvider
     {
+        List<TypeContext> _rootTypes;
         private Dictionary<SyntaxTree, SemanticModel> _modelCache;
         public Compilation Compilation { get; private set; }
+
+        public CompilationContext(Compilation compilation)
+        {
+            _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
+            Compilation = compilation;
+            _rootTypes = new List<TypeContext>();
+        }
 
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
@@ -23,10 +31,14 @@ namespace CodeTranslator.Shared
             return model;
         }
 
-        public CompilationContext(Compilation compilation)
+        internal void AddRootType(TypeContext type)
         {
-            _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
-            Compilation = compilation;
+            _rootTypes.Add(type);
+        }
+
+        public IEnumerable<TypeContext> RootTypes
+        {
+            get { return _rootTypes; }
         }
 
         CompilationContext ICompilationContextProvider.Compilation

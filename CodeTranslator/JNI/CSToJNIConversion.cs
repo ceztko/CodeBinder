@@ -23,17 +23,17 @@ namespace CodeTranslator.JNI
         /// <summary>Base namespace of the package, to be set outside</summary>
         public string BaseNamespace { get; set; }
 
-        public void AddModule(JNIModuleContextParent module)
+        public void AddModule(CompilationContext compilation, JNIModuleContextParent module)
         {
             module.LanguageConversion = this;
             _modules.Add(module.Name, module);
-            AddType(module, null);
+            AddType(compilation, module, null);
         }
 
-        public void AddModule(JNIModuleContextChild module, JNIModuleContextParent parent)
+        public void AddModule(CompilationContext compilation, JNIModuleContextChild module, JNIModuleContextParent parent)
         {
             module.LanguageConversion = this;
-            AddType(module, parent);
+            AddType(compilation, module, parent);
         }
 
         public bool TryGetModule(string moduleName, out JNIModuleContextParent module)
@@ -58,6 +58,11 @@ namespace CodeTranslator.JNI
                 yield return new StringConversionBuilder("JNIBoxes.h", () => JNIResources.JNIBoxes_h);
                 yield return new StringConversionBuilder("JNIBoxesTemplate.h", () => JNIResources.JNIBoxesTemplate_h);
             }
+        }
+
+        public IEnumerable<JNIModuleContextParent> Modules
+        {
+            get { return _modules.Values; }
         }
     }
 }

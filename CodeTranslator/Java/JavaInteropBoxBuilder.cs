@@ -8,11 +8,11 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    class PrimitiveBoxBuilder : ConversionBuilder
+    class InteropBoxBuilder : ConversionBuilder
     {
         private JavaInteropType _primitiveType;
 
-        public PrimitiveBoxBuilder(JavaInteropType primitiveType)
+        public InteropBoxBuilder(JavaInteropType primitiveType)
         {
             _primitiveType = primitiveType;
         }
@@ -36,7 +36,7 @@ namespace CodeTranslator.Java
                 builder.AppendLine();
 
                 builder.Append("public").Space().Append(BoxTypeName).Append("(")
-                    .Append(JavaKeyword).Space().Append("value )").AppendLine();
+                    .Append(JavaKeyword).Space().Append("value)").AppendLine();
                 using (builder.BeginBlock())
                 {
                     builder.Append("this.value = value").EndOfStatement();

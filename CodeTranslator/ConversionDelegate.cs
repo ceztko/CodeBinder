@@ -17,16 +17,13 @@ namespace CodeTranslator
 
         public string SourcePath { get; private set; }
 
-        public IReadOnlyList<string> Exceptions { get; private set; }
-
         internal ConversionDelegate(IConversionBuilder builder)
-            : this(null, builder, null) { }
+            : this(null, builder) { }
 
-        internal ConversionDelegate(string sourcePath, IConversionBuilder builder, IReadOnlyList<string> exceptions)
+        internal ConversionDelegate(string sourcePath, IConversionBuilder builder)
         {
             SourcePath = sourcePath;
             _builder = builder;
-            Exceptions = exceptions;
         }
 
         public string TargetFileName
