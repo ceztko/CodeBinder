@@ -10,6 +10,8 @@ namespace CodeTranslator.Util
     // TODO: Add function to disable trim trailing whitespace
     public class CodeBuilder : IDisposable
     {
+        CodeBuilder _child;
+        bool _closed;
         uint _instanceIndentedCount;
         TextWriter _writer;
         uint _currentIndentLevel;
@@ -32,8 +34,17 @@ namespace CodeTranslator.Util
             _disposeContexts = new List<DisposeContext>();
         }
 
+        ~CodeBuilder()
+        {
+            if (_disposeContexts.Count != 0)
+                throw new Exception("Unbalanced disposed contexts");
+        }
+
+        #region Public methods
+
         public CodeBuilder Append(string str)
         {
+            checkClosed();
             _instanceIndentedCount = 0;
             if (str == string.Empty)
                 return this;
@@ -44,6 +55,7 @@ namespace CodeTranslator.Util
 
         public CodeBuilder AppendLine(string str = "")
         {
+            checkClosed();
             _instanceIndentedCount = 0;
             appendIndent(str, true);
             _writer.WriteLine(str);
@@ -54,14 +66,16 @@ namespace CodeTranslator.Util
 
         public CodeBuilder Append(ContextWriter writer)
         {
+            checkClosed();
             writer.Write(this);
             return this;
         }
 
-        /// <summary>Reset an indented instance. NOTE: Only a freshly
+        /// <summary>Reset an indented instance instance. NOTE: Only a freshly
         /// instance created with Idented() can be reset</summary>
-        public void ResetIndented()
+        public void ResetChildIndent()
         {
+            checkClosed();
             if (_instanceIndentedCount != 0)
             {
                 _currentIndentLevel -= _instanceIndentedCount;
@@ -71,30 +85,48 @@ namespace CodeTranslator.Util
 
         public CodeBuilder Using(string appendString)
         {
+            checkClosed();
             return disposable(0, appendString, false);
         }
 
         public CodeBuilder Indent(string appendString = null, bool appendLine = true)
         {
+            checkClosed();
             return disposable(1, appendString, appendLine);
         }
 
         public CodeBuilder Indent(uint indentCount, string appendString = null, bool appendLine = true)
         {
+            checkClosed();
             if (indentCount == 0)
                 throw new Exception("Can't indent with non positive indent count");
 
             return disposable(indentCount, appendString, appendLine);
         }
 
-        /// <summary>Return a new indented instace</summary>
-        public CodeBuilder Indented(uint indentCount = 1)
+        /// <summary>Return a new child instance that can be used in a using directive</summary>
+        public CodeBuilder UsingChild(string appendString)
         {
+            checkClosed();
+            return newChild(0).disposable(0, appendString, false);
+        }
+
+        /// <summary>Return a new indented child instance</summary>
+        public CodeBuilder IndentChild(uint indentCount = 1)
+        {
+            checkClosed();
             if (indentCount == 0)
                 throw new Exception("Can't indent with non positive indent count");
 
-            return new CodeBuilder(_writer, indentCount, _doIndent, IndentSpaces, _currentIndentLevel + indentCount);
+            return newChild(indentCount);
         }
+
+        public override string ToString()
+        {
+            return _writer.ToString();
+        }
+
+        #endregion // Public methods
 
         // TODO: Support custom newline neding
         private void append(string str)
@@ -121,9 +153,12 @@ namespace CodeTranslator.Util
             _writer.Write(new string(' ', (int)(_currentIndentLevel * IndentSpaces)));
         }
 
-        public override string ToString()
+        CodeBuilder newChild(uint indentCount)
         {
-            return _writer.ToString();
+            if (_child != null)
+                throw new Exception("A child is already active");
+
+            return new CodeBuilder(_writer, indentCount, _doIndent, IndentSpaces, _currentIndentLevel + indentCount);
         }
 
         CodeBuilder disposable(uint indentCount, string appendString, bool appendLine)
@@ -133,18 +168,37 @@ namespace CodeTranslator.Util
             return this;
         }
 
-        void IDisposable.Dispose()
+        void checkClosed()
         {
-            int contextCount = _disposeContexts.Count;
-            if (contextCount == 0)
-                throw new Exception("");
+            if (_closed)
+                throw new ObjectDisposedException(nameof(CodeBuilder));
 
-            disposeContext(_disposeContexts[contextCount - 1]);
-            _disposeContexts.RemoveAt(contextCount - 1);
+            if (_child != null)
+            {
+                _child.close();
+                _child = null;
+            }
         }
 
-        private void disposeContext(DisposeContext context)
+        void close()
         {
+            for (int i = _disposeContexts.Count - 1; i >= 0; i--)
+                disposeContext(i);
+
+            _closed = true;
+        }
+
+        void IDisposable.Dispose()
+        {
+            if (_disposeContexts.Count == 0)
+                throw new Exception("Unbalanced dispose operation");
+
+            disposeContext(_disposeContexts.Count - 1);
+        }
+
+        void disposeContext(int contextIndex)
+        {
+            var context = _disposeContexts[contextIndex];
             Debug.Assert(_currentIndentLevel >= context.IndentCount);
             _currentIndentLevel -= context.IndentCount;
             if (context.AppendString != null)
@@ -154,6 +208,8 @@ namespace CodeTranslator.Util
                 else
                     Append(context.AppendString);
             }
+
+            _disposeContexts.RemoveAt(contextIndex);
         }
 
         #region Support

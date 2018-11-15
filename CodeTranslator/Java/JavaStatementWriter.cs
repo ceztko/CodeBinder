@@ -34,7 +34,7 @@ namespace CodeTranslator.Java
         protected override void Write()
         {
             // Allows to not doubly indent single statements blocks, e.g after "if" statement
-            Builder.ResetIndented();
+            Builder.ResetChildIndent();
             using (Builder.BeginBlock(false))
             {
                 foreach (var statement in Context.Statements)
@@ -96,7 +96,7 @@ namespace CodeTranslator.Java
         protected override void Write()
         {
             Builder.Append("do").AppendLine();
-            Builder.Append(Context.Statement, this);
+            Builder.IndentChild().Append(Context.Statement, this);
             Builder.Append("while").Space().SemiColon();
         }
     }
@@ -135,7 +135,7 @@ namespace CodeTranslator.Java
                     Builder.Append(incrementor, this);
                 }
             }
-            Builder.AppendLine().Indented().Append(Context.Statement, this);
+            Builder.AppendLine().IndentChild().Append(Context.Statement, this);
         }
     }
 
@@ -150,7 +150,7 @@ namespace CodeTranslator.Java
             {
                 Builder.Append(Context.Condition, this);
             }
-            Builder.AppendLine().Indented().Append(Context.Statement, this);
+            Builder.AppendLine().IndentChild().Append(Context.Statement, this);
             if (Context.Else != null)
                 Builder.Append(Context.Else, this);
         }
