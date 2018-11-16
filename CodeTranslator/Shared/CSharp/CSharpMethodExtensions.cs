@@ -350,25 +350,6 @@ namespace CodeTranslator.Shared.CSharp
             return false;
         }
 
-        public static TypeInfo GetTypeInfo(this BaseTypeSyntax type, ICompilationContextProvider provider)
-        {
-            return type.Type.GetTypeInfo(provider);
-        }
-
-        public static string GetFullName(this BaseTypeSyntax type, ICompilationContextProvider provider)
-        {
-            return type.Type.GetFullName(provider);
-        }
-
-        public static string GetName(this BaseTypeSyntax type)
-        {
-            var idenfitifier = type.Type as IdentifierNameSyntax;
-            if (idenfitifier != null)
-                return idenfitifier.GetName();
-
-            return "NULL";
-        }
-
         public static string GetName(this IdentifierNameSyntax node)
         {
             return node.Identifier.Text;

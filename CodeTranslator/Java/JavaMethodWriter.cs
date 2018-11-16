@@ -18,11 +18,18 @@ namespace CodeTranslator.Java
         protected override void Write()
         {
             WriteModifiers();
+            if (Arity != 0)
+            {
+                Builder.Space();
+                WriteTypeParameters();
+            }
             WriteReturnType();
             Builder.Append(MethodName);
             WriteParameters();
             WriteMethodBody();
         }
+
+        protected virtual void WriteTypeParameters() { }
 
         protected virtual void WriteParameters()
         {
@@ -84,6 +91,11 @@ namespace CodeTranslator.Java
             Builder.Append(type.GetJavaType(flags, this));
         }
 
+        public virtual int Arity
+        {
+            get { return 0; }
+        }
+
         protected virtual void WriteReturnType() { }
 
         public abstract string MethodName { get; }
@@ -102,6 +114,11 @@ namespace CodeTranslator.Java
                 return;
 
             base.WriteModifiers();
+        }
+
+        protected override void WriteTypeParameters()
+        {
+            Builder.Append(Context.TypeParameterList, Context.ConstraintClauses, this);
         }
 
         protected override void WriteReturnType()
@@ -131,6 +148,11 @@ namespace CodeTranslator.Java
         public override bool IsNative
         {
             get { return Context.IsNative(this); }
+        }
+
+        public override int Arity
+        {
+            get { return Context.Arity; }
         }
     }
 

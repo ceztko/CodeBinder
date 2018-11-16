@@ -23,6 +23,56 @@ namespace CodeTranslator.Java
     {
         delegate bool ModifierGetter(SyntaxKind modifier, out string javaModifier);
 
+        public static string GetJavaType(this TypeSyntax type, ICompilationContextProvider provider, out bool isInterface)
+        {
+            var typeSymbol = type.GetTypeSymbol(provider);
+            string fullName = typeSymbol.GetFullName();
+            string javaTypeName;
+            if (IsKnownType(fullName, out javaTypeName, out isInterface))
+            {
+
+            }
+            else
+            {
+                var typeInfo = type.GetTypeInfo(provider);
+                isInterface = typeSymbol.TypeKind == TypeKind.Interface;
+
+                var kind = type.Kind();
+                switch (kind)
+                {
+                    case SyntaxKind.IdentifierName:
+                    {
+                        javaTypeName = (type as IdentifierNameSyntax).GetName();
+                        break;
+                    }
+                    default:
+                        javaTypeName =  "NULL";
+                        break;
+                }
+            }
+
+            return javaTypeName;
+        }
+
+        static bool IsKnownType(string typeName, out string convertedKnowType, out bool isInterface)
+        {
+            switch (typeName)
+            {
+                case "System.IDisposable":
+                {
+                    convertedKnowType = "AutoCloseable";
+                    isInterface = true;
+                    return true;
+                }
+                default:
+                {
+                    convertedKnowType = null;
+                    isInterface = false;
+                    return false;
+                }
+            }
+        }
+
         public static string GetJavaTypeDeclaration(this BaseTypeDeclarationSyntax node)
         {
             switch (node.GetType().Name)

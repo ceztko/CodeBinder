@@ -94,7 +94,7 @@ namespace CodeTranslator.Java
             if (Context.BaseList != null)
             {
                 Builder.Space();
-                WriteTypeBaseList(Context.BaseList);
+                WriteBaseTypes(Context.BaseList);
             }
             Builder.AppendLine();
             using (Builder.Block())
@@ -107,7 +107,7 @@ namespace CodeTranslator.Java
 
         protected abstract void WriteTypeMembers();
 
-        private void WriteTypeBaseList(BaseListSyntax baseList)
+        private void WriteBaseTypes(BaseListSyntax baseList)
         {
             bool first = true;
             foreach (var type in baseList.Types)
@@ -123,41 +123,8 @@ namespace CodeTranslator.Java
 
         private void WriteBaseType(BaseTypeSyntax type)
         {
-            string typeName;
-            bool isInterface;
-            if (!IsKnownType(type, out typeName, out isInterface))
-            {
-                typeName = type.GetName();
-                var typeInfo = type.GetTypeInfo(this);
-                isInterface = typeInfo.ConvertedType.TypeKind == TypeKind.Interface;
-            }
-
-            if (isInterface)
-                Builder.Append("implements").Space();
-            else
-                Builder.Append("extends").Space();
-
-            Builder.Append(typeName);
-        }
-
-        private bool IsKnownType(BaseTypeSyntax type, out string convertedKnowType, out bool isInterface)
-        {
-            var fullname = type.GetFullName(this);
-            switch (fullname)
-            {
-                case "System.IDisposable":
-                {
-                    convertedKnowType = "AutoCloseable";
-                    isInterface = true;
-                    return true;
-                }
-                default:
-                {
-                    convertedKnowType = null;
-                    isInterface = false;
-                    return false;
-                }
-            }
+            string javaTypeName = type.Type.GetJavaType(this, out var isInterface);
+            Builder.Append(isInterface ? "implements" : "extends").Space().Append(javaTypeName);
         }
 
         protected void WriteTypeMembers(SyntaxList<MemberDeclarationSyntax> members)
@@ -178,58 +145,6 @@ namespace CodeTranslator.Java
                     Builder.Append(writer);
                 }
             }
-        }
-
-        protected void WriteTypeParameters(TypeParameterListSyntax typeParameterList,
-            SyntaxList<TypeParameterConstraintClauseSyntax> constraintClauses)
-        {
-            var merged = mergeTypeConstraint(typeParameterList.Parameters, constraintClauses);
-            using (Builder.TypeParameterList())
-            {
-                bool first = true;
-                foreach (var pair in merged)
-                {
-                    if (first)
-                        first = true;
-                    else
-                        Builder.AppendLine();
-
-                    Builder.Append(pair.Type.Identifier.Text);
-                    if (pair.Constraints != null)
-                    {
-                        Builder.Space();
-                        writeTypeConstraints(pair.Constraints);
-                    }
-                }
-            }
-        }
-
-        private void writeTypeConstraints(TypeParameterConstraintClauseSyntax constraints)
-        {
-            bool first = true;
-            foreach (var constraint in constraints.Constraints)
-            {
-                if (first)
-                    first = false;
-                else
-                    Builder.Space().Append("&").Space();
-
-                Builder.Append(constraint, this);
-            }
-        }
-
-        private static (TypeParameterSyntax Type, TypeParameterConstraintClauseSyntax Constraints)[] mergeTypeConstraint(
-            SeparatedSyntaxList<TypeParameterSyntax> typeParameters,
-            SyntaxList<TypeParameterConstraintClauseSyntax> constraintClauses)
-        {
-            var ret = new (TypeParameterSyntax Type, TypeParameterConstraintClauseSyntax Constraint)[typeParameters.Count];
-            for (int i = 0; i < typeParameters.Count; i++)
-            {
-                var type = typeParameters[i];
-                var constraints = constraintClauses.FirstOrDefault((element) => element.Name.Identifier.Text == type.Identifier.Text);
-                ret[i] = (type, constraints);
-            }
-            return ret;
         }
 
         public virtual int Arity
