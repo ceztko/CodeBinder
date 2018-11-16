@@ -9,7 +9,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class MethodWriter<TMethod> : ContextWriter<TMethod>
+    abstract class MethodWriter<TMethod> : CodeWriter<TMethod>
         where TMethod : BaseMethodDeclarationSyntax
     {
         protected MethodWriter(TMethod method, ICompilationContextProvider context)

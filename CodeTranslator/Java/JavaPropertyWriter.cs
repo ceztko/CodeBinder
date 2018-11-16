@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class PropertyWriter<TProperty> : ContextWriter<TProperty>
+    abstract class PropertyWriter<TProperty> : CodeWriter<TProperty>
             where TProperty : BasePropertyDeclarationSyntax
     {
         SyntaxKind[] _modifiers;

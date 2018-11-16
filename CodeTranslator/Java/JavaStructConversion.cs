@@ -13,7 +13,7 @@ namespace CodeTranslator.Java
         public JavaStructConversion(CSToJavaConversion conversion)
             : base(conversion) { }
 
-        protected override ContextWriter GetTypeWriter()
+        protected override CodeWriter GetTypeWriter()
         {
             return new StructTypeWriter(TypeContext.Node, this);
         }

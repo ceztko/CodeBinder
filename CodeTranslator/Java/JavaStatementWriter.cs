@@ -8,7 +8,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class StatementWriter<TStatement> : ContextWriter<TStatement>
+    abstract class StatementWriter<TStatement> : CodeWriter<TStatement>
         where TStatement : StatementSyntax
     {
         public StatementWriter(TStatement syntax, ICompilationContextProvider context)

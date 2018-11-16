@@ -16,7 +16,7 @@ namespace CodeTranslator.Java
         public JavaEnumConversion(CSToJavaConversion conversion)
             : base(conversion) { }
 
-        protected override ContextWriter GetTypeWriter()
+        protected override CodeWriter GetTypeWriter()
         {
             return new EnumTypeWriter(TypeContext.Node, this);
         }

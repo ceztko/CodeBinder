@@ -9,7 +9,7 @@ using System.Text;
 
 namespace CodeTranslator.JNI
 {
-    abstract class MethodWriter : ContextWriter<(MethodDeclarationSyntax Method, JNIModuleConversion Module)>
+    abstract class MethodWriter : CodeWriter<(MethodDeclarationSyntax Method, JNIModuleConversion Module)>
     {
         protected MethodWriter(MethodDeclarationSyntax method, JNIModuleConversion module)
             : base((method, module), module) { }

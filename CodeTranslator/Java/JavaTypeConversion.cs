@@ -68,10 +68,10 @@ namespace CodeTranslator.Java
             builder.Append(GetTypeWriter());
         }
 
-        protected abstract ContextWriter GetTypeWriter();
+        protected abstract CodeWriter GetTypeWriter();
     }
 
-    abstract class TypeWriter<TBaseType> : ContextWriter<TBaseType>
+    abstract class TypeWriter<TBaseType> : CodeWriter<TBaseType>
         where TBaseType: BaseTypeDeclarationSyntax
     {
         protected TypeWriter(TBaseType syntax, ICompilationContextProvider context)

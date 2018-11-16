@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CodeTranslator.Util
 {
-    public abstract class ContextWriter
+    public abstract class CodeWriter
     {
         protected CodeBuilder Builder { get; private set; }
 
@@ -21,12 +21,12 @@ namespace CodeTranslator.Util
 
         protected abstract void Write();
 
-        public static ContextWriter NullWriter()
+        public static CodeWriter NullWriter()
         {
-            return new NullContextWriter();
+            return new NullCodeWriter();
         }
 
-        class NullContextWriter : ContextWriter
+        class NullCodeWriter : CodeWriter
         {
             protected override void Write()
             {
@@ -35,12 +35,12 @@ namespace CodeTranslator.Util
         }
     }
 
-    public abstract class ContextWriter<TSyntax> : ContextWriter, ICompilationContextProvider
+    public abstract class CodeWriter<TSyntax> : CodeWriter, ICompilationContextProvider
     {
         public CompilationContext Compilation { get; private set; }
         public TSyntax Context { get; private set; }
 
-        protected ContextWriter(TSyntax context, ICompilationContextProvider provider)
+        protected CodeWriter(TSyntax context, ICompilationContextProvider provider)
         {
             Context = context;
             Compilation = provider.Compilation;

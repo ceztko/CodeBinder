@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class ExpressiontWriter<TExpression> : ContextWriter<TExpression>
+    abstract class ExpressiontWriter<TExpression> : CodeWriter<TExpression>
         where TExpression : ExpressionSyntax
     {
         public ExpressiontWriter(TExpression syntax, ICompilationContextProvider context)

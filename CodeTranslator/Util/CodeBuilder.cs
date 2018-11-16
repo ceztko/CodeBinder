@@ -68,7 +68,7 @@ namespace CodeTranslator.Util
         }
 
 
-        public CodeBuilder Append(ContextWriter writer)
+        public CodeBuilder Append(CodeWriter writer)
         {
             doChecks();
             writer.Write(this);

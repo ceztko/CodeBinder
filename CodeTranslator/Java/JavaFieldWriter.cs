@@ -8,7 +8,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    public class FieldWriter : ContextWriter<FieldDeclarationSyntax>
+    public class FieldWriter : CodeWriter<FieldDeclarationSyntax>
     {
         public FieldWriter(FieldDeclarationSyntax syntax, ICompilationContextProvider context)
             : base(syntax, context) { }
