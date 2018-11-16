@@ -57,7 +57,7 @@ namespace CodeTranslator.JNI
             foreach (var method in TypeContext.Methods)
             {
                 var signatures = method.GetMethodSignatures(this);
-                if (signatures.Length == 0)
+                if (signatures.Count == 0)
                 {
                     builder.Append(MethodWriter.Create(method, this));
                     builder.AppendLine();

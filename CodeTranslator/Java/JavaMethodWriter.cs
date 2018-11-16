@@ -19,10 +19,8 @@ namespace CodeTranslator.Java
         {
             WriteModifiers();
             if (Arity != 0)
-            {
-                Builder.Space();
                 WriteTypeParameters();
-            }
+
             WriteReturnType();
             Builder.Append(MethodName);
             WriteParameters();
@@ -37,11 +35,22 @@ namespace CodeTranslator.Java
             {
                 Builder.Append("()");
             }
-            else
+            else if (Context.ParameterList.Parameters.Count == 1)
             {
                 using (Builder.ParameterList())
                 {
                     WriteParameters(Context.ParameterList);
+                }
+            }
+            else
+            {
+                using (Builder.Indent())
+                {
+                    using (Builder.ParameterList(true))
+                    {
+                        WriteParameters(Context.ParameterList);
+                        Builder.AppendLine();
+                    }
                 }
             }
         }
@@ -118,7 +127,7 @@ namespace CodeTranslator.Java
 
         protected override void WriteTypeParameters()
         {
-            Builder.Append(Context.TypeParameterList, Context.ConstraintClauses, this);
+            Builder.Append(Context.GetTypeParameters(), this);
         }
 
         protected override void WriteReturnType()

@@ -14,6 +14,31 @@ namespace CodeTranslator.Shared.CSharp
 {
     static class CSharpMethodExtensions
     {
+
+        public static CSharpTypeParameters GetTypeParameters(this MethodDeclarationSyntax syntax)
+        {
+            return mergeTypeConstraint(syntax.TypeParameterList.Parameters, syntax.ConstraintClauses);
+        }
+
+        public static CSharpTypeParameters GetTypeParameters(this TypeDeclarationSyntax syntax)
+        {
+            return mergeTypeConstraint(syntax.TypeParameterList.Parameters, syntax.ConstraintClauses);
+        }
+
+        private static CSharpTypeParameters mergeTypeConstraint(
+            SeparatedSyntaxList<TypeParameterSyntax> typeParameters,
+            SyntaxList<TypeParameterConstraintClauseSyntax> constraintClauses)
+        {
+            var parameters = new List<CSharpTypeParameter>(typeParameters.Count);
+            for (int i = 0; i < typeParameters.Count; i++)
+            {
+                var type = typeParameters[i];
+                var constraints = constraintClauses.FirstOrDefault((element) => element.Name.Identifier.Text == type.Identifier.Text);
+                parameters.Add(new CSharpTypeParameter(type, constraints));
+            }
+            return new CSharpTypeParameters(parameters);
+        }
+
         public static bool IsNone(this SyntaxToken token)
         {
             return token.Kind() == SyntaxKind.None;
@@ -45,7 +70,7 @@ namespace CodeTranslator.Shared.CSharp
             }
         }
 
-        public static MethodSignatureInfo[] GetMethodSignatures(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        public static IReadOnlyList<MethodSignatureInfo> GetMethodSignatures(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
         {
             var ret = new List<MethodSignatureInfo>();
             var attributes = method.GetAttributes(provider);
@@ -57,7 +82,7 @@ namespace CodeTranslator.Shared.CSharp
                     ret.Add(methodData);
                 }
             }
-            return ret.ToArray();
+            return ret;
         }
 
         private static MethodSignatureInfo getMethodDataFromConstructorParameter(MethodDeclarationSyntax method, AttributeData attribute)
@@ -131,7 +156,7 @@ namespace CodeTranslator.Shared.CSharp
 
             var ret = new MethodSignatureInfo();
             ret.MethodName = methodName;
-            ret.Modifiers = method.GetCSharpModifiers();
+            ret.Modifiers = method.GetCSharpModifiers().ToArray();
             ret.ReturnType = new MethodParameterInfo(returnType, null);
             ret.Parameters = parameters;
             return ret;
@@ -181,7 +206,7 @@ namespace CodeTranslator.Shared.CSharp
             return node.EqualsValue.Value.GetValue<int>(provider);
         }
 
-        public static SyntaxKind[] GetCSharpModifiers(this BaseFieldDeclarationSyntax node)
+        public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this BaseFieldDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
             foreach (var modifier in node.Modifiers)
@@ -210,10 +235,10 @@ namespace CodeTranslator.Shared.CSharp
             foreach (var modifier in node.Modifiers)
                 ret.Add(modifier.Kind());
 
-            return ret.ToArray();
+            return ret;
         }
 
-        public static SyntaxKind[] GetCSharpModifiers(this BaseTypeDeclarationSyntax node)
+        public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this BaseTypeDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
             foreach (var modifier in node.Modifiers)
@@ -242,10 +267,10 @@ namespace CodeTranslator.Shared.CSharp
             foreach (var modifier in node.Modifiers)
                 ret.Add(modifier.Kind());
 
-            return ret.ToArray();
+            return ret;
         }
 
-        public static SyntaxKind[] GetCSharpModifiers(this BaseMethodDeclarationSyntax node)
+        public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this BaseMethodDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
             foreach (var modifier in node.Modifiers)
@@ -279,10 +304,10 @@ namespace CodeTranslator.Shared.CSharp
             foreach (var modifier in node.Modifiers)
                 ret.Add(modifier.Kind());
 
-            return ret.ToArray();
+            return ret;
         }
 
-        public static SyntaxKind[] GetCSharpModifiers(this BasePropertyDeclarationSyntax node)
+        public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this BasePropertyDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
             foreach (var modifier in node.Modifiers)
@@ -315,10 +340,10 @@ namespace CodeTranslator.Shared.CSharp
             foreach (var modifier in node.Modifiers)
                 ret.Add(modifier.Kind());
 
-            return ret.ToArray();
+            return ret;
         }
 
-        public static SyntaxKind[] GetCSharpModifiers(this AccessorDeclarationSyntax node)
+        public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this AccessorDeclarationSyntax node)
         {
             var ret = new List<SyntaxKind>();
             foreach (var modifier in node.Modifiers)
@@ -336,7 +361,7 @@ namespace CodeTranslator.Shared.CSharp
                 }
             }
 
-            return ret.ToArray();
+            return ret;
         }
 
         public static bool HasModifier(this SyntaxTokenList modifiers, string modifierStr)

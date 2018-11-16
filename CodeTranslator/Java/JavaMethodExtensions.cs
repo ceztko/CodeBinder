@@ -224,10 +224,10 @@ namespace CodeTranslator.Java
                 case SyntaxKind.SealedKeyword:
                     javaModifier = "final";
                     return true;
-                case SyntaxKind.InternalKeyword:
-                    javaModifier = null;
-                    return false;
                 case SyntaxKind.AbstractKeyword:
+                    javaModifier = "abstract";
+                    return true;
+                case SyntaxKind.InternalKeyword:
                     javaModifier = null;
                     return false;
                 case SyntaxKind.StaticKeyword:
@@ -260,6 +260,9 @@ namespace CodeTranslator.Java
                 case SyntaxKind.ExternKeyword:
                     javaModifier = "native";
                     return true;
+                case SyntaxKind.AbstractKeyword:
+                    javaModifier = "abstract";
+                    return true;
                 case SyntaxKind.NewKeyword:
                     javaModifier = null;
                     return false;
@@ -267,9 +270,6 @@ namespace CodeTranslator.Java
                     javaModifier = null;
                     return false;
                 case SyntaxKind.VirtualKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.AbstractKeyword:
                     javaModifier = null;
                     return false;
                 case SyntaxKind.OverrideKeyword:
@@ -299,6 +299,9 @@ namespace CodeTranslator.Java
                 case SyntaxKind.SealedKeyword:
                     javaModifier = "final";
                     return true;
+                case SyntaxKind.AbstractKeyword:
+                    javaModifier = "abstract";
+                    return true;
                 case SyntaxKind.NewKeyword:
                     javaModifier = null;
                     return false;
@@ -306,9 +309,6 @@ namespace CodeTranslator.Java
                     javaModifier = null;
                     return false;
                 case SyntaxKind.VirtualKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.AbstractKeyword:
                     javaModifier = null;
                     return false;
                 case SyntaxKind.OverrideKeyword:

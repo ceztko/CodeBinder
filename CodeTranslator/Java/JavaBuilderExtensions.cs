@@ -15,27 +15,21 @@ namespace CodeTranslator.Java
     static partial class JavaWriterExtension
     {
         public static void Append(this CodeBuilder builder,
-            TypeParameterListSyntax typeParameterList,
-            SyntaxList<TypeParameterConstraintClauseSyntax> constraintClauses,
-            ICompilationContextProvider context)
+            CSharpTypeParameters typeParameters, ICompilationContextProvider context)
         {
-            var merged = mergeTypeConstraint(typeParameterList.Parameters, constraintClauses);
-            using (builder.TypeParameterList())
+            using (builder.TypeParameterList(typeParameters.Count > 1))
             {
-                bool first = true;
-                foreach (var pair in merged)
+                foreach (var parameter in typeParameters)
                 {
-                    if (first)
-                        first = true;
-                    else
-                        builder.AppendLine();
-
-                    builder.Append(pair.Type.Identifier.Text);
-                    if (pair.Constraints != null)
+                    builder.Append(parameter.Type.Identifier.Text);
+                    if (parameter.Constraints != null)
                     {
                         builder.Space();
-                        writeTypeConstraints(builder, pair.Constraints, context);
+                        writeTypeConstraints(builder, parameter.Constraints, context);
                     }
+
+                    if (typeParameters.Count > 1)
+                        builder.AppendLine();
                 }
             }
         }
@@ -56,21 +50,8 @@ namespace CodeTranslator.Java
             }
         }
 
-        private static (TypeParameterSyntax Type, TypeParameterConstraintClauseSyntax Constraints)[] mergeTypeConstraint(
-            SeparatedSyntaxList<TypeParameterSyntax> typeParameters,
-            SyntaxList<TypeParameterConstraintClauseSyntax> constraintClauses)
-        {
-            var ret = new (TypeParameterSyntax Type, TypeParameterConstraintClauseSyntax Constraint)[typeParameters.Count];
-            for (int i = 0; i < typeParameters.Count; i++)
-            {
-                var type = typeParameters[i];
-                var constraints = constraintClauses.FirstOrDefault((element) => element.Name.Identifier.Text == type.Identifier.Text);
-                ret[i] = (type, constraints);
-            }
-            return ret;
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, TypeParameterConstraintSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder,
+            TypeParameterConstraintSyntax syntax, ICompilationContextProvider context)
         {
             switch (syntax.Kind())
             {
@@ -119,6 +100,7 @@ namespace CodeTranslator.Java
             return builder.Append(" ");
         }
 
+        /// <summary>One line parenthesized</summary>
         public static CodeBuilder Parenthesized(this CodeBuilder builder, Action parenthesized)
         {
             builder.Append("(");
@@ -126,6 +108,7 @@ namespace CodeTranslator.Java
             return builder.Append(")");
         }
 
+        /// <summary>One line parenthesized</summary>
         public static CodeBuilder Parenthesized(this CodeBuilder builder)
         {
             builder.Append("(");
@@ -138,16 +121,32 @@ namespace CodeTranslator.Java
             return builder.Indent("}", appendLine);
         }
 
-        public static CodeBuilder ParameterList(this CodeBuilder builder)
+        public static CodeBuilder ParameterList(this CodeBuilder builder, bool multiLine = false)
         {
-            builder.AppendLine("(");
-            return builder.Indent(")");
+            if (multiLine)
+            {
+                builder.AppendLine("(");
+                return builder.Indent(")");
+            }
+            else
+            {
+                builder.Append("(");
+                return builder.Using(")");
+            }
         }
 
-        public static CodeBuilder TypeParameterList(this CodeBuilder builder)
+        public static CodeBuilder TypeParameterList(this CodeBuilder builder, bool multiLine = false)
         {
-            builder.AppendLine("<");
-            return builder.Indent(">");
+            if (multiLine)
+            {
+                builder.AppendLine("<");
+                return builder.Indent(">", true);
+            }
+            else
+            {
+                builder.Append("<");
+                return builder.Using("> ");
+            }
         }
     }
 }

@@ -19,7 +19,7 @@ namespace CodeTranslator.Java
         protected PropertyWriter(TProperty syntax, ICompilationContextProvider context)
             : base(syntax, context)
         {
-            _modifiers = Context.GetCSharpModifiers();
+            _modifiers = Context.GetCSharpModifiers().ToArray();
             _isAutoProperty = true;
             if (Context.AccessorList != null)
             {

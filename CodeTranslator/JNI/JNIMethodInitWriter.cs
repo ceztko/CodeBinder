@@ -30,7 +30,7 @@ namespace CodeTranslator.JNI
                     foreach (var method in module.Methods)
                     {
                         var signatures = method.GetMethodSignatures(module);
-                        if (signatures.Length == 0)
+                        if (signatures.Count == 0)
                         {
                             builder.Append("(void *)").Append(method.GetJNIMethodName(module)).AppendLine(",");
                         }

@@ -97,7 +97,7 @@ namespace CodeTranslator.Java
         static IEnumerable<CodeWriter> getMethodWriters(MethodDeclarationSyntax method, ICompilationContextProvider context)
         {
             var signatures = method.GetMethodSignatures(context);
-            if (signatures.Length == 0)
+            if (signatures.Count == 0)
             {
                 yield return new MethodWriter(method, context);
             }

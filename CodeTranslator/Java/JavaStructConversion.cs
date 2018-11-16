@@ -31,7 +31,7 @@ namespace CodeTranslator.Java
 
         protected override void WriteTypeParameters()
         {
-            Builder.Append(Context.TypeParameterList, Context.ConstraintClauses, this);
+            Builder.Append(Context.GetTypeParameters(), this);
         }
 
         public override int Arity

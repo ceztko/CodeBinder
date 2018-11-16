@@ -93,13 +93,13 @@ namespace CodeTranslator.Util
             return disposable(0, appendString, false);
         }
 
-        public CodeBuilder Indent(string appendString = null, bool appendLine = true)
+        public CodeBuilder Indent(string appendString = null, bool appendLine = false)
         {
             doChecks();
             return disposable(1, appendString, appendLine);
         }
 
-        public CodeBuilder Indent(uint indentCount, string appendString = null, bool appendLine = true)
+        public CodeBuilder Indent(uint indentCount, string appendString = null, bool appendLine = false)
         {
             doChecks();
             if (indentCount == 0)
@@ -215,7 +215,8 @@ namespace CodeTranslator.Util
             // NOTE: we don't do close() here by purpose to allow using
             // statements to just remove last indent operation
             if (_disposeContexts.Count == 0)
-                throw new Exception("Unbalanced dispose operation");
+                throw new Exception("Unbalanced dispose operation. Ensure "
+                    + "to not spawn children inside using statements");
 
             disposeContext(_disposeContexts.Count - 1);
         }

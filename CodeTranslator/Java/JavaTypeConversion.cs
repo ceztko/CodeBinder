@@ -48,17 +48,18 @@ namespace CodeTranslator.Java
             get
             {
                 yield return "Java.util.*";
-                yield return "codetranslator.utils";
+                yield return "codetranslator.utils.*";
             }
         }
 
         public sealed override void Write(CodeBuilder builder)
         {
             builder.Append("package").Space().Append(Namespace).EndOfStatement();
+            builder.AppendLine();
             bool hasImports = false;
             foreach (var import in Imports)
             {
-                builder.Append("import").Space().AppendLine(import);
+                builder.Append("import").Space().Append(import).EndOfStatement();
                 hasImports = true;
             }
 
