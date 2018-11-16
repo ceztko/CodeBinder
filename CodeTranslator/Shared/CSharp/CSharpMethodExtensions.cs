@@ -14,6 +14,11 @@ namespace CodeTranslator.Shared.CSharp
 {
     static class CSharpMethodExtensions
     {
+        public static bool IsNone(this SyntaxToken token)
+        {
+            return token.Kind() == SyntaxKind.None;
+        }
+
         public static string GetTypeName(ref this MethodParameterInfo parameter, out ITypeSymbol typeSymbol)
         {
             if (parameter.Type.Type == null)

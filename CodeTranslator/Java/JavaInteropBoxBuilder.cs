@@ -27,7 +27,7 @@ namespace CodeTranslator.Java
             builder.Append("package").Space().Append("codentranslator.util").EndOfStatement();
             builder.AppendLine();
             builder.Append("class").Space().Append(BoxTypeName).AppendLine();
-            using (builder.BeginBlock())
+            using (builder.Block())
             {
                 builder.Append("public").Space().Append(JavaKeyword).Space().Append("value").EndOfStatement();
                 builder.AppendLine();
@@ -37,7 +37,7 @@ namespace CodeTranslator.Java
 
                 builder.Append("public").Space().Append(BoxTypeName).Append("(")
                     .Append(JavaKeyword).Space().Append("value)").AppendLine();
-                using (builder.BeginBlock())
+                using (builder.Block())
                 {
                     builder.Append("this.value = value").EndOfStatement();
                 }
@@ -46,7 +46,7 @@ namespace CodeTranslator.Java
 
         private string JavaKeyword
         {
-            get { return JavaSharedUtils.ToJavaKeyword(_primitiveType); }
+            get { return JavaUtils.ToJavaKeyword(_primitiveType); }
         }
 
         private string BoxTypeName

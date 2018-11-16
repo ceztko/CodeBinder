@@ -33,5 +33,15 @@ namespace CodeTranslator.Java
         {
             WriteTypeMembers(Context.Members);
         }
+
+        protected override void WriteTypeParameters()
+        {
+            WriteTypeParameters(Context.TypeParameterList, Context.ConstraintClauses);
+        }
+
+        public override int Arity
+        {
+            get { return Context.Arity; }
+        }
     }
 }

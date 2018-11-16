@@ -85,7 +85,7 @@ namespace CodeTranslator.Java
             {
                 if (_isAutoProperty)
                 {
-                    using (Builder.AppendLine().BeginBlock())
+                    using (Builder.AppendLine().Block())
                     {
                         Builder.Append(UnderlyingFieldName).Space().Append("= value").EndOfStatement();
                     }
@@ -111,7 +111,7 @@ namespace CodeTranslator.Java
             {
                 if (_isAutoProperty)
                 {
-                    using (Builder.AppendLine().BeginBlock())
+                    using (Builder.AppendLine().Block())
                     {
                         Builder.Append("return").Space().Append(UnderlyingFieldName).EndOfStatement();
                     }

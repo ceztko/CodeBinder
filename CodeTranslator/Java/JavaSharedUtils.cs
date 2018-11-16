@@ -4,6 +4,20 @@ using System.Text;
 
 namespace CodeTranslator.Shared.Java
 {
+    public enum ParenthesisDirection
+    {
+        Left,
+        Right
+    }
+
+    public enum ParenthesisType
+    {
+        Round,
+        Square,
+        Angle,
+        Brace,
+    }
+
     public enum JavaInteropType
     {
         Boolean,
@@ -17,9 +31,9 @@ namespace CodeTranslator.Shared.Java
         String,
     }
 
-    public static class JavaSharedUtils
+    public static class JavaUtils
     {
-        public static string ToJavaKeyword(JavaInteropType type)
+        public static string ToJavaKeyword(this JavaInteropType type)
         {
             switch (type)
             {
@@ -68,6 +82,47 @@ namespace CodeTranslator.Shared.Java
                     return JavaInteropType.Double;
                 case "string":
                     return JavaInteropType.String;
+                default:
+                    throw new Exception();
+            }
+        }
+
+        public static string ToString(this ParenthesisType type, ParenthesisDirection direction)
+        {
+            switch (direction)
+            {
+                case ParenthesisDirection.Left:
+                {
+                    switch (type)
+                    {
+                        case ParenthesisType.Round:
+                            return "(";
+                        case ParenthesisType.Square:
+                            return "[";
+                        case ParenthesisType.Angle:
+                            return "<";
+                        case ParenthesisType.Brace:
+                            return "{";
+                        default:
+                            throw new Exception();
+                    }
+                }
+                case ParenthesisDirection.Right:
+                {
+                    switch (type)
+                    {
+                        case ParenthesisType.Round:
+                            return ")";
+                        case ParenthesisType.Square:
+                            return "]";
+                        case ParenthesisType.Angle:
+                            return ">";
+                        case ParenthesisType.Brace:
+                            return "}";
+                        default:
+                            throw new Exception();
+                    }
+                }
                 default:
                     throw new Exception();
             }

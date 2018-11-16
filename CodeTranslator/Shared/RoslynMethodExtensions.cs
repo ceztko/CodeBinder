@@ -11,11 +11,6 @@ namespace CodeTranslator.Shared
 {
     static class RoslynMethodExtensions
     {
-        private static readonly SymbolDisplayFormat Format = new SymbolDisplayFormat(
-            SymbolDisplayGlobalNamespaceStyle.Omitted,
-            SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-            miscellaneousOptions: SymbolDisplayMiscellaneousOptions.ExpandNullable);
-
         public static bool IsAttribute<TAttribute>(this AttributeData attribute)
             where TAttribute : Attribute
         {

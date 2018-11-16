@@ -35,7 +35,7 @@ namespace CodeTranslator.Java
         {
             // Allows to not doubly indent single statements blocks, e.g after "if" statement
             Builder.ResetChildIndent();
-            using (Builder.BeginBlock(false))
+            using (Builder.Block(false))
             {
                 foreach (var statement in Context.Statements)
                 {
@@ -192,7 +192,7 @@ namespace CodeTranslator.Java
         protected override void Write()
         {
             Builder.Append("switch").Space().Parenthesized().Append(Context.Expression, this).Close().AppendLine();
-            using (Builder.BeginBlock(false))
+            using (Builder.Block(false))
             {
                 bool first = true;
                 foreach (var section in Context.Sections)

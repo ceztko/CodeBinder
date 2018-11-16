@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Linq;
 
 namespace CodeTranslator.Java
 {
@@ -84,21 +85,30 @@ namespace CodeTranslator.Java
 
             Builder.Append(Context.GetJavaTypeDeclaration()).Space();
             Builder.Append(TypeName);
+            if (Arity > 0)
+            {
+                Builder.Space();
+                WriteTypeParameters();
+            }
+
             if (Context.BaseList != null)
+            {
+                Builder.Space();
                 WriteTypeBaseList(Context.BaseList);
+            }
             Builder.AppendLine();
-            using (Builder.BeginBlock())
+            using (Builder.Block())
             {
                 WriteTypeMembers();
             }
         }
 
+        protected virtual void WriteTypeParameters() { }
+
         protected abstract void WriteTypeMembers();
 
         private void WriteTypeBaseList(BaseListSyntax baseList)
         {
-            Builder.Append(":").Space();
-
             bool first = true;
             foreach (var type in baseList.Types)
             {
@@ -168,6 +178,63 @@ namespace CodeTranslator.Java
                     Builder.Append(writer);
                 }
             }
+        }
+
+        protected void WriteTypeParameters(TypeParameterListSyntax typeParameterList,
+            SyntaxList<TypeParameterConstraintClauseSyntax> constraintClauses)
+        {
+            var merged = mergeTypeConstraint(typeParameterList.Parameters, constraintClauses);
+            using (Builder.TypeParameterList())
+            {
+                bool first = true;
+                foreach (var pair in merged)
+                {
+                    if (first)
+                        first = true;
+                    else
+                        Builder.AppendLine();
+
+                    Builder.Append(pair.Type.Identifier.Text);
+                    if (pair.Constraints != null)
+                    {
+                        Builder.Space();
+                        writeTypeConstraints(pair.Constraints);
+                    }
+                }
+            }
+        }
+
+        private void writeTypeConstraints(TypeParameterConstraintClauseSyntax constraints)
+        {
+            bool first = true;
+            foreach (var constraint in constraints.Constraints)
+            {
+                if (first)
+                    first = false;
+                else
+                    Builder.Space().Append("&").Space();
+
+                Builder.Append(constraint, this);
+            }
+        }
+
+        private static (TypeParameterSyntax Type, TypeParameterConstraintClauseSyntax Constraints)[] mergeTypeConstraint(
+            SeparatedSyntaxList<TypeParameterSyntax> typeParameters,
+            SyntaxList<TypeParameterConstraintClauseSyntax> constraintClauses)
+        {
+            var ret = new (TypeParameterSyntax Type, TypeParameterConstraintClauseSyntax Constraint)[typeParameters.Count];
+            for (int i = 0; i < typeParameters.Count; i++)
+            {
+                var type = typeParameters[i];
+                var constraints = constraintClauses.FirstOrDefault((element) => element.Name.Identifier.Text == type.Identifier.Text);
+                ret[i] = (type, constraints);
+            }
+            return ret;
+        }
+
+        public virtual int Arity
+        {
+            get { return 0; }
         }
 
         public virtual bool IsInterface

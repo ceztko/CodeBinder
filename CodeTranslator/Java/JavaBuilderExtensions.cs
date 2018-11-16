@@ -6,11 +6,23 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using CodeTranslator.Shared.Java;
 
 namespace CodeTranslator.Java
 {
     static class JavaWriterExtension
     {
+        public static CodeBuilder Append(this CodeBuilder builder, TypeParameterConstraintSyntax syntax, ICompilationContextProvider context)
+        {
+            switch (syntax.Kind())
+            {
+                case SyntaxKind.TypeConstraint:
+                    return builder.Append(ContextWriter.NullWriter());
+                default:
+                    throw new Exception("Unsupported type constraint");
+            }
+        }
+
         public static CodeBuilder Append(this CodeBuilder builder, FinallyClauseSyntax syntax, ICompilationContextProvider context)
         {
             return builder.Append(ContextWriter.NullWriter());
@@ -208,7 +220,7 @@ namespace CodeTranslator.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, IdentifierNameSyntax expression, ICompilationContextProvider context)
         {
-            return builder.Append(new IdenfitiferNameWriter(expression, context));
+            return builder.Append(new IdentifierNameWriter(expression, context));
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, NullableTypeSyntax expression, ICompilationContextProvider context)
@@ -321,6 +333,16 @@ namespace CodeTranslator.Java
             return builder.Append(new YieldStatementWriter(statement, context));
         }
 
+        public static CodeBuilder Append(this CodeBuilder builder, ExpressionSyntax syntax, ICompilationContextProvider context)
+        {
+            return builder.Append(syntax.GetWriter(context));
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, StatementSyntax syntax, ICompilationContextProvider context)
+        {
+            return builder.Append(syntax.GetWriter(context));
+        }
+
         public static IEnumerable<ContextWriter> GetWriters(this MemberDeclarationSyntax member, ICompilationContextProvider context)
         {
             var kind = member.Kind();
@@ -352,15 +374,15 @@ namespace CodeTranslator.Java
         }
 
         // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
-        public static CodeBuilder Append(this CodeBuilder builder, ExpressionSyntax expression, ICompilationContextProvider context)
+        public static ContextWriter GetWriter(this ExpressionSyntax expression, ICompilationContextProvider context)
         {
             var kind = expression.Kind();
             switch (kind)
             {
                 case SyntaxKind.ArrayCreationExpression:
-                    return builder.Append(expression as ArrayCreationExpressionSyntax, context);
+                    return new ArrayCreationExpressionWriter(expression as ArrayCreationExpressionSyntax, context);
                 case SyntaxKind.OmittedArraySizeExpression:
-                    return builder.Append(expression as OmittedArraySizeExpressionSyntax, context);
+                    return new OmittedArraySizeExpressionWriter(expression as OmittedArraySizeExpressionSyntax, context);
                 case SyntaxKind.AddAssignmentExpression:
                 case SyntaxKind.AndAssignmentExpression:
                 case SyntaxKind.DivideAssignmentExpression:
@@ -372,7 +394,7 @@ namespace CodeTranslator.Java
                 case SyntaxKind.RightShiftAssignmentExpression:
                 case SyntaxKind.SimpleAssignmentExpression:
                 case SyntaxKind.SubtractAssignmentExpression:
-                    return builder.Append(expression as AssignmentExpressionSyntax, context);
+                    return new AssignmentExpressionWriter(expression as AssignmentExpressionSyntax, context);
                 case SyntaxKind.AddExpression:
                 case SyntaxKind.SubtractExpression:
                 case SyntaxKind.MultiplyExpression:
@@ -394,26 +416,26 @@ namespace CodeTranslator.Java
                 case SyntaxKind.IsExpression:
                 case SyntaxKind.AsExpression:
                 case SyntaxKind.CoalesceExpression:
-                    return builder.Append(expression as BinaryExpressionSyntax, context);
+                    return new BinaryExpressionWriter(expression as BinaryExpressionSyntax, context);
                 case SyntaxKind.CastExpression:
-                    return builder.Append(expression as CastExpressionSyntax, context);
+                    return new CastExpressionWriter(expression as CastExpressionSyntax, context);
                 case SyntaxKind.ConditionalExpression:
-                    return builder.Append(expression as ConditionalExpressionSyntax, context);
+                    return new ConditionalExpressionWriter(expression as ConditionalExpressionSyntax, context);
                 case SyntaxKind.DeclarationExpression:
-                    return builder.Append(expression as DeclarationExpressionSyntax, context);
+                    return new DeclarationExpressionWriter(expression as DeclarationExpressionSyntax, context);
                 case SyntaxKind.ElementAccessExpression:
-                    return builder.Append(expression as ElementAccessExpressionSyntax, context);
+                    return new ElementAccessExpressionWriter(expression as ElementAccessExpressionSyntax, context);
                 case SyntaxKind.ObjectInitializerExpression:
                 case SyntaxKind.CollectionInitializerExpression:
                 case SyntaxKind.ArrayInitializerExpression:
                 case SyntaxKind.ComplexElementInitializerExpression:
-                    return builder.Append(expression as InitializerExpressionSyntax, context);
+                    return new InitializerExpressionWriter(expression as InitializerExpressionSyntax, context);
                 case SyntaxKind.BaseExpression:
-                    return builder.Append(expression as BaseExpressionSyntax, context);
+                    return new BaseExpressionWriter(expression as BaseExpressionSyntax, context);
                 case SyntaxKind.ThisExpression:
-                    return builder.Append(expression as ThisExpressionSyntax, context);
+                    return new ThisExpressionWriter(expression as ThisExpressionSyntax, context);
                 case SyntaxKind.InvocationExpression:
-                    return builder.Append(expression as InvocationExpressionSyntax, context);
+                    return new InvocationExpressionWriter(expression as InvocationExpressionSyntax, context);
                 case SyntaxKind.ArgListExpression:
                 case SyntaxKind.NumericLiteralExpression:
                 case SyntaxKind.StringLiteralExpression:
@@ -422,17 +444,17 @@ namespace CodeTranslator.Java
                 case SyntaxKind.FalseLiteralExpression:
                 case SyntaxKind.NullLiteralExpression:
                 case SyntaxKind.DefaultLiteralExpression:
-                    return builder.Append(expression as LiteralExpressionSyntax, context);
+                    return new LiteralExpressionWriter(expression as LiteralExpressionSyntax, context);
                 case SyntaxKind.SimpleMemberAccessExpression:
                 case SyntaxKind.PointerMemberAccessExpression:
-                    return builder.Append(expression as MemberAccessExpressionSyntax, context);
+                    return new MemberAccessExpressionWriter(expression as MemberAccessExpressionSyntax, context);
                 case SyntaxKind.ObjectCreationExpression:
-                    return builder.Append(expression as ObjectCreationExpressionSyntax, context);
+                    return new ObjectCreationExpressionWriter(expression as ObjectCreationExpressionSyntax, context);
                 case SyntaxKind.ParenthesizedExpression:
-                    return builder.Append(expression as ParenthesizedExpressionSyntax, context);
+                    return new ParenthesizedExpressionWriter(expression as ParenthesizedExpressionSyntax, context);
                 case SyntaxKind.PostIncrementExpression:
                 case SyntaxKind.PostDecrementExpression:
-                    return builder.Append(expression as PostfixUnaryExpressionSyntax, context);
+                    return new PostfixUnaryExpressionWriter(expression as PostfixUnaryExpressionSyntax, context);
                 case SyntaxKind.UnaryPlusExpression:
                 case SyntaxKind.UnaryMinusExpression:
                 case SyntaxKind.BitwiseNotExpression:
@@ -441,76 +463,76 @@ namespace CodeTranslator.Java
                 case SyntaxKind.PreDecrementExpression:
                 case SyntaxKind.AddressOfExpression:
                 case SyntaxKind.PointerIndirectionExpression:
-                    return builder.Append(expression as PrefixUnaryExpressionSyntax, context);
+                    return new PrefixUnaryExpressionWriter(expression as PrefixUnaryExpressionSyntax, context);
                 case SyntaxKind.RefExpression:
-                    return builder.Append(expression as RefExpressionSyntax, context);
+                    return new RefExpressionWriter(expression as RefExpressionSyntax, context);
                 case SyntaxKind.ThrowExpression:
-                    return builder.Append(expression as ThrowExpressionSyntax, context);
+                    return new ThrowExpressionWriter(expression as ThrowExpressionSyntax, context);
                 case SyntaxKind.TypeOfExpression:
-                    return builder.Append(expression as TypeOfExpressionSyntax, context);
+                    return new TypeOfExpressionWriter(expression as TypeOfExpressionSyntax, context);
                 case SyntaxKind.ArrayType:
-                    return builder.Append(expression as ArrayTypeSyntax, context);
+                    return new ArrayTypeWriter(expression as ArrayTypeSyntax, context);
                 case SyntaxKind.QualifiedName:
-                    return builder.Append(expression as QualifiedNameSyntax, context);
+                    return new QualifiedNameWriter(expression as QualifiedNameSyntax, context);
                 case SyntaxKind.GenericName:
-                    return builder.Append(expression as GenericNameSyntax, context);
+                    return new GenericNameWriter(expression as GenericNameSyntax, context);
                 case SyntaxKind.IdentifierName:
-                    return builder.Append(expression as IdentifierNameSyntax, context);
+                    return new IdentifierNameWriter(expression as IdentifierNameSyntax, context);
                 case SyntaxKind.NullableType:
-                    return builder.Append(expression as NullableTypeSyntax, context);
+                    return new NullableTypeWriter(expression as NullableTypeSyntax, context);
                 case SyntaxKind.OmittedTypeArgument:
-                    return builder.Append(expression as OmittedTypeArgumentSyntax, context);
+                    return new OmittedTypeArgumentWriter(expression as OmittedTypeArgumentSyntax, context);
                 case SyntaxKind.PredefinedType:
-                    return builder.Append(expression as PredefinedTypeSyntax, context);
+                    return new PredefinedTypeWriter(expression as PredefinedTypeSyntax, context);
                 case SyntaxKind.RefTypeExpression:
-                    return builder.Append(expression as RefTypeSyntax, context);
+                    return new RefTypeWriter(expression as RefTypeSyntax, context);
                 default:
                     throw new Exception();
             }
         }
 
         // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
-        public static CodeBuilder Append(this CodeBuilder builder, StatementSyntax statement, ICompilationContextProvider context)
+        public static ContextWriter GetWriter(this StatementSyntax statement, ICompilationContextProvider context)
         {
             var kind = statement.Kind();
             switch (kind)
             {
                 case SyntaxKind.Block:
-                    return builder.Append(statement as BlockSyntax, context);
+                    return new BlockStatementWriter(statement as BlockSyntax, context);
                 case SyntaxKind.BreakStatement:
-                    return builder.Append(statement as BreakStatementSyntax, context);
+                    return new BreakStatementWriter(statement as BreakStatementSyntax, context);
                 case SyntaxKind.ForEachStatement:
-                    return builder.Append(statement as ForEachStatementSyntax, context);
+                    return new ForEachStatementWriter(statement as ForEachStatementSyntax, context);
                 case SyntaxKind.ContinueStatement:
-                    return builder.Append(statement as ContinueStatementSyntax, context);
+                    return new ContinueStatementWriter(statement as ContinueStatementSyntax, context);
                 case SyntaxKind.DoStatement:
-                    return builder.Append(statement as DoStatementSyntax, context);
+                    return new DoStatementWriter(statement as DoStatementSyntax, context);
                 case SyntaxKind.EmptyStatement:
-                    return builder.Append(statement as EmptyStatementSyntax, context);
+                    return new EmptyStatementWriter(statement as EmptyStatementSyntax, context);
                 case SyntaxKind.ExpressionStatement:
-                    return builder.Append(statement as ExpressionStatementSyntax, context);
+                    return new ExpressionStamentWriter(statement as ExpressionStatementSyntax, context);
                 case SyntaxKind.ForStatement:
-                    return builder.Append(statement as ForStatementSyntax, context);
+                    return new ForStatementWriter(statement as ForStatementSyntax, context);
                 case SyntaxKind.IfStatement:
-                    return builder.Append(statement as IfStatementSyntax, context);
+                    return new IfStatementWriter(statement as IfStatementSyntax, context);
                 case SyntaxKind.LocalDeclarationStatement:
-                    return builder.Append(statement as LocalDeclarationStatementSyntax, context);
+                    return new LocalDeclarationStatementWriter(statement as LocalDeclarationStatementSyntax, context);
                 case SyntaxKind.LockStatement:
-                    return builder.Append(statement as LockStatementSyntax, context);
+                    return new LockStatementWriter(statement as LockStatementSyntax, context);
                 case SyntaxKind.ReturnStatement:
-                    return builder.Append(statement as ReturnStatementSyntax, context);
+                    return new ReturnStatementWriter(statement as ReturnStatementSyntax, context);
                 case SyntaxKind.SwitchStatement:
-                    return builder.Append(statement as SwitchStatementSyntax, context);
+                    return new SwitchStatementWriter(statement as SwitchStatementSyntax, context);
                 case SyntaxKind.ThrowStatement:
-                    return builder.Append(statement as ThrowStatementSyntax, context);
+                    return new ThrowStatementWriter(statement as ThrowStatementSyntax, context);
                 case SyntaxKind.TryStatement:
-                    return builder.Append(statement as TryStatementSyntax, context);
+                    return new TryStatementWriter(statement as TryStatementSyntax, context);
                 case SyntaxKind.UsingStatement:
-                    return builder.Append(statement as UsingStatementSyntax, context);
+                    return new UsingStatementWriter(statement as UsingStatementSyntax, context);
                 case SyntaxKind.WhileStatement:
-                    return builder.Append(statement as WhileStatementSyntax, context);
+                    return new WhileStatementWriter(statement as WhileStatementSyntax, context);
                 case SyntaxKind.YieldReturnStatement:
-                    return builder.Append(statement as YieldStatementSyntax, context);
+                    return new YieldStatementWriter(statement as YieldStatementSyntax, context);
                 default:
                     throw new Exception();
             }
@@ -573,16 +595,22 @@ namespace CodeTranslator.Java
             return builder.UsingChild(")");
         }
 
-        public static CodeBuilder BeginBlock(this CodeBuilder builder, bool appendLine = true)
+        public static CodeBuilder Block(this CodeBuilder builder, bool appendLine = true)
         {
             builder.AppendLine("{");
             return builder.Indent("}", appendLine);
         }
 
-        public static CodeBuilder BeginParameterList(this CodeBuilder builder)
+        public static CodeBuilder ParameterList(this CodeBuilder builder)
         {
             builder.AppendLine("(");
             return builder.Indent(2, ")", false);
+        }
+
+        public static CodeBuilder TypeParameterList(this CodeBuilder builder)
+        {
+            builder.AppendLine("<");
+            return builder.Indent(2, ">", false);
         }
     }
 }

@@ -79,7 +79,7 @@ namespace CodeTranslator.Java
                 Builder.Append("()");
 
             Builder.AppendLine();
-            using (Builder.BeginBlock())
+            using (Builder.Block())
             {
                 if (_isFlag)
                     Builder.Append("this.value = value").EndOfStatement();
@@ -92,7 +92,7 @@ namespace CodeTranslator.Java
         {
             Builder.Append("public static").Space().Append(TypeName).Space()
                 .Append("fromValue(int value)").AppendLine();
-            using (Builder.BeginBlock())
+            using (Builder.Block())
             {
                 if (_isFlag)
                 {
@@ -101,7 +101,7 @@ namespace CodeTranslator.Java
                     Builder.Append(TypeName);
                     Builder.Append(".values()").EndOfStatement();
                     Builder.Append("for (int i = 0; i < values.length; i++)").AppendLine();
-                    using (Builder.BeginBlock())
+                    using (Builder.Block())
                     {
                         Builder.Append(TypeName).Space();
                         Builder.Append("envalue = values[i];").EndOfStatement();
@@ -114,14 +114,14 @@ namespace CodeTranslator.Java
                 else
                 {
                     Builder.Append("try").AppendLine();
-                    using (Builder.BeginBlock())
+                    using (Builder.Block())
                     {
                         Builder.Append("return").Space();
                         Builder.Append(TypeName);
                         Builder.Append(".values()[value]").EndOfStatement();
                     }
                     Builder.Append("catch (Exception e)").AppendLine();
-                    using (Builder.BeginBlock())
+                    using (Builder.Block())
                     {
                         Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum").Space()
                             .Append(TypeName).Append("\")").EndOfStatement();

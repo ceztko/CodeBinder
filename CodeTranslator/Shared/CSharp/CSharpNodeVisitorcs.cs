@@ -26,12 +26,6 @@ namespace CodeTranslator.Shared.CSharp
 
         private void Unsupported(SyntaxNode node, string message = null)
         {
-            if (node.HasAttribute<IgnoreAttribute>(this))
-            {
-                DefaultVisit(node);
-                return;
-            }
-
             if (message == null)
                 throw new Exception("Unsupported node: " + node);
             else
@@ -48,12 +42,6 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
-            if (node.HasAttribute<IgnoreAttribute>(this))
-            {
-                DefaultVisit(node);
-                return;
-            }
-
             var type = new CSharpInterfaceTypeContext(node, TreeContext, Conversion.GetInterfaceTypeConversion());
             TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
@@ -61,12 +49,6 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            if (node.HasAttribute<IgnoreAttribute>(this))
-            {
-                DefaultVisit(node);
-                return;
-            }
-
             var type = new CSharpClassTypeContext(node, TreeContext, Conversion.GetClassTypeConversion());
             TreeContext.AddType(type, CurrentParent);
             _parents.Enqueue(type);
@@ -76,12 +58,6 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitStructDeclaration(StructDeclarationSyntax node)
         {
-            if (node.HasAttribute<IgnoreAttribute>(this))
-            {
-                DefaultVisit(node);
-                return;
-            }
-
             var type = new CSharpStructTypeContext(node, TreeContext, Conversion.GetStructTypeConversion());
             TreeContext.AddType(type, CurrentParent);
             _parents.Enqueue(type);
@@ -91,12 +67,6 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
-            if (node.HasAttribute<IgnoreAttribute>(this))
-            {
-                DefaultVisit(node);
-                return;
-            }
-
             var type = new CSharpEnumTypeContext(node, TreeContext, Conversion.GetEnumTypeConversion());
             TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
@@ -105,6 +75,14 @@ namespace CodeTranslator.Shared.CSharp
         #endregion Supported types
 
         #region Unsupported syntax
+
+        public override void VisitTypeParameter(TypeParameterSyntax node)
+        {
+            if (!node.VarianceKeyword.IsNone())
+                Unsupported(node, "Type parameter with unsupported variance modifier");
+
+            DefaultVisit(node);
+        }
 
         public override void VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
         {
@@ -122,17 +100,31 @@ namespace CodeTranslator.Shared.CSharp
             DefaultVisit(node);
         }
 
-        public override void VisitArrowExpressionClause(ArrowExpressionClauseSyntax node)
-        {
-            Unsupported(node);
-        }
-
         public override void VisitArrayRankSpecifier(ArrayRankSpecifierSyntax node)
         {
             if (node.Rank > 1)
                 Unsupported(node, "Unsupported array with rank > 1");
 
             DefaultVisit(node);
+        }
+
+        public override void VisitTypeOfExpression(TypeOfExpressionSyntax node)
+        {
+            var typeSymbol = node.Type.GetTypeSymbol(this);
+            if (typeSymbol.TypeKind == TypeKind.TypeParameter)
+                Unsupported(node, "Unsupported typeof expression with parameterized type");
+
+            DefaultVisit(node);
+        }
+
+        public override void VisitConstructorConstraint(ConstructorConstraintSyntax node)
+        {
+            Unsupported(node);
+        }
+
+        public override void VisitArrowExpressionClause(ArrowExpressionClauseSyntax node)
+        {
+            Unsupported(node);
         }
 
         public override void VisitEventDeclaration(EventDeclarationSyntax node)
@@ -376,6 +368,14 @@ namespace CodeTranslator.Shared.CSharp
         public CompilationContext Compilation
         {
             get { return TreeContext.Compilation; }
+        }
+
+        public override void Visit(SyntaxNode node)
+        {
+            if (node.HasAttribute<IgnoreAttribute>(this))
+                return;
+
+            base.Visit(node);
         }
 
         public CSharpNodeVisitor(TSyntaxTree treeContext, TLanguageConversion conversion)

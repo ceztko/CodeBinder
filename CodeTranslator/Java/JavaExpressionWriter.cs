@@ -315,9 +315,9 @@ namespace CodeTranslator.Java
         }
     }
 
-    class IdenfitiferNameWriter : ExpressiontWriter<IdentifierNameSyntax>
+    class IdentifierNameWriter : ExpressiontWriter<IdentifierNameSyntax>
     {
-        public IdenfitiferNameWriter(IdentifierNameSyntax syntax, ICompilationContextProvider context)
+        public IdentifierNameWriter(IdentifierNameSyntax syntax, ICompilationContextProvider context)
             : base(syntax, context) { }
 
         protected override void Write()
