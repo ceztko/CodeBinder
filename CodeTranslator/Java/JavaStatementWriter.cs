@@ -63,18 +63,9 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("for ()");
-        }
-    }
-
-    class ForEachVariableStatementWriter : StatementWriter<ForEachVariableStatementSyntax>
-    {
-        public ForEachVariableStatementWriter(ForEachVariableStatementSyntax syntax, ICompilationContextProvider context)
-            : base(syntax, context) { }
-
-        protected override void Write()
-        {
-            Builder.Append("NULL");
+            Builder.Append("for").Space().Parenthesized().Append(Context.Type, this).Space().Append(Context.Identifier.Text)
+                .Space().Colon().Space().Append(Context.Expression, this).Close().AppendLine();
+            Builder.IndentChild().Append(Context.Statement, this);
         }
     }
 
@@ -97,7 +88,7 @@ namespace CodeTranslator.Java
         {
             Builder.Append("do").AppendLine();
             Builder.IndentChild().Append(Context.Statement, this);
-            Builder.Append("while").Space().Parenthesized( ()=> Builder.Append(Context.Condition, this)).SemiColon();
+            Builder.Append("while").Space().Parenthesized().Append(Context.Condition, this).Close().SemiColon();
         }
     }
 
@@ -200,7 +191,20 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("switch").Space().Parenthesized().Append(Context.Expression, this).Close().AppendLine();
+            using (Builder.BeginBlock(false))
+            {
+                bool first = true;
+                foreach (var section in Context.Sections)
+                {
+                    if (first)
+                        first = true;
+                    else
+                        Builder.AppendLine();
+
+                    Builder.Append(section, this);
+                }
+            }
         }
     }
 
@@ -211,7 +215,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("throw").Space().SemiColon();
+            Builder.Append("throw").Space().Append(Context.Expression, this).SemiColon();
         }
     }
 
@@ -223,7 +227,20 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("try");
+            Builder.Append("try").AppendLine();
+            Builder.Append(Context.Block, this).AppendLine();
+            bool first = true;
+            foreach (var catchClause in Context.Catches)
+            {
+                if (first)
+                    first = true;
+                else
+                    Builder.AppendLine();
+
+                Builder.Append(catchClause, this);
+            }
+            if (Context.Finally != null)
+                Builder.Append(Context.Finally, this);
         }
     }
 

@@ -15,7 +15,10 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append(Context.GetJavaModifiersString()).Space();
+            string modifiers = Context.GetJavaModifiersString();
+            if (!string.IsNullOrEmpty(modifiers))
+                Builder.Append(modifiers).Space();
+
             Builder.Append(Context.Declaration.Type.GetJavaType(this)).Space();
             WriteVariableDeclaration(Context.Declaration.Variables);
             Builder.EndOfStatement();

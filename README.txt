@@ -5,7 +5,6 @@ Supported:
     BlockSyntax
     BreakStatementSyntax
     ForEachStatementSyntax
-    ForEachVariableStatementSyntax
     ContinueStatementSyntax
     DoStatementSyntax
     EmptyStatementSyntax
@@ -22,7 +21,8 @@ Supported:
     WhileStatementSyntax
     YieldStatementSyntax
 
-Unsupported:	
+Unsupported:
+    ForEachVariableStatementSyntax
     CheckedStatementSyntax
     UnsafeStatementSyntax
     LabeledStatementSyntax

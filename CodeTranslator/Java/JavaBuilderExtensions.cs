@@ -11,6 +11,21 @@ namespace CodeTranslator.Java
 {
     static class JavaWriterExtension
     {
+        public static CodeBuilder Append(this CodeBuilder builder, FinallyClauseSyntax syntax, ICompilationContextProvider context)
+        {
+            return builder.Append(ContextWriter.NullWriter());
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, CatchClauseSyntax syntax, ICompilationContextProvider context)
+        {
+            return builder.Append(ContextWriter.NullWriter());
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, SwitchSectionSyntax syntax, ICompilationContextProvider context)
+        {
+            return builder.Append(ContextWriter.NullWriter());
+        }
+
         public static CodeBuilder Append(this CodeBuilder builder, ElseClauseSyntax syntax, ICompilationContextProvider context)
         {
             return builder.Append(ContextWriter.NullWriter());
@@ -229,11 +244,6 @@ namespace CodeTranslator.Java
         public static CodeBuilder Append(this CodeBuilder builder, ForEachStatementSyntax statement, ICompilationContextProvider context)
         {
             return builder.Append(new ForEachStatementWriter(statement, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, ForEachVariableStatementSyntax statement, ICompilationContextProvider context)
-        {
-            return builder.Append(new ForEachVariableStatementWriter(statement, context));
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, ContinueStatementSyntax statement, ICompilationContextProvider context)
@@ -471,8 +481,6 @@ namespace CodeTranslator.Java
                     return builder.Append(statement as BreakStatementSyntax, context);
                 case SyntaxKind.ForEachStatement:
                     return builder.Append(statement as ForEachStatementSyntax, context);
-                case SyntaxKind.ForEachVariableStatement:
-                    return builder.Append(statement as ForEachVariableStatementSyntax, context);
                 case SyntaxKind.ContinueStatement:
                     return builder.Append(statement as ContinueStatementSyntax, context);
                 case SyntaxKind.DoStatement:
@@ -530,6 +538,11 @@ namespace CodeTranslator.Java
         public static CodeBuilder SemiColonSeparator(this CodeBuilder builder)
         {
             return builder.Append("; ");
+        }
+
+        public static CodeBuilder Colon(this CodeBuilder builder)
+        {
+            return builder.Append(":");
         }
 
         public static CodeBuilder SemiColon(this CodeBuilder builder)

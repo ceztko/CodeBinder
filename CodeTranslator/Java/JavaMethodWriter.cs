@@ -49,8 +49,9 @@ namespace CodeTranslator.Java
 
         protected virtual void WriteModifiers()
         {
-            Builder.Append(Context.GetJavaModifiersString());
-            Builder.Space();
+            string modifiers = Context.GetJavaModifiersString();
+            if (!string.IsNullOrEmpty(modifiers))
+                Builder.Append(modifiers).Space();
         }
 
         private void WriteParameters(ParameterListSyntax list)

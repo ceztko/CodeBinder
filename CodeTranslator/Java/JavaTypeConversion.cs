@@ -79,7 +79,7 @@ namespace CodeTranslator.Java
         protected override void Write()
         {
             var modifiers = Context.GetJavaModifiersString();
-            if (modifiers != string.Empty)
+            if (!string.IsNullOrEmpty(modifiers))
                 Builder.Append(modifiers).Space();
 
             Builder.Append(Context.GetJavaTypeDeclaration()).Space();

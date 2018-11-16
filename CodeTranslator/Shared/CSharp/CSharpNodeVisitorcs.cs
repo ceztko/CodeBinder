@@ -238,6 +238,11 @@ namespace CodeTranslator.Shared.CSharp
 
         #region Unsupported expressions
 
+        public override void VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
+        {
+            Unsupported(node);
+        }
+
         public override void VisitDefaultExpression(DefaultExpressionSyntax node)
         {
             Unsupported(node);
