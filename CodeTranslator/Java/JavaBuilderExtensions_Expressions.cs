@@ -124,11 +124,6 @@ namespace CodeTranslator.Java
             return builder.Append(new ArrayTypeWriter(expression, context));
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, QualifiedNameSyntax expression, ICompilationContextProvider context)
-        {
-            return builder.Append(new QualifiedNameWriter(expression, context));
-        }
-
         public static CodeBuilder Append(this CodeBuilder builder, GenericNameSyntax expression, ICompilationContextProvider context)
         {
             return builder.Append(new GenericNameWriter(expression, context));
@@ -201,7 +196,6 @@ namespace CodeTranslator.Java
                 case SyntaxKind.GreaterThanOrEqualExpression:
                 case SyntaxKind.IsExpression:
                 case SyntaxKind.AsExpression:
-                case SyntaxKind.CoalesceExpression:
                     return new BinaryExpressionWriter(expression as BinaryExpressionSyntax, context);
                 case SyntaxKind.CastExpression:
                     return new CastExpressionWriter(expression as CastExpressionSyntax, context);
@@ -232,7 +226,6 @@ namespace CodeTranslator.Java
                 case SyntaxKind.DefaultLiteralExpression:
                     return new LiteralExpressionWriter(expression as LiteralExpressionSyntax, context);
                 case SyntaxKind.SimpleMemberAccessExpression:
-                case SyntaxKind.PointerMemberAccessExpression:
                     return new MemberAccessExpressionWriter(expression as MemberAccessExpressionSyntax, context);
                 case SyntaxKind.ObjectCreationExpression:
                     return new ObjectCreationExpressionWriter(expression as ObjectCreationExpressionSyntax, context);
@@ -247,8 +240,6 @@ namespace CodeTranslator.Java
                 case SyntaxKind.LogicalNotExpression:
                 case SyntaxKind.PreIncrementExpression:
                 case SyntaxKind.PreDecrementExpression:
-                case SyntaxKind.AddressOfExpression:
-                case SyntaxKind.PointerIndirectionExpression:
                     return new PrefixUnaryExpressionWriter(expression as PrefixUnaryExpressionSyntax, context);
                 case SyntaxKind.RefExpression:
                     return new RefExpressionWriter(expression as RefExpressionSyntax, context);
@@ -258,8 +249,6 @@ namespace CodeTranslator.Java
                     return new TypeOfExpressionWriter(expression as TypeOfExpressionSyntax, context);
                 case SyntaxKind.ArrayType:
                     return new ArrayTypeWriter(expression as ArrayTypeSyntax, context);
-                case SyntaxKind.QualifiedName:
-                    return new QualifiedNameWriter(expression as QualifiedNameSyntax, context);
                 case SyntaxKind.GenericName:
                     return new GenericNameWriter(expression as GenericNameSyntax, context);
                 case SyntaxKind.IdentifierName:
@@ -270,8 +259,42 @@ namespace CodeTranslator.Java
                     return new OmittedTypeArgumentWriter(expression as OmittedTypeArgumentSyntax, context);
                 case SyntaxKind.PredefinedType:
                     return new PredefinedTypeWriter(expression as PredefinedTypeSyntax, context);
-                case SyntaxKind.RefTypeExpression:
+                case SyntaxKind.RefType:
                     return new RefTypeWriter(expression as RefTypeSyntax, context);
+                // Unsupported expressions
+                case SyntaxKind.QualifiedName:
+                case SyntaxKind.DefaultExpression:
+                case SyntaxKind.AnonymousMethodExpression:
+                case SyntaxKind.ParenthesizedLambdaExpression:
+                case SyntaxKind.SimpleLambdaExpression:
+                case SyntaxKind.PointerType:
+                case SyntaxKind.RefValueExpression:
+                case SyntaxKind.RefTypeExpression:
+                case SyntaxKind.ImplicitArrayCreationExpression:
+                case SyntaxKind.ElementBindingExpression:
+                case SyntaxKind.ImplicitElementAccess:
+                case SyntaxKind.MemberBindingExpression:
+                case SyntaxKind.SizeOfExpression:
+                case SyntaxKind.MakeRefExpression:
+                case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
+                case SyntaxKind.InterpolatedStringExpression:
+                case SyntaxKind.AwaitExpression:
+                case SyntaxKind.QueryExpression:
+                case SyntaxKind.StackAllocArrayCreationExpression:
+                case SyntaxKind.AnonymousObjectCreationExpression:
+                case SyntaxKind.TupleType:
+                case SyntaxKind.TupleExpression:
+                case SyntaxKind.IsPatternExpression:
+                case SyntaxKind.CheckedExpression:
+                case SyntaxKind.ConditionalAccessExpression:
+                case SyntaxKind.AliasQualifiedName:
+                // Unsupported prefix unary expressions
+                case SyntaxKind.AddressOfExpression:
+                case SyntaxKind.PointerIndirectionExpression:
+                // Unsupported binary expressions
+                case SyntaxKind.CoalesceExpression:
+                // Unsupported member access expressions
+                case SyntaxKind.PointerMemberAccessExpression:
                 default:
                     throw new Exception();
             }

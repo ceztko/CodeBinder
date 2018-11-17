@@ -65,21 +65,24 @@ namespace CodeTranslator.Java
                 }
             }
 
-            Builder.Append(Context.Left, this);
-            Builder.Space().Append(Context.OperatorToken.Text).Space();
-            Builder.Append(Context.Right, this);
+            Builder.Append(Context.Left, this).Space().Append(Context.GetJavaOperator()).Space().Append(Context.Right, this);
         }
     }
 
     class BinaryExpressionWriter : ExpressiontWriter<BinaryExpressionSyntax>
     {
-        public BinaryExpressionWriter(BinaryExpressionSyntax syntax, ICompilationContextProvider context) : base(syntax, context)
-        {
-        }
+        public BinaryExpressionWriter(BinaryExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            if (Context.Kind() == SyntaxKind.AsExpression)
+            {
+                Builder.Append("NULL");
+                return;
+            }
+
+            Builder.Append(Context.Left, this).Space().Append(Context.GetJavaOperator()).Space().Append(Context.Right, this);
         }
     }
 
@@ -90,7 +93,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Parenthesized().Append(Context.Type, this).Close().Append(Context.Expression, this);
         }
     }
 
@@ -101,7 +104,9 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append(Context.Condition, this).Space().QuestionMark().Space()
+                .Append(Context.WhenTrue, this).Space().Colon().Space()
+                .Append(Context.WhenFalse, this);
         }
     }
 
@@ -145,7 +150,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("super");
         }
     }
 
@@ -156,7 +161,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("this");
         }
     }
 
@@ -211,7 +216,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Parenthesized().Append(Context.Expression, this);
         }
     }
 
@@ -222,7 +227,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append(Context.Operand, this).Append(Context.GetJavaOperator());
         }
     }
 
@@ -233,7 +238,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append(Context.GetJavaOperator()).Append(Context.Operand, this);
         }
     }
 
@@ -278,17 +283,6 @@ namespace CodeTranslator.Java
         protected override void Write()
         {
             Builder.Append(Context.ElementType, this).Append("[]");
-        }
-    }
-
-    class QualifiedNameWriter : ExpressiontWriter<QualifiedNameSyntax>
-    {
-        public QualifiedNameWriter(QualifiedNameSyntax syntax, ICompilationContextProvider context)
-            : base(syntax, context) { }
-
-        protected override void Write()
-        {
-            Builder.Append("NULL");
         }
     }
 

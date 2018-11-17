@@ -23,6 +23,129 @@ namespace CodeTranslator.Java
     {
         delegate bool ModifierGetter(SyntaxKind modifier, out string javaModifier);
 
+        public static string GetJavaOperator(this AssignmentExpressionSyntax syntax)
+        {
+            var op = syntax.Kind();
+            switch (op)
+            {
+                case SyntaxKind.AddAssignmentExpression:
+                    return "+=";
+                case SyntaxKind.AndAssignmentExpression:
+                    return "&=";
+                case SyntaxKind.DivideAssignmentExpression:
+                    return "/=";
+                case SyntaxKind.ExclusiveOrAssignmentExpression:
+                    return "^=";
+                case SyntaxKind.LeftShiftAssignmentExpression:
+                    return "<<=";
+                case SyntaxKind.ModuloAssignmentExpression:
+                    return "%=";
+                case SyntaxKind.MultiplyAssignmentExpression:
+                    return "*=";
+                case SyntaxKind.OrAssignmentExpression:
+                    return "|=";
+                case SyntaxKind.RightShiftAssignmentExpression:
+                    return ">>=";
+                case SyntaxKind.SimpleAssignmentExpression:
+                    return "=";
+                case SyntaxKind.SubtractAssignmentExpression:
+                    return "-=";
+                default:
+                    throw new Exception();
+            }
+        }
+
+        public static string GetJavaOperator(this BinaryExpressionSyntax syntax)
+        {
+            var op = syntax.Kind();
+            switch (op)
+            {
+                case SyntaxKind.AddExpression:
+                    return "+";
+                case SyntaxKind.SubtractExpression:
+                    return "-";
+                case SyntaxKind.MultiplyExpression:
+                    return "*";
+                case SyntaxKind.DivideExpression:
+                    return "/";
+                case SyntaxKind.ModuloExpression:
+                    return "%";
+                case SyntaxKind.LeftShiftExpression:
+                    return "<<";
+                case SyntaxKind.RightShiftExpression:
+                    return ">>";
+                case SyntaxKind.LogicalOrExpression:
+                    return "||";
+                case SyntaxKind.LogicalAndExpression:
+                    return "&&";
+                case SyntaxKind.BitwiseOrExpression:
+                    return "|";
+                case SyntaxKind.BitwiseAndExpression:
+                    return "&";
+                case SyntaxKind.ExclusiveOrExpression:
+                    return "^";
+                case SyntaxKind.EqualsExpression:
+                    return "==";
+                case SyntaxKind.NotEqualsExpression:
+                    return "!=";
+                case SyntaxKind.LessThanExpression:
+                    return "<";
+                case SyntaxKind.LessThanOrEqualExpression:
+                    return ">";
+                case SyntaxKind.GreaterThanExpression:
+                    return ">";
+                case SyntaxKind.GreaterThanOrEqualExpression:
+                    return ">=";
+                case SyntaxKind.IsExpression:
+                    return "is";
+                // Unsupported
+                case SyntaxKind.AsExpression:   // NOTE: Unsupported as an operator
+                case SyntaxKind.CoalesceExpression:
+                default:
+                    throw new Exception();
+            }
+        }
+
+        public static string GetJavaOperator(this PrefixUnaryExpressionSyntax syntax)
+        {
+            var op = syntax.Kind();
+            switch (op)
+            {
+                case SyntaxKind.UnaryPlusExpression:
+                    return "+";
+                case SyntaxKind.UnaryMinusExpression:
+                    return "-";
+                case SyntaxKind.BitwiseNotExpression:
+                    return "~";
+                case SyntaxKind.LogicalNotExpression:
+                    return "!";
+                case SyntaxKind.PreIncrementExpression:
+                    return "++";
+                case SyntaxKind.PreDecrementExpression:
+                    return "--";
+                // Unsupported
+                case SyntaxKind.AddressOfExpression:
+                case SyntaxKind.PointerIndirectionExpression:
+                default:
+                    throw new Exception();
+            }
+        }
+
+
+        public static string GetJavaOperator(this PostfixUnaryExpressionSyntax syntax)
+        {
+            var op = syntax.Kind();
+            switch (op)
+            {
+                case SyntaxKind.PostIncrementExpression:
+                    return "++";
+                case SyntaxKind.PostDecrementExpression:
+                    return "--";
+                default:
+                    throw new Exception();
+            }
+        }
+
         public static string GetJavaType(this TypeSyntax type, ICompilationContextProvider provider, out bool isInterface)
         {
             var typeSymbol = type.GetTypeSymbol(provider);

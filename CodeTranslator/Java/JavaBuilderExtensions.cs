@@ -90,6 +90,11 @@ namespace CodeTranslator.Java
             return builder.Append(";");
         }
 
+        public static CodeBuilder QuestionMark(this CodeBuilder builder)
+        {
+            return builder.Append("?");
+        }
+
         public static CodeBuilder CommaSeparator(this CodeBuilder builder)
         {
             return builder.Append(", ");

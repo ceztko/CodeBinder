@@ -72,9 +72,106 @@ namespace CodeTranslator.Shared.CSharp
             DefaultVisit(node);
         }
 
+        public override void Visit(SyntaxNode node)
+        {
+            if (node.HasAttribute<IgnoreAttribute>(this))
+                return;
+
+            var kind = node.Kind();
+            switch (kind)
+            {
+                // Type constraints
+                case SyntaxKind.ConstructorConstraint:
+                case SyntaxKind.StructConstraint:
+                case SyntaxKind.ClassConstraint:
+                // Declarations
+                case SyntaxKind.EventDeclaration:
+                case SyntaxKind.EventFieldDeclaration:
+                case SyntaxKind.ConversionOperatorDeclaration:
+                case SyntaxKind.OperatorDeclaration:
+                // Statements
+                case SyntaxKind.CheckedStatement:
+                case SyntaxKind.UnsafeStatement:
+                case SyntaxKind.LabeledStatement:
+                case SyntaxKind.GotoStatement:
+                case SyntaxKind.GotoCaseStatement:
+                case SyntaxKind.GotoDefaultStatement:
+                case SyntaxKind.FixedStatement:
+                case SyntaxKind.LocalFunctionStatement:
+                case SyntaxKind.ForEachVariableStatement:
+                // Expressions
+                case SyntaxKind.DefaultExpression:
+                case SyntaxKind.AnonymousMethodExpression:
+                case SyntaxKind.ParenthesizedLambdaExpression:
+                case SyntaxKind.SimpleLambdaExpression:
+                case SyntaxKind.PointerType:
+                case SyntaxKind.RefValueExpression:
+                case SyntaxKind.RefTypeExpression:
+                case SyntaxKind.ImplicitArrayCreationExpression:
+                case SyntaxKind.ElementBindingExpression:
+                case SyntaxKind.ImplicitElementAccess:
+                case SyntaxKind.MemberBindingExpression:
+                case SyntaxKind.SizeOfExpression:
+                case SyntaxKind.MakeRefExpression:
+                case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
+                case SyntaxKind.InterpolatedStringExpression:
+                case SyntaxKind.AwaitExpression:
+                case SyntaxKind.QueryExpression:
+                case SyntaxKind.StackAllocArrayCreationExpression:
+                case SyntaxKind.AnonymousObjectCreationExpression:
+                case SyntaxKind.TupleType:
+                case SyntaxKind.TupleExpression:
+                case SyntaxKind.IsPatternExpression:
+                case SyntaxKind.CheckedExpression:
+                case SyntaxKind.ConditionalAccessExpression:
+                case SyntaxKind.AliasQualifiedName:
+                // Prefix unary expression
+                case SyntaxKind.AddressOfExpression:
+                case SyntaxKind.PointerIndirectionExpression:
+                // Binary expression
+                case SyntaxKind.CoalesceExpression:
+                // Member access expression
+                case SyntaxKind.PointerMemberAccessExpression:
+                // Linq
+                case SyntaxKind.FromClause:
+                case SyntaxKind.WhereClause:
+                case SyntaxKind.SelectClause:
+                case SyntaxKind.GroupClause:
+                case SyntaxKind.JoinIntoClause:
+                case SyntaxKind.OrderByClause:
+                case SyntaxKind.JoinClause:
+                case SyntaxKind.LetClause:
+                // Misc
+                case SyntaxKind.ArrowExpressionClause:
+                {
+                    Unsupported(node);
+                    break;
+                }
+            }
+
+            visit(node);
+        }
+
         #endregion Supported types
 
         #region Unsupported syntax
+
+        public override void VisitQualifiedName(QualifiedNameSyntax node)
+        {
+            var parentKind = node.Parent.Kind();
+            switch (parentKind)
+            {
+                case SyntaxKind.UsingDirective:
+                case SyntaxKind.NamespaceDeclaration:
+                case SyntaxKind.Attribute:
+                    break;
+                default:
+                    Unsupported(node, "Unsupported qualified name expression with parent " + node.Parent);
+                    break;
+            }
+
+            // NOTE: Just ignore the node
+        }
 
         public override void VisitTypeParameter(TypeParameterSyntax node)
         {
@@ -117,245 +214,7 @@ namespace CodeTranslator.Shared.CSharp
             DefaultVisit(node);
         }
 
-        public override void VisitConstructorConstraint(ConstructorConstraintSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitArrowExpressionClause(ArrowExpressionClauseSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitEventDeclaration(EventDeclarationSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitEventFieldDeclaration(EventFieldDeclarationSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitConversionOperatorDeclaration(ConversionOperatorDeclarationSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitOperatorDeclaration(OperatorDeclarationSyntax node)
-        {
-            Unsupported(node);
-        }
-
         #endregion // Unsupported syntax
-
-        #region Unsupported Linq
-
-
-        public override void VisitFromClause(FromClauseSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitWhereClause(WhereClauseSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitSelectClause(SelectClauseSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitGroupClause(GroupClauseSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitJoinIntoClause(JoinIntoClauseSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitOrderByClause(OrderByClauseSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitJoinClause(JoinClauseSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitLetClause(LetClauseSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        #endregion // Unsupported Linq
-
-        #region Unsupported statements
-
-        public override void VisitCheckedStatement(CheckedStatementSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitUnsafeStatement(UnsafeStatementSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitLabeledStatement(LabeledStatementSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitGotoStatement(GotoStatementSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitFixedStatement(FixedStatementSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        #endregion // Unsupported statements
-
-        #region Unsupported expressions
-
-        public override void VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitDefaultExpression(DefaultExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitPointerType(PointerTypeSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitRefValueExpression(RefValueExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitRefTypeExpression(RefTypeExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitImplicitArrayCreationExpression(ImplicitArrayCreationExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitElementBindingExpression(ElementBindingExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitImplicitElementAccess(ImplicitElementAccessSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitMemberBindingExpression(MemberBindingExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitSizeOfExpression(SizeOfExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitMakeRefExpression(MakeRefExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitImplicitStackAllocArrayCreationExpression(ImplicitStackAllocArrayCreationExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitInterpolatedStringExpression(InterpolatedStringExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitAwaitExpression(AwaitExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitQueryExpression(QueryExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitStackAllocArrayCreationExpression(StackAllocArrayCreationExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitAnonymousObjectCreationExpression(AnonymousObjectCreationExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitTupleType(TupleTypeSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitTupleExpression(TupleExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitIsPatternExpression(IsPatternExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitCheckedExpression(CheckedExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        public override void VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
-        {
-            Unsupported(node);
-        }
-
-        #endregion // Unsupported expressions
     }
 
     public class CSharpNodeVisitor<TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker, ICompilationContextProvider
@@ -375,6 +234,11 @@ namespace CodeTranslator.Shared.CSharp
             if (node.HasAttribute<IgnoreAttribute>(this))
                 return;
 
+            visit(node);
+        }
+
+        protected void visit(SyntaxNode node)
+        {
             base.Visit(node);
         }
 

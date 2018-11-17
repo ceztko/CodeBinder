@@ -56,7 +56,6 @@ Supported:
     ThrowExpressionSyntax
     TypeOfExpressionSyntax
     ArrayTypeSyntax
-    QualifiedNameSyntax
     GenericNameSyntax
     IdentifierNameSyntax
     NullableTypeSyntax
@@ -65,6 +64,7 @@ Supported:
     RefTypeSyntax
 	
 Unsupported
+    QualifiedNameSyntax                             // Except in namespaces, using directives and attributes
     DefaultExpressionSyntax
     AnonymousMethodExpressionSyntax
     ParenthesizedLambdaExpressionSyntax
