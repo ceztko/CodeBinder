@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text;
 using CodeTranslator.Shared.Java;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics;
 
 namespace CodeTranslator.Java
 {
@@ -163,7 +164,23 @@ namespace CodeTranslator.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(CodeWriter.NullWriter());
+            Debug.Assert(syntax.Variables.Count == 1);
+            return builder.Append(syntax.Type.GetJavaType(context)).Space()
+                .Append(syntax.Variables[0], context).EndOfStatement();
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, VariableDeclaratorSyntax syntax, ICompilationContextProvider context)
+        {
+            builder.Append(syntax.Identifier.Text);
+            if (syntax.Initializer != null)
+                builder.Space().Append(syntax.Initializer, context);
+
+            return builder;
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, EqualsValueClauseSyntax syntax, ICompilationContextProvider context)
+        {
+            return builder.Append("=").Space().Append(syntax.Value, context);
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, FinallyClauseSyntax syntax, ICompilationContextProvider context)

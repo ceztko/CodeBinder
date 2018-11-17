@@ -100,6 +100,8 @@ namespace CodeTranslator.Shared.CSharp
                 case SyntaxKind.LocalFunctionStatement:
                 case SyntaxKind.ForEachVariableStatement:
                 // Expressions
+                case SyntaxKind.DeclarationExpression:
+                case SyntaxKind.ThrowExpression:
                 case SyntaxKind.DefaultExpression:
                 case SyntaxKind.AnonymousMethodExpression:
                 case SyntaxKind.ParenthesizedLambdaExpression:
@@ -125,13 +127,16 @@ namespace CodeTranslator.Shared.CSharp
                 case SyntaxKind.CheckedExpression:
                 case SyntaxKind.ConditionalAccessExpression:
                 case SyntaxKind.AliasQualifiedName:
-                // Prefix unary expression
+                // Prefix unary expressions
                 case SyntaxKind.AddressOfExpression:
                 case SyntaxKind.PointerIndirectionExpression:
-                // Binary expression
+                // Binary expressions
                 case SyntaxKind.CoalesceExpression:
-                // Member access expression
+                // Member access expressions
                 case SyntaxKind.PointerMemberAccessExpression:
+                // Literal expressions
+                case SyntaxKind.ArgListExpression:
+                case SyntaxKind.DefaultLiteralExpression:
                 // Linq
                 case SyntaxKind.FromClause:
                 case SyntaxKind.WhereClause:
@@ -155,6 +160,30 @@ namespace CodeTranslator.Shared.CSharp
         #endregion Supported types
 
         #region Unsupported syntax
+
+        public override void VisitLiteralExpression(LiteralExpressionSyntax node)
+        {
+            if (node.Kind() == SyntaxKind.StringLiteralExpression && node.Token.Text.StartsWith("@"))
+                Unsupported(node, "Verbatim string literal");
+
+            DefaultVisit(node);
+        }
+
+        public override void VisitUsingStatement(UsingStatementSyntax node)
+        {
+            if (node.Expression != null)
+                Unsupported(node, "Using statement with expression");
+
+            DefaultVisit(node);
+        }
+
+        public override void VisitVariableDeclaration(VariableDeclarationSyntax node)
+        {
+            if (node.Variables.Count != 1)
+                Unsupported(node, "Variable declaration with variable count not equals to 1");
+
+            DefaultVisit(node);
+        }
 
         public override void VisitQualifiedName(QualifiedNameSyntax node)
         {

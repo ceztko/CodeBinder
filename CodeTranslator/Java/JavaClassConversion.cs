@@ -38,5 +38,10 @@ namespace CodeTranslator.Java
         {
             get { return Context.Arity; }
         }
+
+        public override bool NeedStaticKeyword
+        {
+            get { return true; }
+        }
     }
 }

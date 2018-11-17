@@ -44,11 +44,6 @@ namespace CodeTranslator.Java
             return builder.Append(new ConditionalExpressionWriter(expression, context));
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, DeclarationExpressionSyntax expression, ICompilationContextProvider context)
-        {
-            return builder.Append(new DeclarationExpressionWriter(expression, context));
-        }
-
         public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax expression, ICompilationContextProvider context)
         {
             return builder.Append(new ElementAccessExpressionWriter(expression, context));
@@ -107,11 +102,6 @@ namespace CodeTranslator.Java
         public static CodeBuilder Append(this CodeBuilder builder, RefExpressionSyntax expression, ICompilationContextProvider context)
         {
             return builder.Append(new RefExpressionWriter(expression, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, ThrowExpressionSyntax expression, ICompilationContextProvider context)
-        {
-            return builder.Append(new ThrowExpressionWriter(expression, context));
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, TypeOfExpressionSyntax expression, ICompilationContextProvider context)
@@ -201,8 +191,6 @@ namespace CodeTranslator.Java
                     return new CastExpressionWriter(expression as CastExpressionSyntax, context);
                 case SyntaxKind.ConditionalExpression:
                     return new ConditionalExpressionWriter(expression as ConditionalExpressionSyntax, context);
-                case SyntaxKind.DeclarationExpression:
-                    return new DeclarationExpressionWriter(expression as DeclarationExpressionSyntax, context);
                 case SyntaxKind.ElementAccessExpression:
                     return new ElementAccessExpressionWriter(expression as ElementAccessExpressionSyntax, context);
                 case SyntaxKind.ObjectInitializerExpression:
@@ -216,14 +204,12 @@ namespace CodeTranslator.Java
                     return new ThisExpressionWriter(expression as ThisExpressionSyntax, context);
                 case SyntaxKind.InvocationExpression:
                     return new InvocationExpressionWriter(expression as InvocationExpressionSyntax, context);
-                case SyntaxKind.ArgListExpression:
                 case SyntaxKind.NumericLiteralExpression:
                 case SyntaxKind.StringLiteralExpression:
                 case SyntaxKind.CharacterLiteralExpression:
                 case SyntaxKind.TrueLiteralExpression:
                 case SyntaxKind.FalseLiteralExpression:
                 case SyntaxKind.NullLiteralExpression:
-                case SyntaxKind.DefaultLiteralExpression:
                     return new LiteralExpressionWriter(expression as LiteralExpressionSyntax, context);
                 case SyntaxKind.SimpleMemberAccessExpression:
                     return new MemberAccessExpressionWriter(expression as MemberAccessExpressionSyntax, context);
@@ -243,8 +229,6 @@ namespace CodeTranslator.Java
                     return new PrefixUnaryExpressionWriter(expression as PrefixUnaryExpressionSyntax, context);
                 case SyntaxKind.RefExpression:
                     return new RefExpressionWriter(expression as RefExpressionSyntax, context);
-                case SyntaxKind.ThrowExpression:
-                    return new ThrowExpressionWriter(expression as ThrowExpressionSyntax, context);
                 case SyntaxKind.TypeOfExpression:
                     return new TypeOfExpressionWriter(expression as TypeOfExpressionSyntax, context);
                 case SyntaxKind.ArrayType:
@@ -262,6 +246,8 @@ namespace CodeTranslator.Java
                 case SyntaxKind.RefType:
                     return new RefTypeWriter(expression as RefTypeSyntax, context);
                 // Unsupported expressions
+                case SyntaxKind.DeclarationExpression:
+                case SyntaxKind.ThrowExpression:
                 case SyntaxKind.QualifiedName:
                 case SyntaxKind.DefaultExpression:
                 case SyntaxKind.AnonymousMethodExpression:
@@ -295,6 +281,9 @@ namespace CodeTranslator.Java
                 case SyntaxKind.CoalesceExpression:
                 // Unsupported member access expressions
                 case SyntaxKind.PointerMemberAccessExpression:
+                // Unsupported literal expressions
+                case SyntaxKind.ArgListExpression:
+                case SyntaxKind.DefaultLiteralExpression:
                 default:
                     throw new Exception();
             }

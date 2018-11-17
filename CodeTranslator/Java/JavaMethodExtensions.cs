@@ -97,7 +97,7 @@ namespace CodeTranslator.Java
                 case SyntaxKind.GreaterThanOrEqualExpression:
                     return ">=";
                 case SyntaxKind.IsExpression:
-                    return "is";
+                    return "instanceof";
                 // Unsupported
                 case SyntaxKind.AsExpression:   // NOTE: Unsupported as an operator
                 case SyntaxKind.CoalesceExpression:

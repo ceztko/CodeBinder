@@ -84,6 +84,18 @@ namespace CodeTranslator.Java
             if (!string.IsNullOrEmpty(modifiers))
                 Builder.Append(modifiers).Space();
 
+            if (NeedStaticKeyword)
+            {
+                var parentKind = Context.Parent.Kind();
+                switch (parentKind)
+                {
+                    case SyntaxKind.NamespaceDeclaration:
+                    case SyntaxKind.CompilationUnit:
+                        Builder.Append("static").Space();
+                        break;
+                }
+            }
+
             Builder.Append(Context.GetJavaTypeDeclaration()).Space();
             Builder.Append(TypeName);
             if (Arity > 0)
@@ -161,6 +173,11 @@ namespace CodeTranslator.Java
         public virtual string TypeName
         {
             get { return Context.GetName(); }
+        }
+
+        public virtual bool NeedStaticKeyword
+        {
+            get { return false; }
         }
     }
 }

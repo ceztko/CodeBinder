@@ -252,7 +252,8 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append("try").Space().Parenthesized().Append(Context.Declaration, this).Close().AppendLine();
+            Builder.IndentChild().Append(Context.Statement, this);
         }
     }
 

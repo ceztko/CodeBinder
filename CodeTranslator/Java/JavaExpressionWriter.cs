@@ -78,7 +78,10 @@ namespace CodeTranslator.Java
         {
             if (Context.Kind() == SyntaxKind.AsExpression)
             {
-                Builder.Append("NULL");
+                Builder.Parenthesized().Append(Context.Left, this).Space().Append("istanceof").Space().Append(Context.Right, this).Close().Space()
+                    .QuestionMark().Space().Parenthesized().Append(Context.Right, this).Close().Append(Context.Left, this).Space()
+                    .Colon().Append("null");
+
                 return;
             }
 
@@ -107,17 +110,6 @@ namespace CodeTranslator.Java
             Builder.Append(Context.Condition, this).Space().QuestionMark().Space()
                 .Append(Context.WhenTrue, this).Space().Colon().Space()
                 .Append(Context.WhenFalse, this);
-        }
-    }
-
-    class DeclarationExpressionWriter : ExpressiontWriter<DeclarationExpressionSyntax>
-    {
-        public DeclarationExpressionWriter(DeclarationExpressionSyntax syntax, ICompilationContextProvider context)
-            : base(syntax, context) { }
-
-        protected override void Write()
-        {
-            Builder.Append("NULL");
         }
     }
 
@@ -183,7 +175,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append(Context.Token.Text);
         }
     }
 
@@ -245,17 +237,6 @@ namespace CodeTranslator.Java
     class RefExpressionWriter : ExpressiontWriter<RefExpressionSyntax>
     {
         public RefExpressionWriter(RefExpressionSyntax syntax, ICompilationContextProvider context)
-            : base(syntax, context) { }
-
-        protected override void Write()
-        {
-            Builder.Append("NULL");
-        }
-    }
-
-    class ThrowExpressionWriter : ExpressiontWriter<ThrowExpressionSyntax>
-    {
-        public ThrowExpressionWriter(ThrowExpressionSyntax syntax, ICompilationContextProvider context)
             : base(syntax, context) { }
 
         protected override void Write()

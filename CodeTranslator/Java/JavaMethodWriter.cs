@@ -151,7 +151,14 @@ namespace CodeTranslator.Java
 
         public override string MethodName
         {
-            get { return Context.GetName().ToJavaCase(); }
+            get
+            {
+                var methodName = Context.GetName();
+                if (IsNative)
+                    return methodName;
+                else
+                    return methodName.ToJavaCase();
+            }
         }
 
         public override bool IsNative

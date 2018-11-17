@@ -19,15 +19,7 @@ namespace CodeTranslator.Java
             if (!string.IsNullOrEmpty(modifiers))
                 Builder.Append(modifiers).Space();
 
-            Builder.Append(Context.Declaration.Type.GetJavaType(this)).Space();
-            WriteVariableDeclaration(Context.Declaration.Variables);
-            Builder.EndOfStatement();
-        }
-
-        private void WriteVariableDeclaration(SeparatedSyntaxList<VariableDeclaratorSyntax> variables)
-        {
-            foreach (var variable in variables)
-                Builder.Append(variable.Identifier.Text);
+            Builder.Append(Context.Declaration, this).EndOfStatement();
         }
     }
 }

@@ -40,7 +40,6 @@ Supported:
     BinaryExpressionSyntax
     CastExpressionSyntax
     ConditionalExpressionSyntax
-    DeclarationExpressionSyntax
     ElementAccessExpressionSyntax
     InitializerExpressionSyntax
     BaseExpressionSyntax
@@ -53,7 +52,6 @@ Supported:
     PostfixUnaryExpressionSyntax
     PrefixUnaryExpressionSyntax
     RefExpressionSyntax
-    ThrowExpressionSyntax
     TypeOfExpressionSyntax
     ArrayTypeSyntax
     GenericNameSyntax
@@ -64,7 +62,9 @@ Supported:
     RefTypeSyntax
 	
 Unsupported
-    QualifiedNameSyntax                             // Except in namespaces, using directives and attributes
+    DeclarationExpressionSyntax # out var declaration or a tuple deconstruction 
+    ThrowExpressionSyntax # https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/throw#the-throw-expression
+    QualifiedNameSyntax # Except in namespaces, using directives and attributes
     DefaultExpressionSyntax
     AnonymousMethodExpressionSyntax
     ParenthesizedLambdaExpressionSyntax
