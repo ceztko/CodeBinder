@@ -104,8 +104,8 @@ namespace CodeTranslator.Java
                     using (Builder.Block())
                     {
                         Builder.Append(TypeName).Space();
-                        Builder.Append("envalue = values[i];").EndOfStatement();
-                        Builder.Append("if (envalue.value == value)");
+                        Builder.Append("envalue = values[i]").EndOfStatement();
+                        Builder.Append("if (envalue.value == value)").AppendLine();
                         Builder.IndentChild().Append("return envalue").EndOfStatement();
                     }
                     Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum").Space()

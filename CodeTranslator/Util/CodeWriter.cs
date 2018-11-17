@@ -35,12 +35,12 @@ namespace CodeTranslator.Util
         }
     }
 
-    public abstract class CodeWriter<TSyntax> : CodeWriter, ICompilationContextProvider
+    public abstract class CodeWriter<TContext> : CodeWriter, ICompilationContextProvider
     {
         public CompilationContext Compilation { get; private set; }
-        public TSyntax Context { get; private set; }
+        public TContext Context { get; private set; }
 
-        protected CodeWriter(TSyntax context, ICompilationContextProvider provider)
+        protected CodeWriter(TContext context, ICompilationContextProvider provider)
         {
             Context = context;
             Compilation = provider.Compilation;

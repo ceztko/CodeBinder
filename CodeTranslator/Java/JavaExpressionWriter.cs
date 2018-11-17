@@ -85,9 +85,8 @@ namespace CodeTranslator.Java
 
     class CastExpressionWriter : ExpressiontWriter<CastExpressionSyntax>
     {
-        public CastExpressionWriter(CastExpressionSyntax syntax, ICompilationContextProvider context) : base(syntax, context)
-        {
-        }
+        public CastExpressionWriter(CastExpressionSyntax syntax, ICompilationContextProvider context)
+            : base(syntax, context) { }
 
         protected override void Write()
         {
@@ -109,17 +108,6 @@ namespace CodeTranslator.Java
     class DeclarationExpressionWriter : ExpressiontWriter<DeclarationExpressionSyntax>
     {
         public DeclarationExpressionWriter(DeclarationExpressionSyntax syntax, ICompilationContextProvider context)
-            : base(syntax, context) { }
-
-        protected override void Write()
-        {
-            Builder.Append("NULL");
-        }
-    }
-
-    class DefaultExpressionWriter : ExpressiontWriter<DefaultExpressionSyntax>
-    {
-        public DefaultExpressionWriter(DefaultExpressionSyntax syntax, ICompilationContextProvider context)
             : base(syntax, context) { }
 
         protected override void Write()
@@ -278,7 +266,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append(Context.Type, this).Append(".class");
         }
     }
 
@@ -289,7 +277,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append(Context.ElementType, this).Append("[]");
         }
     }
 
@@ -322,6 +310,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
+            // TODO: identificare properties
             var symbol = Context.GetSymbolInfo(this);
             Builder.Append(Context.Identifier.Text);
         }
@@ -334,7 +323,14 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            if (Context.ElementType.Kind() == SyntaxKind.PredefinedType)
+            {
+                var prededefined = Context.ElementType as PredefinedTypeSyntax;
+                Builder.Append(prededefined.GetJavaType());
+                return;
+            }
+
+            Builder.Append(Context.ElementType, this);
         }
     }
 
@@ -349,6 +345,7 @@ namespace CodeTranslator.Java
         }
     }
 
+    // Types with keyword: object, string, void, bool, char, byte, int, etc.
     class PredefinedTypeWriter : ExpressiontWriter<PredefinedTypeSyntax>
     {
         public PredefinedTypeWriter(PredefinedTypeSyntax syntax, ICompilationContextProvider context)
@@ -356,7 +353,7 @@ namespace CodeTranslator.Java
 
         protected override void Write()
         {
-            Builder.Append("NULL");
+            Builder.Append(Context.GetJavaType());
         }
     }
 

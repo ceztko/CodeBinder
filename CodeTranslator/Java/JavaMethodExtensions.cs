@@ -157,6 +157,80 @@ namespace CodeTranslator.Java
             return getJavaModifiersString(modifiers, getJavaMethodModifier);
         }
 
+        public static string GetJavaBoxType(this PredefinedTypeSyntax syntax)
+        {
+            var kind = syntax.Kind();
+            switch (kind)
+            {
+                case SyntaxKind.BoolKeyword:
+                    return "Boolean";
+                case SyntaxKind.CharKeyword:
+                    return "Character";
+                case SyntaxKind.SByteKeyword:
+                    return "Byte";
+                case SyntaxKind.ByteKeyword:
+                    return "Byte";
+                case SyntaxKind.ShortKeyword:
+                    return "Short";
+                case SyntaxKind.UShortKeyword:
+                    return "Short";
+                case SyntaxKind.IntKeyword:
+                    return "Integer";
+                case SyntaxKind.UIntKeyword:
+                    return "Integer";
+                case SyntaxKind.LongKeyword:
+                    return "Long";
+                case SyntaxKind.ULongKeyword:
+                    return "Long";
+                case SyntaxKind.FloatKeyword:
+                    return "Float";
+                case SyntaxKind.DoubleKeyword:
+                    return "Double";
+                default:
+                    throw new Exception();
+            }
+        }
+
+        public static string GetJavaType(this PredefinedTypeSyntax syntax)
+        {
+            var kind = syntax.Kind();
+            switch (kind)
+            {
+                case SyntaxKind.VoidKeyword:
+                    return "void";
+                case SyntaxKind.ObjectKeyword:
+                    return "Object";
+                case SyntaxKind.StringKeyword:
+                    return "String";
+                case SyntaxKind.BoolKeyword:
+                    return "boolean";
+                case SyntaxKind.CharKeyword:
+                    return "char";
+                case SyntaxKind.SByteKeyword:
+                    return "byte";
+                case SyntaxKind.ByteKeyword:
+                    return "byte";
+                case SyntaxKind.ShortKeyword:
+                    return "short";
+                case SyntaxKind.UShortKeyword:
+                    return "short";
+                case SyntaxKind.IntKeyword:
+                    return "int";
+                case SyntaxKind.UIntKeyword:
+                    return "int";
+                case SyntaxKind.LongKeyword:
+                    return "long";
+                case SyntaxKind.ULongKeyword:
+                    return "long";
+                case SyntaxKind.FloatKeyword:
+                    return "float";
+                case SyntaxKind.DoubleKeyword:
+                    return "double";
+                default:
+                    throw new Exception();
+            }
+        }
+
         private static string getJavaModifiersString(IEnumerable<SyntaxKind> modifiers, ModifierGetter getJavaModifier)
         {
             StringBuilder builder = new StringBuilder();
