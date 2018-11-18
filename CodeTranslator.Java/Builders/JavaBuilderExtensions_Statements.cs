@@ -253,8 +253,7 @@ namespace CodeTranslator.Java
         public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, ICompilationContextProvider context)
         {
             Debug.Assert(syntax.Variables.Count == 1);
-            builder.Append(syntax.Type.GetJavaType(context)).Space()
-                .Append(syntax.Variables[0], context);
+            builder.Append(syntax.Type, context).Space().Append(syntax.Variables[0], context);
             return builder;
         }
 

@@ -173,6 +173,7 @@ namespace CodeTranslator.Java
                     writeJavaType(builder, typeSymbol?.GetFullName(), syntax, typeSymbol, false, provider, out isInterface);
                     return builder;
                 }
+                case SymbolKind.Local:
                 case SymbolKind.Field:
                 case SymbolKind.Property:
                 case SymbolKind.Parameter:
@@ -181,6 +182,8 @@ namespace CodeTranslator.Java
                     writeJavaIdentifier(builder, syntax, symbol, provider);
                     break;
                 }
+                default:
+                    throw new Exception();
             }
 
             return builder;
@@ -205,14 +208,14 @@ namespace CodeTranslator.Java
             return builder;
         }
 
-        static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax type, ISymbol symbol, ICompilationContextProvider provider)
+        static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, ICompilationContextProvider provider)
         {
-            var kind = type.Kind();
+            var kind = syntax.Kind();
             switch (kind)
             {
                 case SyntaxKind.IdentifierName:
                 {
-                    var identifierName = type as IdentifierNameSyntax;
+                    var identifierName = syntax as IdentifierNameSyntax;
                     builder.Append(identifierName.GetName());
                     break;
                 }

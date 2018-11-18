@@ -162,10 +162,21 @@ namespace CodeTranslator.Shared.CSharp
 
         #region Unsupported syntax
 
+        public override void VisitIdentifierName(IdentifierNameSyntax node)
+        {
+            var symbol = node.GetSymbol(this);
+            switch (symbol.Kind)
+            {
+                case SymbolKind.DynamicType:
+                    Unsupported(node, "Dynamic type specifier");
+                    break;
+            }
+        }
+
         public override void VisitArgument(ArgumentSyntax node)
         {
             if (node.NameColon != null)
-                Unsupported(node, "Argumnet with optional argument specification");
+                Unsupported(node, "Argument with optional argument specification");
 
             DefaultVisit(node);
         }
