@@ -21,6 +21,9 @@ namespace CodeTranslator.Util
 
         public uint IndentSpaces { get; set; }
 
+        public CodeBuilder()
+            : this(new StringWriter()) { }
+
         public CodeBuilder(TextWriter writer)
             : this(null, writer, 0, true, 4, 0) { }
 
@@ -48,7 +51,7 @@ namespace CodeTranslator.Util
 
         public CodeBuilder Append(string str)
         {
-            doChecks();
+            doChecks(ref str);
             _instanceIndentedCount = 0;
             if (str == string.Empty)
                 return this;
@@ -59,14 +62,13 @@ namespace CodeTranslator.Util
 
         public CodeBuilder AppendLine(string str = "")
         {
-            doChecks();
+            doChecks(ref str);
             _instanceIndentedCount = 0;
             appendIndent(str, true);
             _writer.WriteLine(str);
             _doIndent = true;
             return this;
         }
-
 
         public CodeBuilder Append(CodeWriter writer)
         {
@@ -184,6 +186,14 @@ namespace CodeTranslator.Util
             return this;
         }
 
+        void doChecks(ref string str)
+        {
+            if (str == null)
+                str = string.Empty;
+
+            doChecks();
+        }
+
         void doChecks()
         {
             if (_closed)
@@ -226,13 +236,10 @@ namespace CodeTranslator.Util
             var context = _disposeContexts[contextIndex];
             Debug.Assert(_currentIndentLevel >= context.IndentCount);
             _currentIndentLevel -= context.IndentCount;
-            if (context.AppendString != null)
-            {
-                if (context.AppendLine)
-                    AppendLine(context.AppendString);
-                else
-                    Append(context.AppendString);
-            }
+            if (context.AppendLine)
+                AppendLine(context.AppendString);
+            else if (context.AppendString != null)
+                Append(context.AppendString);
 
             _disposeContexts.RemoveAt(contextIndex);
         }

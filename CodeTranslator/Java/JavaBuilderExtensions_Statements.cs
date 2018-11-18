@@ -15,9 +15,9 @@ namespace CodeTranslator.Java
 {
     static partial class JavaWriterExtension
     {
-        public static CodeBuilder Append(this CodeBuilder builder, BlockSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, BlockSyntax statement, ICompilationContextProvider context, bool skipBraces = false)
         {
-            return builder.Append(new BlockStatementWriter(statement, context));
+            return builder.Append(new BlockStatementWriter(statement, context) { SkipBraces = skipBraces });
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, BreakStatementSyntax statement, ICompilationContextProvider context)
@@ -166,7 +166,7 @@ namespace CodeTranslator.Java
         {
             Debug.Assert(syntax.Variables.Count == 1);
             return builder.Append(syntax.Type.GetJavaType(context)).Space()
-                .Append(syntax.Variables[0], context).EndOfStatement();
+                .Append(syntax.Variables[0], context);
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, VariableDeclaratorSyntax syntax, ICompilationContextProvider context)

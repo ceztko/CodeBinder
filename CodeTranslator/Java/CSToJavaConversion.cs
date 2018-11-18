@@ -12,6 +12,8 @@ namespace CodeTranslator.Java
 {
     public class CSToJavaConversion : CSharpLanguageConversion
     {
+        internal const bool SkipBody = true;
+
         public const string GeneratedPreamble = "/* This file was generated. DO NOT EDIT! */";
 
         /// <summary>Base namespace of the package, to be set outside</summary>

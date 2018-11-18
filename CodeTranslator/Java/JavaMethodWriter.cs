@@ -24,10 +24,8 @@ namespace CodeTranslator.Java
             WriteReturnType();
             Builder.Append(MethodName);
             WriteParameters();
-            WriteMethodBody();
+            writeMethodBody();
         }
-
-        protected virtual void WriteTypeParameters() { }
 
         protected virtual void WriteParameters()
         {
@@ -39,7 +37,7 @@ namespace CodeTranslator.Java
             {
                 using (Builder.ParameterList())
                 {
-                    WriteParameters(Context.ParameterList);
+                    writeParameters(Context.ParameterList);
                 }
             }
             else
@@ -48,19 +46,11 @@ namespace CodeTranslator.Java
                 {
                     using (Builder.ParameterList(true))
                     {
-                        WriteParameters(Context.ParameterList);
+                        writeParameters(Context.ParameterList);
                         Builder.AppendLine();
                     }
                 }
             }
-        }
-
-        protected virtual void WriteMethodBody()
-        {
-            if (Context.Body == null)
-                Builder.EndOfStatement();
-            else
-                Builder.AppendLine().Append(Context.Body, this).AppendLine();
         }
 
         protected virtual void WriteModifiers()
@@ -70,7 +60,29 @@ namespace CodeTranslator.Java
                 Builder.Append(modifiers).Space();
         }
 
-        private void WriteParameters(ParameterListSyntax list)
+        protected void WriteType(TypeSyntax type, JavaTypeFlags flags)
+        {
+            Builder.Append(type.GetJavaType(flags, this));
+        }
+
+        void writeMethodBody()
+        {
+            if (Context.Body == null || !WriteMethodBody)
+            {
+                Builder.EndOfStatement();
+            }
+            else
+            {
+                using (Builder.AppendLine().Block())
+                {
+                    WriteMethodBodyInternal();
+                    if (!CSToJavaConversion.SkipBody)
+                        Builder.Append(Context.Body, this, true).AppendLine();
+                }
+            }
+        }
+
+        private void writeParameters(ParameterListSyntax list)
         {
             bool first = true;
             foreach (var parameter in list.Parameters)
@@ -80,11 +92,11 @@ namespace CodeTranslator.Java
                 else
                     Builder.AppendLine(",");
 
-                WriteParameter(parameter);
+                writeParameter(parameter);
             }
         }
 
-        private void WriteParameter(ParameterSyntax parameter)
+        private void writeParameter(ParameterSyntax parameter)
         {
             var flags = IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None;
             bool isRef = parameter.IsRef() | parameter.IsOut();
@@ -95,17 +107,21 @@ namespace CodeTranslator.Java
             Builder.Space().Append(parameter.Identifier.Text);
         }
 
-        protected void WriteType(TypeSyntax type, JavaTypeFlags flags)
+        protected virtual void WriteTypeParameters() { /* Do nothing */ }
+
+        protected virtual void WriteMethodBodyInternal() { /* Do nothing */ }
+
+        protected virtual void WriteReturnType() { /* Do nothing */ }
+
+        public virtual bool WriteMethodBody
         {
-            Builder.Append(type.GetJavaType(flags, this));
+            get { return true; }
         }
 
         public virtual int Arity
         {
             get { return 0; }
         }
-
-        protected virtual void WriteReturnType() { }
 
         public abstract string MethodName { get; }
 
@@ -136,12 +152,10 @@ namespace CodeTranslator.Java
             Builder.Space();
         }
 
-        protected override void WriteMethodBody()
+        protected override void WriteMethodBodyInternal()
         {
-            if (IsParentInterface)
-                Builder.EndOfStatement();
-            else
-                base.WriteMethodBody();
+            if (CSToJavaConversion.SkipBody)
+                Builder.Append(Context.ReturnType.GetJavaDefaultReturnStatement(this)).EndOfStatement();
         }
 
         public bool IsParentInterface
@@ -192,7 +206,7 @@ namespace CodeTranslator.Java
             Builder.Append(_signature.ReturnType.GetJavaTypeName(JavaTypeFlags.NativeMethod)).Space();
         }
 
-        protected override void WriteMethodBody()
+        protected override void WriteMethodBodyInternal()
         {
             Builder.EndOfStatement();
         }
@@ -213,9 +227,14 @@ namespace CodeTranslator.Java
             get { return _signature.MethodName; }
         }
 
+        public override bool WriteMethodBody
+        {
+            get { return false; }
+        }
+
         public override bool IsNative
         {
-            get { return true; } // TODO: Check method native
+            get { return true; } // TODO: Check if the method is really native?
         }
     }
 
@@ -229,6 +248,11 @@ namespace CodeTranslator.Java
             get { return (Context.Parent as BaseTypeDeclarationSyntax).GetName();}
         }
 
+        protected override void WriteMethodBodyInternal()
+        {
+
+        }
+
         public override bool IsNative
         {
             get { return false; }
@@ -239,6 +263,12 @@ namespace CodeTranslator.Java
     {
         public DestructorWriter(DestructorDeclarationSyntax method, ICompilationContextProvider context)
             : base(method, context) { }
+
+        protected override void WriteMethodBodyInternal()
+        {
+            base.WriteMethodBodyInternal();
+            Builder.Append("super.finalize()").EndOfStatement();
+        }
 
         protected override void WriteModifiers()
         {

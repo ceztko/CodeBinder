@@ -28,19 +28,33 @@ namespace CodeTranslator.Java
 
     class BlockStatementWriter : StatementWriter<BlockSyntax>
     {
+        public bool SkipBraces { get; set; }
+
         public BlockStatementWriter(BlockSyntax syntax, ICompilationContextProvider context)
             : base(syntax, context) { }
 
         protected override void Write()
         {
-            // Allows to not doubly indent single statements blocks, e.g after "if" statement
-            Builder.ResetChildIndent();
-            using (Builder.Block(false))
+            if (SkipBraces)
             {
-                foreach (var statement in Context.Statements)
+                writeStatements();
+            }
+            else
+            {
+                // Allows to not doubly indent single statements blocks, e.g after "if" statement
+                Builder.ResetChildIndent();
+                using (Builder.Block(false))
                 {
-                    Builder.Append(statement, this).AppendLine();
+                    writeStatements();
                 }
+            }
+        }
+
+        void writeStatements()
+        {
+            foreach (var statement in Context.Statements)
+            {
+                Builder.Append(statement, this).AppendLine();
             }
         }
     }
@@ -243,7 +257,6 @@ namespace CodeTranslator.Java
                 Builder.Append(Context.Finally, this);
         }
     }
-
 
     class UsingStatementWriter : StatementWriter<UsingStatementSyntax>
     {

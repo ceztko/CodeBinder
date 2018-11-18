@@ -23,6 +23,46 @@ namespace CodeTranslator.Java
     {
         delegate bool ModifierGetter(SyntaxKind modifier, out string javaModifier);
 
+        public static string GetJavaDefaultReturnStatement(this TypeSyntax type, ICompilationContextProvider provider)
+        {
+            var builder = new CodeBuilder();
+            string defaultLiteral = type.GetJavaDefaultLiteral(provider);
+            builder.Append("return");
+            if (!string.IsNullOrEmpty(defaultLiteral))
+                builder.Space().Append(defaultLiteral);
+
+            return builder.ToString();
+        }
+
+        public static string GetJavaDefaultLiteral(this TypeSyntax type, ICompilationContextProvider provider)
+        {
+            var fullName = type.GetFullName(provider);
+            switch(fullName)
+            {
+                case "System.Void":
+                    return null;
+                case "System.IntPtr":
+                    return "0";
+                case "System.Boolean":
+                    return "false";
+                case "System.Char":
+                    return "'\0'";
+                case "System.Byte":
+                case "System.SByte":
+                case "System.Int16":
+                case "System.UInt16":
+                case "System.Int32":
+                case "System.UInt32":
+                case "System.Int64":
+                case "System.UInt64":
+                case "System.Single":
+                case "System.Double":
+                    return "0";
+                default:
+                    return "null";
+            }
+        }
+
         public static string GetJavaOperator(this AssignmentExpressionSyntax syntax)
         {
             var op = syntax.Kind();

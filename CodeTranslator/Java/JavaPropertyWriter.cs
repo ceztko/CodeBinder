@@ -92,7 +92,11 @@ namespace CodeTranslator.Java
                 }
                 else
                 {
-                    Builder.Space().Append(accessor.Body, this).AppendLine();
+                    using (Builder.AppendLine().Block())
+                    {
+                        if (!CSToJavaConversion.SkipBody)
+                            Builder.Space().Append(accessor.Body, this, true);
+                    }
                 }
             }
         }
@@ -118,7 +122,13 @@ namespace CodeTranslator.Java
                 }
                 else
                 {
-                    Builder.Space().Append(accessor.Body, this).AppendLine();
+                    using (Builder.AppendLine().Block())
+                    {
+                        if (CSToJavaConversion.SkipBody)
+                            Builder.Append(Context.Type.GetJavaDefaultReturnStatement(this)).EndOfStatement();
+                        else
+                            Builder.Append(accessor.Body, this, true);
+                    }
                 }
             }
         }
