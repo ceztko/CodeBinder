@@ -9,7 +9,7 @@ using System.Text;
 
 namespace CodeTranslator.Shared
 {
-    static class RoslynMethodExtensions
+    public static class RoslynMethodExtensions
     {
         public static bool IsAttribute<TAttribute>(this AttributeData attribute)
             where TAttribute : Attribute

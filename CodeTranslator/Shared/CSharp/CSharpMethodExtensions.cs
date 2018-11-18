@@ -12,9 +12,8 @@ using CodeTranslator.Attributes;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    static class CSharpMethodExtensions
+    public static class CSharpMethodExtensions
     {
-
         public static CSharpTypeParameters GetTypeParameters(this MethodDeclarationSyntax syntax)
         {
             return mergeTypeConstraint(syntax.TypeParameterList.Parameters, syntax.ConstraintClauses);
