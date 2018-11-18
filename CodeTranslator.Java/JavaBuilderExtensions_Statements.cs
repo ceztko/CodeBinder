@@ -15,148 +15,236 @@ namespace CodeTranslator.Java
 {
     static partial class JavaWriterExtension
     {
-        public static CodeBuilder Append(this CodeBuilder builder, BlockSyntax statement, ICompilationContextProvider context, bool skipBraces = false)
+        public static CodeBuilder Append(this CodeBuilder builder, BlockSyntax syntax, ICompilationContextProvider context, bool skipBraces = false)
         {
-            return builder.Append(new BlockStatementWriter(statement, context) { SkipBraces = skipBraces });
+            void writeStatements()
+            {
+                foreach (var statement in syntax.Statements)
+                {
+                    builder.Append(statement, context).AppendLine();
+                }
+            }
+
+            if (skipBraces)
+            {
+                writeStatements();
+            }
+            else
+            {
+                // Allows to not doubly indent single statements blocks, e.g after "if" statement
+                builder.ResetChildIndent();
+                using (builder.Block(false))
+                {
+                    writeStatements();
+                }
+            }
+
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, BreakStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, BreakStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new BreakStatementWriter(statement, context));
+            builder.Append("break").SemiColon();
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ForEachStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ForEachStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ForEachStatementWriter(statement, context));
+            builder.Append("for").Space().Parenthesized().Append(syntax.Type, context).Space().Append(syntax.Identifier.Text)
+                .Space().Colon().Space().Append(syntax.Expression, context).Close().AppendLine();
+            builder.IndentChild().Append(syntax.Statement, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ContinueStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ContinueStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ContinueStatementWriter(statement, context));
+            builder.Append("continue").SemiColon();
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, DoStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, DoStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new DoStatementWriter(statement, context));
+            builder.Append("do").AppendLine();
+            builder.IndentChild().Append(syntax.Statement, context);
+            builder.Append("while").Space().Parenthesized().Append(syntax.Condition, context).Close().SemiColon();
+
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, EmptyStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, EmptyStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new EmptyStatementWriter(statement, context));
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ExpressionStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ExpressionStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ExpressionStamentWriter(statement, context));
+
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ForStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ForStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ForStatementWriter(statement, context));
+            builder.Append("for").Space().Parenthesized(() =>
+            {
+                builder.Append(syntax.Declaration, context).SemiColonSeparator()
+                .Append(syntax.Condition, context).SemiColonSeparator();
+
+                bool first = true;
+                foreach (var incrementor in syntax.Incrementors)
+                {
+                    if (first)
+                        first = true;
+                    else
+                        builder.CommaSeparator();
+
+                    builder.Append(incrementor, context);
+                }
+            }).AppendLine();
+            builder.IndentChild().Append(syntax.Statement, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, IfStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, IfStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new IfStatementWriter(statement, context));
+            builder.Append("if").Space().Parenthesized().Append(syntax.Condition, context).Close().AppendLine();
+            builder.IndentChild().Append(syntax.Statement, context);
+            if (syntax.Else != null)
+                builder.Append(syntax.Else, context);
+
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, LocalDeclarationStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, LocalDeclarationStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new LocalDeclarationStatementWriter(statement, context));
+            if (syntax.IsConst)
+                builder.Append("final").Space();
+
+            builder.Append(syntax.Declaration, context).SemiColon();
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, LockStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, LockStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new LockStatementWriter(statement, context));
+            builder.Append("synchronized").Space().Parenthesized().Append(syntax.Expression, context).Close().AppendLine();
+            builder.IndentChild().Append(syntax.Statement, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ReturnStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ReturnStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ReturnStatementWriter(statement, context));
+            builder.Append("return");
+            if (syntax.Expression != null)
+                builder.Space().Append(syntax.Expression, context);
+            builder.SemiColon();
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, SwitchStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, SwitchStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new SwitchStatementWriter(statement, context));
+            builder.Append("switch").Space().Parenthesized().Append(syntax.Expression, context).Close().AppendLine();
+            using (builder.Block(false))
+            {
+                bool first = true;
+                foreach (var section in syntax.Sections)
+                {
+                    if (first)
+                        first = true;
+                    else
+                        builder.AppendLine();
+
+                    builder.Append(section, context);
+                }
+            }
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ThrowStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ThrowStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ThrowStatementWriter(statement, context));
+            builder.Append("throw").Space().Append(syntax.Expression, context).SemiColon();
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, TryStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, TryStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new TryStatementWriter(statement, context));
+            builder.Append("try").AppendLine();
+            builder.Append(syntax.Block, context).AppendLine();
+            bool first = true;
+            foreach (var catchClause in syntax.Catches)
+            {
+                if (first)
+                    first = true;
+                else
+                    builder.AppendLine();
+
+                builder.Append(catchClause, context);
+            }
+            if (syntax.Finally != null)
+                builder.Append(syntax.Finally, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, UsingStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, UsingStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new UsingStatementWriter(statement, context));
+            builder.Append("try").Space().Parenthesized().Append(syntax.Declaration, context).Close().AppendLine();
+            builder.IndentChild().Append(syntax.Statement, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, WhileStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, WhileStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new WhileStatementWriter(statement, context));
+            builder.Append("while").Space().Append(syntax.Condition, context).AppendLine()
+                .IndentChild().Append(syntax.Statement, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, YieldStatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, YieldStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new YieldStatementWriter(statement, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, ExpressionSyntax syntax, ICompilationContextProvider context)
-        {
-            return builder.Append(syntax.GetWriter(context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, StatementSyntax syntax, ICompilationContextProvider context)
-        {
-            return builder.Append(syntax.GetWriter(context));
+            builder.Append("NULL");
+            return builder;
         }
 
         // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
-        public static CodeWriter GetWriter(this StatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, StatementSyntax statement, ICompilationContextProvider context)
         {
             var kind = statement.Kind();
             switch (kind)
             {
                 case SyntaxKind.Block:
-                    return new BlockStatementWriter(statement as BlockSyntax, context);
+                    return builder.Append(statement as BlockSyntax, context);
                 case SyntaxKind.BreakStatement:
-                    return new BreakStatementWriter(statement as BreakStatementSyntax, context);
+                    return builder.Append(statement as BreakStatementSyntax, context);
                 case SyntaxKind.ForEachStatement:
-                    return new ForEachStatementWriter(statement as ForEachStatementSyntax, context);
+                    return builder.Append(statement as ForEachStatementSyntax, context);
                 case SyntaxKind.ContinueStatement:
-                    return new ContinueStatementWriter(statement as ContinueStatementSyntax, context);
+                    return builder.Append(statement as ContinueStatementSyntax, context);
                 case SyntaxKind.DoStatement:
-                    return new DoStatementWriter(statement as DoStatementSyntax, context);
+                    return builder.Append(statement as DoStatementSyntax, context);
                 case SyntaxKind.EmptyStatement:
-                    return new EmptyStatementWriter(statement as EmptyStatementSyntax, context);
+                    return builder.Append(statement as EmptyStatementSyntax, context);
                 case SyntaxKind.ExpressionStatement:
-                    return new ExpressionStamentWriter(statement as ExpressionStatementSyntax, context);
+                    return builder.Append(statement as ExpressionStatementSyntax, context);
                 case SyntaxKind.ForStatement:
-                    return new ForStatementWriter(statement as ForStatementSyntax, context);
+                    return builder.Append(statement as ForStatementSyntax, context);
                 case SyntaxKind.IfStatement:
-                    return new IfStatementWriter(statement as IfStatementSyntax, context);
+                    return builder.Append(statement as IfStatementSyntax, context);
                 case SyntaxKind.LocalDeclarationStatement:
-                    return new LocalDeclarationStatementWriter(statement as LocalDeclarationStatementSyntax, context);
+                    return builder.Append(statement as LocalDeclarationStatementSyntax, context);
                 case SyntaxKind.LockStatement:
-                    return new LockStatementWriter(statement as LockStatementSyntax, context);
+                    return builder.Append(statement as LockStatementSyntax, context);
                 case SyntaxKind.ReturnStatement:
-                    return new ReturnStatementWriter(statement as ReturnStatementSyntax, context);
+                    return builder.Append(statement as ReturnStatementSyntax, context);
                 case SyntaxKind.SwitchStatement:
-                    return new SwitchStatementWriter(statement as SwitchStatementSyntax, context);
+                    return builder.Append(statement as SwitchStatementSyntax, context);
                 case SyntaxKind.ThrowStatement:
-                    return new ThrowStatementWriter(statement as ThrowStatementSyntax, context);
+                    return builder.Append(statement as ThrowStatementSyntax, context);
                 case SyntaxKind.TryStatement:
-                    return new TryStatementWriter(statement as TryStatementSyntax, context);
+                    return builder.Append(statement as TryStatementSyntax, context);
                 case SyntaxKind.UsingStatement:
-                    return new UsingStatementWriter(statement as UsingStatementSyntax, context);
+                    return builder.Append(statement as UsingStatementSyntax, context);
                 case SyntaxKind.WhileStatement:
-                    return new WhileStatementWriter(statement as WhileStatementSyntax, context);
+                    return builder.Append(statement as WhileStatementSyntax, context);
                 case SyntaxKind.YieldReturnStatement:
-                    return new YieldStatementWriter(statement as YieldStatementSyntax, context);
+                    return builder.Append(statement as YieldStatementSyntax, context);
                 default:
                     throw new Exception();
             }
@@ -165,8 +253,9 @@ namespace CodeTranslator.Java
         public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, ICompilationContextProvider context)
         {
             Debug.Assert(syntax.Variables.Count == 1);
-            return builder.Append(syntax.Type.GetJavaType(context)).Space()
+            builder.Append(syntax.Type.GetJavaType(context)).Space()
                 .Append(syntax.Variables[0], context);
+            return builder;
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, VariableDeclaratorSyntax syntax, ICompilationContextProvider context)
@@ -174,13 +263,13 @@ namespace CodeTranslator.Java
             builder.Append(syntax.Identifier.Text);
             if (syntax.Initializer != null)
                 builder.Space().Append(syntax.Initializer, context);
-
             return builder;
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, EqualsValueClauseSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append("=").Space().Append(syntax.Value, context);
+            builder.Append("=").Space().Append(syntax.Value, context);
+            return builder;
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, FinallyClauseSyntax syntax, ICompilationContextProvider context)

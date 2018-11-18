@@ -14,146 +14,212 @@ namespace CodeTranslator.Java
 {
     static partial class JavaWriterExtension
     {
-        public static CodeBuilder Append(this CodeBuilder builder, ArrayCreationExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ArrayCreationExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ArrayCreationExpressionWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, OmittedArraySizeExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, OmittedArraySizeExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new OmittedArraySizeExpressionWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, AssignmentExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, AssignmentExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new AssignmentExpressionWriter(expression, context));
+            if (syntax.Left.Kind() == SyntaxKind.IdentifierName)
+            {
+                var symbol = syntax.Left.GetSymbolInfo(context);
+                if (symbol.Symbol.Kind == SymbolKind.Property)
+                {
+                    var operatorKind = syntax.OperatorToken.Kind();
+                    switch (operatorKind)
+                    {
+                        case SyntaxKind.EqualsToken:
+                            builder.Append("set").Append((syntax.Left as IdentifierNameSyntax).Identifier.Text)
+                                .Append("(").Append(syntax.Right, context).Append(")");
+                            break;
+                        default:
+                            break;
+                    }
+                    return builder;
+                }
+            }
+
+            builder.Append(syntax.Left, context).Space().Append(syntax.GetJavaOperator()).Space().Append(syntax.Right, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, BinaryExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, BinaryExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new BinaryExpressionWriter(expression, context));
+            if (syntax.Kind() == SyntaxKind.AsExpression)
+            {
+                builder.Parenthesized().Append(syntax.Left, context).Space().Append("istanceof").Space().Append(syntax.Right, context).Close().Space()
+                    .QuestionMark().Space().Parenthesized().Append(syntax.Right, context).Close().Append(syntax.Left, context).Space()
+                    .Colon().Append("null");
+
+                return builder;
+            }
+
+            builder.Append(syntax.Left, context).Space().Append(syntax.GetJavaOperator()).Space().Append(syntax.Right, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new CastExpressionWriter(expression, context));
+            builder.Parenthesized().Append(syntax.Type, context).Close().Append(syntax.Expression, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ConditionalExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ConditionalExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ConditionalExpressionWriter(expression, context));
+            builder.Append(syntax.Condition, context).Space().QuestionMark().Space()
+                .Append(syntax.WhenTrue, context).Space().Colon().Space()
+                .Append(syntax.WhenFalse, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ElementAccessExpressionWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, InitializerExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, InitializerExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new InitializerExpressionWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, BaseExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, BaseExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new BaseExpressionWriter(expression, context));
+            builder.Append("super");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ThisExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ThisExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ThisExpressionWriter(expression, context));
+            builder.Append("this");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new InvocationExpressionWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new LiteralExpressionWriter(expression, context));
+            builder.Append(syntax.Token.Text);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new MemberAccessExpressionWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ObjectCreationExpressionWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ParenthesizedExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ParenthesizedExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ParenthesizedExpressionWriter(expression, context));
+            builder.Parenthesized().Append(syntax.Expression, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, PostfixUnaryExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, PostfixUnaryExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new PostfixUnaryExpressionWriter(expression, context));
+            builder.Append(syntax.Operand, context).Append(syntax.GetJavaOperator());
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, PrefixUnaryExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, PrefixUnaryExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new PrefixUnaryExpressionWriter(expression, context));
+            builder.Append(syntax.GetJavaOperator()).Append(syntax.Operand, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, RefExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, RefExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new RefExpressionWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, TypeOfExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, TypeOfExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new TypeOfExpressionWriter(expression, context));
+            builder.Append(syntax.Type, context).Append(".class");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ArrayTypeSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ArrayTypeSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new ArrayTypeWriter(expression, context));
+            builder.Append(syntax.ElementType, context).Append("[]");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, GenericNameSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, GenericNameSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new GenericNameWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, IdentifierNameSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, IdentifierNameSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new IdentifierNameWriter(expression, context));
+            // TODO: identificare properties
+            var symbol = syntax.GetSymbolInfo(context);
+            builder.Append(syntax.Identifier.Text);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, NullableTypeSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, NullableTypeSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new NullableTypeWriter(expression, context));
+            if (syntax.ElementType.Kind() == SyntaxKind.PredefinedType)
+            {
+                var prededefined = syntax.ElementType as PredefinedTypeSyntax;
+                builder.Append(prededefined.GetJavaType());
+                return builder;
+            }
+
+            builder.Append(syntax.ElementType, context);
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, OmittedTypeArgumentSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, OmittedTypeArgumentSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new OmittedTypeArgumentWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, PredefinedTypeSyntax expression, ICompilationContextProvider context)
+        // Types with keyword: object, string, void, bool, char, byte, int, etc.
+        public static CodeBuilder Append(this CodeBuilder builder, PredefinedTypeSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new PredefinedTypeWriter(expression, context));
+            builder.Append(syntax.GetJavaType());
+            return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, RefTypeSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, RefTypeSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(new RefTypeWriter(expression, context));
+            builder.Append("NULL");
+            return builder;
         }
 
         // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
-        public static CodeWriter GetWriter(this ExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ExpressionSyntax expression, ICompilationContextProvider context)
         {
             var kind = expression.Kind();
             switch (kind)
             {
                 case SyntaxKind.ArrayCreationExpression:
-                    return new ArrayCreationExpressionWriter(expression as ArrayCreationExpressionSyntax, context);
+                    return builder.Append(expression as ArrayCreationExpressionSyntax, context);
                 case SyntaxKind.OmittedArraySizeExpression:
-                    return new OmittedArraySizeExpressionWriter(expression as OmittedArraySizeExpressionSyntax, context);
+                    return builder.Append(expression as OmittedArraySizeExpressionSyntax, context);
                 case SyntaxKind.AddAssignmentExpression:
                 case SyntaxKind.AndAssignmentExpression:
                 case SyntaxKind.DivideAssignmentExpression:
@@ -165,7 +231,7 @@ namespace CodeTranslator.Java
                 case SyntaxKind.RightShiftAssignmentExpression:
                 case SyntaxKind.SimpleAssignmentExpression:
                 case SyntaxKind.SubtractAssignmentExpression:
-                    return new AssignmentExpressionWriter(expression as AssignmentExpressionSyntax, context);
+                    return builder.Append(expression as AssignmentExpressionSyntax, context);
                 case SyntaxKind.AddExpression:
                 case SyntaxKind.SubtractExpression:
                 case SyntaxKind.MultiplyExpression:
@@ -186,65 +252,65 @@ namespace CodeTranslator.Java
                 case SyntaxKind.GreaterThanOrEqualExpression:
                 case SyntaxKind.IsExpression:
                 case SyntaxKind.AsExpression:
-                    return new BinaryExpressionWriter(expression as BinaryExpressionSyntax, context);
+                    return builder.Append(expression as BinaryExpressionSyntax, context);
                 case SyntaxKind.CastExpression:
-                    return new CastExpressionWriter(expression as CastExpressionSyntax, context);
+                    return builder.Append(expression as CastExpressionSyntax, context);
                 case SyntaxKind.ConditionalExpression:
-                    return new ConditionalExpressionWriter(expression as ConditionalExpressionSyntax, context);
+                    return builder.Append(expression as ConditionalExpressionSyntax, context);
                 case SyntaxKind.ElementAccessExpression:
-                    return new ElementAccessExpressionWriter(expression as ElementAccessExpressionSyntax, context);
+                    return builder.Append(expression as ElementAccessExpressionSyntax, context);
                 case SyntaxKind.ObjectInitializerExpression:
                 case SyntaxKind.CollectionInitializerExpression:
                 case SyntaxKind.ArrayInitializerExpression:
                 case SyntaxKind.ComplexElementInitializerExpression:
-                    return new InitializerExpressionWriter(expression as InitializerExpressionSyntax, context);
+                    return builder.Append(expression as InitializerExpressionSyntax, context);
                 case SyntaxKind.BaseExpression:
-                    return new BaseExpressionWriter(expression as BaseExpressionSyntax, context);
+                    return builder.Append(expression as BaseExpressionSyntax, context);
                 case SyntaxKind.ThisExpression:
-                    return new ThisExpressionWriter(expression as ThisExpressionSyntax, context);
+                    return builder.Append(expression as ThisExpressionSyntax, context);
                 case SyntaxKind.InvocationExpression:
-                    return new InvocationExpressionWriter(expression as InvocationExpressionSyntax, context);
+                    return builder.Append(expression as InvocationExpressionSyntax, context);
                 case SyntaxKind.NumericLiteralExpression:
                 case SyntaxKind.StringLiteralExpression:
                 case SyntaxKind.CharacterLiteralExpression:
                 case SyntaxKind.TrueLiteralExpression:
                 case SyntaxKind.FalseLiteralExpression:
                 case SyntaxKind.NullLiteralExpression:
-                    return new LiteralExpressionWriter(expression as LiteralExpressionSyntax, context);
+                    return builder.Append(expression as LiteralExpressionSyntax, context);
                 case SyntaxKind.SimpleMemberAccessExpression:
-                    return new MemberAccessExpressionWriter(expression as MemberAccessExpressionSyntax, context);
+                    return builder.Append(expression as MemberAccessExpressionSyntax, context);
                 case SyntaxKind.ObjectCreationExpression:
-                    return new ObjectCreationExpressionWriter(expression as ObjectCreationExpressionSyntax, context);
+                    return builder.Append(expression as ObjectCreationExpressionSyntax, context);
                 case SyntaxKind.ParenthesizedExpression:
-                    return new ParenthesizedExpressionWriter(expression as ParenthesizedExpressionSyntax, context);
+                    return builder.Append(expression as ParenthesizedExpressionSyntax, context);
                 case SyntaxKind.PostIncrementExpression:
                 case SyntaxKind.PostDecrementExpression:
-                    return new PostfixUnaryExpressionWriter(expression as PostfixUnaryExpressionSyntax, context);
+                    return builder.Append(expression as PostfixUnaryExpressionSyntax, context);
                 case SyntaxKind.UnaryPlusExpression:
                 case SyntaxKind.UnaryMinusExpression:
                 case SyntaxKind.BitwiseNotExpression:
                 case SyntaxKind.LogicalNotExpression:
                 case SyntaxKind.PreIncrementExpression:
                 case SyntaxKind.PreDecrementExpression:
-                    return new PrefixUnaryExpressionWriter(expression as PrefixUnaryExpressionSyntax, context);
+                    return builder.Append(expression as PrefixUnaryExpressionSyntax, context);
                 case SyntaxKind.RefExpression:
-                    return new RefExpressionWriter(expression as RefExpressionSyntax, context);
+                    return builder.Append(expression as RefExpressionSyntax, context);
                 case SyntaxKind.TypeOfExpression:
-                    return new TypeOfExpressionWriter(expression as TypeOfExpressionSyntax, context);
+                    return builder.Append(expression as TypeOfExpressionSyntax, context);
                 case SyntaxKind.ArrayType:
-                    return new ArrayTypeWriter(expression as ArrayTypeSyntax, context);
+                    return builder.Append(expression as ArrayTypeSyntax, context);
                 case SyntaxKind.GenericName:
-                    return new GenericNameWriter(expression as GenericNameSyntax, context);
+                    return builder.Append(expression as GenericNameSyntax, context);
                 case SyntaxKind.IdentifierName:
-                    return new IdentifierNameWriter(expression as IdentifierNameSyntax, context);
+                    return builder.Append(expression as IdentifierNameSyntax, context);
                 case SyntaxKind.NullableType:
-                    return new NullableTypeWriter(expression as NullableTypeSyntax, context);
+                    return builder.Append(expression as NullableTypeSyntax, context);
                 case SyntaxKind.OmittedTypeArgument:
-                    return new OmittedTypeArgumentWriter(expression as OmittedTypeArgumentSyntax, context);
+                    return builder.Append(expression as OmittedTypeArgumentSyntax, context);
                 case SyntaxKind.PredefinedType:
-                    return new PredefinedTypeWriter(expression as PredefinedTypeSyntax, context);
+                    return builder.Append(expression as PredefinedTypeSyntax, context);
                 case SyntaxKind.RefType:
-                    return new RefTypeWriter(expression as RefTypeSyntax, context);
+                    return builder.Append(expression as RefTypeSyntax, context);
                 // Unsupported expressions
                 case SyntaxKind.DeclarationExpression:
                 case SyntaxKind.ThrowExpression:
