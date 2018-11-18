@@ -1,5 +1,5 @@
-﻿using CodeTranslator.Shared;
-using CodeTranslator.Shared.CSharp;
+﻿using CodeTranslator.Shared.CSharp;
+using CodeTranslator.Shared;
 using CodeTranslator.Util;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -8,20 +8,9 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    class JavaStructConversion : JavaTypeConversion<CSharpStructTypeContext>
+    class ClassTypeWriter : TypeWriter<ClassDeclarationSyntax>
     {
-        public JavaStructConversion(CSToJavaConversion conversion)
-            : base(conversion) { }
-
-        protected override CodeWriter GetTypeWriter()
-        {
-            return new StructTypeWriter(TypeContext.Node, this);
-        }
-    }
-
-    class StructTypeWriter : TypeWriter<StructDeclarationSyntax>
-    {
-        public StructTypeWriter(StructDeclarationSyntax syntax, ICompilationContextProvider context)
+        public ClassTypeWriter(ClassDeclarationSyntax syntax, ICompilationContextProvider context)
             : base(syntax, context) { }
 
         protected override void WriteTypeMembers()

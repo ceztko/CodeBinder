@@ -8,17 +8,6 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    class JavaInterfaceConversion : JavaTypeConversion<CSharpInterfaceTypeContext>
-    {
-        public JavaInterfaceConversion(CSToJavaConversion conversion)
-            : base(conversion) { }
-
-        protected override CodeWriter GetTypeWriter()
-        {
-            return new InterfaceTypeWriter(TypeContext.Node, this);
-        }
-    }
-
     class InterfaceTypeWriter : TypeWriter<InterfaceDeclarationSyntax>
     {
         public InterfaceTypeWriter(InterfaceDeclarationSyntax syntax, ICompilationContextProvider context)

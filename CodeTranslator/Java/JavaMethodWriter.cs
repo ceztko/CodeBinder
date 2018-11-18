@@ -250,7 +250,8 @@ namespace CodeTranslator.Java
 
         protected override void WriteMethodBodyInternal()
         {
-
+            if (Context.Initializer != null)
+                Builder.Append(Context.Initializer, this).EndOfStatement();
         }
 
         public override bool IsNative

@@ -11,17 +11,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeTranslator.Java
 {
-    class JavaEnumConversion : JavaTypeConversion<CSharpEnumTypeContext>
-    {
-        public JavaEnumConversion(CSToJavaConversion conversion)
-            : base(conversion) { }
-
-        protected override CodeWriter GetTypeWriter()
-        {
-            return new EnumTypeWriter(TypeContext.Node, this);
-        }
-    }
-
     class EnumTypeWriter : TypeWriter<EnumDeclarationSyntax>
     {
         bool _isFlag;

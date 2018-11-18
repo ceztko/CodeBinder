@@ -14,6 +14,11 @@ namespace CodeTranslator.Java
 {
     static partial class JavaWriterExtension
     {
+        public static CodeBuilder Append(this CodeBuilder builder, ConstructorInitializerSyntax syntax, ICompilationContextProvider context)
+        {
+            return builder;
+        }
+
         public static void Append(this CodeBuilder builder,
             CSharpTypeParameters typeParameters, ICompilationContextProvider context)
         {
