@@ -40,7 +40,7 @@ namespace CodeTranslator.Java
                 if (first)
                     first = false;
                 else
-                    Builder.AppendLine(",");
+                    Builder.Comma().AppendLine();
 
                 WriteMember(member);
             }

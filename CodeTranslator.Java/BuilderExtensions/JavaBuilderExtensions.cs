@@ -14,67 +14,6 @@ namespace CodeTranslator.Java
 {
     static partial class JavaWriterExtension
     {
-        public static CodeBuilder Append(this CodeBuilder builder, ConstructorInitializerSyntax syntax, ICompilationContextProvider context)
-        {
-            return builder;
-        }
-
-        public static void Append(this CodeBuilder builder,
-            CSharpTypeParameters typeParameters, ICompilationContextProvider context)
-        {
-            using (builder.TypeParameterList(typeParameters.Count > 1))
-            {
-                foreach (var parameter in typeParameters)
-                {
-                    builder.Append(parameter.Type.Identifier.Text);
-                    if (parameter.Constraints != null)
-                    {
-                        builder.Space();
-                        writeTypeConstraints(builder, parameter.Constraints, context);
-                    }
-
-                    if (typeParameters.Count > 1)
-                        builder.AppendLine();
-                }
-            }
-        }
-
-        static void writeTypeConstraints(CodeBuilder builder,
-            TypeParameterConstraintClauseSyntax constraints,
-            ICompilationContextProvider context)
-        {
-            bool first = true;
-            foreach (var constraint in constraints.Constraints)
-            {
-                if (first)
-                    first = false;
-                else
-                    builder.Space().Append("&").Space();
-
-                builder.Append(constraint, context);
-            }
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder,
-            TypeParameterConstraintSyntax syntax, ICompilationContextProvider context)
-        {
-            switch (syntax.Kind())
-            {
-                case SyntaxKind.TypeConstraint:
-                {
-                    var typeContraints = syntax as TypeConstraintSyntax;
-                    string javaTypeName = typeContraints.Type.GetJavaType(context, out var isInterface);
-
-                    builder.Append(isInterface ? "implements" : "extends").Space().Append(javaTypeName);
-                    break;
-                }
-                default:
-                    throw new Exception("Unsupported type constraint");
-            }
-
-            return builder;
-        }
-
         public static CodeBuilder EndOfStatement(this CodeBuilder builder)
         {
             return builder.AppendLine(";");
@@ -98,6 +37,11 @@ namespace CodeTranslator.Java
         public static CodeBuilder QuestionMark(this CodeBuilder builder)
         {
             return builder.Append("?");
+        }
+
+        public static CodeBuilder Comma(this CodeBuilder builder)
+        {
+            return builder.Append(",");
         }
 
         public static CodeBuilder CommaSeparator(this CodeBuilder builder)
