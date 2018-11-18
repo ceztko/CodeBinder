@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text;
 using CodeTranslator.Shared.Java;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics;
 
 namespace CodeTranslator.Java
 {
@@ -47,6 +48,7 @@ namespace CodeTranslator.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, CSharpTypeParameters typeParameters, ICompilationContextProvider context)
         {
+            Debug.Assert(typeParameters.Count != 0);
             using (builder.TypeParameterList(typeParameters.Count > 1))
             {
                 foreach (var parameter in typeParameters)

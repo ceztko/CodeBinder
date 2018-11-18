@@ -161,22 +161,6 @@ namespace CodeTranslator.Shared.CSharp
             return ret;
         }
 
-        public static string GetTypeIdentifier(this TypeSyntax type)
-        {
-            var kind = type.Kind();
-            switch (kind)
-            {
-                case SyntaxKind.PredefinedType:
-                    return (type as PredefinedTypeSyntax).Keyword.Text;
-                case SyntaxKind.IdentifierName:
-                    return (type as IdentifierNameSyntax).Identifier.Text;
-                case SyntaxKind.NullableType:
-                    return (type as NullableTypeSyntax).ElementType.GetTypeIdentifier();
-                default:
-                    return "NULL";
-            }
-        }
-
         public static bool IsNative(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
         {
             if (!method.HasAttribute<DllImportAttribute>(provider))
@@ -372,6 +356,11 @@ namespace CodeTranslator.Shared.CSharp
             }
 
             return false;
+        }
+
+        public static string GetName(this GenericNameSyntax node)
+        {
+            return node.Identifier.Text;
         }
 
         public static string GetName(this IdentifierNameSyntax node)

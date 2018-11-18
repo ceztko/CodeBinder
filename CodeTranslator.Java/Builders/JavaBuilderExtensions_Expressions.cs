@@ -158,26 +158,6 @@ namespace CodeTranslator.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ArrayTypeSyntax syntax, ICompilationContextProvider context)
-        {
-            builder.Append(syntax.ElementType, context).Append("[]");
-            return builder;
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, GenericNameSyntax syntax, ICompilationContextProvider context)
-        {
-            builder.Append("NULL");
-            return builder;
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, IdentifierNameSyntax syntax, ICompilationContextProvider context)
-        {
-            // TODO: identificare properties
-            var symbol = syntax.GetSymbolInfo(context);
-            builder.Append(syntax.Identifier.Text);
-            return builder;
-        }
-
         public static CodeBuilder Append(this CodeBuilder builder, NullableTypeSyntax syntax, ICompilationContextProvider context)
         {
             if (syntax.ElementType.Kind() == SyntaxKind.PredefinedType)
@@ -188,25 +168,6 @@ namespace CodeTranslator.Java
             }
 
             builder.Append(syntax.ElementType, context);
-            return builder;
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, OmittedTypeArgumentSyntax syntax, ICompilationContextProvider context)
-        {
-            builder.Append("NULL");
-            return builder;
-        }
-
-        // Types with keyword: object, string, void, bool, char, byte, int, etc.
-        public static CodeBuilder Append(this CodeBuilder builder, PredefinedTypeSyntax syntax, ICompilationContextProvider context)
-        {
-            builder.Append(syntax.GetJavaType());
-            return builder;
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, RefTypeSyntax syntax, ICompilationContextProvider context)
-        {
-            builder.Append("NULL");
             return builder;
         }
 
@@ -298,19 +259,13 @@ namespace CodeTranslator.Java
                 case SyntaxKind.TypeOfExpression:
                     return builder.Append(expression as TypeOfExpressionSyntax, context);
                 case SyntaxKind.ArrayType:
-                    return builder.Append(expression as ArrayTypeSyntax, context);
                 case SyntaxKind.GenericName:
-                    return builder.Append(expression as GenericNameSyntax, context);
                 case SyntaxKind.IdentifierName:
-                    return builder.Append(expression as IdentifierNameSyntax, context);
                 case SyntaxKind.NullableType:
-                    return builder.Append(expression as NullableTypeSyntax, context);
                 case SyntaxKind.OmittedTypeArgument:
-                    return builder.Append(expression as OmittedTypeArgumentSyntax, context);
                 case SyntaxKind.PredefinedType:
-                    return builder.Append(expression as PredefinedTypeSyntax, context);
                 case SyntaxKind.RefType:
-                    return builder.Append(expression as RefTypeSyntax, context);
+                    return builder.Append(expression as TypeSyntax, context);
                 // Unsupported expressions
                 case SyntaxKind.DeclarationExpression:
                 case SyntaxKind.ThrowExpression:

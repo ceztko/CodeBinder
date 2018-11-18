@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.Diagnostics;
 
 namespace CodeTranslator.Shared.CSharp
 {
@@ -160,6 +161,36 @@ namespace CodeTranslator.Shared.CSharp
         #endregion Supported types
 
         #region Unsupported syntax
+
+        public override void VisitNullableType(NullableTypeSyntax node)
+        {
+            var typeSymbol = node.ElementType.GetTypeSymbol(this);
+            string fullname = typeSymbol.GetFullName();
+            switch(fullname)
+            {
+                // Types that are boxable
+                case "System.Boolean":
+                case "System.Char":
+                case "System.Byte":
+                case "System.SByte":
+                case "System.Int16":
+                case "System.UInt16":
+                case "System.Int32":
+                case "System.UInt32":
+                case "System.Int64":
+                case "System.UInt64":
+                case "System.Single":
+                case "System.Double":
+                case "System.IntPtr":
+                    break;
+                default:
+                    if (!(typeSymbol.TypeKind == TypeKind.Enum || typeSymbol.TypeKind == TypeKind.Struct))
+                        Unsupported(node, "Nullable types supported only on boxable types or structs");
+                    break;
+            }
+
+            DefaultVisit(node);
+        }
 
         public override void VisitLiteralExpression(LiteralExpressionSyntax node)
         {

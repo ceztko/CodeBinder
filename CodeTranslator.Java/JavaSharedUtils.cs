@@ -31,6 +31,13 @@ namespace CodeTranslator.Shared.Java
         String,
     }
 
+    enum JavaTypeFlags
+    {
+        None = 0,
+        NativeMethod,
+        IsByRef
+    }
+
     public static class JavaUtils
     {
         public static string ToJavaKeyword(this JavaInteropType type)

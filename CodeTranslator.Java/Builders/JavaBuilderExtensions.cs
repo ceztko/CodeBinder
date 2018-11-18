@@ -99,7 +99,7 @@ namespace CodeTranslator.Java
             else
             {
                 builder.Append("<");
-                return builder.Using("> ");
+                return builder.Using(">");
             }
         }
     }

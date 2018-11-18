@@ -6,6 +6,7 @@ using CodeTranslator.Shared.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using CodeTranslator.Shared.Java;
 
 namespace CodeTranslator.Java
 {
@@ -143,7 +144,7 @@ namespace CodeTranslator.Java
 
         protected override void WriteTypeParameters()
         {
-            Builder.Append(Context.GetTypeParameters(), this);
+            Builder.Append(Context.GetTypeParameters(), this).Space();
         }
 
         protected override void WriteReturnType()
@@ -203,7 +204,7 @@ namespace CodeTranslator.Java
 
         protected override void WriteReturnType()
         {
-            Builder.Append(_signature.ReturnType.GetJavaTypeName(JavaTypeFlags.NativeMethod)).Space();
+            Builder.Append(_signature.ReturnType.GetJavaType(JavaTypeFlags.NativeMethod)).Space();
         }
 
         protected override void WriteMethodBodyInternal()
@@ -219,7 +220,7 @@ namespace CodeTranslator.Java
 
         private void WriteParameter(ref MethodParameterInfo parameter)
         {
-            Builder.CommaSeparator().Append(parameter.GetJavaTypeName(JavaTypeFlags.NativeMethod)).Space().Append(parameter.Name);
+            Builder.CommaSeparator().Append(parameter.GetJavaType(JavaTypeFlags.NativeMethod)).Space().Append(parameter.Name);
         }
 
         public override string MethodName
