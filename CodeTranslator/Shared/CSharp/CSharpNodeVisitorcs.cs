@@ -162,6 +162,14 @@ namespace CodeTranslator.Shared.CSharp
 
         #region Unsupported syntax
 
+        public override void VisitArgument(ArgumentSyntax node)
+        {
+            if (node.NameColon != null)
+                Unsupported(node, "Argumnet with optional argument specification");
+
+            DefaultVisit(node);
+        }
+
         public override void VisitNullableType(NullableTypeSyntax node)
         {
             var typeSymbol = node.ElementType.GetTypeSymbol(this);

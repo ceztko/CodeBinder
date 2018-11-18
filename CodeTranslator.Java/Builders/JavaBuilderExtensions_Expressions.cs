@@ -30,8 +30,8 @@ namespace CodeTranslator.Java
         {
             if (syntax.Left.Kind() == SyntaxKind.IdentifierName)
             {
-                var symbol = syntax.Left.GetSymbolInfo(context);
-                if (symbol.Symbol.Kind == SymbolKind.Property)
+                var symbol = syntax.Left.GetSymbol(context);
+                if (symbol.Kind == SymbolKind.Property)
                 {
                     var operatorKind = syntax.OperatorToken.Kind();
                     switch (operatorKind)
@@ -106,7 +106,7 @@ namespace CodeTranslator.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            builder.Append("NULL");
+            builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
             return builder;
         }
 
@@ -308,6 +308,25 @@ namespace CodeTranslator.Java
                 default:
                     throw new Exception();
             }
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, ArgumentListSyntax syntax, ICompilationContextProvider context)
+        {
+            using (builder.ParameterList())
+            {
+                bool first = true;
+                foreach  (var arg in syntax.Arguments)
+                {
+                    if (first)
+                        first = false;
+                    else
+                        builder.CommaSeparator();
+
+                    builder.Append(arg.Expression, context);
+                }
+            }
+
+            return builder;
         }
     }
 }

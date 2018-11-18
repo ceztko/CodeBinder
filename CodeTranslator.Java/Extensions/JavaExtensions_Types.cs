@@ -141,8 +141,8 @@ namespace CodeTranslator.Java
         public static string GetJavaType(this TypeSyntax type, ICompilationContextProvider provider, out bool isInterface)
         {
             var builder = new CodeBuilder();
-            var symbol = type.GetTypeSymbol(provider);
-            writeJavaType(builder, symbol.GetFullName(), type, symbol, false, provider, out isInterface);
+            var typeSymbol = type.GetTypeSymbol(provider);
+            writeJavaType(builder, typeSymbol?.GetFullName(), type, typeSymbol, false, provider, out isInterface);
             return builder.ToString();
         }
 
@@ -159,12 +159,30 @@ namespace CodeTranslator.Java
             return getJavaType(symbol.GetFullName(), type, symbol, flags, provider);
         }
 
-
-        public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax type, ICompilationContextProvider provider)
+        public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, ICompilationContextProvider provider)
         {
-            var symbol = type.GetTypeSymbol(provider);
-            bool isInterface;
-            writeJavaType(builder, symbol.GetFullName(), type, symbol, false, provider, out isInterface);
+            var symbol = syntax.GetSymbol(provider);
+            switch (symbol.Kind)
+            {
+                case SymbolKind.TypeParameter:
+                case SymbolKind.NamedType:
+                case SymbolKind.ArrayType:
+                {
+                    bool isInterface;
+                    var typeSymbol = syntax.GetTypeSymbol(provider);
+                    writeJavaType(builder, typeSymbol?.GetFullName(), syntax, typeSymbol, false, provider, out isInterface);
+                    return builder;
+                }
+                case SymbolKind.Field:
+                case SymbolKind.Property:
+                case SymbolKind.Parameter:
+                case SymbolKind.Method:
+                {
+                    writeJavaIdentifier(builder, syntax, symbol, provider);
+                    break;
+                }
+            }
+
             return builder;
         }
 
@@ -185,6 +203,22 @@ namespace CodeTranslator.Java
             }
 
             return builder;
+        }
+
+        static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax type, ISymbol symbol, ICompilationContextProvider provider)
+        {
+            var kind = type.Kind();
+            switch (kind)
+            {
+                case SyntaxKind.IdentifierName:
+                {
+                    var identifierName = type as IdentifierNameSyntax;
+                    builder.Append(identifierName.GetName());
+                    break;
+                }
+                default:
+                    throw new Exception();
+            }
         }
 
         static void writeJavaType(CodeBuilder builder, string typeName, TypeSyntax type, ITypeSymbol symbol,
@@ -226,7 +260,6 @@ namespace CodeTranslator.Java
                     return;
                 }
 
-                Debug.Assert(symbol != null);
                 Debug.Assert(provider != null);
 
                 var kind = type.Kind();
@@ -294,7 +327,6 @@ namespace CodeTranslator.Java
                     return;
                 }
 
-                Debug.Assert(symbol != null);
                 Debug.Assert(provider != null);
 
                 var kind = type.Kind();
@@ -320,6 +352,7 @@ namespace CodeTranslator.Java
                     }
                     case SyntaxKind.NullableType:
                     {
+                        Debug.Assert(symbol != null);
                         var nullableType = type as NullableTypeSyntax;
                         switch (symbol.TypeKind)
                         {
@@ -338,7 +371,7 @@ namespace CodeTranslator.Java
                         throw new Exception();
                 }
 
-                isInterface = symbol.TypeKind == TypeKind.Interface;
+                isInterface = symbol?.TypeKind == TypeKind.Interface;
             }
         }
 
@@ -364,6 +397,13 @@ namespace CodeTranslator.Java
 
         public static bool IsKnownJavaType(string typeName, bool isByRef, out string knownJavaType, out bool isInterface)
         {
+            if (string.IsNullOrEmpty(typeName))
+            {
+                knownJavaType = null;
+                isInterface = false;
+                return false;
+            }
+
             if (IsKnowSimpleJavaType(typeName, isByRef, out knownJavaType))
             {
                 isInterface = false;
