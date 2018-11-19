@@ -41,7 +41,7 @@ namespace CodeTranslator.Java
         {
             get
             {
-                yield return "Java.util.*";
+                yield return "java.util.*";
                 yield return "codetranslator.utils.*";
             }
         }

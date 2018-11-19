@@ -61,7 +61,7 @@ namespace CodeTranslator.Shared.Java
                 case JavaInteropType.Double:
                     return "double";
                 case JavaInteropType.String:
-                    return "string";
+                    return "String";
                 default:
                     throw new Exception();
             }

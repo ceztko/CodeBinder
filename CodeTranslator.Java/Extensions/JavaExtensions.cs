@@ -18,6 +18,73 @@ namespace CodeTranslator.Java
     {
         delegate bool ModifierGetter(SyntaxKind modifier, out string javaModifier);
 
+        static Dictionary<string, Dictionary<string, string>> _replacements;
+
+        static JavaExtensions()
+        {
+            _replacements = new Dictionary<string, Dictionary<string, string>>()
+            {
+                // java.lang.Object
+                { "System.Object", new Dictionary<string, string>() {
+                    { "GetHashCode", "hashCode" },
+                    { "Equals", "hashCode" },
+                    { "Clone", "clone" },
+                    { "ToString", "toString" },
+                } },
+                // java.lang.AutoCloseable
+                { "System.Collections.Generic.List<T>", new Dictionary<string, string>() {
+                    { "Add", "add" },
+                    { "Clear", "clear" },
+                } },
+                // java.lang.AutoCloseable
+                { "System.IDisposable", new Dictionary<string, string>() { { "Dispose", "close" } } },
+                // java.lang.Iterable<T>
+                { "System.Collections.Generic.IEnumerable<out T>", new Dictionary<string, string>() { { "GetEnumerator", "iterator" } } },
+            };
+        }
+
+        public static bool HasJavaMethodReplacement(this IMethodSymbol methodSymbol, out string javaReplacement)
+        {
+            var containingType = methodSymbol.ContainingType;
+            foreach (var iface in containingType.AllInterfaces)
+            {
+                string ifaceName = iface.GetFullName();
+                if (_replacements.TryGetValue(ifaceName, out var replacements))
+                {
+                    foreach (var member in iface.GetMembers())
+                    {
+                        if (member.Kind != SymbolKind.Method)
+                            continue;
+
+                        if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
+                        {
+                            if (containingType.FindImplementationForInterfaceMember(member) == methodSymbol)
+                            {
+                                javaReplacement = replacement;
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (methodSymbol.OverriddenMethod != null)
+            {
+                var overridenMethodContaningType = methodSymbol.OverriddenMethod.ContainingType.GetFullName();
+                if (_replacements.TryGetValue(overridenMethodContaningType, out var replacements))
+                {
+                    if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
+                    {
+                        javaReplacement = replacement;
+                        return true;
+                    }
+                }
+            }
+
+            javaReplacement = null;
+            return false;
+        }
+
         public static string GetJavaOperator(this AssignmentExpressionSyntax syntax)
         {
             var op = syntax.Kind();

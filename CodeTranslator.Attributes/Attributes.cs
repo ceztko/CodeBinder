@@ -67,6 +67,18 @@ namespace CodeTranslator.Attributes
     }
 
     [Conditional("DEBUG")]
+    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
+    public sealed class RequiresAttribute : Attribute
+    {
+        private string[] _policies;
+
+        public RequiresAttribute(params string[] policies)
+        {
+            _policies = policies;
+        }
+    }
+
+    [Conditional("DEBUG")]
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public sealed class SignatureAttribute : Attribute
     {

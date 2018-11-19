@@ -15,23 +15,34 @@ namespace CodeTranslator.Java
     {
         SyntaxKind[] _modifiers;
         bool _isAutoProperty;
+        bool _isParentInterface;
 
         protected PropertyWriter(TProperty syntax, ICompilationContextProvider context)
             : base(syntax, context)
         {
             _modifiers = Context.GetCSharpModifiers().ToArray();
-            _isAutoProperty = true;
-            if (Context.AccessorList != null)
+
+            if (_modifiers.Contains(SyntaxKind.AbstractKeyword))
             {
-                foreach (var accessor in Context.AccessorList.Accessors)
+                _isAutoProperty = false;
+            }
+            else
+            {
+                _isAutoProperty = true;
+                if (Context.AccessorList != null)
                 {
-                    if (accessor.Body != null)
+                    foreach (var accessor in Context.AccessorList.Accessors)
                     {
-                        _isAutoProperty = false;
-                        break;
+                        if (accessor.Body != null)
+                        {
+                            _isAutoProperty = false;
+                            break;
+                        }
                     }
                 }
             }
+
+            _isParentInterface = Context.Parent.Kind() == SyntaxKind.InterfaceDeclaration;
         }
 
         protected override void Write()
@@ -42,7 +53,7 @@ namespace CodeTranslator.Java
 
         private void WriteUnderlyingField()
         {
-            if (!_isAutoProperty || IsParentInterface)
+            if (!_isAutoProperty || _isParentInterface)
                 return;
 
             Builder.Append("private").Space();
@@ -73,11 +84,14 @@ namespace CodeTranslator.Java
 
         private void WriteSetter(AccessorDeclarationSyntax accessor)
         {
-            var modifiers = getSetterModifiers(accessor);
-            Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(modifiers)).Space();
+            if (!_isParentInterface)
+            {
+                var modifiers = getSetterModifiers(accessor);
+                Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(modifiers)).Space();
+            }
             Builder.Append(JavaType).Space();
             Builder.Append(SetterName).Append("(").Append(JavaType).Space().Append("value").Append(")");
-            if (IsParentInterface)
+            if (_isParentInterface)
             {
                 Builder.EndOfStatement();
             }
@@ -92,10 +106,17 @@ namespace CodeTranslator.Java
                 }
                 else
                 {
-                    using (Builder.AppendLine().Block())
+                    if (accessor.Body == null)
                     {
-                        if (!CSToJavaConversion.SkipBody)
-                            Builder.Space().Append(accessor.Body, this, true);
+                        Builder.EndOfStatement();
+                    }
+                    else
+                    {
+                        using (Builder.AppendLine().Block())
+                        {
+                            if (!CSToJavaConversion.SkipBody)
+                                Builder.Space().Append(accessor.Body, this, true);
+                        }
                     }
                 }
             }
@@ -103,13 +124,14 @@ namespace CodeTranslator.Java
 
         private void WriteGetter(AccessorDeclarationSyntax accessor)
         {
-            Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(_modifiers)).Space();
+            if (!_isParentInterface)
+                Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(_modifiers)).Space();
+
             Builder.Append(JavaType).Space();
             Builder.Append(GetterName).Append("()");
-            if (IsParentInterface)
+            if (_isParentInterface)
             {
                 Builder.EndOfStatement();
-
             }
             else
             {
@@ -122,12 +144,19 @@ namespace CodeTranslator.Java
                 }
                 else
                 {
-                    using (Builder.AppendLine().Block())
+                    if (accessor.Body == null)
                     {
-                        if (CSToJavaConversion.SkipBody)
-                            Builder.Append(Context.Type.GetJavaDefaultReturnStatement(this)).EndOfStatement();
-                        else
-                            Builder.Append(accessor.Body, this, true);
+                        Builder.EndOfStatement();
+                    }
+                    else
+                    {
+                        using (Builder.AppendLine().Block())
+                        {
+                            if (CSToJavaConversion.SkipBody)
+                                Builder.Append(Context.Type.GetJavaDefaultReturnStatement(this)).EndOfStatement();
+                            else
+                                Builder.Append(accessor.Body, this, true);
+                        }
                     }
                 }
             }
@@ -139,11 +168,6 @@ namespace CodeTranslator.Java
             ret.AddRange(_modifiers.Skip(1));
             ret.AddRange(accessor.GetCSharpModifiers());
             return ret;
-        }
-
-        public bool IsParentInterface
-        {
-            get { return Context.Parent.Kind() == SyntaxKind.InterfaceDeclaration; }
         }
 
         public string UnderlyingFieldName

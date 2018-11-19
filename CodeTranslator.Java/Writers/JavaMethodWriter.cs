@@ -132,26 +132,6 @@ namespace CodeTranslator.Java
 
     class MethodWriter : MethodWriter<MethodDeclarationSyntax>
     {
-        static Dictionary<string, Dictionary<string, string>> _replacements;
-
-        static MethodWriter()
-        {
-            _replacements = new Dictionary<string, Dictionary<string, string>>()
-            {
-                // java.lang.Object
-                { "System.Object", new Dictionary<string, string>() {
-                    { "GetHashCode", "hashCode" },
-                    { "Equals", "hashCode" },
-                    { "Clone", "clone" },
-                    { "ToString", "toString" },
-                } },
-                // java.lang.AutoCloseable
-                { "System.IDisposable", new Dictionary<string, string>() { { "Dispose", "close" } } },
-                // java.lang.Iterable<T>
-                { "System.Collections.Generic.IEnumerable<out T>", new Dictionary<string, string>() { { "GetEnumerator", "iterator" } } },
-            };
-        }
-
         public MethodWriter(MethodDeclarationSyntax method, ICompilationContextProvider context)
             : base(method, context) { }
 
@@ -189,37 +169,10 @@ namespace CodeTranslator.Java
         {
             get
             {
-                // Try first interface replacements
+                // Try first look for replacements
                 var methodSymbol = (IMethodSymbol)Context.GetDeclaredSymbol(this);
-                var containingType = methodSymbol.ContainingType;
-                foreach (var iface in containingType.AllInterfaces)
-                {
-                    string ifaceName = iface.GetFullName();
-                    if (_replacements.TryGetValue(ifaceName, out var replacements))
-                    {
-                        foreach (var member in iface.GetMembers())
-                        {
-                            if (member.Kind != SymbolKind.Method)
-                                continue;
-
-                            if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
-                            {
-                                if (containingType.FindImplementationForInterfaceMember(member) == methodSymbol)
-                                    return replacement;
-                            }
-                        }
-                    }
-                }
-
-                if (methodSymbol.OverriddenMethod != null)
-                {
-                    var overridenMethodContaningType = methodSymbol.OverriddenMethod.ContainingType.GetFullName();
-                    if (_replacements.TryGetValue(overridenMethodContaningType, out var replacements))
-                    {
-                        if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
-                            return replacement;
-                    }
-                }
+                if (methodSymbol.HasJavaMethodReplacement(out var replacement))
+                    return replacement;
 
                 var methodName = Context.GetName();
                 if (IsNative)

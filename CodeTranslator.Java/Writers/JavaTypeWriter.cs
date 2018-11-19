@@ -28,8 +28,8 @@ namespace CodeTranslator.Java
                 var parentKind = Context.Parent.Kind();
                 switch (parentKind)
                 {
-                    case SyntaxKind.NamespaceDeclaration:
-                    case SyntaxKind.CompilationUnit:
+                    case SyntaxKind.ClassDeclaration:
+                    case SyntaxKind.StructDeclaration:
                         Builder.Append("static").Space();
                         break;
                 }
@@ -62,21 +62,19 @@ namespace CodeTranslator.Java
         private void WriteBaseTypes(BaseListSyntax baseList)
         {
             bool first = true;
+            bool isInterface = false;
             foreach (var type in baseList.Types)
             {
                 if (first)
                     first = false;
-                else
+                else if (isInterface)
                     Builder.CommaSeparator();
+                else
+                    Builder.Space();
 
-                WriteBaseType(type);
+                string javaTypeName = type.Type.GetJavaType(this, out isInterface);
+                Builder.Append(isInterface ? "implements" : "extends").Space().Append(javaTypeName);
             }
-        }
-
-        private void WriteBaseType(BaseTypeSyntax type)
-        {
-            string javaTypeName = type.Type.GetJavaType(this, out var isInterface);
-            Builder.Append(isInterface ? "implements" : "extends").Space().Append(javaTypeName);
         }
 
         protected void WriteTypeMembers(SyntaxList<MemberDeclarationSyntax> members)
@@ -102,11 +100,6 @@ namespace CodeTranslator.Java
         public virtual int Arity
         {
             get { return 0; }
-        }
-
-        public virtual bool IsInterface
-        {
-            get { return false; }
         }
 
         public virtual string TypeName

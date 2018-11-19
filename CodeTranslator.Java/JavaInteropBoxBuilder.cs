@@ -24,9 +24,9 @@ namespace CodeTranslator.Java
 
         public override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space().Append("codentranslator.util").EndOfStatement();
+            builder.Append("package").Space().Append("codetranslator.utils").EndOfStatement();
             builder.AppendLine();
-            builder.Append("class").Space().Append(BoxTypeName).AppendLine();
+            builder.Append("public").Space().Append("class").Space().Append(BoxTypeName).AppendLine();
             using (builder.Block())
             {
                 builder.Append("public").Space().Append(JavaKeyword).Space().Append("value").EndOfStatement();
