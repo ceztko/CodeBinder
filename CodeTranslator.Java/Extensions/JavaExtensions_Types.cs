@@ -142,7 +142,7 @@ namespace CodeTranslator.Java
         {
             var builder = new CodeBuilder();
             var typeSymbol = type.GetTypeSymbol(provider);
-            writeJavaType(builder, typeSymbol?.GetFullName(), type, typeSymbol, false, provider, out isInterface);
+            writeJavaType(builder, typeSymbol?.GetFullName(), type, typeSymbol, null, false, provider, out isInterface);
             return builder.ToString();
         }
 
@@ -168,9 +168,7 @@ namespace CodeTranslator.Java
                 case SymbolKind.NamedType:
                 case SymbolKind.ArrayType:
                 {
-                    bool isInterface;
-                    var typeSymbol = syntax.GetTypeSymbol(provider);
-                    writeJavaType(builder, typeSymbol?.GetFullName(), syntax, typeSymbol, false, provider, out isInterface);
+                    builder.append(syntax, null, provider);
                     return builder;
                 }
                 case SymbolKind.Local:
@@ -189,23 +187,29 @@ namespace CodeTranslator.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, TypeArgumentListSyntax syntax, ICompilationContextProvider provider)
+        static string getJavaType(string typeName, TypeSyntax syntax, ITypeSymbol symbol, JavaTypeFlags flags, ICompilationContextProvider provider)
         {
-            using (builder.TypeParameterList())
+            bool isByRef = flags.HasFlag(JavaTypeFlags.IsByRef);
+            if (symbol != null && flags.HasFlag(JavaTypeFlags.NativeMethod))
             {
-                bool first = true;
-                foreach (var type in syntax.Arguments)
+                switch (symbol.TypeKind)
                 {
-                    if (first)
-                        first = false;
-                    else
-                        builder.CommaSeparator();
-
-                    builder.Append(type, provider);
+                    case TypeKind.Struct:
+                        if (isByRef)
+                            return "long";
+                        break;
+                    case TypeKind.Enum:
+                        if (isByRef)
+                            return "IntegerBox"; // TODO: Box per gli enum?
+                        else
+                            return "int";
                 }
             }
 
-            return builder;
+            var builder = new CodeBuilder();
+            bool isInterface;
+            writeJavaType(builder, typeName, syntax, symbol, null, isByRef, provider, out isInterface);
+            return builder.ToString();
         }
 
         static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, ICompilationContextProvider provider)
@@ -224,8 +228,36 @@ namespace CodeTranslator.Java
             }
         }
 
+        static CodeBuilder append(this CodeBuilder builder, TypeArgumentListSyntax syntax, TypeSyntax parent, ICompilationContextProvider provider)
+        {
+            using (builder.TypeParameterList())
+            {
+                bool first = true;
+                foreach (var type in syntax.Arguments)
+                {
+                    if (first)
+                        first = false;
+                    else
+                        builder.CommaSeparator();
+
+                    append(builder, type, parent, provider);
+                }
+            }
+
+            return builder;
+        }
+
+        static CodeBuilder append(this CodeBuilder builder, TypeSyntax type, TypeSyntax parent,
+            ICompilationContextProvider provider)
+        {
+            bool isInterface;
+            var typeSymbol = type.GetTypeSymbol(provider);
+            writeJavaType(builder, typeSymbol?.GetFullName(), type, typeSymbol, parent, false, provider, out isInterface);
+            return builder;
+        }
+
         static void writeJavaType(CodeBuilder builder, string typeName, TypeSyntax type, ITypeSymbol symbol,
-            bool isByRef, ICompilationContextProvider provider, out bool isInterface)
+            TypeSyntax parent, bool isByRef, ICompilationContextProvider provider, out bool isInterface)
         {
             if (symbol != null)
             {
@@ -255,7 +287,7 @@ namespace CodeTranslator.Java
             }
 
             string javaTypeName;
-            if (IsKnownJavaType(typeName, isByRef, out javaTypeName, out isInterface))
+            if (IsKnownJavaType(typeName, isByRef, parent, out javaTypeName, out isInterface))
             {
                 if (type == null)
                 {
@@ -271,7 +303,7 @@ namespace CodeTranslator.Java
                     case SyntaxKind.GenericName:
                     {
                         var arrayType = type as GenericNameSyntax;
-                        builder.Append(javaTypeName).Append(arrayType.TypeArgumentList, provider);
+                        builder.Append(javaTypeName).append(arrayType.TypeArgumentList, type, provider);
                         break;
                     }
                     case SyntaxKind.ArrayType:
@@ -282,36 +314,11 @@ namespace CodeTranslator.Java
                     }
                     case SyntaxKind.NullableType:
                     {
-                        switch (javaTypeName)
-                        {
-                            // Boxable types
-                            case "boolean":
-                                builder.Append("Boolean");
-                                break;
-                            case "char":
-                                builder.Append("Character");
-                                break;
-                            case "byte":
-                                builder.Append("Byte");
-                                break;
-                            case "short":
-                                builder.Append("Short");
-                                break;
-                            case "int":
-                                builder.Append("Integer");
-                                break;
-                            case "long":
-                                builder.Append("Long");
-                                break;
-                            case "float":
-                                builder.Append("Float");
-                                break;
-                            case "double":
-                                builder.Append("Double");
-                                break;
-                            default:
-                                throw new Exception();
-                        }
+                        string boxTypeName;
+                        if (getJavaBoxType(javaTypeName, out boxTypeName))
+                            builder.Append("boxTypeName");
+                        else
+                            throw new Exception();
                         break;
                     }
                     case SyntaxKind.PredefinedType:
@@ -344,13 +351,13 @@ namespace CodeTranslator.Java
                     case SyntaxKind.ArrayType:
                     {
                         var arrayType = type as ArrayTypeSyntax;
-                        builder.Append(arrayType.ElementType, provider).Append("[]");
+                        builder.append(arrayType.ElementType, type, provider).Append("[]");
                         break;
                     }
                     case SyntaxKind.GenericName:
                     {
                         var genericType = type as GenericNameSyntax;
-                        builder.Append(genericType.GetName()).Append(genericType.TypeArgumentList, provider);
+                        builder.Append(genericType.GetName()).append(genericType.TypeArgumentList, type, provider);
                         break;
                     }
                     case SyntaxKind.NullableType:
@@ -378,32 +385,8 @@ namespace CodeTranslator.Java
             }
         }
 
-        static string getJavaType(string typeName, TypeSyntax syntax, ITypeSymbol symbol, JavaTypeFlags flags, ICompilationContextProvider provider)
-        {
-            bool isByRef = flags.HasFlag(JavaTypeFlags.IsByRef);
-            if (symbol != null && flags.HasFlag(JavaTypeFlags.NativeMethod))
-            {
-                switch (symbol.TypeKind)
-                {
-                    case TypeKind.Struct:
-                        if (isByRef)
-                            return "long";
-                        break;
-                    case TypeKind.Enum:
-                        if (isByRef)
-                            return "IntegerBox"; // TODO: Box per gli enum?
-                        else
-                            return "int";
-                }
-            }
-
-            var builder = new CodeBuilder();
-            bool isInterface;
-            writeJavaType(builder, typeName, syntax, symbol, isByRef, provider, out isInterface);
-            return builder.ToString();
-        }
-
-        public static bool IsKnownJavaType(string typeName, bool isByRef, out string knownJavaType, out bool isInterface)
+        public static bool IsKnownJavaType(string typeName, bool isByRef, TypeSyntax parent,
+            out string knownJavaType, out bool isInterface)
         {
             if (string.IsNullOrEmpty(typeName))
             {
@@ -412,7 +395,7 @@ namespace CodeTranslator.Java
                 return false;
             }
 
-            if (IsKnowSimpleJavaType(typeName, isByRef, out knownJavaType))
+            if (IsKnowSimpleJavaType(typeName, isByRef, parent, out knownJavaType))
             {
                 isInterface = false;
                 return true;
@@ -438,6 +421,12 @@ namespace CodeTranslator.Java
                     isInterface = false;
                     return true;
                 }
+                case "System.Collections.Generic.KeyValuePair<TKey, TValue>":
+                {
+                    knownJavaType = "AbstractMap.SimpleEntry";
+                    isInterface = false;
+                    return true;
+                }
                 default:
                 {
                     knownJavaType = null;
@@ -447,7 +436,7 @@ namespace CodeTranslator.Java
             }
         }
 
-        public static bool IsKnowSimpleJavaType(string typeName, bool isByRef, out string knownJavaType)
+        public static bool IsKnowSimpleJavaType(string typeName, bool isByRef, TypeSyntax parent, out string knownJavaType)
         {
             if (isByRef)
             {
@@ -500,6 +489,63 @@ namespace CodeTranslator.Java
                         return false;
                 }
             }
+            else if (parent?.Kind() == SyntaxKind.GenericName)
+            {
+                switch (typeName)
+                {
+                    case "System.Object":
+                        knownJavaType = "Object";
+                        return true;
+                    case "System.String":
+                        knownJavaType = "String";
+                        return true;
+                    // Boxed types
+                    case "System.IntPtr":
+                        knownJavaType = "Long";
+                        return true;
+                    case "System.Boolean":
+                        knownJavaType = "Boolean";
+                        return true;
+                    case "System.Char":
+                        knownJavaType = "Character";
+                        return true;
+                    case "System.Byte":
+                        knownJavaType = "Byte";
+                        return true;
+                    case "System.SByte":
+                        knownJavaType = "Byte";
+                        return true;
+                    case "System.Int16":
+                        knownJavaType = "Short";
+                        return true;
+                    case "System.UInt16":
+                        knownJavaType = "Short";
+                        return true;
+                    case "System.Int32":
+                        knownJavaType = "Integer";
+                        return true;
+                    case "System.UInt32":
+                        knownJavaType = "Integer";
+                        return true;
+                    case "System.Int64":
+                        knownJavaType = "Long";
+                        return true;
+                    case "System.UInt64":
+                        knownJavaType = "Long";
+                        return true;
+                    case "System.Single":
+                        knownJavaType = "Float";
+                        return true;
+                    case "System.Double":
+                        knownJavaType = "Double";
+                        return true;
+                    case "System.Void":
+                        throw new Exception();
+                    default:
+                        knownJavaType = null;
+                        return false;
+                }
+            }
             else
             {
                 switch (typeName)
@@ -510,6 +556,9 @@ namespace CodeTranslator.Java
                     case "System.Object":
                         knownJavaType = "Object";
                         return true;
+                    case "System.String":
+                        knownJavaType = "String";
+                        return true;
                     case "System.IntPtr":
                         knownJavaType = "long";
                         return true;
@@ -518,9 +567,6 @@ namespace CodeTranslator.Java
                         return true;
                     case "System.Char":
                         knownJavaType = "char";
-                        return true;
-                    case "System.String":
-                        knownJavaType = "String";
                         return true;
                     case "System.Byte":
                         knownJavaType = "byte";
@@ -556,6 +602,40 @@ namespace CodeTranslator.Java
                         knownJavaType = null;
                         return false;
                 }
+            }
+        }
+
+        static bool getJavaBoxType(string javaTypeName, out string boxTypeName)
+        {
+            switch (javaTypeName)
+            {
+                case "boolean":
+                    boxTypeName = "Boolean";
+                    return true;
+                case "char":
+                    boxTypeName = "Character";
+                    return true;
+                case "byte":
+                    boxTypeName = "Byte";
+                    return true;
+                case "short":
+                    boxTypeName = "Short";
+                    return true;
+                case "int":
+                    boxTypeName = "Integer";
+                    return true;
+                case "long":
+                    boxTypeName = "Long";
+                    return true;
+                case "float":
+                    boxTypeName = "Float";
+                    return true;
+                case "double":
+                    boxTypeName = "Double";
+                    return true;
+                default:
+                    boxTypeName = null;
+                    return false;
             }
         }
     }
