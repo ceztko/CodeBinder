@@ -36,9 +36,9 @@ namespace CodeTranslator
             get { return _builder.BasePath; }
         }
 
-        public void Write(Stream stream)
+        public void Write(Stream stream, Encoding encoding)
         {
-            var writer = new StreamWriter(stream, new UTF8Encoding(true));
+            var writer = new StreamWriter(stream, encoding);
             write(writer);
         }
 

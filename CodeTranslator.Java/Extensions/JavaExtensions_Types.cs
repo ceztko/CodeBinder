@@ -381,16 +381,21 @@ namespace CodeTranslator.Java
         static string getJavaType(string typeName, TypeSyntax syntax, ITypeSymbol symbol, JavaTypeFlags flags, ICompilationContextProvider provider)
         {
             bool isByRef = flags.HasFlag(JavaTypeFlags.IsByRef);
-            if (symbol?.TypeKind == TypeKind.Enum)
+            if (symbol != null && flags.HasFlag(JavaTypeFlags.NativeMethod))
             {
-                if (isByRef)
-                    return "IntegerBox"; // TODO: Box per gli enum?
-                else
-                    return "int";
+                switch (symbol.TypeKind)
+                {
+                    case TypeKind.Struct:
+                        if (isByRef)
+                            return "long";
+                        break;
+                    case TypeKind.Enum:
+                        if (isByRef)
+                            return "IntegerBox"; // TODO: Box per gli enum?
+                        else
+                            return "int";
+                }
             }
-
-            if (symbol?.TypeKind == TypeKind.Struct && isByRef && flags.HasFlag( JavaTypeFlags.NativeMethod))
-                return "long";
 
             var builder = new CodeBuilder();
             bool isInterface;

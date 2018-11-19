@@ -39,6 +39,11 @@ namespace CodeTranslator.Java
             return new JavaEnumConversion(this);
         }
 
+        public override bool UseUTF8Bom
+        {
+            get { return false; }
+        }
+
         public override IEnumerable<ConversionBuilder> DefaultConversions
         {
             get

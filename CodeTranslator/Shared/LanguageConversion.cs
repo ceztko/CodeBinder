@@ -20,6 +20,11 @@ namespace CodeTranslator.Shared
             get { yield break; }
         }
 
+        public virtual bool UseUTF8Bom
+        {
+            get { return true; }
+        }
+
         internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
         {
             get

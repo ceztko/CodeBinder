@@ -18,6 +18,8 @@ namespace CodeTranslator
 
     public abstract class Converter
     {
+        internal Converter() { }
+
         public LanguageConversion Conversion
         {
             get { return GetConversion(); }
@@ -38,13 +40,13 @@ namespace CodeTranslator
                 var filepath = Path.Combine(basepath, conversion.TargetFileName);
                 if (args.EagerStringConversion)
                 {
-                    File.WriteAllText(filepath, conversion.ToFullString(), new UTF8Encoding(true));
+                    File.WriteAllText(filepath, conversion.ToFullString(), new UTF8Encoding(Conversion.UseUTF8Bom));
                 }
                 else
                 {
                     using (var filestream = new FileStream(filepath, FileMode.OpenOrCreate))
                     {
-                        conversion.Write(filestream);
+                        conversion.Write(filestream, new UTF8Encoding(Conversion.UseUTF8Bom));
                     }
                 }
             }
