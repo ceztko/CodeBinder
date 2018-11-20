@@ -13,5 +13,18 @@
   <ItemGroup>
     <ProjectReference Include="..\CodeTranslator\CodeTranslator.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Compile Update="JNI\Resources\JNIResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>JNIResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="JNI\Resources\JNIResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>JNIResources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>CodeTranslator.JNI.Resources</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>

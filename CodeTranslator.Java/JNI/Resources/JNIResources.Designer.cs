@@ -39,7 +39,7 @@ namespace CodeTranslator.JNI.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CodeTranslator.JNI.Resources.JNIResources", typeof(JNIResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CodeTranslator.Java.JNI.Resources.JNIResources", typeof(JNIResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,22 +63,22 @@ namespace CodeTranslator.JNI.Resources {
         /// <summary>
         ///   Looks up a localized string similar to #include &quot;JNIBoxes.h&quot;
         ///
-        ///JB2NImpl&lt;jBooleanBox, jboolean&gt; JB2N(JNIEnv * env, jBooleanBox box, bool commit)
+        ///BJ2NImpl&lt;jBooleanBox, jboolean&gt; BJ2N(JNIEnv * env, jBooleanBox box, bool commit)
         ///{
-        ///    return JB2NImpl&lt;jBooleanBox, jboolean&gt;(env, box, commit);
+        ///    return BJ2NImpl&lt;jBooleanBox, jboolean&gt;(env, box, commit);
         ///}
         ///
-        ///JB2NImpl&lt;jCharacterBox, jchar&gt; JB2N(JNIEnv * env, jCharacterBox box, bool commit)
+        ///BJ2NImpl&lt;jCharacterBox, jchar&gt; BJ2N(JNIEnv * env, jCharacterBox box, bool commit)
         ///{
-        ///    return JB2NImpl&lt;jCharacterBox, jchar&gt;(env, box, commit);
+        ///    return BJ2NImpl&lt;jCharacterBox, jchar&gt;(env, box, commit);
         ///}
         ///
-        ///JB2NImpl&lt;jByteBox, jbyte&gt; JB2N(JNIEnv * env, jByteBox box, bool commit)
+        ///BJ2NImpl&lt;jByteBox, jbyte&gt; BJ2N(JNIEnv * env, jByteBox box, bool commit)
         ///{
-        ///    return JB2NImpl&lt;jByteBox, jbyte&gt;(env, box, commit);
+        ///    return BJ2NImpl&lt;jByteBox, jbyte&gt;(env, box, commit);
         ///}
         ///
-        ///JB2NImpl&lt;jShortBox, jshort&gt; JB2N(JNIEnv * e [rest of string was truncated]&quot;;.
+        ///BJ2NImpl&lt;jShortBox, jshort&gt; BJ2N(JNIEnv * e [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxes_cpp {
             get {
@@ -91,12 +91,12 @@ namespace CodeTranslator.JNI.Resources {
         ///
         ///#include &quot;JNIBoxesTemplate.h&quot;
         ///
-        ///JB2NImpl&lt;jBooleanBox, jboolean&gt; JB2N(JNIEnv *env, jBooleanBox box, bool commit = false);
-        ///JB2NImpl&lt;jCharacterBox, jchar&gt; JB2N(JNIEnv *env, jCharacterBox box, bool commit = false);
-        ///JB2NImpl&lt;jByteBox, jbyte&gt; JB2N(JNIEnv *env, jByteBox box, bool commit = false);
-        ///JB2NImpl&lt;jShortBox, jshort&gt; JB2N(JNIEnv *env, jShortBox box, bool commit = false);
-        ///JB2NImpl&lt;jIntegerBox, jint&gt; JB2N(JNIEnv *env, jIntegerBox box, bool commit = false);
-        ///JB2NImpl&lt;jLongBox, jlong&gt; JB2N( [rest of string was truncated]&quot;;.
+        ///BJ2NImpl&lt;jBooleanBox, jboolean&gt; BJ2N(JNIEnv *env, jBooleanBox box, bool commit = true);
+        ///BJ2NImpl&lt;jCharacterBox, jchar&gt; BJ2N(JNIEnv *env, jCharacterBox box, bool commit = true);
+        ///BJ2NImpl&lt;jByteBox, jbyte&gt; BJ2N(JNIEnv *env, jByteBox box, bool commit = true);
+        ///BJ2NImpl&lt;jShortBox, jshort&gt; BJ2N(JNIEnv *env, jShortBox box, bool commit = true);
+        ///BJ2NImpl&lt;jIntegerBox, jint&gt; BJ2N(JNIEnv *env, jIntegerBox box, bool commit = true);
+        ///BJ2NImpl&lt;jLongBox, jlong&gt; BJ2N(JNIEn [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxes_h {
             get {
@@ -112,25 +112,23 @@ namespace CodeTranslator.JNI.Resources {
         ///
         ///// Wraps custom java box type
         ///template &lt;typename TJBox, typename T&gt;
-        ///class JB2NImpl
+        ///class BJ2NImpl
         ///{
         ///public:
-        ///    JB2NImpl(JNIEnv *env, TJBox box, bool commit);
-        ///    ~JB2NImpl();
+        ///    BJ2NImpl(JNIEnv *env, TJBox box, bool commit);
+        ///    ~BJ2NImpl();
         ///public:
-        ///    inline operator T *() const { return &amp;Value; }
+        ///    inline T * ptr() { return &amp;Value; }
+        ///    inline T &amp; ref() { return Value; }
+        ///    inline operator T *() { return &amp;Value; }
+        ///    inline operator T &amp;() { return Value; }
         ///public:
         ///    T Value;
         ///private:
         ///    JNIEnv *m_env;
         ///    TJBox m_box;
         ///    bool m_commit;
-        ///};
-        ///
-        ///template&lt;typename TJBox, typename T&gt;
-        ///JB2NImpl&lt;TJBox, T&gt;::JB2NImpl(JNIEnv *env, TJBox box, bool commit)
-        ///{
-        ///    m_en [rest of string was truncated]&quot;;.
+        ///}; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxesTemplate_h {
             get {
