@@ -15,6 +15,34 @@ namespace CodeTranslator.Shared.CSharp
 {
     public static class CSharpMethodExtensions
     {
+        // Note: Declations -> GetDeclaredSymbol()
+        public static string GetFullName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
+        {
+            var symbol = node.GetDeclaredSymbol(provider);
+            return symbol.GetFullName();
+        }
+
+        // Note: Declations -> GetDeclaredSymbol()
+        public static string GetQualifiedName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
+        {
+            var symbol = node.GetDeclaredSymbol(provider);
+            return symbol.GetQualifiedName();
+        }
+
+        // Note: Types -> GetTypeSymbol()
+        public static string GetFullName(this TypeSyntax node, ICompilationContextProvider provider)
+        {
+            var symbol = node.GetTypeSymbol(provider);
+            return symbol.GetFullName();
+        }
+
+        // Note: Types -> GetTypeSymbol()
+        public static string GetQualifiedName(this TypeSyntax node, ICompilationContextProvider provider)
+        {
+            var symbol = node.GetTypeSymbol(provider);
+            return symbol.GetQualifiedName();
+        }
+
         public static CSharpTypeParameters GetTypeParameters(this MethodDeclarationSyntax syntax, ICompilationContextProvider provider)
         {
             var symbol = syntax.GetDeclaredSymbol<IMethodSymbol>(provider);

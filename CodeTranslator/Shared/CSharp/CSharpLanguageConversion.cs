@@ -24,9 +24,9 @@ namespace CodeTranslator.Shared.CSharp
         }
 
         // FIXME: The following (AddPartialType, AddPartialTypeChild, TryGetPartialType) should be part of CompilationContext
-        public void AddPartialType(CompilationContext compilation, CSharpTypeContext type)
+        public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpTypeContext type)
         {
-            _partialTypes.Add(type.TypeName, type);
+            _partialTypes.Add(qualifiedName, type);
             AddType(compilation, type, null);
         }
 

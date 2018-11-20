@@ -77,10 +77,11 @@ namespace CodeTranslator.Shared.CSharp
         {
             if (type.Node.Modifiers.Any(SyntaxKind.PartialKeyword))
             {
-                if (Conversion.TryGetPartialType(type.TypeName, out var parent))
+                string qualifiedName = type.Node.GetQualifiedName(this);
+                if (Conversion.TryGetPartialType(qualifiedName, out var parent))
                     Conversion.AddPartialTypeChild(Compilation, type, parent);
                 else
-                    Conversion.AddPartialType(Compilation, type);
+                    Conversion.AddPartialType(qualifiedName, Compilation, type);
             }
             else
             {

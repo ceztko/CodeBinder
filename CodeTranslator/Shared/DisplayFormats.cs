@@ -8,7 +8,7 @@ namespace CodeTranslator.Shared
     public static class DisplayFormats
     {
         // Reference https://github.com/dotnet/roslyn/blob/master/src/Compilers/Core/Portable/SymbolDisplay/SymbolDisplayFormat.cs
-        public static readonly SymbolDisplayFormat DefaultFormat = new SymbolDisplayFormat(
+        public static readonly SymbolDisplayFormat FullnameFormat = new SymbolDisplayFormat(
             globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
             propertyStyle: SymbolDisplayPropertyStyle.ShowReadWriteDescriptor,
@@ -35,7 +35,8 @@ namespace CodeTranslator.Shared
                 SymbolDisplayMiscellaneousOptions.ExpandNullable
         );
 
-        public static readonly SymbolDisplayFormat NoNamespaceFormat =  new SymbolDisplayFormat(
+        /// <summary>No namespace</summary>
+        public static readonly SymbolDisplayFormat QualifiedFormat =  new SymbolDisplayFormat(
             globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
             propertyStyle: SymbolDisplayPropertyStyle.ShowReadWriteDescriptor,

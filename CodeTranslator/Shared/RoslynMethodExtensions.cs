@@ -17,12 +17,6 @@ namespace CodeTranslator.Shared
             return attribute.AttributeClass.GetFullName() == typeof(TAttribute).FullName;
         }
 
-        public static string GetFullName(this SyntaxNode node, ICompilationContextProvider provider)
-        {
-            var symbol = node.GetTypeSymbol(provider);
-            return symbol.GetFullName();
-        }
-
         public static TypeInfo GetTypeInfo(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = node.GetSemanticModel(provider);
@@ -110,12 +104,13 @@ namespace CodeTranslator.Shared
         // Reference: https://github.com/dotnet/roslyn/issues/1891
         public static string GetFullName(this ISymbol symbol)
         {
-            return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.DefaultFormat);
+            return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.FullnameFormat);
         }
 
-        public static string GetName(this ISymbol symbol)
+        /// <summary>No namespace</summary>
+        public static string GetQualifiedName(this ISymbol symbol)
         {
-            return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.NoNamespaceFormat);
+            return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.QualifiedFormat);
         }
     }
 }

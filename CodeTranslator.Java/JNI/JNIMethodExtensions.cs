@@ -28,7 +28,7 @@ namespace CodeTranslator.JNI
             var parentType = method.Parent.GetDeclaredSymbol(module);
             StringBuilder builder = new StringBuilder();
             builder.Append("Java_").Append(module.LanguageConversion.BaseNamespace.Replace('.', '_')).Append("_")
-                .Append(parentType.GetName().Replace('.', '_')).Append("_").Append(methodName);
+                .Append(parentType.GetQualifiedName().Replace('.', '_')).Append("_").Append(methodName);
             return builder.ToString();
         }
 
