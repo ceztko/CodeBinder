@@ -56,7 +56,7 @@ namespace CodeTranslator.Java
 
         public override string GeneratedPreamble
         {
-            get { return CSToJavaConversion.GeneratedPreamble; }
+            get { return CSToJavaConversion.SourcePreamble; }
         }
 
         public override string BasePath

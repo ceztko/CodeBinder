@@ -38,7 +38,7 @@ namespace CodeTranslator.JNI
                 }
 
                 module = new JNIModuleContextChild(TreeContext);
-                Conversion.AddModule(Compilation, module, parent);
+                Conversion.AddModuleChild(Compilation, module, parent);
             }
 
             foreach (var member in type.Members)

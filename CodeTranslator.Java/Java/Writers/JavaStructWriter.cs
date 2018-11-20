@@ -10,13 +10,13 @@ namespace CodeTranslator.Java
 {
     class StructTypeWriter : TypeWriter<StructDeclarationSyntax>
     {
-        public StructTypeWriter(StructDeclarationSyntax syntax, ICompilationContextProvider context)
-            : base(syntax, context) { }
+        public StructTypeWriter(StructDeclarationSyntax declaration,
+                ICompilationContextProvider context)
+            : base(declaration, context) { }
 
-        protected override void WriteTypeMembers()
-        {
-            WriteTypeMembers(Context.Members);
-        }
+        public StructTypeWriter(IReadOnlyList<StructDeclarationSyntax> partialDeclarations,
+                ICompilationContextProvider context)
+            : base(partialDeclarations, context) { }
 
         protected override void WriteTypeParameters()
         {

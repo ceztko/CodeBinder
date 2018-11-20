@@ -14,7 +14,7 @@ namespace CodeTranslator.Java
     {
         internal const bool SkipBody = true;
 
-        public const string GeneratedPreamble = "/* This file was generated. DO NOT EDIT! */";
+        internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 
         /// <summary>Base namespace of the package, to be set outside</summary>
         public string BaseNamespace { get; set; }

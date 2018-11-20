@@ -11,10 +11,10 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    abstract class TypeWriter<TBaseType> : CodeWriter<TBaseType>
-        where TBaseType : BaseTypeDeclarationSyntax
+    abstract class BaseTypeWriter<TTypeDeclaration> : CodeWriter<TTypeDeclaration>
+        where TTypeDeclaration : BaseTypeDeclarationSyntax
     {
-        protected TypeWriter(TBaseType syntax, ICompilationContextProvider context)
+        protected BaseTypeWriter(TTypeDeclaration syntax, ICompilationContextProvider context)
             : base(syntax, context) { }
 
         protected override void Write()
@@ -110,6 +110,56 @@ namespace CodeTranslator.Java
         public virtual bool NeedStaticKeyword
         {
             get { return false; }
+        }
+    }
+
+    abstract class TypeWriter<TTypeDeclaration> : BaseTypeWriter<TTypeDeclaration>
+        where TTypeDeclaration : TypeDeclarationSyntax
+    {
+        public IReadOnlyList<TTypeDeclaration> PartialDeclarations { get; private set; }
+
+        protected TypeWriter(TTypeDeclaration syntax, ICompilationContextProvider context)
+            : this(syntax, new[] { syntax }, context) { }
+
+        protected TypeWriter(IReadOnlyList<TTypeDeclaration> partialDeclarations, ICompilationContextProvider context)
+            : this(findMainDeclaration(partialDeclarations), partialDeclarations, context)
+        {
+            PartialDeclarations = partialDeclarations;
+        }
+
+        private TypeWriter(TTypeDeclaration syntax, IReadOnlyList<TTypeDeclaration> partialDeclarations,
+            ICompilationContextProvider context)
+            : base(syntax, context)
+        {
+            PartialDeclarations = partialDeclarations;
+        }
+
+        protected override void WriteTypeMembers()
+        {
+            bool first = true;
+            foreach (var declaration in PartialDeclarations)
+            {
+                if (first)
+                    first = false;
+                else
+                    Builder.AppendLine();
+
+                WriteTypeMembers(declaration.Members);
+            }
+        }
+
+        static TTypeDeclaration findMainDeclaration(IReadOnlyList<TTypeDeclaration> partialDeclarations)
+        {
+            // The main declaration has the BaseList non null, or it's just the first one found
+            TTypeDeclaration ret = null;
+            foreach (var declaration in partialDeclarations)
+            {
+                ret = declaration;
+                if (declaration.BaseList != null)
+                    return declaration;
+            }
+
+            return ret;
         }
     }
 }

@@ -3,6 +3,9 @@
 using CodeTranslator.Shared;
 using CodeTranslator.Shared.CSharp;
 using CodeTranslator.Util;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -34,7 +37,7 @@ namespace CodeTranslator.Java
 
         public override string GeneratedPreamble
         {
-            get { return CSToJavaConversion.GeneratedPreamble; }
+            get { return CSToJavaConversion.SourcePreamble; }
         }
 
         public virtual IEnumerable<string> Imports
@@ -63,6 +66,20 @@ namespace CodeTranslator.Java
             builder.Append(GetTypeWriter());
         }
 
+        protected IReadOnlyList<TTypeDeclaration> GetPartialDeclarations<TTypeDeclaration>()
+            where TTypeDeclaration : BaseTypeDeclarationSyntax
+        {
+            var ret = new List<TTypeDeclaration>();
+            ret.Add((TTypeDeclaration)TypeContext.Node);
+            if (TypeContext.Node.Modifiers.Any(SyntaxKind.PartialKeyword))
+            {
+                foreach (var child in TypeContext.Children)
+                    ret.Add((TTypeDeclaration)child.Node);
+            }
+
+            return ret;
+        }
+
         protected abstract CodeWriter GetTypeWriter();
     }
 
@@ -73,7 +90,7 @@ namespace CodeTranslator.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new InterfaceTypeWriter(TypeContext.Node, this);
+            return new InterfaceTypeWriter(GetPartialDeclarations<InterfaceDeclarationSyntax>(), this);
         }
     }
 
@@ -84,7 +101,7 @@ namespace CodeTranslator.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new ClassTypeWriter(TypeContext.Node, this);
+            return new ClassTypeWriter(GetPartialDeclarations<ClassDeclarationSyntax>(), this);
         }
     }
 
@@ -95,7 +112,7 @@ namespace CodeTranslator.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new StructTypeWriter(TypeContext.Node, this);
+            return new StructTypeWriter(GetPartialDeclarations<StructDeclarationSyntax>(), this);
         }
     }
 

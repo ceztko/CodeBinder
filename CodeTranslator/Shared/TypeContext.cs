@@ -53,7 +53,7 @@ namespace CodeTranslator.Shared
             _Children.Add(child);
         }
 
-        public new IEnumerable<TTypeContext> Children
+        public new IReadOnlyList<TTypeContext> Children
         {
             get { return _Children; }
         }

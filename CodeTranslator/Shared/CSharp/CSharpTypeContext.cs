@@ -19,6 +19,8 @@ namespace CodeTranslator.Shared.CSharp
             get { return GetNode(); }
         }
 
+        public abstract string TypeName { get; }
+
         protected abstract BaseTypeDeclarationSyntax GetNode();
     }
 
@@ -35,6 +37,11 @@ namespace CodeTranslator.Shared.CSharp
         {
             Node = node;
             Conversion = conversion;
+        }
+
+        public override string TypeName
+        {
+            get { return Node.GetName(); }
         }
 
         protected override BaseTypeDeclarationSyntax GetNode()

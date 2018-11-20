@@ -47,7 +47,7 @@ namespace CodeTranslator.Shared
     public abstract class TypeConversion<TTypeContext> : TypeConversion
         where TTypeContext : TypeContext
     {
-        // TODO: Find a way to make it internal again, look JNI JNIModuleContextParent
+        // FIXME: Find a way to make it internal again, look JNI JNIModuleContextParent
         public new TTypeContext TypeContext { get; /* internal */ set; }
 
         protected override TypeContext GetTypeContext()

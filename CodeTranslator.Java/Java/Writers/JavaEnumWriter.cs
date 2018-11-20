@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeTranslator.Java
 {
-    class EnumTypeWriter : TypeWriter<EnumDeclarationSyntax>
+    class EnumTypeWriter : BaseTypeWriter<EnumDeclarationSyntax>
     {
         bool _isFlag;
 

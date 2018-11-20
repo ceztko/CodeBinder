@@ -44,14 +44,14 @@ namespace CodeTranslator.Shared.CSharp
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
             var type = new CSharpInterfaceTypeContext(node, TreeContext, Conversion.GetInterfaceTypeConversion());
-            TreeContext.AddType(type, CurrentParent);
+            addType(type);
             DefaultVisit(node);
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             var type = new CSharpClassTypeContext(node, TreeContext, Conversion.GetClassTypeConversion());
-            TreeContext.AddType(type, CurrentParent);
+            addType(type);
             _parents.Enqueue(type);
             DefaultVisit(node);
             _parents.Dequeue();
@@ -60,7 +60,7 @@ namespace CodeTranslator.Shared.CSharp
         public override void VisitStructDeclaration(StructDeclarationSyntax node)
         {
             var type = new CSharpStructTypeContext(node, TreeContext, Conversion.GetStructTypeConversion());
-            TreeContext.AddType(type, CurrentParent);
+            addType(type);
             _parents.Enqueue(type);
             DefaultVisit(node);
             _parents.Dequeue();
@@ -71,6 +71,21 @@ namespace CodeTranslator.Shared.CSharp
             var type = new CSharpEnumTypeContext(node, TreeContext, Conversion.GetEnumTypeConversion());
             TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
+        }
+
+        void addType(CSharpTypeContext type)
+        {
+            if (type.Node.Modifiers.Any(SyntaxKind.PartialKeyword))
+            {
+                if (Conversion.TryGetPartialType(type.TypeName, out var parent))
+                    Conversion.AddPartialTypeChild(Compilation, type, parent);
+                else
+                    Conversion.AddPartialType(Compilation, type);
+            }
+            else
+            {
+                TreeContext.AddType(type, CurrentParent);
+            }
         }
 
         public override void Visit(SyntaxNode node)
@@ -162,6 +177,14 @@ namespace CodeTranslator.Shared.CSharp
 
         #region Unsupported syntax
 
+        public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
+        {
+            if (node.Modifiers.Any(SyntaxKind.PartialKeyword))
+                Unsupported(node, "Partial method");
+
+            DefaultVisit(node);
+        }
+
         public override void VisitIdentifierName(IdentifierNameSyntax node)
         {
             var symbol = node.GetSymbol(this);
@@ -171,6 +194,8 @@ namespace CodeTranslator.Shared.CSharp
                     Unsupported(node, "Dynamic type specifier");
                     break;
             }
+
+            DefaultVisit(node);
         }
 
         public override void VisitArgument(ArgumentSyntax node)

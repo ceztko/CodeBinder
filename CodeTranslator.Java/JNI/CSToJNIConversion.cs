@@ -11,8 +11,9 @@ namespace CodeTranslator.JNI
 {
     public class CSToJNIConversion : LanguageConversion<JNISyntaxTreeContext, JNIModuleContext>
     {
-        public const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
+        internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 
+        // FIXME: this should be part of CompilationContext. CompilationContext must me made generic
         Dictionary<string, JNIModuleContextParent> _modules;
 
         public CSToJNIConversion()
@@ -23,6 +24,7 @@ namespace CodeTranslator.JNI
         /// <summary>Base namespace of the package, to be set outside</summary>
         public string BaseNamespace { get; set; }
 
+        // FIXME: The following (AddModule, AddModuleChild, TryGetModule) should be part of CompilationContext
         public void AddModule(CompilationContext compilation, JNIModuleContextParent module)
         {
             module.LanguageConversion = this;
@@ -30,7 +32,7 @@ namespace CodeTranslator.JNI
             AddType(compilation, module, null);
         }
 
-        public void AddModule(CompilationContext compilation, JNIModuleContextChild module, JNIModuleContextParent parent)
+        public void AddModuleChild(CompilationContext compilation, JNIModuleContextChild module, JNIModuleContextParent parent)
         {
             module.LanguageConversion = this;
             AddType(compilation, module, parent);
