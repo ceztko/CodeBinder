@@ -116,28 +116,28 @@ namespace CodeTranslator.Java
     abstract class TypeWriter<TTypeDeclaration> : BaseTypeWriter<TTypeDeclaration>
         where TTypeDeclaration : TypeDeclarationSyntax
     {
-        public IReadOnlyList<TTypeDeclaration> PartialDeclarations { get; private set; }
+        public IReadOnlyList<TTypeDeclaration> ChildDeclarations { get; private set; }
 
         protected TypeWriter(TTypeDeclaration syntax, ICompilationContextProvider context)
             : this(syntax, new[] { syntax }, context) { }
 
-        protected TypeWriter(IReadOnlyList<TTypeDeclaration> partialDeclarations, ICompilationContextProvider context)
-            : this(findMainDeclaration(partialDeclarations), partialDeclarations, context)
+        protected TypeWriter(IReadOnlyList<TTypeDeclaration> childDeclarations, ICompilationContextProvider context)
+            : this(findMainDeclaration(childDeclarations), childDeclarations, context)
         {
-            PartialDeclarations = partialDeclarations;
+            ChildDeclarations = childDeclarations;
         }
 
         private TypeWriter(TTypeDeclaration syntax, IReadOnlyList<TTypeDeclaration> partialDeclarations,
             ICompilationContextProvider context)
             : base(syntax, context)
         {
-            PartialDeclarations = partialDeclarations;
+            ChildDeclarations = partialDeclarations;
         }
 
         protected override void WriteTypeMembers()
         {
             bool first = true;
-            foreach (var declaration in PartialDeclarations)
+            foreach (var declaration in ChildDeclarations)
             {
                 if (first)
                     first = false;

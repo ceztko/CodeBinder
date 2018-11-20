@@ -12,9 +12,9 @@ namespace CodeTranslator.Shared.CSharp
 {
     class CSharpNodeVisitor : CSharpNodeVisitor<CSharpSyntaxTreeContext, CSharpLanguageConversion>
     {
-        private Queue<CSharpTypeContext> _parents;
+        private Queue<CSharpBaseTypeContext> _parents;
 
-        public CSharpTypeContext CurrentParent
+        public CSharpBaseTypeContext CurrentParent
         {
             get
             {
@@ -38,7 +38,7 @@ namespace CodeTranslator.Shared.CSharp
         public CSharpNodeVisitor(CSharpSyntaxTreeContext context, CSharpLanguageConversion conversion)
             : base(context, conversion)
         {
-            _parents = new Queue<CSharpTypeContext>();
+            _parents = new Queue<CSharpBaseTypeContext>();
         }
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
@@ -73,15 +73,21 @@ namespace CodeTranslator.Shared.CSharp
             DefaultVisit(node);
         }
 
-        void addType(CSharpTypeContext type)
+        void addType(CSharpBaseTypeContext type)
         {
             if (type.Node.Modifiers.Any(SyntaxKind.PartialKeyword))
             {
                 string qualifiedName = type.Node.GetQualifiedName(this);
                 if (Conversion.TryGetPartialType(qualifiedName, out var parent))
-                    Conversion.AddPartialTypeChild(Compilation, type, parent);
+                {
+                    parent.AddPartialDeclaration(type);
+                    Conversion.AddPartialTypeChild(Compilation, type, CurrentParent);
+                }
                 else
+                {
+                    type.AddPartialDeclaration(type);
                     Conversion.AddPartialType(qualifiedName, Compilation, type);
+                }
             }
             else
             {

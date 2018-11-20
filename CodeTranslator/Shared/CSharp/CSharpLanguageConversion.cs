@@ -8,14 +8,14 @@ using Microsoft.CodeAnalysis;
 namespace CodeTranslator.Shared.CSharp
 {
     public abstract class CSharpLanguageConversion
-        : LanguageConversion<CSharpSyntaxTreeContext, CSharpTypeContext>
+        : LanguageConversion<CSharpSyntaxTreeContext, CSharpBaseTypeContext>
     {
         // FIXME: this should be part of CompilationContext. CompilationContext must me made generic
-        Dictionary<string, CSharpTypeContext> _partialTypes;
+        Dictionary<string, CSharpBaseTypeContext> _partialTypes;
 
         public CSharpLanguageConversion()
         {
-            _partialTypes = new Dictionary<string, CSharpTypeContext>();
+            _partialTypes = new Dictionary<string, CSharpBaseTypeContext>();
         }
 
         protected override CSharpSyntaxTreeContext getSyntaxTreeContext()
@@ -24,18 +24,18 @@ namespace CodeTranslator.Shared.CSharp
         }
 
         // FIXME: The following (AddPartialType, AddPartialTypeChild, TryGetPartialType) should be part of CompilationContext
-        public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpTypeContext type)
+        public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpBaseTypeContext type)
         {
             _partialTypes.Add(qualifiedName, type);
             AddType(compilation, type, null);
         }
 
-        public void AddPartialTypeChild(CompilationContext compilation, CSharpTypeContext child, CSharpTypeContext parent)
+        public void AddPartialTypeChild(CompilationContext compilation, CSharpBaseTypeContext child, CSharpBaseTypeContext parent)
         {
             AddType(compilation, child, parent);
         }
 
-        public bool TryGetPartialType(string typeName, out CSharpTypeContext type)
+        public bool TryGetPartialType(string typeName, out CSharpBaseTypeContext type)
         {
             return _partialTypes.TryGetValue(typeName, out type);
         }

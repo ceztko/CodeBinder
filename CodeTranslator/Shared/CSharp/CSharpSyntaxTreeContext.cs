@@ -9,7 +9,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    public sealed class CSharpSyntaxTreeContext : SyntaxTreeContext<CSharpTypeContext, CSharpLanguageConversion>
+    public sealed class CSharpSyntaxTreeContext : SyntaxTreeContext<CSharpBaseTypeContext, CSharpLanguageConversion>
     {
         public CSharpSyntaxTreeContext(CSharpLanguageConversion conversion)
             : base(conversion) { }
@@ -20,7 +20,7 @@ namespace CodeTranslator.Shared.CSharp
             walker.Visit(tree.GetRoot());
         }
 
-        public new void AddType(CSharpTypeContext type, CSharpTypeContext parent)
+        public new void AddType(CSharpBaseTypeContext type, CSharpBaseTypeContext parent)
         {
             base.AddType(type, parent);
         }

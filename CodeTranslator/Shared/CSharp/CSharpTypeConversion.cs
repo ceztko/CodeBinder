@@ -5,7 +5,7 @@ using System.Text;
 namespace CodeTranslator.Shared.CSharp
 {
     public abstract class CSharpTypeConversion<TTypeContext, TLanguageConversion> : TypeConversion<TTypeContext, TLanguageConversion>
-        where TTypeContext : CSharpTypeContext
+        where TTypeContext : CSharpBaseTypeContext
         where TLanguageConversion: CSharpLanguageConversion
     {
         protected CSharpTypeConversion(TLanguageConversion conversion)

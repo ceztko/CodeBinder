@@ -14,9 +14,9 @@ namespace CodeTranslator.Java
                 ICompilationContextProvider context)
             : base(declaration, context) { }
 
-        public InterfaceTypeWriter(IReadOnlyList<InterfaceDeclarationSyntax> partialDeclarations,
+        public InterfaceTypeWriter(IReadOnlyList<InterfaceDeclarationSyntax> childDeclarations,
                 ICompilationContextProvider context)
-            : base(partialDeclarations, context) { }
+            : base(childDeclarations, context) { }
 
         protected override void WriteTypeParameters()
         {

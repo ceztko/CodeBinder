@@ -9,7 +9,7 @@ using System.Text;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    public sealed class CSharpEnumTypeContext : CSharpTypeContext<EnumDeclarationSyntax, TypeConversion<CSharpEnumTypeContext>>
+    public sealed class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax, TypeConversion<CSharpEnumTypeContext>>
     {
         public CSharpEnumTypeContext(EnumDeclarationSyntax node,
                 CSharpSyntaxTreeContext treeContext,

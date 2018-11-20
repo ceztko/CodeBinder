@@ -12,13 +12,13 @@ using System.IO;
 
 namespace CodeTranslator.Java
 {
-    abstract partial class JavaTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext, CSToJavaConversion>
-        where TTypeContext : CSharpTypeContext
+    abstract partial class JavaBaseTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext, CSToJavaConversion>
+        where TTypeContext : CSharpBaseTypeContext
     {
         public string Namespace { get; private set; }
         string _Basepath;
 
-        protected JavaTypeConversion(CSToJavaConversion conversion)
+        protected JavaBaseTypeConversion(CSToJavaConversion conversion)
             : base(conversion)
         {
             Namespace = conversion.BaseNamespace;
@@ -66,21 +66,33 @@ namespace CodeTranslator.Java
             builder.Append(GetTypeWriter());
         }
 
-        protected IReadOnlyList<TTypeDeclaration> GetPartialDeclarations<TTypeDeclaration>()
+        /// <summary>Returns self or all partial declarations</summary>
+        protected IReadOnlyList<TTypeDeclaration> GetChildDeclarations<TTypeDeclaration>()
             where TTypeDeclaration : BaseTypeDeclarationSyntax
         {
-            var ret = new List<TTypeDeclaration>();
-            ret.Add((TTypeDeclaration)TypeContext.Node);
-            if (TypeContext.Node.Modifiers.Any(SyntaxKind.PartialKeyword))
+            var partialDeclarations = TypeContext.PartialDeclarations;
+            if (partialDeclarations.Count == 0)
             {
-                foreach (var child in TypeContext.Children)
-                    ret.Add((TTypeDeclaration)child.Node);
+                return new[] { (TTypeDeclaration)TypeContext.Node };
             }
+            else
+            {
+                var ret = new List<TTypeDeclaration>();
+                foreach (var partial in partialDeclarations)
+                    ret.Add((TTypeDeclaration)partial.Node);
 
-            return ret;
+                return ret;
+            }
         }
 
         protected abstract CodeWriter GetTypeWriter();
+    }
+
+    abstract partial class JavaTypeConversion<TTypeContext> : JavaBaseTypeConversion<TTypeContext>
+        where TTypeContext : CSharpTypeContext
+    {
+        protected JavaTypeConversion(CSToJavaConversion conversion)
+            : base(conversion) { }
     }
 
     class JavaInterfaceConversion : JavaTypeConversion<CSharpInterfaceTypeContext>
@@ -90,7 +102,7 @@ namespace CodeTranslator.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new InterfaceTypeWriter(GetPartialDeclarations<InterfaceDeclarationSyntax>(), this);
+            return new InterfaceTypeWriter(GetChildDeclarations<InterfaceDeclarationSyntax>(), this);
         }
     }
 
@@ -101,7 +113,7 @@ namespace CodeTranslator.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new ClassTypeWriter(GetPartialDeclarations<ClassDeclarationSyntax>(), this);
+            return new ClassTypeWriter(GetChildDeclarations<ClassDeclarationSyntax>(), this);
         }
     }
 
@@ -112,11 +124,11 @@ namespace CodeTranslator.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new StructTypeWriter(GetPartialDeclarations<StructDeclarationSyntax>(), this);
+            return new StructTypeWriter(GetChildDeclarations<StructDeclarationSyntax>(), this);
         }
     }
 
-    class JavaEnumConversion : JavaTypeConversion<CSharpEnumTypeContext>
+    class JavaEnumConversion : JavaBaseTypeConversion<CSharpEnumTypeContext>
     {
         public JavaEnumConversion(CSToJavaConversion conversion)
             : base(conversion) { }
