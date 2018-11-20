@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using CodeTranslator.Shared;
 using CodeTranslator.Util;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
 namespace CodeTranslator
@@ -31,9 +32,14 @@ namespace CodeTranslator
 
         internal protected override IEnumerable<ConversionDelegate> Convert()
         {
-            var solutionFilePath = _project.Solution.FilePath;
+            // Add some language specific preprocessor options
+            var options = _project.ParseOptions as CSharpParseOptions;
+            options = options.WithPreprocessorSymbols(options.PreprocessorSymbolNames.Concat(Conversion.CondictionaCompilationSymbols));
+            var project = _project.WithParseOptions(options);
+
+            var solutionFilePath = project.Solution.FilePath;
             var solutionDir = Path.GetDirectoryName(solutionFilePath);
-            var compilation = _project.GetCompilationAsync().GetAwaiter().GetResult();
+            var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
             if (!IgnoreCompilationErrors)
             {
                 string errors = CompilationOuput.ErrorsForCompilation(compilation, "source");

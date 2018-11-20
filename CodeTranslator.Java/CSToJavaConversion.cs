@@ -39,6 +39,11 @@ namespace CodeTranslator.Java
             return new JavaEnumConversion(this);
         }
 
+        public override IEnumerable<string> CondictionaCompilationSymbols
+        {
+            get { yield return "JAVA"; }
+        }
+
         public override bool UseUTF8Bom
         {
             get { return false; }

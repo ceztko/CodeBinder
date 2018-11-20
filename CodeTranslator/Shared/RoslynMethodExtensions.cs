@@ -51,10 +51,22 @@ namespace CodeTranslator.Shared
             return symbol.GetAttributes();
         }
 
+        public static TSymbol GetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
+            where TSymbol : ISymbol
+        {
+            return (TSymbol)GetSymbol(node, provider);
+        }
+
         public static ISymbol GetSymbol(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = node.GetSemanticModel(provider);
             return model.GetSymbolInfo(node).Symbol;
+        }
+
+        public static TSymbol GetDeclaredSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
+            where TSymbol : ISymbol
+        {
+            return (TSymbol)node.GetDeclaredSymbol(provider);
         }
 
         public static ISymbol GetDeclaredSymbol(this SyntaxNode node, ICompilationContextProvider provider)

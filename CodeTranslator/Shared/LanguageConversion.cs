@@ -25,6 +25,12 @@ namespace CodeTranslator.Shared
             get { return true; }
         }
 
+        /// <summary>Preprocessor definitions</summary>
+        public virtual IEnumerable<string> CondictionaCompilationSymbols
+        {
+            get { yield break; }
+        }
+
         internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
         {
             get

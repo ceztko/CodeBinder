@@ -168,7 +168,9 @@ namespace CodeTranslator.Java
                 case SymbolKind.NamedType:
                 case SymbolKind.ArrayType:
                 {
-                    builder.append(syntax, null, provider);
+                    bool isInterface;
+                    var typeSymbol = (ITypeSymbol)symbol;
+                    writeJavaType(builder, typeSymbol?.GetFullName(), syntax, typeSymbol, null, false, provider, out isInterface);
                     return builder;
                 }
                 case SymbolKind.Local:

@@ -9,13 +9,23 @@ using System.Text;
 using System.Linq;
 using System.Runtime.InteropServices;
 using CodeTranslator.Attributes;
+using System.Diagnostics;
 
 namespace CodeTranslator.Shared.CSharp
 {
     public static class CSharpMethodExtensions
     {
-        public static CSharpTypeParameters GetTypeParameters(this MethodDeclarationSyntax syntax)
+        public static CSharpTypeParameters GetTypeParameters(this MethodDeclarationSyntax syntax, ICompilationContextProvider provider)
         {
+            var symbol = syntax.GetDeclaredSymbol<IMethodSymbol>(provider);
+            if (symbol.OverriddenMethod != null)
+            {
+                // Java requires all constraints to be written as well
+                Debug.Assert(symbol.OverriddenMethod.DeclaringSyntaxReferences.Length == 1);
+                var parentDeclaration = (MethodDeclarationSyntax)symbol.OverriddenMethod.DeclaringSyntaxReferences[0].GetSyntax();
+                return mergeTypeConstraint(syntax.TypeParameterList.Parameters, parentDeclaration.ConstraintClauses);
+            }
+
             return mergeTypeConstraint(syntax.TypeParameterList.Parameters, syntax.ConstraintClauses);
         }
 
@@ -236,6 +246,7 @@ namespace CodeTranslator.Shared.CSharp
                         break;
                     case SyntaxKind.AbstractKeyword:
                     case SyntaxKind.StaticKeyword:
+                    case SyntaxKind.PartialKeyword:
                         break;
                     default:
                         throw new Exception();
@@ -248,7 +259,13 @@ namespace CodeTranslator.Shared.CSharp
                 ret.Add(SyntaxKind.InternalKeyword);
 
             foreach (var modifier in node.Modifiers)
+            {
+                var kind = modifier.Kind();
+                if (kind == SyntaxKind.PartialKeyword)
+                    continue;
+
                 ret.Add(modifier.Kind());
+            }
 
             return ret;
         }

@@ -145,7 +145,7 @@ namespace CodeTranslator.Java
 
         protected override void WriteTypeParameters()
         {
-            Builder.Append(Context.GetTypeParameters(), this).Space();
+            Builder.Append(Context.GetTypeParameters(this), this).Space();
         }
 
         protected override void WriteReturnType()
@@ -170,7 +170,7 @@ namespace CodeTranslator.Java
             get
             {
                 // Try first look for replacements
-                var methodSymbol = (IMethodSymbol)Context.GetDeclaredSymbol(this);
+                var methodSymbol = Context.GetDeclaredSymbol<IMethodSymbol>(this);
                 if (methodSymbol.HasJavaMethodReplacement(out var replacement))
                     return replacement;
 

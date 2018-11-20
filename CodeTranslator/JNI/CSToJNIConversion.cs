@@ -46,6 +46,11 @@ namespace CodeTranslator.JNI
             return new JNISyntaxTreeContext(this);
         }
 
+        public override IEnumerable<string> CondictionaCompilationSymbols
+        {
+            get { yield return "JNI"; }
+        }
+
         public override IEnumerable<ConversionBuilder> DefaultConversions
         {
             get
