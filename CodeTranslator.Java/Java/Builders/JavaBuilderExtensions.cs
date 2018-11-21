@@ -39,6 +39,11 @@ namespace CodeTranslator.Java
             return builder.Append("?");
         }
 
+        public static CodeBuilder Dot(this CodeBuilder builder)
+        {
+            return builder.Append(".");
+        }
+
         public static CodeBuilder Comma(this CodeBuilder builder)
         {
             return builder.Append(",");

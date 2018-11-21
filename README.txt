@@ -1,5 +1,5 @@
-
-======
+Statements
+==========
 
 Supported:
     Block
@@ -51,6 +51,7 @@ Supported:
     ParenthesizedExpression
     PostfixUnaryExpression
     PrefixUnaryExpression
+    QualifiedName
     RefExpression
     TypeOfExpression
     ArrayType
@@ -64,13 +65,12 @@ Supported:
 Unsupported
     DeclarationExpression # out var declaration or a tuple deconstruction 
     ThrowExpression # https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/throw#the-throw-expression
-    QualifiedName # Except in namespaces, using directives and attributes
     DefaultExpression
     AnonymousMethodExpression
     ParenthesizedLambdaExpression
     SimpleLambdaExpression
     PointerType
-    AliasQualifiedName
+    AliasQualifiedName // Except in attributes
     RefValueExpression
     RefTypeExpression
     ImplicitArrayCreationExpression (var names = new [] { "Bob", "Sam", "Jim", "Dan", "Mel" }; )

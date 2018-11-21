@@ -327,6 +327,11 @@ namespace CodeTranslator.Java
                     case SyntaxKind.IdentifierName:
                         builder.Append(javaTypeName);
                         break;
+                    case SyntaxKind.QualifiedName:
+                    {
+                        var qualifiedName = type as QualifiedNameSyntax;
+                        throw new Exception();
+                    }
                     default:
                         throw new Exception();
                 }
@@ -369,7 +374,7 @@ namespace CodeTranslator.Java
                         switch (symbol.TypeKind)
                         {
                             case TypeKind.Struct:
-                                builder.Append(nullableType.ElementType, provider);
+                                builder.append(nullableType.ElementType, type, provider);
                                 break;
                             case TypeKind.Enum:
                                 throw new Exception("TODO");
@@ -377,6 +382,12 @@ namespace CodeTranslator.Java
                                 throw new Exception();
                         }
 
+                        break;
+                    }
+                    case SyntaxKind.QualifiedName:
+                    {
+                        var qualifiedName = type as QualifiedNameSyntax;
+                        builder.append(qualifiedName.Left, type, provider).Dot().append(qualifiedName.Right, type, provider);
                         break;
                     }
                     default:
@@ -425,7 +436,7 @@ namespace CodeTranslator.Java
                 }
                 case "System.Collections.Generic.KeyValuePair<TKey, TValue>":
                 {
-                    knownJavaType = "AbstractMap.SimpleEntry";
+                    knownJavaType = "Map.Entry";
                     isInterface = false;
                     return true;
                 }

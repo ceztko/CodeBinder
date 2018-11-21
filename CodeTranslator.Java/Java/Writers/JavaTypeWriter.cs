@@ -7,10 +7,12 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace CodeTranslator.Java
 {
+    [DebuggerDisplay("Name = {Context.Identifier.Text}")]
     abstract class BaseTypeWriter<TTypeDeclaration> : CodeWriter<TTypeDeclaration>
         where TTypeDeclaration : BaseTypeDeclarationSyntax
     {
@@ -77,7 +79,7 @@ namespace CodeTranslator.Java
             }
         }
 
-        protected void WriteTypeMembers(SyntaxList<MemberDeclarationSyntax> members, PartialDeclarationsTree partialDeclarations)
+        protected void WriteTypeMembers(IEnumerable<MemberDeclarationSyntax> members, PartialDeclarationsTree partialDeclarations)
         {
             bool first = true;
             foreach (var member in members)
@@ -126,26 +128,35 @@ namespace CodeTranslator.Java
 
         protected override void WriteTypeMembers()
         {
-            bool first = true;
-            foreach (var declaration in ChildDeclarations)
-            {
-                if (first)
-                    first = false;
-                else
-                    Builder.AppendLine();
-
-                WriteTypeMembers(declaration.Members, _partialDeclarations);
-            }
+            if (_partialDeclarations.PartialDeclarations.Count == 0)
+                WriteTypeMembers(Context.Members, _partialDeclarations);
+            else
+                WriteTypeMembers(getPartialDeclarationMembers(), _partialDeclarations);
         }
 
-        public IEnumerable<TypeDeclarationSyntax> ChildDeclarations
+        IEnumerable<MemberDeclarationSyntax> getPartialDeclarationMembers()
         {
-            get
+            foreach (var declaration in _partialDeclarations.PartialDeclarations)
             {
-                if (_partialDeclarations.PartialDeclarations.Count == 0)
-                    return new[] { Context };
-
-                return _partialDeclarations.PartialDeclarations;
+                foreach (var member in declaration.Members)
+                {
+                    switch (member.Kind())
+                    {
+                        case SyntaxKind.InterfaceDeclaration:
+                        case SyntaxKind.ClassDeclaration:
+                        case SyntaxKind.StructDeclaration:
+                        {
+                            if (_partialDeclarations.MemberPartialDeclarations.ContainsKey(member as TypeDeclarationSyntax))
+                                yield return member;
+                            break;
+                        }
+                        default:
+                        {
+                            yield return member;
+                            break;
+                        }
+                    }
+                }
             }
         }
 

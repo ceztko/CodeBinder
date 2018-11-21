@@ -40,7 +40,7 @@ namespace CodeTranslator.Shared.Java
 
     public static class JavaUtils
     {
-        public static string ToJavaKeyword(this JavaInteropType type)
+        public static string ToJavaType(this JavaInteropType type)
         {
             switch (type)
             {

@@ -21,13 +21,7 @@ namespace CodeTranslator.Shared.CSharp
                 if (_parents.Count == 0)
                     return null;
 
-                var parent = _parents.Peek();
-                // Verify if the current parent is actually a partial type
-                string parentQualifiedName = parent.Node.GetQualifiedName(this);
-                if (Conversion.TryGetPartialType(parentQualifiedName, out var partialType))
-                    parent = partialType;
-
-                return parent;
+                return _parents.Peek();
             }
         }
 
@@ -154,7 +148,6 @@ namespace CodeTranslator.Shared.CSharp
                 case SyntaxKind.IsPatternExpression:
                 case SyntaxKind.CheckedExpression:
                 case SyntaxKind.ConditionalAccessExpression:
-                case SyntaxKind.AliasQualifiedName:
                 // Prefix unary expressions
                 case SyntaxKind.AddressOfExpression:
                 case SyntaxKind.PointerIndirectionExpression:
@@ -272,21 +265,21 @@ namespace CodeTranslator.Shared.CSharp
             DefaultVisit(node);
         }
 
-        public override void VisitQualifiedName(QualifiedNameSyntax node)
+        public override void VisitAliasQualifiedName(AliasQualifiedNameSyntax node)
         {
-            var parentKind = node.Parent.Kind();
-            switch (parentKind)
+            var current = node.Parent;
+            while (current != null)
             {
-                case SyntaxKind.UsingDirective:
-                case SyntaxKind.NamespaceDeclaration:
-                case SyntaxKind.Attribute:
-                    break;
-                default:
-                    Unsupported(node, "Unsupported qualified name expression with parent " + node.Parent);
-                    break;
+                if (current.Kind() == SyntaxKind.Attribute)
+                {
+                    // NOTE: If an ancestor is attribute, just ignore the node
+                    return;
+                }
+
+                current = current.Parent;
             }
 
-            // NOTE: Just ignore the node
+            Unsupported(node, "Unsupported qualified name expression with parent " + node.Parent);
         }
 
         public override void VisitTypeParameter(TypeParameterSyntax node)

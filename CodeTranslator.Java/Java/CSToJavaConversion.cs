@@ -53,15 +53,15 @@ namespace CodeTranslator.Java
         {
             get
             {
-                yield return new InteropBoxBuilder(JavaInteropType.Boolean);
-                yield return new InteropBoxBuilder(JavaInteropType.Character);
-                yield return new InteropBoxBuilder(JavaInteropType.Byte);
-                yield return new InteropBoxBuilder(JavaInteropType.Short);
-                yield return new InteropBoxBuilder(JavaInteropType.Integer);
-                yield return new InteropBoxBuilder(JavaInteropType.Long);
-                yield return new InteropBoxBuilder(JavaInteropType.Float);
-                yield return new InteropBoxBuilder(JavaInteropType.Double);
-                yield return new InteropBoxBuilder(JavaInteropType.String);
+                yield return new InteropBoxBuilder(JavaInteropType.Boolean, this);
+                yield return new InteropBoxBuilder(JavaInteropType.Character, this);
+                yield return new InteropBoxBuilder(JavaInteropType.Byte, this);
+                yield return new InteropBoxBuilder(JavaInteropType.Short, this);
+                yield return new InteropBoxBuilder(JavaInteropType.Integer, this);
+                yield return new InteropBoxBuilder(JavaInteropType.Long, this);
+                yield return new InteropBoxBuilder(JavaInteropType.Float, this);
+                yield return new InteropBoxBuilder(JavaInteropType.Double, this);
+                yield return new InteropBoxBuilder(JavaInteropType.String, this);
             }
         }
     }

@@ -5,10 +5,12 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace CodeTranslator.Shared.CSharp
 {
+    [DebuggerDisplay("Name = {Name}")]
     public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext>
     {
         internal CSharpBaseTypeContext(CSharpSyntaxTreeContext treeContext)
@@ -17,6 +19,11 @@ namespace CodeTranslator.Shared.CSharp
         public BaseTypeDeclarationSyntax Node
         {
             get { return GetBaseType(); }
+        }
+
+        public string Name
+        {
+            get { return Node.Identifier.Text; }
         }
 
         protected abstract BaseTypeDeclarationSyntax GetBaseType();
@@ -73,17 +80,7 @@ namespace CodeTranslator.Shared.CSharp
         protected internal override void FillMemberPartialDeclarations(Dictionary<TypeDeclarationSyntax, PartialDeclarationsTree> memberPartialDeclarations)
         {
             var partialDeclarations = ComputePartialDeclarationsTree();
-            if (_partialDeclarations.Count == 0)
-            {
-                // Assign the partial declarations tree to just the current context type
-                memberPartialDeclarations.Add(Node, partialDeclarations);
-            }
-            else
-            {
-                // Assign the partial declarations tree to local partial declarations types
-                foreach (var partialDeclaration in _partialDeclarations)
-                    memberPartialDeclarations.Add(partialDeclaration.Node, partialDeclarations);
-            }
+            memberPartialDeclarations.Add(Node, partialDeclarations);
         }
     }
 

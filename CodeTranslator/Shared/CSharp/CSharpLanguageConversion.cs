@@ -26,6 +26,15 @@ namespace CodeTranslator.Shared.CSharp
         // FIXME: The following (AddPartialType, AddPartialTypeChild, TryGetPartialType) should be part of CompilationContext
         public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpTypeContext type, CSharpBaseTypeContext parent)
         {
+            // Verify if the given parent is actually a partial type and
+            // use that istead if so
+            if (parent != null)
+            {
+                string parentQualifiedName = parent.Node.GetQualifiedName(compilation);
+                if (_partialTypes.TryGetValue(parentQualifiedName, out var parentPartialType))
+                    parent = parentPartialType;
+            }
+
             if (_partialTypes.TryGetValue(qualifiedName, out var partialType))
             {
                 partialType.AddPartialDeclaration(type);
@@ -36,11 +45,6 @@ namespace CodeTranslator.Shared.CSharp
                 _partialTypes.Add(qualifiedName, type);
                 AddType(compilation, type, parent);
             }
-        }
-
-        public bool TryGetPartialType(string typeName, out CSharpTypeContext type)
-        {
-            return _partialTypes.TryGetValue(typeName, out type);
         }
 
         public abstract TypeConversion<CSharpClassTypeContext> GetClassTypeConversion();

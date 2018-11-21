@@ -42,11 +42,7 @@ namespace CodeTranslator.Java
 
         public virtual IEnumerable<string> Imports
         {
-            get
-            {
-                yield return "java.util.*";
-                yield return "codetranslator.utils.*";
-            }
+            get { yield return "java.util.*"; }
         }
 
         public sealed override void Write(CodeBuilder builder)
@@ -74,24 +70,6 @@ namespace CodeTranslator.Java
     {
         protected JavaTypeConversion(CSToJavaConversion conversion)
             : base(conversion) { }
-
-        /// <summary>Returns self or all partial declarations</summary>
-        protected IReadOnlyList<TypeDeclarationSyntax> GetChildDeclarations<TTypeDeclaration>()
-        {
-            var partialDeclarations = TypeContext.PartialDeclarations;
-            if (partialDeclarations.Count == 0)
-            {
-                return new[] { TypeContext.Node };
-            }
-            else
-            {
-                var ret = new List<TypeDeclarationSyntax>();
-                foreach (var partial in partialDeclarations)
-                    ret.Add(partial.Node);
-
-                return ret;
-            }
-        }
     }
 
     class JavaInterfaceConversion : JavaTypeConversion<CSharpInterfaceTypeContext>

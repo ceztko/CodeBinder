@@ -258,6 +258,7 @@ namespace CodeTranslator.Java
                     return builder.Append(expression as RefExpressionSyntax, context);
                 case SyntaxKind.TypeOfExpression:
                     return builder.Append(expression as TypeOfExpressionSyntax, context);
+                case SyntaxKind.QualifiedName:
                 case SyntaxKind.ArrayType:
                 case SyntaxKind.GenericName:
                 case SyntaxKind.IdentifierName:
@@ -269,7 +270,6 @@ namespace CodeTranslator.Java
                 // Unsupported expressions
                 case SyntaxKind.DeclarationExpression:
                 case SyntaxKind.ThrowExpression:
-                case SyntaxKind.QualifiedName:
                 case SyntaxKind.DefaultExpression:
                 case SyntaxKind.AnonymousMethodExpression:
                 case SyntaxKind.ParenthesizedLambdaExpression:
