@@ -197,12 +197,6 @@ namespace CodeTranslator.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, YieldStatementSyntax syntax, ICompilationContextProvider context)
-        {
-            builder.Append("NULL");
-            return builder;
-        }
-
         // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
         public static CodeBuilder Append(this CodeBuilder builder, StatementSyntax statement, ICompilationContextProvider context)
         {
@@ -243,8 +237,6 @@ namespace CodeTranslator.Java
                     return builder.Append(statement as UsingStatementSyntax, context);
                 case SyntaxKind.WhileStatement:
                     return builder.Append(statement as WhileStatementSyntax, context);
-                case SyntaxKind.YieldReturnStatement:
-                    return builder.Append(statement as YieldStatementSyntax, context);
                 default:
                     throw new Exception();
             }

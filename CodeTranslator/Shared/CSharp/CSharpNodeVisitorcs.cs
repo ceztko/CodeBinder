@@ -49,15 +49,19 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
+            bool isPartial;
+            checkTypeDeclaration(node, out isPartial);
             var type = new CSharpInterfaceTypeContext(node, TreeContext, Conversion.GetInterfaceTypeConversion());
-            addType(type);
+            addType(type, isPartial);
             DefaultVisit(node);
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
+            bool isPartial;
+            checkTypeDeclaration(node, out isPartial);
             var type = new CSharpClassTypeContext(node, TreeContext, Conversion.GetClassTypeConversion());
-            addType(type);
+            addType(type, isPartial);
             _parents.Push(type);
             DefaultVisit(node);
             _parents.Pop();
@@ -65,8 +69,10 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void VisitStructDeclaration(StructDeclarationSyntax node)
         {
+            bool isPartial;
+            checkTypeDeclaration(node, out isPartial);
             var type = new CSharpStructTypeContext(node, TreeContext, Conversion.GetStructTypeConversion());
-            addType(type);
+            addType(type, isPartial);
             _parents.Push(type);
             DefaultVisit(node);
             _parents.Pop();
@@ -79,9 +85,9 @@ namespace CodeTranslator.Shared.CSharp
             DefaultVisit(node);
         }
 
-        void addType(CSharpTypeContext type)
+        void addType(CSharpTypeContext type, bool isPartial)
         {
-            if (type.Node.Modifiers.Any(SyntaxKind.PartialKeyword))
+            if (isPartial)
             {
                 string qualifiedName = type.Node.GetQualifiedName(this);
                 Conversion.AddPartialType(qualifiedName, Compilation, type, CurrentParent);
@@ -119,6 +125,8 @@ namespace CodeTranslator.Shared.CSharp
                 case SyntaxKind.FixedStatement:
                 case SyntaxKind.LocalFunctionStatement:
                 case SyntaxKind.ForEachVariableStatement:
+                case SyntaxKind.YieldBreakStatement:
+                case SyntaxKind.YieldReturnStatement:
                 // Expressions
                 case SyntaxKind.DeclarationExpression:
                 case SyntaxKind.ThrowExpression:
@@ -320,6 +328,27 @@ namespace CodeTranslator.Shared.CSharp
                 Unsupported(node, "Unsupported typeof expression with parameterized type");
 
             DefaultVisit(node);
+        }
+
+        private void checkTypeDeclaration(TypeDeclarationSyntax type, out bool isPartial)
+        {
+            isPartial = type.Modifiers.Any(SyntaxKind.PartialKeyword);
+            if (isPartial)
+            {
+                Debug.Assert(type.Parent != null);
+                var parentKind = type.Parent.Kind();
+                switch (parentKind)
+                {
+                    case SyntaxKind.ClassDeclaration:
+                    case SyntaxKind.InterfaceDeclaration:
+                    case SyntaxKind.StructDeclaration:
+                        var parentType = type.Parent as TypeDeclarationSyntax;
+                        if (!parentType.Modifiers.Any(SyntaxKind.PartialKeyword))
+                            Unsupported(type, "Nested partial types must have partial parent");
+
+                        break;
+                }
+            }
         }
 
         #endregion // Unsupported syntax

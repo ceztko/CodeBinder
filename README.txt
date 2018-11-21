@@ -1,92 +1,92 @@
-Syntax
+
 ======
 
 Supported:
-    BlockSyntax
-    BreakStatementSyntax
-    ForEachStatementSyntax
-    ContinueStatementSyntax
-    DoStatementSyntax
-    EmptyStatementSyntax
-    ExpressionStatementSyntax
-    ForStatementSyntax
-    IfStatementSyntax
-    LocalDeclarationStatementSyntax
-    LockStatementSyntax
-    ReturnStatementSyntax
-    SwitchStatementSyntax
-    ThrowStatementSyntax
-    TryStatementSyntax
-    UsingStatementSyntax
-    WhileStatementSyntax
-    YieldStatementSyntax
+    Block
+    BreakStatement
+    ForEachStatement
+    ContinueStatement
+    DoStatement
+    EmptyStatement
+    ExpressionStatement
+    ForStatement
+    IfStatement
+    LocalDeclarationStatement
+    LockStatement
+    ReturnStatement
+    SwitchStatement
+    ThrowStatement
+    TryStatement
+    UsingStatement
+    WhileStatement
 
 Unsupported:
-    ForEachVariableStatementSyntax
-    CheckedStatementSyntax
-    UnsafeStatementSyntax
-    LabeledStatementSyntax
-    GotoStatementSyntax
-    FixedStatementSyntax
-    LocalFunctionStatementSyntax
+    ForEachVariableStatement
+    CheckedStatement
+    UnsafeStatement
+    LabeledStatement
+    GotoStatement
+    FixedStatement
+    LocalFunctionStatement
+    YieldStatement
 
 Expressions
 ===========
 
 Supported:
-    ArrayCreationExpressionSyntax
-    OmittedArraySizeExpressionSyntax	
-    AssignmentExpressionSyntax
-    BinaryExpressionSyntax
-    CastExpressionSyntax
-    ConditionalExpressionSyntax
-    ElementAccessExpressionSyntax
-    InitializerExpressionSyntax
-    BaseExpressionSyntax
-    ThisExpressionSyntax
-    InvocationExpressionSyntax
-    LiteralExpressionSyntax
-    MemberAccessExpressionSyntax
-    ObjectCreationExpressionSyntax
-    ParenthesizedExpressionSyntax
-    PostfixUnaryExpressionSyntax
-    PrefixUnaryExpressionSyntax
-    RefExpressionSyntax
-    TypeOfExpressionSyntax
-    ArrayTypeSyntax
-    GenericNameSyntax
-    IdentifierNameSyntax
-    NullableTypeSyntax
-    OmittedTypeArgumentSyntax
-    PredefinedTypeSyntax
-    RefTypeSyntax
+    ArrayCreationExpression
+    OmittedArraySizeExpression	
+    AssignmentExpression
+    BinaryExpression
+    CastExpression
+    ConditionalExpression
+    ElementAccessExpression
+    InitializerExpression
+    BaseExpression
+    ThisExpression
+    InvocationExpression
+    LiteralExpression
+    MemberAccessExpression
+    ObjectCreationExpression
+    ParenthesizedExpression
+    PostfixUnaryExpression
+    PrefixUnaryExpression
+    RefExpression
+    TypeOfExpression
+    ArrayType
+    GenericName
+    IdentifierName
+    NullableType
+    OmittedTypeArgument
+    PredefinedType
+    RefType
 	
 Unsupported
-    DeclarationExpressionSyntax # out var declaration or a tuple deconstruction 
-    ThrowExpressionSyntax # https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/throw#the-throw-expression
-    QualifiedNameSyntax # Except in namespaces, using directives and attributes
-    DefaultExpressionSyntax
-    AnonymousMethodExpressionSyntax
-    ParenthesizedLambdaExpressionSyntax
-    SimpleLambdaExpressionSyntax
-    PointerTypeSyntax
-    AliasQualifiedNameSyntax
-    RefValueExpressionSyntax
-    RefTypeExpressionSyntax
-    ImplicitArrayCreationExpressionSyntax (var names = new [] { "Bob", "Sam", "Jim", "Dan", "Mel" }; )
-    ElementBindingExpressionSyntax (new Class() { Member = 1; })
-	ImplicitElementAccessSyntax ???
-	MemberBindingExpressionSyntax	
-	SizeOfExpressionSyntax
-    MakeRefExpressionSyntax
-    ImplicitStackAllocArrayCreationExpressionSyntax
-    InterpolatedStringExpressionSyntax
-    AwaitExpressionSyntax
-    QueryExpressionSyntax
-    StackAllocArrayCreationExpressionSyntax
-    AnonymousObjectCreationExpressionSyntax
-    TupleTypeSyntax ???
-    TupleExpressionSyntax ???
-    IsPatternExpressionSyntax
-    CheckedExpressionSyntax
-    ConditionalAccessExpressionSyntax
+    DeclarationExpression # out var declaration or a tuple deconstruction 
+    ThrowExpression # https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/throw#the-throw-expression
+    QualifiedName # Except in namespaces, using directives and attributes
+    DefaultExpression
+    AnonymousMethodExpression
+    ParenthesizedLambdaExpression
+    SimpleLambdaExpression
+    PointerType
+    AliasQualifiedName
+    RefValueExpression
+    RefTypeExpression
+    ImplicitArrayCreationExpression (var names = new [] { "Bob", "Sam", "Jim", "Dan", "Mel" }; )
+    ElementBindingExpression (new Class() { Member = 1; })
+	ImplicitElementAccess ???
+	MemberBindingExpression	
+	SizeOfExpression
+    MakeRefExpression
+    ImplicitStackAllocArrayCreationExpression
+    InterpolatedStringExpression
+    AwaitExpression
+    QueryExpression
+    StackAllocArrayCreationExpression
+    AnonymousObjectCreationExpression
+    TupleType ???
+    TupleExpression ???
+    IsPatternExpression
+    CheckedExpression
+    ConditionalAccessExpression
