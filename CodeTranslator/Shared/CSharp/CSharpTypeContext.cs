@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CodeTranslator.Shared.CSharp
 {
-    [DebuggerDisplay("Name = {Name}")]
+    [DebuggerDisplay("TypeName = {TypeName}")]
     public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext>
     {
         internal CSharpBaseTypeContext(CSharpSyntaxTreeContext treeContext)
@@ -21,7 +21,7 @@ namespace CodeTranslator.Shared.CSharp
             get { return GetBaseType(); }
         }
 
-        public string Name
+        public string TypeName
         {
             get { return Node.Identifier.Text; }
         }

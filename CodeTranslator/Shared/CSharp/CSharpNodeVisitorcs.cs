@@ -21,7 +21,17 @@ namespace CodeTranslator.Shared.CSharp
                 if (_parents.Count == 0)
                     return null;
 
-                return _parents.Peek();
+                var ret = _parents.Peek();
+                if (ret != null)
+                {
+                    // Verify if the current parent is actually a partial type and, if so,
+                    // use that istead
+                    string parentQualifiedName = ret.Node.GetQualifiedName(this);
+                    if (Conversion.TryGetPartialType(parentQualifiedName, out var parentPartialType))
+                        ret = parentPartialType;
+                }
+
+                return ret;
             }
         }
 

@@ -12,7 +12,7 @@ using System.Text;
 
 namespace CodeTranslator.Java
 {
-    [DebuggerDisplay("Name = {Context.Identifier.Text}")]
+    [DebuggerDisplay("TypeName = {TypeName}")]
     abstract class BaseTypeWriter<TTypeDeclaration> : CodeWriter<TTypeDeclaration>
         where TTypeDeclaration : BaseTypeDeclarationSyntax
     {
