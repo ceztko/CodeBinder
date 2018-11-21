@@ -26,6 +26,7 @@ namespace CodeTranslator.Java
             WriteReturnType();
             Builder.Append(MethodName);
             WriteParameters();
+            WriteThrows();
             writeMethodBody();
         }
 
@@ -108,6 +109,9 @@ namespace CodeTranslator.Java
             WriteType(parameter.Type, flags);
             Builder.Space().Append(parameter.Identifier.Text);
         }
+
+
+        protected virtual void WriteThrows() { /* Do nothing */ }
 
         protected virtual void WriteTypeParameters() { /* Do nothing */ }
 
@@ -295,9 +299,13 @@ namespace CodeTranslator.Java
         public DestructorWriter(DestructorDeclarationSyntax method, ICompilationContextProvider context)
             : base(method, context) { }
 
+        protected override void WriteThrows()
+        {
+            Builder.Space().Append("throws Throwable");
+        }
+
         protected override void WriteMethodBodyInternal()
         {
-            base.WriteMethodBodyInternal();
             Builder.Append("super.finalize()").EndOfStatement();
         }
 

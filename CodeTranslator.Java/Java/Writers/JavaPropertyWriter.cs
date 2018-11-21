@@ -89,7 +89,7 @@ namespace CodeTranslator.Java
                 var modifiers = getSetterModifiers(accessor);
                 Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(modifiers)).Space();
             }
-            Builder.Append(JavaType).Space();
+            Builder.Append("void").Space();
             Builder.Append(SetterName).Append("(").Append(JavaType).Space().Append("value").Append(")");
             if (_isParentInterface)
             {
