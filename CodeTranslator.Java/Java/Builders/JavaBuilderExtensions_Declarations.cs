@@ -44,19 +44,22 @@ namespace CodeTranslator.Java
             return builder.Append(new FieldWriter(member, context));
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, InterfaceDeclarationSyntax member, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, InterfaceDeclarationSyntax member,
+            PartialDeclarationsTree partialDeclarations, ICompilationContextProvider context)
         {
-            return builder.Append(new InterfaceTypeWriter(member, context));
+            return builder.Append(new InterfaceTypeWriter(member, partialDeclarations, context));
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ClassDeclarationSyntax member, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ClassDeclarationSyntax member,
+            PartialDeclarationsTree partialDeclarations, ICompilationContextProvider context)
         {
-            return builder.Append(new ClassTypeWriter(member, context));
+            return builder.Append(new ClassTypeWriter(member, partialDeclarations, context));
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, StructDeclarationSyntax member, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, StructDeclarationSyntax member,
+            PartialDeclarationsTree partialDeclarations, ICompilationContextProvider context)
         {
-            return builder.Append(new StructTypeWriter(member, context));
+            return builder.Append(new StructTypeWriter(member, partialDeclarations, context));
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, EnumDeclarationSyntax member, ICompilationContextProvider context)
@@ -64,7 +67,8 @@ namespace CodeTranslator.Java
             return builder.Append(new EnumTypeWriter(member, context));
         }
 
-        public static IEnumerable<CodeWriter> GetWriters(this MemberDeclarationSyntax member, ICompilationContextProvider context)
+        public static IEnumerable<CodeWriter> GetWriters(this MemberDeclarationSyntax member,
+            PartialDeclarationsTree partialDeclarations, ICompilationContextProvider context)
         {
             var kind = member.Kind();
             switch (kind)
@@ -82,11 +86,14 @@ namespace CodeTranslator.Java
                 case SyntaxKind.FieldDeclaration:
                     return new[] { new FieldWriter(member as FieldDeclarationSyntax, context) };
                 case SyntaxKind.InterfaceDeclaration:
-                    return new[] { new InterfaceTypeWriter(member as InterfaceDeclarationSyntax, context) };
+                    var iface = member as InterfaceDeclarationSyntax;
+                    return new[] { new InterfaceTypeWriter(iface, partialDeclarations.MemberPartialDeclarations[iface], context) };
                 case SyntaxKind.ClassDeclaration:
-                    return new[] { new ClassTypeWriter(member as ClassDeclarationSyntax, context) };
+                    var cls = member as ClassDeclarationSyntax;
+                    return new[] { new ClassTypeWriter(cls, partialDeclarations.MemberPartialDeclarations[cls], context) };
                 case SyntaxKind.StructKeyword:
-                    return new[] { new StructTypeWriter(member as StructDeclarationSyntax, context) };
+                    var structure = member as StructDeclarationSyntax;
+                    return new[] { new StructTypeWriter(structure, partialDeclarations.MemberPartialDeclarations[structure], context) };
                 case SyntaxKind.EnumDeclaration:
                     return new[] { new EnumTypeWriter(member as EnumDeclarationSyntax, context) };
                 default:

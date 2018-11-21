@@ -10,13 +10,8 @@ namespace CodeTranslator.Java
 {
     class InterfaceTypeWriter : TypeWriter<InterfaceDeclarationSyntax>
     {
-        public InterfaceTypeWriter(InterfaceDeclarationSyntax declaration,
-                ICompilationContextProvider context)
-            : base(declaration, context) { }
-
-        public InterfaceTypeWriter(IReadOnlyList<InterfaceDeclarationSyntax> childDeclarations,
-                ICompilationContextProvider context)
-            : base(childDeclarations, context) { }
+        public InterfaceTypeWriter(InterfaceDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
+                ICompilationContextProvider context) : base(declaration, partialDeclarations, context) { }
 
         protected override void WriteTypeParameters()
         {

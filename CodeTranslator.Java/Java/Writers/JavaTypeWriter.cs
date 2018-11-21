@@ -77,7 +77,7 @@ namespace CodeTranslator.Java
             }
         }
 
-        protected void WriteTypeMembers(SyntaxList<MemberDeclarationSyntax> members)
+        protected void WriteTypeMembers(SyntaxList<MemberDeclarationSyntax> members, PartialDeclarationsTree partialDeclarations)
         {
             bool first = true;
             foreach (var member in members)
@@ -85,7 +85,7 @@ namespace CodeTranslator.Java
                 if (member.HasAttribute<IgnoreAttribute>(this))
                     continue;
 
-                foreach (var writer in member.GetWriters(this))
+                foreach (var writer in member.GetWriters(partialDeclarations, this))
                 {
                     if (first)
                         first = false;
@@ -116,22 +116,12 @@ namespace CodeTranslator.Java
     abstract class TypeWriter<TTypeDeclaration> : BaseTypeWriter<TTypeDeclaration>
         where TTypeDeclaration : TypeDeclarationSyntax
     {
-        public IReadOnlyList<TTypeDeclaration> ChildDeclarations { get; private set; }
+        PartialDeclarationsTree _partialDeclarations;
 
-        protected TypeWriter(TTypeDeclaration syntax, ICompilationContextProvider context)
-            : this(syntax, new[] { syntax }, context) { }
-
-        protected TypeWriter(IReadOnlyList<TTypeDeclaration> childDeclarations, ICompilationContextProvider context)
-            : this(findMainDeclaration(childDeclarations), childDeclarations, context)
+        protected TypeWriter(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations, ICompilationContextProvider context)
+            : base(findMainDeclaration(syntax, partialDeclarations), context)
         {
-            ChildDeclarations = childDeclarations;
-        }
-
-        private TypeWriter(TTypeDeclaration syntax, IReadOnlyList<TTypeDeclaration> partialDeclarations,
-            ICompilationContextProvider context)
-            : base(syntax, context)
-        {
-            ChildDeclarations = partialDeclarations;
+            _partialDeclarations = partialDeclarations;
         }
 
         protected override void WriteTypeMembers()
@@ -144,22 +134,37 @@ namespace CodeTranslator.Java
                 else
                     Builder.AppendLine();
 
-                WriteTypeMembers(declaration.Members);
+                WriteTypeMembers(declaration.Members, _partialDeclarations);
             }
         }
 
-        static TTypeDeclaration findMainDeclaration(IReadOnlyList<TTypeDeclaration> partialDeclarations)
+        public IEnumerable<TypeDeclarationSyntax> ChildDeclarations
         {
-            // The main declaration has the BaseList non null, or it's just the first one found
-            TTypeDeclaration ret = null;
-            foreach (var declaration in partialDeclarations)
+            get
+            {
+                if (_partialDeclarations.PartialDeclarations.Count == 0)
+                    return new[] { Context };
+
+                return _partialDeclarations.PartialDeclarations;
+            }
+        }
+
+        static TTypeDeclaration findMainDeclaration(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations)
+        {
+            // If there are no partial declarations, just return the given syntax
+            if (partialDeclarations.PartialDeclarations.Count == 0)
+                return syntax;
+
+            // Find the declaration with non null base list, or just return the first
+            TypeDeclarationSyntax ret = null;
+            foreach (var declaration in partialDeclarations.PartialDeclarations)
             {
                 ret = declaration;
                 if (declaration.BaseList != null)
-                    return declaration;
+                    break;
             }
 
-            return ret;
+            return (TTypeDeclaration)ret;
         }
     }
 }

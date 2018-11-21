@@ -12,7 +12,7 @@ namespace CodeTranslator.Shared.CSharp
 {
     class CSharpNodeVisitor : CSharpNodeVisitor<CSharpSyntaxTreeContext, CSharpLanguageConversion>
     {
-        private Queue<CSharpBaseTypeContext> _parents;
+        private Stack<CSharpBaseTypeContext> _parents;
 
         public CSharpBaseTypeContext CurrentParent
         {
@@ -21,7 +21,13 @@ namespace CodeTranslator.Shared.CSharp
                 if (_parents.Count == 0)
                     return null;
 
-                return _parents.Peek();
+                var parent = _parents.Peek();
+                // Verify if the current parent is actually a partial type
+                string parentQualifiedName = parent.Node.GetQualifiedName(this);
+                if (Conversion.TryGetPartialType(parentQualifiedName, out var partialType))
+                    parent = partialType;
+
+                return parent;
             }
         }
 
@@ -38,7 +44,7 @@ namespace CodeTranslator.Shared.CSharp
         public CSharpNodeVisitor(CSharpSyntaxTreeContext context, CSharpLanguageConversion conversion)
             : base(context, conversion)
         {
-            _parents = new Queue<CSharpBaseTypeContext>();
+            _parents = new Stack<CSharpBaseTypeContext>();
         }
 
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
@@ -52,18 +58,18 @@ namespace CodeTranslator.Shared.CSharp
         {
             var type = new CSharpClassTypeContext(node, TreeContext, Conversion.GetClassTypeConversion());
             addType(type);
-            _parents.Enqueue(type);
+            _parents.Push(type);
             DefaultVisit(node);
-            _parents.Dequeue();
+            _parents.Pop();
         }
 
         public override void VisitStructDeclaration(StructDeclarationSyntax node)
         {
             var type = new CSharpStructTypeContext(node, TreeContext, Conversion.GetStructTypeConversion());
             addType(type);
-            _parents.Enqueue(type);
+            _parents.Push(type);
             DefaultVisit(node);
-            _parents.Dequeue();
+            _parents.Pop();
         }
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
@@ -73,21 +79,12 @@ namespace CodeTranslator.Shared.CSharp
             DefaultVisit(node);
         }
 
-        void addType(CSharpBaseTypeContext type)
+        void addType(CSharpTypeContext type)
         {
             if (type.Node.Modifiers.Any(SyntaxKind.PartialKeyword))
             {
                 string qualifiedName = type.Node.GetQualifiedName(this);
-                if (Conversion.TryGetPartialType(qualifiedName, out var parent))
-                {
-                    parent.AddPartialDeclaration(type);
-                    Conversion.AddPartialTypeChild(Compilation, type, CurrentParent);
-                }
-                else
-                {
-                    type.AddPartialDeclaration(type);
-                    Conversion.AddPartialType(qualifiedName, Compilation, type);
-                }
+                Conversion.AddPartialType(qualifiedName, Compilation, type, CurrentParent);
             }
             else
             {

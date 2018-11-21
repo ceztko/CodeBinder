@@ -10,13 +10,8 @@ namespace CodeTranslator.Java
 {
     class ClassTypeWriter : TypeWriter<ClassDeclarationSyntax>
     {
-        public ClassTypeWriter(ClassDeclarationSyntax declaration,
-                ICompilationContextProvider context)
-            : base(declaration, context) { }
-
-        public ClassTypeWriter(IReadOnlyList<ClassDeclarationSyntax> childDeclarations,
-                ICompilationContextProvider context)
-            : base(childDeclarations, context) { }
+        public ClassTypeWriter(ClassDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
+                ICompilationContextProvider context) : base(declaration, partialDeclarations, context) { }
 
         protected override void WriteTypeParameters()
         {

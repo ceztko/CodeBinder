@@ -66,25 +66,6 @@ namespace CodeTranslator.Java
             builder.Append(GetTypeWriter());
         }
 
-        /// <summary>Returns self or all partial declarations</summary>
-        protected IReadOnlyList<TTypeDeclaration> GetChildDeclarations<TTypeDeclaration>()
-            where TTypeDeclaration : BaseTypeDeclarationSyntax
-        {
-            var partialDeclarations = TypeContext.PartialDeclarations;
-            if (partialDeclarations.Count == 0)
-            {
-                return new[] { (TTypeDeclaration)TypeContext.Node };
-            }
-            else
-            {
-                var ret = new List<TTypeDeclaration>();
-                foreach (var partial in partialDeclarations)
-                    ret.Add((TTypeDeclaration)partial.Node);
-
-                return ret;
-            }
-        }
-
         protected abstract CodeWriter GetTypeWriter();
     }
 
@@ -93,6 +74,24 @@ namespace CodeTranslator.Java
     {
         protected JavaTypeConversion(CSToJavaConversion conversion)
             : base(conversion) { }
+
+        /// <summary>Returns self or all partial declarations</summary>
+        protected IReadOnlyList<TypeDeclarationSyntax> GetChildDeclarations<TTypeDeclaration>()
+        {
+            var partialDeclarations = TypeContext.PartialDeclarations;
+            if (partialDeclarations.Count == 0)
+            {
+                return new[] { TypeContext.Node };
+            }
+            else
+            {
+                var ret = new List<TypeDeclarationSyntax>();
+                foreach (var partial in partialDeclarations)
+                    ret.Add(partial.Node);
+
+                return ret;
+            }
+        }
     }
 
     class JavaInterfaceConversion : JavaTypeConversion<CSharpInterfaceTypeContext>
@@ -102,7 +101,7 @@ namespace CodeTranslator.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new InterfaceTypeWriter(GetChildDeclarations<InterfaceDeclarationSyntax>(), this);
+            return new InterfaceTypeWriter(TypeContext.Node, TypeContext.ComputePartialDeclarationsTree(), this);
         }
     }
 
@@ -113,7 +112,7 @@ namespace CodeTranslator.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new ClassTypeWriter(GetChildDeclarations<ClassDeclarationSyntax>(), this);
+            return new ClassTypeWriter(TypeContext.Node, TypeContext.ComputePartialDeclarationsTree(), this);
         }
     }
 
@@ -124,7 +123,7 @@ namespace CodeTranslator.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new StructTypeWriter(GetChildDeclarations<StructDeclarationSyntax>(), this);
+            return new StructTypeWriter(TypeContext.Node, TypeContext.ComputePartialDeclarationsTree(), this);
         }
     }
 

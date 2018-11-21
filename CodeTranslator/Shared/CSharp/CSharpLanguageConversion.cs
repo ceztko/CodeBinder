@@ -11,11 +11,11 @@ namespace CodeTranslator.Shared.CSharp
         : LanguageConversion<CSharpSyntaxTreeContext, CSharpBaseTypeContext>
     {
         // FIXME: this should be part of CompilationContext. CompilationContext must me made generic
-        Dictionary<string, CSharpBaseTypeContext> _partialTypes;
+        Dictionary<string, CSharpTypeContext> _partialTypes;
 
         public CSharpLanguageConversion()
         {
-            _partialTypes = new Dictionary<string, CSharpBaseTypeContext>();
+            _partialTypes = new Dictionary<string, CSharpTypeContext>();
         }
 
         protected override CSharpSyntaxTreeContext getSyntaxTreeContext()
@@ -24,18 +24,21 @@ namespace CodeTranslator.Shared.CSharp
         }
 
         // FIXME: The following (AddPartialType, AddPartialTypeChild, TryGetPartialType) should be part of CompilationContext
-        public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpBaseTypeContext type)
+        public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpTypeContext type, CSharpBaseTypeContext parent)
         {
-            _partialTypes.Add(qualifiedName, type);
-            AddType(compilation, type, null);
+            if (_partialTypes.TryGetValue(qualifiedName, out var partialType))
+            {
+                partialType.AddPartialDeclaration(type);
+            }
+            else
+            {
+                type.AddPartialDeclaration(type);
+                _partialTypes.Add(qualifiedName, type);
+                AddType(compilation, type, parent);
+            }
         }
 
-        public void AddPartialTypeChild(CompilationContext compilation, CSharpBaseTypeContext child, CSharpBaseTypeContext parent)
-        {
-            AddType(compilation, child, parent);
-        }
-
-        public bool TryGetPartialType(string typeName, out CSharpBaseTypeContext type)
+        public bool TryGetPartialType(string typeName, out CSharpTypeContext type)
         {
             return _partialTypes.TryGetValue(typeName, out type);
         }

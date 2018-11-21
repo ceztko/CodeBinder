@@ -11,45 +11,56 @@ namespace CodeTranslator.Shared.CSharp
 {
     public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext>
     {
-        List<CSharpBaseTypeContext> _partialDeclarations;
-
         internal CSharpBaseTypeContext(CSharpSyntaxTreeContext treeContext)
-            : base(treeContext)
-        {
-            _partialDeclarations = new List<CSharpBaseTypeContext>();
-        }
+            : base(treeContext) { }
 
         public BaseTypeDeclarationSyntax Node
         {
             get { return GetBaseType(); }
         }
 
-        public void AddPartialDeclaration(CSharpBaseTypeContext partialDeclaration)
-        {
-            _partialDeclarations.Add(partialDeclaration);
-        }
-
-        public IReadOnlyList<CSharpBaseTypeContext> PartialDeclarations
-        {
-            get { return _partialDeclarations; }
-        }
-
-        public PartialDeclarationsTree BuildPartialDeclarationTree()
-        {
-            return null;
-        }
-
         protected abstract BaseTypeDeclarationSyntax GetBaseType();
+
+        protected internal virtual void FillMemberPartialDeclarations(
+            Dictionary<TypeDeclarationSyntax, PartialDeclarationsTree> memberPartialDeclarations) { }
     }
 
     public abstract class CSharpTypeContext : CSharpBaseTypeContext
     {
-        internal CSharpTypeContext(CSharpSyntaxTreeContext treeContext)
-            : base(treeContext) { }
+        List<CSharpTypeContext> _partialDeclarations;
 
-        public new BaseTypeDeclarationSyntax Node
+        internal CSharpTypeContext(CSharpSyntaxTreeContext treeContext)
+            : base(treeContext)
         {
-            get { return GetBaseType(); }
+            _partialDeclarations = new List<CSharpTypeContext>();
+        }
+
+        public PartialDeclarationsTree ComputePartialDeclarationsTree()
+        {
+            var partialDeclarations = new List<TypeDeclarationSyntax>();
+            foreach (var partialDeclaration in _partialDeclarations)
+                partialDeclarations.Add(partialDeclaration.Node);
+
+            var memberPartialDelarations = new Dictionary<TypeDeclarationSyntax, PartialDeclarationsTree>();
+            foreach (var child in Children)
+                child.FillMemberPartialDeclarations(memberPartialDelarations);
+
+            return new PartialDeclarationsTree(partialDeclarations, memberPartialDelarations);
+        }
+
+        public void AddPartialDeclaration(CSharpTypeContext partialDeclaration)
+        {
+            _partialDeclarations.Add(partialDeclaration);
+        }
+
+        public IReadOnlyList<CSharpTypeContext> PartialDeclarations
+        {
+            get { return _partialDeclarations; }
+        }
+
+        public new TypeDeclarationSyntax Node
+        {
+            get { return GetSyntaxType(); }
         }
 
         protected override BaseTypeDeclarationSyntax GetBaseType()
@@ -58,6 +69,22 @@ namespace CodeTranslator.Shared.CSharp
         }
 
         protected abstract TypeDeclarationSyntax GetSyntaxType();
+
+        protected internal override void FillMemberPartialDeclarations(Dictionary<TypeDeclarationSyntax, PartialDeclarationsTree> memberPartialDeclarations)
+        {
+            var partialDeclarations = ComputePartialDeclarationsTree();
+            if (_partialDeclarations.Count == 0)
+            {
+                // Assign the partial declarations tree to just the current context type
+                memberPartialDeclarations.Add(Node, partialDeclarations);
+            }
+            else
+            {
+                // Assign the partial declarations tree to local partial declarations types
+                foreach (var partialDeclaration in _partialDeclarations)
+                    memberPartialDeclarations.Add(partialDeclaration.Node, partialDeclarations);
+            }
+        }
     }
 
     public abstract class CSharpBaseTypeContext<TNode, TTypeConversion> : CSharpBaseTypeContext
