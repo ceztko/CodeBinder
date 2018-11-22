@@ -4,37 +4,37 @@
 #include "JNITypesPrivate.h"
 
 // Wraps custom java box type
-template <typename TJBox, typename T>
+template <typename TJBox, typename TN = typename TJBox::ValueType>
 class BJ2NImpl
 {
 public:
-    BJ2NImpl(JNIEnv *env, TJBox box, bool commit);
+    BJ2NImpl(JNIEnv *env, typename TJBox::BoxPtr box, bool commit);
     ~BJ2NImpl();
 public:
-    inline T * ptr() { return &Value; }
-    inline T & ref() { return Value; }
-    inline operator T *() { return &Value; }
-    inline operator T &() { return Value; }
+    inline TN * ptr() { return &Value; }
+    inline TN & ref() { return Value; }
+    inline operator TN *() { return &Value; }
+    inline operator TN &() { return Value; }
 public:
-    T Value;
+    TN Value;
 private:
     JNIEnv *m_env;
-    TJBox m_box;
+    typename TJBox::BoxPtr m_box;
     bool m_commit;
 };
 
-template<typename TJBox, typename T>
-BJ2NImpl<TJBox, T>::BJ2NImpl(JNIEnv *env, TJBox box, bool commit)
+template<typename TJBox, typename TN>
+BJ2NImpl<TJBox, TN>::BJ2NImpl(JNIEnv *env, typename TJBox::BoxPtr box, bool commit)
 {
     m_env = env;
     m_box = box;
     m_commit = commit;
-    Value = box->GetValue(env);
+    Value = (TN)box->GetValue(env);
 }
 
-template<typename TJBox, typename T>
-BJ2NImpl<TJBox, T>::~BJ2NImpl()
+template<typename TJBox, typename TN>
+BJ2NImpl<TJBox, TN>::~BJ2NImpl()
 {
     if (m_commit)
-        m_box->SetValue(m_env, Value);
+        m_box->SetValue(m_env, (typename TJBox::ValueType)Value);
 }

@@ -17,8 +17,8 @@ template <typename BaseT>
 class _jTypeBox : public BaseT
 {
 public:
-    typename BaseT::Type GetValue(JNIEnv *env) const;
-    void SetValue(JNIEnv *env, typename BaseT::Type value);
+    typename BaseT::ValueType GetValue(JNIEnv *env) const;
+    void SetValue(JNIEnv *env, typename BaseT::ValueType value);
 private:
     jfieldID getFieldId(JNIEnv *env) const;
 };
@@ -27,94 +27,125 @@ private:
 // Base box types //
 ////////////////////
 
+// Forward declarations for box type classes
+class _jBooleanBox;
+class _jCharacterBox;
+class _jByteBox;
+class _jShortBox;
+class _jIntegerBox;
+class _jLongBox;
+class _jFloatBox;
+class _jDoubleBox;
+class _jStringBox;
+
+// Typedef for box type pointers
+typedef _jBooleanBox * jBooleanBox;
+typedef _jCharacterBox * jCharacterBox;
+typedef _jByteBox * jByteBox;
+typedef _jShortBox * jShortBox;
+typedef _jIntegerBox * jIntegerBox;
+typedef _jLongBox * jLongBox;
+typedef _jFloatBox * jFloatBox;
+typedef _jDoubleBox * jDoubleBox;
+typedef _jStringBox * jStringBox;
+
 class _jBooleanBoxBase : public _jobject
 {
 public:
-    typedef jboolean Type;
+    typedef jBooleanBox BoxPtr;
+    typedef jboolean ValueType;
 protected:
     static const char * getFieldIdSignature();
-    jboolean getValue(JNIEnv *env, jfieldID field) const;
-    void setValue(JNIEnv *env, jfieldID field, jboolean value);
+    ValueType getValue(JNIEnv *env, jfieldID field) const;
+    void setValue(JNIEnv *env, jfieldID field, ValueType value);
 };
 
 class _jCharacterBoxBase : public _jobject
 {
 public:
-    typedef jboolean Type;
+    typedef jCharacterBox BoxPtr;
+    typedef jchar ValueType;
 protected:
     static const char * getFieldIdSignature();
-    jchar getValue(JNIEnv *env, jfieldID field) const;
-    void setValue(JNIEnv *env, jfieldID field, jchar value);
+    ValueType getValue(JNIEnv *env, jfieldID field) const;
+    void setValue(JNIEnv *env, jfieldID field, ValueType value);
 };
 
 class _jByteBoxBase : public _jobject
 {
 public:
-    typedef jbyte Type;
+    typedef jByteBox BoxPtr;
+    typedef jbyte ValueType;
 protected:
     static const char * getFieldIdSignature();
-    jbyte getValue(JNIEnv *env, jfieldID field) const;
-    void setValue(JNIEnv *env, jfieldID field, jbyte value);
+    ValueType getValue(JNIEnv *env, jfieldID field) const;
+    void setValue(JNIEnv *env, jfieldID field, ValueType value);
 };
 
 class _jShortBoxBase : public _jobject
 {
 public:
-    typedef jshort Type;
+    typedef jShortBox BoxPtr;
+    typedef jshort ValueType;
 protected:
     static const char * getFieldIdSignature();
-    jshort getValue(JNIEnv *env, jfieldID field) const;
-    void setValue(JNIEnv *env, jfieldID field, jshort value);
+    ValueType getValue(JNIEnv *env, jfieldID field) const;
+    void setValue(JNIEnv *env, jfieldID field, ValueType value);
 };
 
 class _jIntegerBoxBase : public _jobject
 {
 public:
-    typedef jint Type;
+    typedef jIntegerBox BoxPtr;
+    typedef jint ValueType;
 protected:
     static const char * getFieldIdSignature();
-    jint getValue(JNIEnv *env, jfieldID field) const;
-    void setValue(JNIEnv *env, jfieldID field, jint value);
+    ValueType getValue(JNIEnv *env, jfieldID field) const;
+    void setValue(JNIEnv *env, jfieldID field, ValueType value);
 };
 
 class _jLongBoxBase : public _jobject
 {
 public:
-    typedef jlong Type;
+    typedef jLongBox BoxPtr;
+    typedef jlong ValueType;
 protected:
     static const char * getFieldIdSignature();
-    jlong getValue(JNIEnv *env, jfieldID field) const;
-    void setValue(JNIEnv *env, jfieldID field, jlong value);
+    ValueType getValue(JNIEnv *env, jfieldID field) const;
+    void setValue(JNIEnv *env, jfieldID field, ValueType value);
 };
 
 class _jFloatBoxBase : public _jobject
 {
 public:
-    typedef jfloat Type;
+    typedef jFloatBox BoxPtr;
+    typedef jfloat ValueType;
 protected:
     static const char * getFieldIdSignature();
-    jfloat getValue(JNIEnv *env, jfieldID field) const;
-    void setValue(JNIEnv *env, jfieldID field, jfloat value);
+    ValueType getValue(JNIEnv *env, jfieldID field) const;
+    void setValue(JNIEnv *env, jfieldID field, ValueType value);
 };
 
 class _jDoubleBoxBase : public _jobject
 {
 public:
-    typedef jdouble Type;
+    typedef jDoubleBox BoxPtr;
+    typedef jdouble ValueType;
 protected:
     static const char * getFieldIdSignature();
-    jdouble getValue(JNIEnv *env, jfieldID field) const;
-    void setValue(JNIEnv *env, jfieldID field, jdouble  value);
+    ValueType getValue(JNIEnv *env, jfieldID field) const;
+    void setValue(JNIEnv *env, jfieldID field, ValueType  value);
 };
 
 class _jStringBoxBase : public _jobject
 {
 public:
-    typedef jstring Type;
+    typedef jStringBox BoxPtr;
+    typedef jstring ValueType;
 protected:
     static const char * getFieldIdSignature();
-    jstring getValue(JNIEnv *env, jfieldID field) const;
-    void setValue(JNIEnv *env, jfieldID field, jstring  value);
+    ValueType getValue(JNIEnv *env, jfieldID field) const;
+    void setValue(JNIEnv *env, jfieldID field, ValueType  value);
 };
 
 // Typedef for box types
@@ -128,25 +159,14 @@ class _jFloatBox : public _jTypeBox<_jFloatBoxBase> { };
 class _jDoubleBox : public _jTypeBox<_jDoubleBoxBase> { };
 class _jStringBox : public _jTypeBox<_jStringBoxBase> { };
 
-// Typedef for box type pointers
-typedef _jBooleanBox * jBooleanBox;
-typedef _jCharacterBox * jCharacterBox;
-typedef _jByteBox * jByteBox;
-typedef _jShortBox * jShortBox;
-typedef _jIntegerBox * jIntegerBox;
-typedef _jLongBox * jLongBox;
-typedef _jFloatBox * jFloatBox;
-typedef _jDoubleBox * jDoubleBox;
-typedef _jStringBox * jStringBox;
-
 template<typename BaseT>
-typename BaseT::Type _jTypeBox<BaseT>::GetValue(JNIEnv *env) const
+typename BaseT::ValueType _jTypeBox<BaseT>::GetValue(JNIEnv *env) const
 {
     return this->getValue(env, getFieldId(env));
 }
 
 template<typename BaseT>
-void _jTypeBox<BaseT>::SetValue(JNIEnv *env, typename BaseT::Type value)
+void _jTypeBox<BaseT>::SetValue(JNIEnv *env, typename BaseT::ValueType value)
 {
     this->setValue(env, getFieldId(env), value);
 }

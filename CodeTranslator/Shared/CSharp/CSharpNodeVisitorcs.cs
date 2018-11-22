@@ -185,7 +185,7 @@ namespace CodeTranslator.Shared.CSharp
                 }
             }
 
-            visit(node);
+            base.Visit(node);
         }
 
         #endregion Supported types
@@ -383,19 +383,6 @@ namespace CodeTranslator.Shared.CSharp
         public CompilationContext Compilation
         {
             get { return TreeContext.Compilation; }
-        }
-
-        public override void Visit(SyntaxNode node)
-        {
-            if (node.ShouldDiscard(this))
-                return;
-
-            visit(node);
-        }
-
-        protected void visit(SyntaxNode node)
-        {
-            base.Visit(node);
         }
 
         public CSharpNodeVisitor(TSyntaxTree treeContext, TLanguageConversion conversion)

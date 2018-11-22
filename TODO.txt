@@ -1,3 +1,40 @@
 - Wrap SyntaxTree, SemanticModel, Compilation to agnostic classes;
 - Better Support RequiresAttribute;
 - Support for C# project macros that are disabled when porting to another language (e.g. CSHARP/NET_FRAMEWORK)
+
+Internals JNI:
+- Mettere AJ2N e AN2J, fare come per i tipi Box (basta uso template specializzato)
+
+Possible support:
+- structs:
+  blittable structs with simple types [StructLayout(LayoutKind.Sequential)] can be supported
+  by annotating Fields with getter/setter C methods
+  and generating JNI code
+- yield;
+- delegates;
+- by ref:
+
+public class ByRef
+{
+    static <T> ByRef<T> Create(T value)
+    {
+        return new ByRef<T>(value);
+    }
+
+    static <T> ByRef<T> Create()
+    {
+        return new ByRef<T>();
+    }
+}
+
+public class ByRef<T> : ByRef
+{
+    public T value;
+
+    ByRef<T>() { }
+
+    ByRef<T>(T value)
+    {
+        this.value = value;
+    }
+}
