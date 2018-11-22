@@ -78,7 +78,7 @@ namespace CodeTranslator.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, ExpressionStatementSyntax syntax, ICompilationContextProvider context)
         {
-
+            builder.Append(syntax.Expression, context);
             return builder;
         }
 

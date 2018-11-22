@@ -38,7 +38,7 @@ namespace CodeTranslator.Java
                 builder.AppendLine();
 
                 // Default constructor
-                builder.Append("public").Space().Append(BoxTypeName).Append("()").Space().AppendLine("{ }");
+                builder.Append("public").Space().Append(BoxTypeName).EmptyParameterList().Space().AppendLine("{ }");
                 builder.AppendLine();
 
                 // Constructor with parameter

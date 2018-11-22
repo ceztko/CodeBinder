@@ -216,6 +216,13 @@ namespace CodeTranslator.Java
 
         static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, ICompilationContextProvider provider)
         {
+            if (symbol.Kind == SymbolKind.Property)
+            {
+                // TODO: just temporary. Find correct usage get/set based on syntax parents?
+                builder.Append("get").Append(symbol.Name).EmptyParameterList();
+                return;
+            }
+
             var kind = syntax.Kind();
             switch (kind)
             {

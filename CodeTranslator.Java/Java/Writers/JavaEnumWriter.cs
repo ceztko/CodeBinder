@@ -63,9 +63,9 @@ namespace CodeTranslator.Java
         {
             Builder.Append(TypeName);
             if (_isFlag)
-                Builder.Append("(int value)");
+                Builder.Parenthesized().Append("int value");
             else
-                Builder.Append("()");
+                Builder.EmptyParameterList();
 
             Builder.AppendLine();
             using (Builder.Block())

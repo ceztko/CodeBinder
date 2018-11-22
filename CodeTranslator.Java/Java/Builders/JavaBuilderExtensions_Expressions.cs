@@ -118,7 +118,7 @@ namespace CodeTranslator.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            builder.Append("NULL");
+            builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
             return builder;
         }
 

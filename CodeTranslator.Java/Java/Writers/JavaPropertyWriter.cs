@@ -128,7 +128,7 @@ namespace CodeTranslator.Java
                 Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(_modifiers)).Space();
 
             Builder.Append(JavaType).Space();
-            Builder.Append(GetterName).Append("()");
+            Builder.Append(GetterName).EmptyParameterList();
             if (_isParentInterface)
             {
                 Builder.EndOfStatement();

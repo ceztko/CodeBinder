@@ -59,6 +59,11 @@ namespace CodeTranslator.Java
             return builder.Append(" ");
         }
 
+        public static CodeBuilder EmptyParameterList(this CodeBuilder builder)
+        {
+            return builder.Append("()");
+        }
+
         /// <summary>One line parenthesized</summary>
         public static CodeBuilder Parenthesized(this CodeBuilder builder, Action parenthesized)
         {

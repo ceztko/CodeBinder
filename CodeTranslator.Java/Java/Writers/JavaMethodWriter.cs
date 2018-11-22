@@ -34,7 +34,7 @@ namespace CodeTranslator.Java
         {
             if (Context.ParameterList.Parameters.Count == 0)
             {
-                Builder.Append("()");
+                Builder.EmptyParameterList();
             }
             else if (Context.ParameterList.Parameters.Count == 1)
             {

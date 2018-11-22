@@ -192,6 +192,14 @@ namespace CodeTranslator.Shared.CSharp
 
         #region Unsupported syntax
 
+        public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+        {
+            if (!node.OperatorToken.IsKind(SyntaxKind.DotToken))
+                Unsupported(node, "Not dot member access");
+
+            base.VisitMemberAccessExpression(node);
+        }
+
         public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
             if (node.Modifiers.Any(SyntaxKind.PartialKeyword))
