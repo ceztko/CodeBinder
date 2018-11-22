@@ -13,7 +13,7 @@ using System.Diagnostics;
 
 namespace CodeTranslator.Java
 {
-    static partial class JavaWriterExtension
+    static partial class JavaBuilderExtension
     {
         public static CodeBuilder Append(this CodeBuilder builder, BlockSyntax syntax, ICompilationContextProvider context, bool skipBraces = false)
         {

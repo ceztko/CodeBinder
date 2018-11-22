@@ -12,7 +12,7 @@ using Microsoft.CodeAnalysis;
 
 namespace CodeTranslator.Java
 {
-    static partial class JavaWriterExtension
+    static partial class JavaBuilderExtension
     {
         public static CodeBuilder EndOfStatement(this CodeBuilder builder)
         {

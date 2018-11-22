@@ -12,61 +12,8 @@ using Microsoft.CodeAnalysis;
 
 namespace CodeTranslator.Java
 {
-    static partial class JavaWriterExtension
+    static partial class JavaExtensions
     {
-        public static CodeBuilder Append(this CodeBuilder builder, ConstructorDeclarationSyntax member, ICompilationContextProvider context)
-        {
-            return builder.Append(new ConstructorWriter(member, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, DestructorDeclarationSyntax member, ICompilationContextProvider context)
-        {
-            return builder.Append(new DestructorWriter(member, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, MethodDeclarationSyntax member, ICompilationContextProvider context)
-        {
-            return builder.Append(new MethodWriter(member, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, PropertyDeclarationSyntax member, ICompilationContextProvider context)
-        {
-            return builder.Append(new PropertyWriter(member, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, IndexerDeclarationSyntax member, ICompilationContextProvider context)
-        {
-            return builder.Append(new IndexerWriter(member, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, FieldDeclarationSyntax member, ICompilationContextProvider context)
-        {
-            return builder.Append(new FieldWriter(member, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, InterfaceDeclarationSyntax member,
-            PartialDeclarationsTree partialDeclarations, ICompilationContextProvider context)
-        {
-            return builder.Append(new InterfaceTypeWriter(member, partialDeclarations, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, ClassDeclarationSyntax member,
-            PartialDeclarationsTree partialDeclarations, ICompilationContextProvider context)
-        {
-            return builder.Append(new ClassTypeWriter(member, partialDeclarations, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, StructDeclarationSyntax member,
-            PartialDeclarationsTree partialDeclarations, ICompilationContextProvider context)
-        {
-            return builder.Append(new StructTypeWriter(member, partialDeclarations, context));
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, EnumDeclarationSyntax member, ICompilationContextProvider context)
-        {
-            return builder.Append(new EnumTypeWriter(member, context));
-        }
-
         public static IEnumerable<CodeWriter> GetWriters(this MemberDeclarationSyntax member,
             PartialDeclarationsTree partialDeclarations, ICompilationContextProvider context)
         {
