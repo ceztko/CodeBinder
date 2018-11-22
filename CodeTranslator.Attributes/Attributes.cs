@@ -85,6 +85,7 @@ namespace CodeTranslator.Attributes
         public const string Yield = "{6D4647AE-CA4C-49F0-8BE6-138512992E21}";
         public const string NETFramework = "{5DD7ECEA-0F59-4781-BCA2-1DC916EB3CFC}";
         public const string ValueTypes = "{5DD7ECEA-0F59-4781-BCA2-1DC916EB3CFC}";
+        public const string PassByRef = "{5B8D618C-93E8-46F2-85FE-DE28FEE86196}";
     }
 
     [Conditional("DEBUG")]
