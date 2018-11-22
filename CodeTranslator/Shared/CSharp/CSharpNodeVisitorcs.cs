@@ -192,12 +192,20 @@ namespace CodeTranslator.Shared.CSharp
 
         #region Unsupported syntax
 
+        public override void VisitParameter(ParameterSyntax node)
+        {
+            if (node.Default != null)
+                Unsupported(node, "Optional parameter");
+
+            DefaultVisit(node);
+        }
+
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             if (!node.OperatorToken.IsKind(SyntaxKind.DotToken))
                 Unsupported(node, "Not dot member access");
 
-            base.VisitMemberAccessExpression(node);
+            DefaultVisit(node);
         }
 
         public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
