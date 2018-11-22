@@ -1,5 +1,6 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
+using CodeTranslator.Attributes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -11,6 +12,12 @@ namespace CodeTranslator.Shared
 {
     public static class RoslynMethodExtensions
     {
+        public static bool ShouldDiscard(this SyntaxNode node, ICompilationContextProvider provider)
+        {
+            // TODO: More support for RequiresAttribute
+            return node.HasAttribute<IgnoreAttribute>(provider) || node.HasAttribute<RequiresAttribute>(provider);
+        }
+
         public static bool IsAttribute<TAttribute>(this AttributeData attribute)
             where TAttribute : Attribute
         {

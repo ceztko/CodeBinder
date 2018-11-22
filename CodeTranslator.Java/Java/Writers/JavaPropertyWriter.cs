@@ -211,7 +211,8 @@ namespace CodeTranslator.Java
 
         public override string PropertyName
         {
-            get { return "At"; }
+            // TODO: setter?
+            get { return "get"; }
         }
     }
 }

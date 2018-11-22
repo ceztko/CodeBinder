@@ -104,7 +104,7 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void Visit(SyntaxNode node)
         {
-            if (node.HasAttribute<IgnoreAttribute>(this))
+            if (node.ShouldDiscard(this))
                 return;
 
             var kind = node.Kind();
@@ -371,7 +371,7 @@ namespace CodeTranslator.Shared.CSharp
 
         public override void Visit(SyntaxNode node)
         {
-            if (node.HasAttribute<IgnoreAttribute>(this))
+            if (node.ShouldDiscard(this))
                 return;
 
             visit(node);

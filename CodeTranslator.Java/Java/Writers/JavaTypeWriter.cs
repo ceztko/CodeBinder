@@ -84,7 +84,7 @@ namespace CodeTranslator.Java
             bool first = true;
             foreach (var member in members)
             {
-                if (member.HasAttribute<IgnoreAttribute>(this))
+                if (member.ShouldDiscard(this))
                     continue;
 
                 foreach (var writer in member.GetWriters(partialDeclarations, this))
