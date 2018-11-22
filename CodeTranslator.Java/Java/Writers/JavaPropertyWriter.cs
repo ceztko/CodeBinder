@@ -69,12 +69,12 @@ namespace CodeTranslator.Java
 
         private void WriteAccessor(AccessorDeclarationSyntax accessor)
         {
-            switch (accessor.Keyword.Text)
+            switch (accessor.Keyword.Kind())
             {
-                case "get":
+                case SyntaxKind.GetKeyword:
                     WriteGetter(accessor);
                     break;
-                case "set":
+                case SyntaxKind.SetKeyword:
                     WriteSetter(accessor);
                     break;
                 default:
@@ -175,12 +175,12 @@ namespace CodeTranslator.Java
             get { return "__" + PropertyName.ToJavaCase(); }
         }
 
-        public string GetterName
+        public virtual string GetterName
         {
             get { return "get" + PropertyName; }
         }
 
-        public string SetterName
+        public virtual string SetterName
         {
             get { return "set" + PropertyName; }
         }
@@ -211,8 +211,17 @@ namespace CodeTranslator.Java
 
         public override string PropertyName
         {
-            // TODO: setter?
+            get { return "Indexer"; }
+        }
+
+        public override string GetterName
+        {
             get { return "get"; }
+        }
+
+        public override string SetterName
+        {
+            get { return "set"; }
         }
     }
 }
