@@ -207,13 +207,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CodeTranslator.Java\CodeTranslator.Java.csproj">
+    <ProjectReference Include="..\CodeBinder.Java\CodeBinder.Java.csproj">
       <Project>{7bb1a9cd-d845-4ebe-bc6c-184f596b6ad1}</Project>
-      <Name>CodeTranslator.Java</Name>
+      <Name>CodeBinder.Java</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CodeTranslator\CodeTranslator.csproj">
+    <ProjectReference Include="..\CodeBinder\CodeBinder.csproj">
       <Project>{7ea075c6-6406-445c-ab77-6c47aff88d58}</Project>
-      <Name>CodeTranslator</Name>
+      <Name>CodeBinder</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

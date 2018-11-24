@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CodeTranslator.Java;
-using CodeTranslator;
+using CodeBinder.Java;
+using CodeBinder;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
-using CodeTranslator.JNI;
+using CodeBinder.JNI;
 
 namespace ConsoleApp1
 {
