@@ -12,7 +12,7 @@ namespace CodeTranslator.Java
 {
     public class CSToJavaConversion : CSharpLanguageConversion
     {
-        internal const bool SkipBody = true;
+        internal const bool SkipBody = false;
 
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 

@@ -233,11 +233,16 @@ namespace CodeTranslator.Java
                     break;
                 }
                 default:
-                    throw new Exception();
+                {
+                    // throw new Exception();
+                    builder.Append("NULL");
+                    break;
+                }
+
             }
         }
 
-        static CodeBuilder append(this CodeBuilder builder, TypeArgumentListSyntax syntax, TypeSyntax parent, ICompilationContextProvider provider)
+        static CodeBuilder Append(this CodeBuilder builder, TypeArgumentListSyntax syntax, TypeSyntax parent, ICompilationContextProvider provider)
         {
             using (builder.TypeParameterList())
             {
@@ -249,14 +254,14 @@ namespace CodeTranslator.Java
                     else
                         builder.CommaSeparator();
 
-                    append(builder, type, parent, provider);
+                    builder.Append(type, parent, provider);
                 }
             }
 
             return builder;
         }
 
-        static CodeBuilder append(this CodeBuilder builder, TypeSyntax type, TypeSyntax parent,
+        static CodeBuilder Append(this CodeBuilder builder, TypeSyntax type, TypeSyntax parent,
             ICompilationContextProvider provider)
         {
             bool isInterface;
@@ -312,7 +317,7 @@ namespace CodeTranslator.Java
                     case SyntaxKind.GenericName:
                     {
                         var arrayType = type as GenericNameSyntax;
-                        builder.Append(javaTypeName).append(arrayType.TypeArgumentList, type, provider);
+                        builder.Append(javaTypeName).Append(arrayType.TypeArgumentList, type, provider);
                         break;
                     }
                     case SyntaxKind.ArrayType:
@@ -365,13 +370,13 @@ namespace CodeTranslator.Java
                     case SyntaxKind.ArrayType:
                     {
                         var arrayType = type as ArrayTypeSyntax;
-                        builder.append(arrayType.ElementType, type, provider).Append("[]");
+                        builder.Append(arrayType.ElementType, type, provider).Append("[]");
                         break;
                     }
                     case SyntaxKind.GenericName:
                     {
                         var genericType = type as GenericNameSyntax;
-                        builder.Append(genericType.GetName()).append(genericType.TypeArgumentList, type, provider);
+                        builder.Append(genericType.GetName()).Append(genericType.TypeArgumentList, type, provider);
                         break;
                     }
                     case SyntaxKind.NullableType:
@@ -381,7 +386,7 @@ namespace CodeTranslator.Java
                         switch (symbol.TypeKind)
                         {
                             case TypeKind.Struct:
-                                builder.append(nullableType.ElementType, type, provider);
+                                builder.Append(nullableType.ElementType, type, provider);
                                 break;
                             case TypeKind.Enum:
                                 throw new Exception("TODO");
@@ -394,7 +399,7 @@ namespace CodeTranslator.Java
                     case SyntaxKind.QualifiedName:
                     {
                         var qualifiedName = type as QualifiedNameSyntax;
-                        builder.append(qualifiedName.Left, type, provider).Dot().append(qualifiedName.Right, type, provider);
+                        builder.Append(qualifiedName.Left, type, provider).Dot().Append(qualifiedName.Right, type, provider);
                         break;
                     }
                     default:
