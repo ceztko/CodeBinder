@@ -8,39 +8,11 @@ using Microsoft.CodeAnalysis;
 namespace CodeBinder.Shared.CSharp
 {
     public abstract class CSharpLanguageConversion
-        : LanguageConversion<CSharpSyntaxTreeContext, CSharpBaseTypeContext>
+        : LanguageConversion<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpBaseTypeContext>
     {
-        // FIXME: this should be part of CompilationContext. CompilationContext must me made generic
-        Dictionary<string, CSharpTypeContext> _partialTypes;
-
-        public CSharpLanguageConversion()
+        protected override CSharpCompilationContext createCompilationContext()
         {
-            _partialTypes = new Dictionary<string, CSharpTypeContext>();
-        }
-
-        protected override CSharpSyntaxTreeContext getSyntaxTreeContext()
-        {
-            return new CSharpSyntaxTreeContext(this);
-        }
-
-        // FIXME: The following (AddPartialType, AddPartialTypeChild, TryGetPartialType) should be part of CompilationContext
-        public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpTypeContext type, CSharpBaseTypeContext parent)
-        {
-            if (_partialTypes.TryGetValue(qualifiedName, out var partialType))
-            {
-                partialType.AddPartialDeclaration(type);
-            }
-            else
-            {
-                type.AddPartialDeclaration(type);
-                _partialTypes.Add(qualifiedName, type);
-                AddType(compilation, type, parent);
-            }
-        }
-
-        public bool TryGetPartialType(string qualifiedName, out CSharpTypeContext partialType)
-        {
-            return _partialTypes.TryGetValue(qualifiedName, out partialType);
+            return new CSharpCompilationContext(this);
         }
 
         public abstract TypeConversion<CSharpClassTypeContext> GetClassTypeConversion();

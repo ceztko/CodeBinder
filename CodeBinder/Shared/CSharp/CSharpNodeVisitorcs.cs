@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace CodeBinder.Shared.CSharp
 {
-    class CSharpNodeVisitor : CSharpNodeVisitor<CSharpSyntaxTreeContext, CSharpLanguageConversion>
+    class CSharpNodeVisitor : CSharpNodeVisitor<CSharpSyntaxTreeContext, CSharpCompilationContext, CSharpLanguageConversion>
     {
         private Stack<CSharpBaseTypeContext> _parents;
 
@@ -27,7 +27,7 @@ namespace CodeBinder.Shared.CSharp
                     // Verify if the current parent is actually a partial type and, if so,
                     // use that istead
                     string parentQualifiedName = ret.Node.GetQualifiedName(this);
-                    if (Conversion.TryGetPartialType(parentQualifiedName, out var parentPartialType))
+                    if (Compilation.TryGetPartialType(parentQualifiedName, out var parentPartialType))
                         ret = parentPartialType;
                 }
 
@@ -45,8 +45,8 @@ namespace CodeBinder.Shared.CSharp
 
         #region Supported types
 
-        public CSharpNodeVisitor(CSharpSyntaxTreeContext context, CSharpLanguageConversion conversion)
-            : base(context, conversion)
+        public CSharpNodeVisitor(CSharpSyntaxTreeContext context)
+            : base(context, context.Compilation, context.Compilation.Conversion)
         {
             _parents = new Stack<CSharpBaseTypeContext>();
         }
@@ -55,7 +55,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpInterfaceTypeContext(node, TreeContext, Conversion.GetInterfaceTypeConversion());
+            var type = new CSharpInterfaceTypeContext(node, Compilation, Conversion.GetInterfaceTypeConversion());
             addType(type, isPartial);
             DefaultVisit(node);
         }
@@ -64,7 +64,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpClassTypeContext(node, TreeContext, Conversion.GetClassTypeConversion());
+            var type = new CSharpClassTypeContext(node, Compilation, Conversion.GetClassTypeConversion());
             addType(type, isPartial);
             _parents.Push(type);
             DefaultVisit(node);
@@ -75,7 +75,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpStructTypeContext(node, TreeContext, Conversion.GetStructTypeConversion());
+            var type = new CSharpStructTypeContext(node, Compilation, Conversion.GetStructTypeConversion());
             addType(type, isPartial);
             _parents.Push(type);
             DefaultVisit(node);
@@ -84,7 +84,7 @@ namespace CodeBinder.Shared.CSharp
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
-            var type = new CSharpEnumTypeContext(node, TreeContext, Conversion.GetEnumTypeConversion());
+            var type = new CSharpEnumTypeContext(node, Compilation, Conversion.GetEnumTypeConversion());
             TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
         }
@@ -94,7 +94,7 @@ namespace CodeBinder.Shared.CSharp
             if (isPartial)
             {
                 string qualifiedName = type.Node.GetQualifiedName(this);
-                Conversion.AddPartialType(qualifiedName, Compilation, type, CurrentParent);
+                Compilation.AddPartialType(qualifiedName, Compilation, type, CurrentParent);
             }
             else
             {
@@ -373,22 +373,25 @@ namespace CodeBinder.Shared.CSharp
         #endregion // Unsupported syntax
     }
 
-    public class CSharpNodeVisitor<TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker, ICompilationContextProvider
+    public class CSharpNodeVisitor<TSyntaxTree, TCompilation, TLanguageConversion> : CSharpSyntaxWalker, ICompilationContextProvider
         where TSyntaxTree : SyntaxTreeContext
+        where TCompilation : CompilationContext
         where TLanguageConversion : LanguageConversion
     {
-        public TLanguageConversion Conversion { get; private set; }
         public TSyntaxTree TreeContext { get; private set; }
+        public TCompilation Compilation { get; private set; }
+        public TLanguageConversion Conversion { get; private set; }
 
-        public CompilationContext Compilation
-        {
-            get { return TreeContext.Compilation; }
-        }
-
-        public CSharpNodeVisitor(TSyntaxTree treeContext, TLanguageConversion conversion)
+        public CSharpNodeVisitor(TSyntaxTree treeContext, TCompilation compilation, TLanguageConversion conversion)
         {
             TreeContext = treeContext;
+            Compilation = compilation;
             Conversion = conversion;
+        }
+
+        CompilationContext ICompilationContextProvider.Compilation
+        {
+            get { return Compilation; }
         }
     }
 }

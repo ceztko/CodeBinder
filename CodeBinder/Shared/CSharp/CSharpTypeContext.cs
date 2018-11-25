@@ -11,10 +11,10 @@ using System.Text;
 namespace CodeBinder.Shared.CSharp
 {
     [DebuggerDisplay("TypeName = {TypeName}")]
-    public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext>
+    public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext, CSharpCompilationContext>
     {
-        internal CSharpBaseTypeContext(CSharpSyntaxTreeContext treeContext)
-            : base(treeContext) { }
+        internal CSharpBaseTypeContext(CSharpCompilationContext compilation)
+            : base(compilation) { }
 
         public BaseTypeDeclarationSyntax Node
         {
@@ -36,8 +36,8 @@ namespace CodeBinder.Shared.CSharp
     {
         List<CSharpTypeContext> _partialDeclarations;
 
-        internal CSharpTypeContext(CSharpSyntaxTreeContext treeContext)
-            : base(treeContext)
+        internal CSharpTypeContext(CSharpCompilationContext compilation)
+            : base(compilation)
         {
             _partialDeclarations = new List<CSharpTypeContext>();
         }
@@ -92,8 +92,8 @@ namespace CodeBinder.Shared.CSharp
 
         public new TTypeConversion Conversion { get; private set; }
 
-        protected CSharpBaseTypeContext(TNode node, CSharpSyntaxTreeContext treeContext, TTypeConversion conversion)
-            : base(treeContext)
+        protected CSharpBaseTypeContext(TNode node, CSharpCompilationContext compilation, TTypeConversion conversion)
+            : base(compilation)
         {
             Node = node;
             Conversion = conversion;
@@ -118,8 +118,8 @@ namespace CodeBinder.Shared.CSharp
 
         public new TTypeConversion Conversion { get; private set; }
 
-        protected CSharpTypeContext(TNode node, CSharpSyntaxTreeContext treeContext, TTypeConversion conversion)
-            : base(treeContext)
+        protected CSharpTypeContext(TNode node, CSharpCompilationContext compilation, TTypeConversion conversion)
+            : base(compilation)
         {
             Node = node;
             Conversion = conversion;

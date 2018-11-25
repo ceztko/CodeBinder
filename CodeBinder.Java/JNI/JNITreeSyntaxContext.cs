@@ -6,14 +6,14 @@ using System.Text;
 
 namespace CodeBinder.JNI
 {
-    public class JNISyntaxTreeContext : SyntaxTreeContext<JNIModuleContext, CSToJNIConversion>
+    public class JNISyntaxTreeContext : JNICompilationContext.SyntaxTree<JNICompilationContext>
     {
-        public JNISyntaxTreeContext(CSToJNIConversion conversion)
-            : base(conversion)  { }
+        public JNISyntaxTreeContext(JNICompilationContext compilation)
+            : base(compilation)  { }
 
         public override void Visit(SyntaxTree tree)
         {
-            var walker = new JNINodeVisitor(this, Conversion);
+            var walker = new JNINodeVisitor(this);
             walker.Visit(tree.GetRoot());
         }
     }

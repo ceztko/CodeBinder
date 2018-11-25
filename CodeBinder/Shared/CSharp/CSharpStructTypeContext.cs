@@ -8,9 +8,9 @@ namespace CodeBinder.Shared.CSharp
     public sealed class CSharpStructTypeContext : CSharpTypeContext<StructDeclarationSyntax, TypeConversion<CSharpStructTypeContext>>
     {
         public CSharpStructTypeContext(StructDeclarationSyntax node,
-                CSharpSyntaxTreeContext treeContext,
+                CSharpCompilationContext compilation,
                 TypeConversion<CSharpStructTypeContext> conversion)
-            : base(node, treeContext, conversion)
+            : base(node, compilation, conversion)
         {
             conversion.TypeContext = this;
         }

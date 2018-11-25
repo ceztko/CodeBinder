@@ -48,7 +48,7 @@ namespace CodeBinder
             }
 
             var syntaxTrees = solutionDir == null ? compilation.SyntaxTrees.ToArray() : compilation.SyntaxTrees.Where(t => t.FilePath.StartsWith(solutionDir)).ToArray();
-            var compilationContext = new CompilationContext(compilation);
+            var compilationContext = Conversion.GetCompilationContext(compilation);
 
             var syntaxTreeContextTypes = getSyntaxTreeContextTypes(compilationContext, syntaxTrees);
             foreach (var pair in syntaxTreeContextTypes)
@@ -73,9 +73,7 @@ namespace CodeBinder
             var syntaxTreeContexts = new Dictionary<string, SyntaxTreeContext>();
             foreach (var tree in syntaxTrees)
             {
-                var syntaxTree = Conversion.GetSyntaxTreeContext();
-                syntaxTree.Compilation = compilation;
-
+                var syntaxTree = compilation.CreateSyntaxTreeContext();
                 var treeFilePath = tree.FilePath ?? "";
                 syntaxTree.Visit(tree);
                 syntaxTreeContexts.Add(treeFilePath, syntaxTree);

@@ -9,10 +9,10 @@ using CodeBinder.Attributes;
 
 namespace CodeBinder.JNI
 {
-    class JNINodeVisitor : CSharpNodeVisitor<JNISyntaxTreeContext, CSToJNIConversion>
+    class JNINodeVisitor : CSharpNodeVisitor<JNISyntaxTreeContext, JNICompilationContext, CSToJNIConversion>
     {
-        public JNINodeVisitor(JNISyntaxTreeContext treeContext, CSToJNIConversion conversion)
-            : base(treeContext, conversion) { }
+        public JNINodeVisitor(JNISyntaxTreeContext treeContext)
+            : base(treeContext, treeContext.Compilation, treeContext.Compilation.Conversion) { }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
@@ -31,14 +31,14 @@ namespace CodeBinder.JNI
             if (TryGetModule(type, out moduleName))
             {
                 JNIModuleContextParent parent;
-                if (!Conversion.TryGetModule(moduleName, out parent))
+                if (!Compilation.TryGetModule(moduleName, out parent))
                 {
-                    parent = new JNIModuleContextParent(moduleName);
-                    Conversion.AddModule(Compilation, parent);
+                    parent = new JNIModuleContextParent(moduleName, Compilation);
+                    Compilation.AddModule(Compilation, parent);
                 }
 
-                module = new JNIModuleContextChild(TreeContext);
-                Conversion.AddModuleChild(Compilation, module, parent);
+                module = new JNIModuleContextChild(Compilation);
+                Compilation.AddModuleChild(Compilation, module, parent);
             }
 
             foreach (var member in type.Members)

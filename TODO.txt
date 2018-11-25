@@ -1,4 +1,4 @@
-- Wrap SyntaxTree, SemanticModel, Compilation to agnostic classes;
+- Wrap SyntaxTree, SemanticModel, Compilation to agnostic classes???
 - Better Support RequiresAttribute;
 - Support for C# project macros that are disabled when porting to another language (e.g. CSHARP/NET_FRAMEWORK)
 

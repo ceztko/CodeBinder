@@ -13,8 +13,6 @@ namespace CodeBinder.Shared
     {
         internal LanguageConversion() { }
 
-        public abstract SyntaxTreeContext GetSyntaxTreeContext();
-
         public virtual IEnumerable<ConversionBuilder> DefaultConversions
         {
             get { yield break; }
@@ -39,41 +37,29 @@ namespace CodeBinder.Shared
                     yield return new ConversionDelegate(conversion);
             }
         }
+
+        internal CompilationContext GetCompilationContext(Compilation compilation)
+        {
+            var ret = CreateCompilationContext();
+            ret.Compilation = compilation;
+            return ret;
+        }
+
+        internal abstract CompilationContext CreateCompilationContext();
     }
 
-    public abstract class LanguageConversion<TSyntaxTreeContext, TTypeContext> : LanguageConversion
-        where TSyntaxTreeContext : SyntaxTreeContext<TTypeContext>
-        where TTypeContext : TypeContext<TTypeContext, TSyntaxTreeContext>
+    public abstract class LanguageConversion<TCompilationContext, TSyntaxTreeContext, TTypeContext> : LanguageConversion
+        where TCompilationContext : CompilationContext<TTypeContext>
+        where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
+        where TTypeContext : TypeContext<TTypeContext, TCompilationContext>
     {
-        protected LanguageConversion() { }
+        public LanguageConversion() { }
 
-        public sealed override SyntaxTreeContext GetSyntaxTreeContext()
+        internal sealed override CompilationContext CreateCompilationContext()
         {
-            return getSyntaxTreeContext();
+            return createCompilationContext();
         }
 
-        protected abstract TSyntaxTreeContext getSyntaxTreeContext();
-
-        // TODO: Find a method to have types directly on CompilationContext
-        // e.g., by having just CompilationContext generic and TypeContext subclass inside
-        protected void AddType(CompilationContext compilation, TTypeContext type, TTypeContext parent)
-        {
-            if (type.Parent != null)
-                throw new Exception("Can't re-add root type");
-
-            if (type == parent)
-                throw new Exception("The parent can't be same reference as the given type");
-
-            type.Compilation = compilation;
-            if (parent == null)
-            {
-                compilation.AddRootType(type);
-            }
-            else
-            {
-                type.Parent = parent;
-                parent.AddChild(type);
-            }
-        }
+        protected abstract TCompilationContext createCompilationContext();
     }
 }

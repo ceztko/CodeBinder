@@ -6,11 +6,9 @@ using System.Text;
 
 namespace CodeBinder.JNI
 {
-    public abstract class JNIModuleContext : TypeContext<JNIModuleContext, JNISyntaxTreeContext>
+    public abstract class JNIModuleContext : TypeContext<JNIModuleContext, JNICompilationContext>
     {
-        public CSToJNIConversion LanguageConversion { get; internal set; }
-
-        protected JNIModuleContext(JNISyntaxTreeContext context)
+        protected JNIModuleContext(JNICompilationContext context)
             : base(context) { }
 
         public abstract string Name
@@ -28,15 +26,15 @@ namespace CodeBinder.JNI
     {
         private string _Name;
 
-        public JNIModuleContextParent(string name)
-            : base(null)
+        public JNIModuleContextParent(string name, JNICompilationContext context)
+            : base(context)
         {
             _Name = name;
         }
 
         protected override TypeConversion GetConversion()
         {
-            var ret = new JNIModuleConversion(LanguageConversion);
+            var ret = new JNIModuleConversion(Compilation.Conversion);
             ret.TypeContext = this;
             return ret;
         }
@@ -63,7 +61,7 @@ namespace CodeBinder.JNI
     {
         private List<MethodDeclarationSyntax> _methods;
 
-        public JNIModuleContextChild(JNISyntaxTreeContext context)
+        public JNIModuleContextChild(JNICompilationContext context)
             : base(context)
         {
             _methods = new List<MethodDeclarationSyntax>();

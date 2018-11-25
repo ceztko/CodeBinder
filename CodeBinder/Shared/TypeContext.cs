@@ -12,11 +12,9 @@ namespace CodeBinder.Shared
     {
         internal TypeContext() { }
 
-        public CompilationContext Compilation { get; internal set; }
-
-        public SyntaxTreeContext TreeContext
+        public CompilationContext Compilation
         {
-            get { return GetSyntaxTreeContext(); }
+            get { return GetCompilationContext(); }
         }
 
         public TypeConversion Conversion
@@ -29,7 +27,7 @@ namespace CodeBinder.Shared
             get { return GetChildren(); }
         }
 
-        protected abstract SyntaxTreeContext GetSyntaxTreeContext();
+        protected abstract CompilationContext GetCompilationContext();
 
         protected abstract TypeConversion GetConversion();
 
@@ -64,20 +62,20 @@ namespace CodeBinder.Shared
         }
     }
 
-    public abstract class TypeContext<TTypeContext, TTreeContext> : TypeContext<TTypeContext>
+    public abstract class TypeContext<TTypeContext, TCompilationContext> : TypeContext<TTypeContext>
         where TTypeContext : TypeContext
-        where TTreeContext : SyntaxTreeContext
+        where TCompilationContext : CompilationContext
     {
-        public new TTreeContext TreeContext { get; private set; }
+        public new TCompilationContext Compilation { get; private set; }
 
-        protected TypeContext(TTreeContext treeContext)
+        protected TypeContext(TCompilationContext compilation)
         {
-            TreeContext = treeContext;
+            Compilation = compilation;
         }
 
-        protected override SyntaxTreeContext GetSyntaxTreeContext()
+        protected override CompilationContext GetCompilationContext()
         {
-            return TreeContext;
+            return Compilation;
         }
     }
 }

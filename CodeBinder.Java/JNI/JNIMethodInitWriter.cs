@@ -8,24 +8,24 @@ namespace CodeBinder.JNI
 {
     class MethodInitWriter : ConversionBuilder
     {
-        CSToJNIConversion _conversion;
+        JNICompilationContext _compilation;
 
-        public MethodInitWriter(CSToJNIConversion conversion)
+        public MethodInitWriter(JNICompilationContext compilation)
         {
-            _conversion = conversion;
+            _compilation = compilation;
         }
 
         public override void Write(CodeBuilder builder)
         {
             builder.AppendLine("#include \"JNITypesPrivate.h\"");
-            foreach (var module in _conversion.Modules)
+            foreach (var module in _compilation.Modules)
                 builder.Append("#include \"JNI").Append(module.Name).AppendLine(".h\"");
 
             builder.AppendLine();
             builder.AppendLine("static void* funcs[] = {");
             using (builder.Indent())
             {
-                foreach (var module in _conversion.Modules)
+                foreach (var module in _compilation.Modules)
                 {
                     foreach (var method in module.Methods)
                     {
