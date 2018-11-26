@@ -8,18 +8,18 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    public class FieldWriter : CodeWriter<FieldDeclarationSyntax>
+    class FieldWriter : JavaCodeWriter<FieldDeclarationSyntax>
     {
-        public FieldWriter(FieldDeclarationSyntax syntax, ICompilationContextProvider context)
+        public FieldWriter(FieldDeclarationSyntax syntax, JavaCodeWriterContext context)
             : base(syntax, context) { }
 
         protected override void Write()
         {
-            string modifiers = Context.GetJavaModifiersString();
+            string modifiers = Item.GetJavaModifiersString();
             if (!string.IsNullOrEmpty(modifiers))
                 Builder.Append(modifiers).Space();
 
-            Builder.Append(Context.Declaration, this).EndOfStatement();
+            Builder.Append(Item.Declaration, this).EndOfStatement();
         }
     }
 }

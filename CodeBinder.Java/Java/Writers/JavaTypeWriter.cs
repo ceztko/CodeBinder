@@ -13,21 +13,21 @@ using System.Text;
 namespace CodeBinder.Java
 {
     [DebuggerDisplay("TypeName = {TypeName}")]
-    abstract class BaseTypeWriter<TTypeDeclaration> : CodeWriter<TTypeDeclaration>
+    abstract class BaseTypeWriter<TTypeDeclaration> : JavaCodeWriter<TTypeDeclaration>
         where TTypeDeclaration : BaseTypeDeclarationSyntax
     {
-        protected BaseTypeWriter(TTypeDeclaration syntax, ICompilationContextProvider context)
+        protected BaseTypeWriter(TTypeDeclaration syntax, JavaCodeWriterContext context)
             : base(syntax, context) { }
 
         protected override void Write()
         {
-            var modifiers = Context.GetJavaModifiersString();
+            var modifiers = Item.GetJavaModifiersString();
             if (!string.IsNullOrEmpty(modifiers))
                 Builder.Append(modifiers).Space();
 
             if (NeedStaticKeyword)
             {
-                var parentKind = Context.Parent.Kind();
+                var parentKind = Item.Parent.Kind();
                 switch (parentKind)
                 {
                     case SyntaxKind.ClassDeclaration:
@@ -37,7 +37,7 @@ namespace CodeBinder.Java
                 }
             }
 
-            Builder.Append(Context.GetJavaTypeDeclaration()).Space();
+            Builder.Append(Item.GetJavaTypeDeclaration()).Space();
             Builder.Append(TypeName);
             if (Arity > 0)
             {
@@ -45,10 +45,10 @@ namespace CodeBinder.Java
                 WriteTypeParameters();
             }
 
-            if (Context.BaseList != null)
+            if (Item.BaseList != null)
             {
                 Builder.Space();
-                WriteBaseTypes(Context.BaseList);
+                WriteBaseTypes(Item.BaseList);
             }
             Builder.AppendLine();
             using (Builder.Block())
@@ -101,7 +101,7 @@ namespace CodeBinder.Java
                 if (member.ShouldDiscard(this))
                     continue;
 
-                foreach (var writer in member.GetWriters(partialDeclarations, this))
+                foreach (var writer in member.GetWriters(partialDeclarations, Context))
                 {
                     if (first)
                         first = false;
@@ -120,7 +120,7 @@ namespace CodeBinder.Java
 
         public virtual string TypeName
         {
-            get { return Context.GetName(); }
+            get { return Item.GetName(); }
         }
 
         public virtual bool NeedStaticKeyword
@@ -134,7 +134,7 @@ namespace CodeBinder.Java
     {
         PartialDeclarationsTree _partialDeclarations;
 
-        protected TypeWriter(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations, ICompilationContextProvider context)
+        protected TypeWriter(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations, JavaCodeWriterContext context)
             : base(findMainDeclaration(syntax, partialDeclarations), context)
         {
             _partialDeclarations = partialDeclarations;
@@ -143,7 +143,7 @@ namespace CodeBinder.Java
         protected override void WriteTypeMembers()
         {
             if (_partialDeclarations.PartialDeclarations.Count == 0)
-                WriteTypeMembers(Context.Members, _partialDeclarations);
+                WriteTypeMembers(Item.Members, _partialDeclarations);
             else
                 WriteTypeMembers(getPartialDeclarationMembers(), _partialDeclarations);
         }

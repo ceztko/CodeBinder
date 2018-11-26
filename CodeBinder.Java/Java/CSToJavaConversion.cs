@@ -12,7 +12,7 @@ namespace CodeBinder.Java
 {
     public class CSToJavaConversion : CSharpLanguageConversion
     {
-        internal const bool SkipBody = false;
+        public bool SkipBody { get; set; }
 
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 

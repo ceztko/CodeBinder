@@ -11,10 +11,10 @@ using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.Java
 {
-    abstract class MethodWriter<TMethod> : CodeWriter<TMethod>
+    abstract class MethodWriter<TMethod> : JavaCodeWriter<TMethod>
         where TMethod : BaseMethodDeclarationSyntax
     {
-        protected MethodWriter(TMethod method, ICompilationContextProvider context)
+        protected MethodWriter(TMethod method, JavaCodeWriterContext context)
             : base(method, context) { }
 
         protected override void Write()
@@ -32,15 +32,15 @@ namespace CodeBinder.Java
 
         protected virtual void WriteParameters()
         {
-            if (Context.ParameterList.Parameters.Count == 0)
+            if (Item.ParameterList.Parameters.Count == 0)
             {
                 Builder.EmptyParameterList();
             }
-            else if (Context.ParameterList.Parameters.Count == 1)
+            else if (Item.ParameterList.Parameters.Count == 1)
             {
                 using (Builder.ParameterList())
                 {
-                    writeParameters(Context.ParameterList);
+                    writeParameters(Item.ParameterList);
                 }
             }
             else
@@ -49,7 +49,7 @@ namespace CodeBinder.Java
                 {
                     using (Builder.ParameterList(true))
                     {
-                        writeParameters(Context.ParameterList);
+                        writeParameters(Item.ParameterList);
                         Builder.AppendLine();
                     }
                 }
@@ -58,7 +58,7 @@ namespace CodeBinder.Java
 
         protected virtual void WriteModifiers()
         {
-            string modifiers = Context.GetJavaModifiersString();
+            string modifiers = Item.GetJavaModifiersString();
             if (!string.IsNullOrEmpty(modifiers))
                 Builder.Append(modifiers).Space();
         }
@@ -70,7 +70,7 @@ namespace CodeBinder.Java
 
         void writeMethodBody()
         {
-            if (Context.Body == null || !WriteMethodBody)
+            if (Item.Body == null || !WriteMethodBody)
             {
                 Builder.EndOfStatement();
             }
@@ -79,8 +79,8 @@ namespace CodeBinder.Java
                 using (Builder.AppendLine().Block())
                 {
                     WriteMethodBodyInternal();
-                    if (!CSToJavaConversion.SkipBody)
-                        Builder.Append(Context.Body, this, true).AppendLine();
+                    if (!Context.Conversion.SkipBody)
+                        Builder.Append(Item.Body, this, true).AppendLine();
                 }
             }
         }
@@ -136,7 +136,7 @@ namespace CodeBinder.Java
 
     class MethodWriter : MethodWriter<MethodDeclarationSyntax>
     {
-        public MethodWriter(MethodDeclarationSyntax method, ICompilationContextProvider context)
+        public MethodWriter(MethodDeclarationSyntax method, JavaCodeWriterContext context)
             : base(method, context) { }
 
         protected override void WriteModifiers()
@@ -149,24 +149,24 @@ namespace CodeBinder.Java
 
         protected override void WriteTypeParameters()
         {
-            Builder.Append(Context.GetTypeParameters(this), this).Space();
+            Builder.Append(Item.GetTypeParameters(this), this).Space();
         }
 
         protected override void WriteReturnType()
         {
-            WriteType(Context.ReturnType, IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None);
+            WriteType(Item.ReturnType, IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None);
             Builder.Space();
         }
 
         protected override void WriteMethodBodyInternal()
         {
-            if (CSToJavaConversion.SkipBody)
-                Builder.Append(Context.ReturnType.GetJavaDefaultReturnStatement(this)).EndOfStatement();
+            if (Context.Conversion.SkipBody)
+                Builder.Append(Item.ReturnType.GetJavaDefaultReturnStatement(this)).EndOfStatement();
         }
 
         public bool IsParentInterface
         {
-            get { return Context.Parent.Kind() == SyntaxKind.InterfaceDeclaration; }
+            get { return Item.Parent.Kind() == SyntaxKind.InterfaceDeclaration; }
         }
 
         public override string MethodName
@@ -174,11 +174,11 @@ namespace CodeBinder.Java
             get
             {
                 // Try first look for replacements
-                var methodSymbol = Context.GetDeclaredSymbol<IMethodSymbol>(this);
+                var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(this);
                 if (methodSymbol.HasJavaMethodReplacement(out var replacement))
                     return replacement;
 
-                var methodName = Context.GetName();
+                var methodName = Item.GetName();
                 if (IsNative)
                     return methodName;
                 else
@@ -188,12 +188,12 @@ namespace CodeBinder.Java
 
         public override bool IsNative
         {
-            get { return Context.IsNative(this); }
+            get { return Item.IsNative(this); }
         }
 
         public override int Arity
         {
-            get { return Context.Arity; }
+            get { return Item.Arity; }
         }
     }
 
@@ -201,7 +201,7 @@ namespace CodeBinder.Java
     {
         MethodSignatureInfo _signature;
 
-        public SignatureMethodWriter(MethodSignatureInfo signature, MethodDeclarationSyntax method, ICompilationContextProvider context)
+        public SignatureMethodWriter(MethodSignatureInfo signature, MethodDeclarationSyntax method, JavaCodeWriterContext context)
             : base(method, context)
         {
             _signature = signature;
@@ -253,10 +253,10 @@ namespace CodeBinder.Java
     {
         bool _isStatic;
 
-        public ConstructorWriter(ConstructorDeclarationSyntax method, ICompilationContextProvider context)
+        public ConstructorWriter(ConstructorDeclarationSyntax method, JavaCodeWriterContext context)
             : base(method, context)
         {
-            _isStatic = Context.Modifiers.Any(SyntaxKind.StaticKeyword);
+            _isStatic = Item.Modifiers.Any(SyntaxKind.StaticKeyword);
         }
 
         protected override void WriteModifiers()
@@ -273,8 +273,8 @@ namespace CodeBinder.Java
 
         protected override void WriteMethodBodyInternal()
         {
-            if (Context.Initializer != null)
-                Builder.Append(Context.Initializer, this).EndOfStatement();
+            if (Item.Initializer != null)
+                Builder.Append(Item.Initializer, this).EndOfStatement();
         }
 
         public override string MethodName
@@ -284,7 +284,7 @@ namespace CodeBinder.Java
                 if (_isStatic)
                     return "static";
                 else
-                    return (Context.Parent as BaseTypeDeclarationSyntax).GetName();
+                    return (Item.Parent as BaseTypeDeclarationSyntax).GetName();
             }
         }
 
@@ -296,7 +296,7 @@ namespace CodeBinder.Java
 
     class DestructorWriter : MethodWriter<DestructorDeclarationSyntax>
     {
-        public DestructorWriter(DestructorDeclarationSyntax method, ICompilationContextProvider context)
+        public DestructorWriter(DestructorDeclarationSyntax method, JavaCodeWriterContext context)
             : base(method, context) { }
 
         protected override void WriteThrows()

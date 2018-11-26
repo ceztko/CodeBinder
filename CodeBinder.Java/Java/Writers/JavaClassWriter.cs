@@ -11,16 +11,16 @@ namespace CodeBinder.Java
     class ClassTypeWriter : TypeWriter<ClassDeclarationSyntax>
     {
         public ClassTypeWriter(ClassDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
-                ICompilationContextProvider context) : base(declaration, partialDeclarations, context) { }
+                JavaCodeWriterContext context) : base(declaration, partialDeclarations, context) { }
 
         protected override void WriteTypeParameters()
         {
-            Builder.Append(Context.GetTypeParameters(), this).Space();
+            Builder.Append(Item.GetTypeParameters(), this).Space();
         }
 
         public override int Arity
         {
-            get { return Context.Arity; }
+            get { return Item.Arity; }
         }
 
         public override bool NeedStaticKeyword

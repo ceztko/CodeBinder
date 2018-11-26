@@ -59,7 +59,7 @@ namespace CodeBinder.JNI
 
             protected override void WriteParameters()
             {
-                foreach (var parameter in Context.Method.ParameterList.Parameters)
+                foreach (var parameter in Item.Method.ParameterList.Parameters)
                     WriteParameter(parameter);
             }
 
@@ -73,12 +73,12 @@ namespace CodeBinder.JNI
 
             public override string ReturnType
             {
-                get { return Context.Method.ReturnType.GetJNIType(false, this); }
+                get { return Item.Method.ReturnType.GetJNIType(false, this); }
             }
 
             public override string MethodName
             {
-                get { return Context.Method.GetJNIMethodName(Context.Module.TypeContext); }
+                get { return Item.Method.GetJNIMethodName(Item.Module.TypeContext); }
             }
 
             private void WriteType(TypeSyntax type, bool isRef)
@@ -115,7 +115,7 @@ namespace CodeBinder.JNI
 
             public override string MethodName
             {
-                get { return _signature.GetJNIMethodName(Context.Method, Context.Module.TypeContext); }
+                get { return _signature.GetJNIMethodName(Item.Method, Item.Module.TypeContext); }
             }
         }
     }

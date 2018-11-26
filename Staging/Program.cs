@@ -32,8 +32,9 @@ namespace ConsoleApp1
             {
                 // Java conversion
                 var conv = ProjectConverter.CreateFor<CSToJavaConversion>(project);
+                conv.Conversion.SkipBody = true;
                 conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
-                genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\alt\java";
+                genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\main\java";
                 genargs.EagerStringConversion = true;
                 conv.ConvertAndWrite(genargs);
             }

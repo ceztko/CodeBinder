@@ -35,15 +35,27 @@ namespace CodeBinder.Util
         }
     }
 
-    public abstract class CodeWriter<TContext> : CodeWriter, ICompilationContextProvider
+    public abstract class CodeWriter<TItem> : CodeWriter, ICompilationContextProvider
     {
         public CompilationContext Compilation { get; private set; }
+        public TItem Item { get; private set; }
+
+        protected CodeWriter(TItem item, ICompilationContextProvider context)
+        {
+            Item = item;
+            Compilation = context.Compilation;
+        }
+    }
+
+    public abstract class CodeWriter<TItem, TContext> : CodeWriter<TItem>
+        where TContext : ICompilationContextProvider
+    {
         public TContext Context { get; private set; }
 
-        protected CodeWriter(TContext context, ICompilationContextProvider provider)
+        protected CodeWriter(TItem item, TContext context, ICompilationContextProvider provider)
+            : base(item, provider)
         {
             Context = context;
-            Compilation = provider.Compilation;
         }
     }
 }

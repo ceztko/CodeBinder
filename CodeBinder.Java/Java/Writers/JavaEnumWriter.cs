@@ -15,10 +15,10 @@ namespace CodeBinder.Java
     {
         bool _isFlag;
 
-        public EnumTypeWriter(EnumDeclarationSyntax syntax, ICompilationContextProvider context)
+        public EnumTypeWriter(EnumDeclarationSyntax syntax, JavaCodeWriterContext context)
             : base(syntax, context)
         {
-            _isFlag = Context.IsFlag(this);
+            _isFlag = Item.IsFlag(this);
         }
 
         protected override void WriteTypeMembers()
@@ -35,7 +35,7 @@ namespace CodeBinder.Java
         private void WriteEnumMembers()
         {
             bool first = true;
-            foreach (var member in Context.Members)
+            foreach (var member in Item.Members)
             {
                 if (first)
                     first = false;

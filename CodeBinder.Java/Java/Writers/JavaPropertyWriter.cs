@@ -10,17 +10,17 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    abstract class PropertyWriter<TProperty> : CodeWriter<TProperty>
+    abstract class PropertyWriter<TProperty> : JavaCodeWriter<TProperty>
             where TProperty : BasePropertyDeclarationSyntax
     {
         SyntaxKind[] _modifiers;
         bool _isAutoProperty;
         bool _isParentInterface;
 
-        protected PropertyWriter(TProperty syntax, ICompilationContextProvider context)
+        protected PropertyWriter(TProperty syntax, JavaCodeWriterContext context)
             : base(syntax, context)
         {
-            _modifiers = Context.GetCSharpModifiers().ToArray();
+            _modifiers = Item.GetCSharpModifiers().ToArray();
 
             if (_modifiers.Contains(SyntaxKind.AbstractKeyword))
             {
@@ -29,9 +29,9 @@ namespace CodeBinder.Java
             else
             {
                 _isAutoProperty = true;
-                if (Context.AccessorList != null)
+                if (Item.AccessorList != null)
                 {
-                    foreach (var accessor in Context.AccessorList.Accessors)
+                    foreach (var accessor in Item.AccessorList.Accessors)
                     {
                         if (accessor.Body != null)
                         {
@@ -42,13 +42,13 @@ namespace CodeBinder.Java
                 }
             }
 
-            _isParentInterface = Context.Parent.Kind() == SyntaxKind.InterfaceDeclaration;
+            _isParentInterface = Item.Parent.Kind() == SyntaxKind.InterfaceDeclaration;
         }
 
         protected override void Write()
         {
             WriteUnderlyingField();
-            WriteAccessors(Context.AccessorList);
+            WriteAccessors(Item.AccessorList);
         }
 
         private void WriteUnderlyingField()
@@ -119,7 +119,7 @@ namespace CodeBinder.Java
                     {
                         using (Builder.AppendLine().Block())
                         {
-                            if (!CSToJavaConversion.SkipBody)
+                            if (!Context.Conversion.SkipBody)
                                 Builder.Space().Append(accessor.Body, this, true);
                         }
                     }
@@ -161,8 +161,8 @@ namespace CodeBinder.Java
                     {
                         using (Builder.AppendLine().Block())
                         {
-                            if (CSToJavaConversion.SkipBody)
-                                Builder.Append(Context.Type.GetJavaDefaultReturnStatement(this)).EndOfStatement();
+                            if (Context.Conversion.SkipBody)
+                                Builder.Append(Item.Type.GetJavaDefaultReturnStatement(this)).EndOfStatement();
                             else
                                 Builder.Append(accessor.Body, this, true);
                         }
@@ -198,7 +198,7 @@ namespace CodeBinder.Java
 
         public string JavaType
         {
-            get { return Context.Type.GetJavaType(this); }
+            get { return Item.Type.GetJavaType(this); }
         }
 
         public abstract string PropertyName { get; }
@@ -206,18 +206,18 @@ namespace CodeBinder.Java
 
     class PropertyWriter : PropertyWriter<PropertyDeclarationSyntax>
     {
-        public PropertyWriter(PropertyDeclarationSyntax syntax, ICompilationContextProvider context)
+        public PropertyWriter(PropertyDeclarationSyntax syntax, JavaCodeWriterContext context)
             : base(syntax, context) { }
 
         public override string PropertyName
         {
-            get { return Context.Identifier.Text; }
+            get { return Item.Identifier.Text; }
         }
     }
 
     class IndexerWriter : PropertyWriter<IndexerDeclarationSyntax>
     {
-        public IndexerWriter(IndexerDeclarationSyntax syntax, ICompilationContextProvider context)
+        public IndexerWriter(IndexerDeclarationSyntax syntax, JavaCodeWriterContext context)
             : base(syntax, context) { }
 
         public override string PropertyName
@@ -238,7 +238,7 @@ namespace CodeBinder.Java
         protected override void WriteAccessorParameters(bool setter)
         {
             bool first = true;
-            foreach (var parameter in Context.ParameterList.Parameters)
+            foreach (var parameter in Item.ParameterList.Parameters)
             {
                 if (first)
                     first = false;
