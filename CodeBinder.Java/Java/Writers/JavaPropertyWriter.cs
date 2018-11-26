@@ -90,7 +90,12 @@ namespace CodeBinder.Java
                 Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(modifiers)).Space();
             }
             Builder.Append("void").Space();
-            Builder.Append(SetterName).Append("(").Append(JavaType).Space().Append("value").Append(")");
+            using (Builder.Append(SetterName).ParameterList())
+            {
+                WriteAccessorParameters(true);
+                Builder.Append(JavaType).Space().Append("value");
+            }
+
             if (_isParentInterface)
             {
                 Builder.EndOfStatement();
@@ -128,7 +133,11 @@ namespace CodeBinder.Java
                 Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(_modifiers)).Space();
 
             Builder.Append(JavaType).Space();
-            Builder.Append(GetterName).EmptyParameterList();
+            using (Builder.Append(GetterName).ParameterList())
+            {
+                WriteAccessorParameters(false);
+            }
+
             if (_isParentInterface)
             {
                 Builder.EndOfStatement();
@@ -161,6 +170,8 @@ namespace CodeBinder.Java
                 }
             }
         }
+
+        protected virtual void WriteAccessorParameters(bool setter) { /* Do nothing */ }
 
         List<SyntaxKind> getSetterModifiers(AccessorDeclarationSyntax accessor)
         {
@@ -222,6 +233,23 @@ namespace CodeBinder.Java
         public override string SetterName
         {
             get { return "set"; }
+        }
+
+        protected override void WriteAccessorParameters(bool setter)
+        {
+            bool first = true;
+            foreach (var parameter in Context.ParameterList.Parameters)
+            {
+                if (first)
+                    first = false;
+                else
+                    Builder.CommaSeparator();
+
+                Builder.Append(parameter.Type, this).Space().Append(parameter.Identifier.Text);
+            }
+
+            if (setter)
+                Builder.CommaSeparator();
         }
     }
 }

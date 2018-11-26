@@ -64,6 +64,8 @@ namespace CodeBinder.Java
         private void WriteBaseTypes(BaseListSyntax baseList)
         {
             bool first = true;
+          
+            bool firstInterface = true;
             bool isInterface = false;
             foreach (var type in baseList.Types)
             {
@@ -75,7 +77,19 @@ namespace CodeBinder.Java
                     Builder.Space();
 
                 string javaTypeName = type.Type.GetJavaType(this, out isInterface);
-                Builder.Append(isInterface ? "implements" : "extends").Space().Append(javaTypeName);
+                if (isInterface)
+                {
+                    if (firstInterface)
+                    {
+                        Builder.Append("implements").Space();
+                        firstInterface = false;
+                    }
+                }
+                else
+                {
+                    Builder.Append("extends").Space();
+                }
+                Builder.Append(javaTypeName);
             }
         }
 
