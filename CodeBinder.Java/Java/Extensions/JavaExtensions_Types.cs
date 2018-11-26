@@ -162,6 +162,11 @@ namespace CodeBinder.Java
         public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, ICompilationContextProvider provider)
         {
             var symbol = syntax.GetSymbol(provider);
+            if (symbol == null)
+            {
+                builder.Append("NULL");
+                return builder;
+            }
             switch (symbol.Kind)
             {
                 case SymbolKind.TypeParameter:

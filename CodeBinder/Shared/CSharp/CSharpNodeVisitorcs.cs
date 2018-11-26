@@ -192,6 +192,14 @@ namespace CodeBinder.Shared.CSharp
 
         #region Unsupported syntax
 
+        public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
+        {
+            if (node.Initializer != null)
+                Unsupported(node, "Object initializer");
+
+            DefaultVisit(node);
+        }
+
         public override void VisitParameter(ParameterSyntax node)
         {
             if (node.Default != null)

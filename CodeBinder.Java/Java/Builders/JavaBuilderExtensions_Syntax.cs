@@ -29,20 +29,7 @@ namespace CodeBinder.Java
                     throw new Exception();
             }
 
-            using (builder.ParameterList())
-            {
-                bool first = true;
-                foreach (var arg in syntax.ArgumentList.Arguments)
-                {
-                    if (first)
-                        first = false;
-                    else
-                        builder.CommaSeparator();
-
-                    builder.Append(arg.Expression, context);
-                }
-            }
-
+            builder.ParameterList().Append(syntax.ArgumentList, context);
             return builder;
         }
 

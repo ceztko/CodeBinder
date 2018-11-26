@@ -87,18 +87,8 @@ namespace CodeBinder.Java
             builder.Append("for").Space().Parenthesized(() =>
             {
                 builder.Append(syntax.Declaration, context).SemiColonSeparator()
-                .Append(syntax.Condition, context).SemiColonSeparator();
-
-                bool first = true;
-                foreach (var incrementor in syntax.Incrementors)
-                {
-                    if (first)
-                        first = true;
-                    else
-                        builder.CommaSeparator();
-
-                    builder.Append(incrementor, context);
-                }
+                    .Append(syntax.Condition, context).SemiColonSeparator()
+                    .Append(syntax.Incrementors, context);
             }).AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
             return builder;

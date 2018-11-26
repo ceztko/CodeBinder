@@ -16,13 +16,16 @@ namespace CodeBinder.Java
     {
         public static CodeBuilder Append(this CodeBuilder builder, ArrayCreationExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            builder.Append("NULL");
+            builder.Append("new").Space().Append(syntax.Type, context);
+            if (syntax.Initializer != null)
+                builder.Append(syntax.Initializer, context);
+
             return builder;
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, OmittedArraySizeExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            builder.Append("NULL");
+            builder.Append("[]");
             return builder;
         }
 
@@ -82,13 +85,13 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            builder.Append("NULL");
+            builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
             return builder;
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, InitializerExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            builder.Append("NULL");
+            builder.InitializerList().Append(syntax.Expressions, context);
             return builder;
         }
 
@@ -124,7 +127,7 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            builder.Append("NULL");
+            builder.Append("new").Space().Append(syntax.Type, context).Append(syntax.ArgumentList, context);
             return builder;
         }
 
@@ -310,20 +313,45 @@ namespace CodeBinder.Java
             }
         }
 
+        public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, ICompilationContextProvider context)
+        {
+            builder.ElementAccessList().Append(syntax.Arguments, context);
+            return builder;
+        }
+
         public static CodeBuilder Append(this CodeBuilder builder, ArgumentListSyntax syntax, ICompilationContextProvider context)
         {
-            using (builder.ParameterList())
-            {
-                bool first = true;
-                foreach  (var arg in syntax.Arguments)
-                {
-                    if (first)
-                        first = false;
-                    else
-                        builder.CommaSeparator();
+            builder.ParameterList().Append(syntax.Arguments, context);
+            return builder;
+        }
 
-                    builder.Append(arg.Expression, context);
-                }
+        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, ICompilationContextProvider context)
+        {
+            bool first = true;
+            foreach (var arg in arguments)
+            {
+                if (first)
+                    first = false;
+                else
+                    builder.CommaSeparator();
+
+                builder.Append(arg.Expression, context);
+            }
+
+            return builder;
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ExpressionSyntax> expressions, ICompilationContextProvider context)
+        {
+            bool first = true;
+            foreach (var expression in expressions)
+            {
+                if (first)
+                    first = false;
+                else
+                    builder.CommaSeparator();
+
+                builder.Append(expression, context);
             }
 
             return builder;

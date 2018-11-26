@@ -85,6 +85,18 @@ namespace CodeBinder.Java
             return builder.Indent("}", appendLine);
         }
 
+        public static CodeBuilder InitializerList(this CodeBuilder builder)
+        {
+            builder.Append("{ ");
+            return builder.Using(" }");
+        }
+
+        public static CodeBuilder ElementAccessList(this CodeBuilder builder)
+        {
+            builder.Append("[");
+            return builder.Using("]");
+        }
+
         public static CodeBuilder ParameterList(this CodeBuilder builder, bool multiLine = false)
         {
             if (multiLine)
