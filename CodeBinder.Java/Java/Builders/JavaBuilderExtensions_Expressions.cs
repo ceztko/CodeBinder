@@ -91,7 +91,7 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, InitializerExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            builder.InitializerList().Append(syntax.Expressions, context);
+            builder.Braced().Append(syntax.Expressions, context);
             return builder;
         }
 
@@ -315,13 +315,13 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, ICompilationContextProvider context)
         {
-            builder.ElementAccessList().Append(syntax.Arguments, context);
+            builder.Bracketed().Append(syntax.Arguments, context);
             return builder;
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, ArgumentListSyntax syntax, ICompilationContextProvider context)
         {
-            builder.ParameterList().Append(syntax.Arguments, context);
+            builder.Parenthesized().Append(syntax.Arguments, context);
             return builder;
         }
 

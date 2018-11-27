@@ -29,7 +29,7 @@ namespace CodeBinder.Java
                     throw new Exception();
             }
 
-            builder.ParameterList().Append(syntax.ArgumentList, context);
+            builder.Append(syntax.ArgumentList, context);
             return builder;
         }
 

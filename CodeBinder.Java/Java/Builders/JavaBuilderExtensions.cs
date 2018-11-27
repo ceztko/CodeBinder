@@ -64,7 +64,7 @@ namespace CodeBinder.Java
             return builder.Append("()");
         }
 
-        /// <summary>One line parenthesized</summary>
+        /// <remarks>One line</remarks>
         public static CodeBuilder Parenthesized(this CodeBuilder builder, Action parenthesized)
         {
             builder.Append("(");
@@ -72,29 +72,31 @@ namespace CodeBinder.Java
             return builder.Append(")");
         }
 
-        /// <summary>One line parenthesized</summary>
+        /// <remarks>One line. Child istance</remarks>
         public static CodeBuilder Parenthesized(this CodeBuilder builder)
         {
             builder.Append("(");
             return builder.UsingChild(")");
         }
 
+        /// <remarks>One line. Child istance</remarks>
+        public static CodeBuilder Braced(this CodeBuilder builder)
+        {
+            builder.Append("{ ");
+            return builder.UsingChild(" }");
+        }
+
+        /// <remarks>One line. Child istance</remarks>
+        public static CodeBuilder Bracketed(this CodeBuilder builder)
+        {
+            builder.Append("[");
+            return builder.UsingChild("]");
+        }
+
         public static CodeBuilder Block(this CodeBuilder builder, bool appendLine = true)
         {
             builder.AppendLine("{");
             return builder.Indent("}", appendLine);
-        }
-
-        public static CodeBuilder InitializerList(this CodeBuilder builder)
-        {
-            builder.Append("{ ");
-            return builder.Using(" }");
-        }
-
-        public static CodeBuilder ElementAccessList(this CodeBuilder builder)
-        {
-            builder.Append("[");
-            return builder.Using("]");
         }
 
         public static CodeBuilder ParameterList(this CodeBuilder builder, bool multiLine = false)
