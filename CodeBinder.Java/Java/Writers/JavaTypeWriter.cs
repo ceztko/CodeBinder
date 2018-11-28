@@ -102,14 +102,7 @@ namespace CodeBinder.Java
                     continue;
 
                 foreach (var writer in member.GetWriters(partialDeclarations, Context))
-                {
-                    if (first)
-                        first = false;
-                    else
-                        Builder.AppendLine();
-
-                    Builder.Append(writer);
-                }
+                    Builder.AppendLine(ref first).Append(writer);
             }
         }
 

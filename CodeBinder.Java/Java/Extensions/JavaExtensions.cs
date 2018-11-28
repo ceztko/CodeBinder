@@ -275,7 +275,7 @@ namespace CodeBinder.Java
 
         private static string getJavaModifiersString(IEnumerable<SyntaxKind> modifiers, ModifierGetter getJavaModifier)
         {
-            StringBuilder builder = new StringBuilder();
+            var builder = new CodeBuilder();
             bool first = true;
             foreach (var modifier in modifiers)
             {
@@ -283,12 +283,7 @@ namespace CodeBinder.Java
                 if (!getJavaModifier(modifier, out javaModifier))
                     continue;
 
-                if (first)
-                    first = false;
-                else
-                    builder.Append(" ");
-
-                builder.Append(javaModifier);
+                builder.Space(ref first).Append(javaModifier);
             }
 
             return builder.ToString();

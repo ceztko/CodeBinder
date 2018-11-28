@@ -14,6 +14,56 @@ namespace CodeBinder.Java
 {
     static partial class JavaBuilderExtension
     {
+        public static CodeBuilder Space(this CodeBuilder builder, ref bool first)
+        {
+            if (first)
+                first = false;
+            else
+                return builder.Space();
+
+            return builder;
+        }
+
+        public static CodeBuilder AppendLine(this CodeBuilder builder, ref bool first)
+        {
+            if (first)
+                first = false;
+            else
+                return builder.AppendLine();
+
+            return builder;
+        }
+
+        public static CodeBuilder CommaAppendLine(this CodeBuilder builder, ref bool first)
+        {
+            if (first)
+                first = false;
+            else
+                return builder.Comma().AppendLine();
+
+            return builder;
+        }
+
+        public static CodeBuilder CommaSeparator(this CodeBuilder builder, ref bool first)
+        {
+            if (first)
+                first = false;
+            else
+                return builder.CommaSeparator();
+
+            return builder;
+        }
+
+        public static CodeBuilder AmpSeparator(this CodeBuilder builder, ref bool first)
+        {
+            if (first)
+                first = false;
+            else
+                return builder.AmpSeparator();
+
+            return builder;
+        }
+
         public static CodeBuilder EndOfStatement(this CodeBuilder builder)
         {
             return builder.AppendLine(";");
@@ -47,6 +97,11 @@ namespace CodeBinder.Java
         public static CodeBuilder Comma(this CodeBuilder builder)
         {
             return builder.Append(",");
+        }
+
+        public static CodeBuilder AmpSeparator(this CodeBuilder builder)
+        {
+            return builder.Append(" & ");
         }
 
         public static CodeBuilder CommaSeparator(this CodeBuilder builder)

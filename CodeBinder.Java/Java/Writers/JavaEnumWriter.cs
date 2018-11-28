@@ -37,11 +37,7 @@ namespace CodeBinder.Java
             bool first = true;
             foreach (var member in Item.Members)
             {
-                if (first)
-                    first = false;
-                else
-                    Builder.Comma().AppendLine();
-
+                Builder.CommaAppendLine(ref first);
                 WriteMember(member);
             }
 

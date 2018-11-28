@@ -61,14 +61,7 @@ namespace CodeBinder.Java
         {
             bool first = true;
             foreach (var constraint in constraints.Constraints)
-            {
-                if (first)
-                    first = false;
-                else
-                    builder.Space().Append("&").Space();
-
-                builder.Append(constraint, context);
-            }
+                builder.AmpSeparator(ref first).Append(constraint, context);
         }
 
         public static CodeBuilder Append(this CodeBuilder builder,

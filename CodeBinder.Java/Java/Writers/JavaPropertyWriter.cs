@@ -240,12 +240,8 @@ namespace CodeBinder.Java
             bool first = true;
             foreach (var parameter in Item.ParameterList.Parameters)
             {
-                if (first)
-                    first = false;
-                else
-                    Builder.CommaSeparator();
-
-                Builder.Append(parameter.Type, this).Space().Append(parameter.Identifier.Text);
+                Builder.CommaSeparator(ref first).Append(parameter.Type, this)
+                    .Space().Append(parameter.Identifier.Text);
             }
 
             if (setter)

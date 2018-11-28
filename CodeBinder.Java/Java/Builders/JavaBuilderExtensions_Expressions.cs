@@ -416,10 +416,7 @@ namespace CodeBinder.Java
             bool first = true;
             foreach (var arg in arguments)
             {
-                if (first)
-                    first = false;
-                else
-                    builder.CommaSeparator();
+                builder.CommaSeparator(ref first);
 
                 // For ref/out variables
                 if (!arg.RefKindKeyword.IsNone())
@@ -435,14 +432,7 @@ namespace CodeBinder.Java
         {
             bool first = true;
             foreach (var expression in expressions)
-            {
-                if (first)
-                    first = false;
-                else
-                    builder.CommaSeparator();
-
-                builder.Append(expression, context);
-            }
+                builder.CommaSeparator(ref first).Append(expression, context);
 
             return builder;
         }

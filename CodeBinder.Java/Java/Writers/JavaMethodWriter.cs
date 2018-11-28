@@ -90,11 +90,7 @@ namespace CodeBinder.Java
             bool first = true;
             foreach (var parameter in list.Parameters)
             {
-                if (first)
-                    first = false;
-                else
-                    Builder.AppendLine(",");
-
+                Builder.CommaAppendLine(ref first);
                 writeParameter(parameter);
             }
         }

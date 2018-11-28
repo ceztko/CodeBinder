@@ -135,14 +135,7 @@ namespace CodeBinder.Java
             {
                 bool first = true;
                 foreach (var section in syntax.Sections)
-                {
-                    if (first)
-                        first = true;
-                    else
-                        builder.AppendLine();
-
-                    builder.Append(section, context);
-                }
+                    builder.AppendLine(ref first).Append(section, context);
             }
             return builder;
         }
@@ -159,14 +152,8 @@ namespace CodeBinder.Java
             builder.Append(syntax.Block, context).AppendLine();
             bool first = true;
             foreach (var catchClause in syntax.Catches)
-            {
-                if (first)
-                    first = true;
-                else
-                    builder.AppendLine();
+                builder.AppendLine(ref first).Append(catchClause, context);
 
-                builder.Append(catchClause, context);
-            }
             if (syntax.Finally != null)
                 builder.Append(syntax.Finally, context);
             return builder;
@@ -230,6 +217,8 @@ namespace CodeBinder.Java
                     throw new Exception();
             }
         }
+
+
 
         public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, ICompilationContextProvider context)
         {

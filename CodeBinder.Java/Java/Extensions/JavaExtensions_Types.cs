@@ -253,14 +253,7 @@ namespace CodeBinder.Java
             {
                 bool first = true;
                 foreach (var type in syntax.Arguments)
-                {
-                    if (first)
-                        first = false;
-                    else
-                        builder.CommaSeparator();
-
-                    builder.Append(type, parent, provider);
-                }
+                    builder.CommaSeparator(ref first).Append(type, parent, provider);
             }
 
             return builder;
