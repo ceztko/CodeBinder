@@ -192,6 +192,26 @@ namespace CodeBinder.Shared.CSharp
 
         #region Unsupported syntax
 
+        public override void VisitArgumentList(ArgumentListSyntax node)
+        {
+            foreach (var arg in node.Arguments)
+            {
+                if (!arg.RefKindKeyword.IsNone())
+                {
+                    // ref/out supported only in a non-return invocation contained in a block
+                    if (node.Parent.Kind() != SyntaxKind.InvocationExpression
+                            || node.Parent.Parent.Kind() != SyntaxKind.ExpressionStatement
+                            || node.Parent.Parent.Parent.Kind() != SyntaxKind.Block)
+                        Unsupported(node, "ref/out keyword in unsupported context");
+
+                    break;
+                }
+            }
+
+
+            DefaultVisit(node);
+        }
+
         public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
             if (node.Initializer != null)

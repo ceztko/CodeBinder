@@ -109,8 +109,54 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
+            foreach (var arg in syntax.ArgumentList.Arguments)
+            {
+                if (!arg.RefKindKeyword.IsNone())
+                {
+                    var argSymbol = arg.Expression.GetSymbol<ILocalSymbol>(context);
+                    string boxType;
+                    if (argSymbol.Type.TypeKind == TypeKind.Enum)
+                        boxType = "IntegerBox";
+                    else
+                        boxType = JavaUtils.GetJavaBoxType(argSymbol.Type.GetFullName());
+
+                    builder.Append(boxType).Space().Append("__" + argSymbol.Name).Space().Append("=").Space()
+                        .Append("new").Space().Append(boxType).EmptyParameterList().EndOfStatement();
+                }
+            }
+
+            var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context);
+            if (methodSymbol.ReturnType.TypeKind == TypeKind.Enum)
+                builder.Append(methodSymbol.ReturnType.Name).Dot().Append("fromValue").Parenthesized(() => append(builder, syntax, context));
+            else
+                append(builder, syntax, context);
+
+            foreach (var arg in syntax.ArgumentList.Arguments)
+            {
+                if (!arg.RefKindKeyword.IsNone())
+                {
+                    builder.EndOfStatement();
+                    var argSymbol = arg.Expression.GetSymbol<ILocalSymbol>(context);
+                    builder.Append(argSymbol.Name).Space().Append("=").Space();
+
+                    void appendAssingmentRHS()
+                    {
+                        builder.Append("__").Append(argSymbol.Name).Dot().Append("value");
+                    }
+
+                    if (argSymbol.Type.TypeKind == TypeKind.Enum)
+                        builder.Append(argSymbol.Type.Name).Dot().Append("fromValue").Parenthesized(() => appendAssingmentRHS());
+                    else
+                        appendAssingmentRHS();
+                }
+            }
+
             return builder;
+        }
+
+        static void append(CodeBuilder builder, InvocationExpressionSyntax syntax, ICompilationContextProvider context)
+        {
+            builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, ICompilationContextProvider context)
@@ -334,6 +380,10 @@ namespace CodeBinder.Java
                     first = false;
                 else
                     builder.CommaSeparator();
+
+                // For ref/out variables
+                if (!arg.RefKindKeyword.IsNone())
+                    builder.Append("__");
 
                 builder.Append(arg.Expression, context);
             }

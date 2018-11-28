@@ -334,8 +334,8 @@ namespace CodeBinder.Java
                     case SyntaxKind.NullableType:
                     {
                         string boxTypeName;
-                        if (getJavaBoxType(javaTypeName, out boxTypeName))
-                            builder.Append("boxTypeName");
+                        if (JavaUtils.GetJavaBoxType(typeName, out boxTypeName))
+                            builder.Append(boxTypeName);
                         else
                             throw new Exception();
                         break;
@@ -445,6 +445,12 @@ namespace CodeBinder.Java
                     isInterface = true;
                     return true;
                 }
+                case "System.Collections.Generic.IList<T>":
+                {
+                    knownJavaType = "List";
+                    isInterface = false;
+                    return true;
+                }
                 case "System.Collections.Generic.List<T>":
                 {
                     knownJavaType = "ArrayList";
@@ -470,54 +476,10 @@ namespace CodeBinder.Java
         {
             if (isByRef)
             {
-                switch (typeName)
-                {
-                    case "System.Boolean":
-                        knownJavaType = "BooleanBox";
-                        return true;
-                    case "System.Char":
-                        knownJavaType = "CharacterBox";
-                        return true;
-                    case "System.Byte":
-                        knownJavaType = "ByteBox";
-                        return true;
-                    case "System.SByte":
-                        knownJavaType = "ByteBox";
-                        return true;
-                    case "System.Int16":
-                        knownJavaType = "ShortBox";
-                        return true;
-                    case "System.UInt16":
-                        knownJavaType = "ShortBox";
-                        return true;
-                    case "System.Int32":
-                        knownJavaType = "IntegerBox";
-                        return true;
-                    case "System.UInt32":
-                        knownJavaType = "IntegerBox";
-                        return true;
-                    case "System.Int64":
-                        knownJavaType = "LongBox";
-                        return true;
-                    case "System.UInt64":
-                        knownJavaType = "LongBox";
-                        return true;
-                    case "System.Single":
-                        knownJavaType = "FloatBox";
-                        return true;
-                    case "System.Double":
-                        knownJavaType = "DoubleBox";
-                        return true;
-                    case "System.String":
-                        knownJavaType = "StringBox";
-                        return true;
-                    case "System.IntPtr":
-                        knownJavaType = "LongBox";
-                        return true;
-                    default:
-                        knownJavaType = null;
-                        return false;
-                }
+                if (JavaUtils.GetJavaRefBoxType(typeName, out knownJavaType))
+                    return true;
+                else
+                    return false;
             }
             else if (parent?.Kind() == SyntaxKind.GenericName)
             {
@@ -632,40 +594,6 @@ namespace CodeBinder.Java
                         knownJavaType = null;
                         return false;
                 }
-            }
-        }
-
-        static bool getJavaBoxType(string javaTypeName, out string boxTypeName)
-        {
-            switch (javaTypeName)
-            {
-                case "boolean":
-                    boxTypeName = "Boolean";
-                    return true;
-                case "char":
-                    boxTypeName = "Character";
-                    return true;
-                case "byte":
-                    boxTypeName = "Byte";
-                    return true;
-                case "short":
-                    boxTypeName = "Short";
-                    return true;
-                case "int":
-                    boxTypeName = "Integer";
-                    return true;
-                case "long":
-                    boxTypeName = "Long";
-                    return true;
-                case "float":
-                    boxTypeName = "Float";
-                    return true;
-                case "double":
-                    boxTypeName = "Double";
-                    return true;
-                default:
-                    boxTypeName = null;
-                    return false;
             }
         }
     }

@@ -40,6 +40,109 @@ namespace CodeBinder.Shared.Java
 
     public static class JavaUtils
     {
+        public static string GetJavaBoxType(string typeName)
+        {
+            string ret;
+            if (GetJavaBoxType(typeName, out ret))
+                return ret;
+            else
+                throw new Exception("Unsupported java box type for " + typeName);
+        }
+
+        public static bool GetJavaBoxType(string typeName, out string boxTypeName)
+        {
+            switch (typeName)
+            {
+                case "System.IntPtr":
+                    boxTypeName = "Long";
+                    return true;
+                case "System.Boolean":
+                    boxTypeName = "Boolean";
+                    return true;
+                case "System.Char":
+                    boxTypeName = "Character";
+                    return true;
+                case "System.Byte":
+                case "System.SByte":
+                    boxTypeName = "Byte";
+                    return true;
+                case "System.Int16":
+                case "System.UInt16":
+                    boxTypeName = "Short";
+                    return true;
+                case "System.Int32":
+                case "System.UInt32":
+                    boxTypeName = "Integer";
+                    return true;
+                case "System.Int64":
+                case "System.UInt64":
+                    boxTypeName = "Long";
+                    return true;
+                case "System.Single":
+                    boxTypeName = "Float";
+                    return true;
+                case "System.Double":
+                    boxTypeName = "Double";
+                    return true;
+                default:
+                    boxTypeName = null;
+                    return false;
+            }
+        }
+
+        public static string GetJavaRefBoxType(string typeName)
+        {
+            string ret;
+            if (GetJavaRefBoxType(typeName, out ret))
+                return ret;
+            else
+                throw new Exception("Unsupported java ref box type for " + typeName);
+        }
+
+        public static bool GetJavaRefBoxType(string typeName, out string boxTypeName)
+        {
+            switch (typeName)
+            {
+                case "System.String":
+                    boxTypeName = "StringBox";
+                    return true;
+                case "System.IntPtr":
+                    boxTypeName = "LongBox";
+                    return true;
+                case "System.Boolean":
+                    boxTypeName = "BooleanBox";
+                    return true;
+                case "System.Char":
+                    boxTypeName = "CharacterBox";
+                    return true;
+                case "System.Byte":
+                case "System.SByte":
+                    boxTypeName = "ByteBox";
+                    return true;
+                case "System.Int16":
+                case "System.UInt16":
+                    boxTypeName = "ShortBox";
+                    return true;
+                case "System.Int32":
+                case "System.UInt32":
+                    boxTypeName = "IntegerBox";
+                    return true;
+                case "System.Int64":
+                case "System.UInt64":
+                    boxTypeName = "LongBox";
+                    return true;
+                case "System.Single":
+                    boxTypeName = "FloatBox";
+                    return true;
+                case "System.Double":
+                    boxTypeName = "DoubleBox";
+                    return true;
+                default:
+                    boxTypeName = null;
+                    return false;
+            }
+        }
+
         public static string ToJavaType(this JavaInteropType type)
         {
             switch (type)

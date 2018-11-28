@@ -73,12 +73,12 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, EmptyStatementSyntax syntax, ICompilationContextProvider context)
         {
-            return builder;
+            return builder.SemiColon();
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, ExpressionStatementSyntax syntax, ICompilationContextProvider context)
         {
-            builder.Append(syntax.Expression, context);
+            builder.Append(syntax.Expression, context).SemiColon();
             return builder;
         }
 
