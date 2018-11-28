@@ -21,7 +21,17 @@ namespace CodeBinder.Java
             {
                 foreach (var statement in syntax.Statements)
                 {
-                    builder.Append(statement, context).AppendLine();
+                    IEnumerable<CodeWriter> writers;
+                    if (statement.HasReplacementWriter(context, out writers))
+                    {
+                        bool first = true;
+                        foreach (var writer in writers)
+                            builder.AppendLine(ref first).Append(writer);
+                    }
+                    else
+                    {
+                        builder.Append(statement, context).AppendLine();
+                    }
                 }
             }
 
@@ -213,6 +223,20 @@ namespace CodeBinder.Java
                     return builder.Append(statement as UsingStatementSyntax, context);
                 case SyntaxKind.WhileStatement:
                     return builder.Append(statement as WhileStatementSyntax, context);
+                // Unsupported statements
+                case SyntaxKind.CheckedStatement:
+                case SyntaxKind.UnsafeStatement:
+                case SyntaxKind.LabeledStatement:
+                case SyntaxKind.FixedStatement:
+                case SyntaxKind.LocalFunctionStatement:
+                case SyntaxKind.ForEachVariableStatement:
+                // Unsupported yield statements
+                case SyntaxKind.YieldBreakStatement:
+                case SyntaxKind.YieldReturnStatement:
+                // Unsupported goto statements
+                case SyntaxKind.GotoStatement:
+                case SyntaxKind.GotoCaseStatement:
+                case SyntaxKind.GotoDefaultStatement:
                 default:
                     throw new Exception();
             }

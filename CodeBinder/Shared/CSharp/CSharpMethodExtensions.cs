@@ -15,6 +15,313 @@ namespace CodeBinder.Shared.CSharp
 {
     public static class CSharpMethodExtensions
     {
+        public static ExpressionKind ExpressionKind(this ExpressionSyntax node)
+        {
+            ExpressionKind kind;
+            if (IsExpression(node, out kind))
+                return kind;
+
+            throw new Exception("Unsupported expression kind");
+        }
+
+        public static bool IsExpression(this SyntaxNode node, out ExpressionKind kind)
+        {
+            switch (node.Kind())
+            {
+                case SyntaxKind.ArrayCreationExpression:
+                    kind = CSharp.ExpressionKind.ArrayCreation;
+                    return true;
+                case SyntaxKind.OmittedArraySizeExpression:
+                    kind = CSharp.ExpressionKind.OmittedArraySize;
+                    return true;
+                case SyntaxKind.AddAssignmentExpression:
+                case SyntaxKind.AndAssignmentExpression:
+                case SyntaxKind.DivideAssignmentExpression:
+                case SyntaxKind.ExclusiveOrAssignmentExpression:
+                case SyntaxKind.LeftShiftAssignmentExpression:
+                case SyntaxKind.ModuloAssignmentExpression:
+                case SyntaxKind.MultiplyAssignmentExpression:
+                case SyntaxKind.OrAssignmentExpression:
+                case SyntaxKind.RightShiftAssignmentExpression:
+                case SyntaxKind.SimpleAssignmentExpression:
+                case SyntaxKind.SubtractAssignmentExpression:
+                    kind = CSharp.ExpressionKind.Assignment;
+                    return true;
+                case SyntaxKind.AddExpression:
+                case SyntaxKind.SubtractExpression:
+                case SyntaxKind.MultiplyExpression:
+                case SyntaxKind.DivideExpression:
+                case SyntaxKind.ModuloExpression:
+                case SyntaxKind.LeftShiftExpression:
+                case SyntaxKind.RightShiftExpression:
+                case SyntaxKind.LogicalOrExpression:
+                case SyntaxKind.LogicalAndExpression:
+                case SyntaxKind.BitwiseOrExpression:
+                case SyntaxKind.BitwiseAndExpression:
+                case SyntaxKind.ExclusiveOrExpression:
+                case SyntaxKind.EqualsExpression:
+                case SyntaxKind.NotEqualsExpression:
+                case SyntaxKind.LessThanExpression:
+                case SyntaxKind.LessThanOrEqualExpression:
+                case SyntaxKind.GreaterThanExpression:
+                case SyntaxKind.GreaterThanOrEqualExpression:
+                case SyntaxKind.IsExpression:
+                case SyntaxKind.AsExpression:
+                case SyntaxKind.CoalesceExpression:
+                    kind = CSharp.ExpressionKind.Binary;
+                    return true;
+                case SyntaxKind.CastExpression:
+                    kind = CSharp.ExpressionKind.Cast;
+                    return true;
+                case SyntaxKind.ConditionalExpression:
+                    kind = CSharp.ExpressionKind.Conditional;
+                    return true;
+                case SyntaxKind.ElementAccessExpression:
+                    kind = CSharp.ExpressionKind.ElementAccess;
+                    return true;
+                case SyntaxKind.ObjectInitializerExpression:
+                case SyntaxKind.CollectionInitializerExpression:
+                case SyntaxKind.ArrayInitializerExpression:
+                case SyntaxKind.ComplexElementInitializerExpression:
+                    kind = CSharp.ExpressionKind.Initializer;
+                    return true;
+                case SyntaxKind.BaseExpression:
+                    kind = CSharp.ExpressionKind.Base;
+                    return true;
+                case SyntaxKind.ThisExpression:
+                    kind = CSharp.ExpressionKind.This;
+                    return true;
+                case SyntaxKind.InvocationExpression:
+                    kind = CSharp.ExpressionKind.Invocation;
+                    return true;
+                case SyntaxKind.NumericLiteralExpression:
+                case SyntaxKind.StringLiteralExpression:
+                case SyntaxKind.CharacterLiteralExpression:
+                case SyntaxKind.TrueLiteralExpression:
+                case SyntaxKind.FalseLiteralExpression:
+                case SyntaxKind.NullLiteralExpression:
+                case SyntaxKind.ArgListExpression:
+                case SyntaxKind.DefaultLiteralExpression:
+                    kind = CSharp.ExpressionKind.Literal;
+                    return true;
+                case SyntaxKind.PointerMemberAccessExpression:
+                case SyntaxKind.SimpleMemberAccessExpression:
+                    kind = CSharp.ExpressionKind.MemberAccess;
+                    return true;
+                case SyntaxKind.ObjectCreationExpression:
+                    kind = CSharp.ExpressionKind.ObjectCreation;
+                    return true;
+                case SyntaxKind.ParenthesizedExpression:
+                    kind = CSharp.ExpressionKind.Parenthesized;
+                    return true;
+                case SyntaxKind.PostIncrementExpression:
+                case SyntaxKind.PostDecrementExpression:
+                    kind = CSharp.ExpressionKind.PostfixUnary;
+                    return true;
+                case SyntaxKind.UnaryPlusExpression:
+                case SyntaxKind.UnaryMinusExpression:
+                case SyntaxKind.BitwiseNotExpression:
+                case SyntaxKind.LogicalNotExpression:
+                case SyntaxKind.PreIncrementExpression:
+                case SyntaxKind.PreDecrementExpression:
+                case SyntaxKind.AddressOfExpression:
+                case SyntaxKind.PointerIndirectionExpression:
+                    kind = CSharp.ExpressionKind.PrefixUnary;
+                    return true;
+                case SyntaxKind.RefExpression:
+                    kind = CSharp.ExpressionKind.Ref;
+                    return true;
+                case SyntaxKind.TypeOfExpression:
+                    kind = CSharp.ExpressionKind.TypeOf;
+                    return true;
+                case SyntaxKind.ArrayType:
+                case SyntaxKind.QualifiedName:
+                case SyntaxKind.AliasQualifiedName:
+                case SyntaxKind.GenericName:
+                case SyntaxKind.IdentifierName:
+                case SyntaxKind.NullableType:
+                case SyntaxKind.OmittedTypeArgument:
+                case SyntaxKind.PredefinedType:
+                case SyntaxKind.RefType:
+                case SyntaxKind.PointerType:
+                case SyntaxKind.TupleType:
+                    kind = CSharp.ExpressionKind.Type;
+                    return true;
+                case SyntaxKind.DeclarationExpression:
+                    kind = CSharp.ExpressionKind.Declaration;
+                    return true;
+                case SyntaxKind.ThrowExpression:
+                    kind = CSharp.ExpressionKind.Throw;
+                    return true;
+                case SyntaxKind.DefaultExpression:
+                    kind = CSharp.ExpressionKind.Default;
+                    return true;
+                case SyntaxKind.AnonymousMethodExpression:
+                    kind = CSharp.ExpressionKind.AnonymousMethod;
+                    return true;
+                case SyntaxKind.ParenthesizedLambdaExpression:
+                    kind = CSharp.ExpressionKind.ParenthesizedLambda;
+                    return true;
+                case SyntaxKind.SimpleLambdaExpression:
+                    kind = CSharp.ExpressionKind.SimpleLambda;
+                    return true;
+                case SyntaxKind.RefValueExpression:
+                    kind = CSharp.ExpressionKind.RefValue;
+                    return true;
+                case SyntaxKind.RefTypeExpression:
+                    kind = CSharp.ExpressionKind.RefType;
+                    return true;
+                case SyntaxKind.ImplicitArrayCreationExpression:
+                    kind = CSharp.ExpressionKind.ImplicitArrayCreation;
+                    return true;
+                case SyntaxKind.ElementBindingExpression:
+                    kind = CSharp.ExpressionKind.ElementBinding;
+                    return true;
+                case SyntaxKind.ImplicitElementAccess:
+                    kind = CSharp.ExpressionKind.ImplicitElementAccess;
+                    return true;
+                case SyntaxKind.MemberBindingExpression:
+                    kind = CSharp.ExpressionKind.MemberBinding;
+                    return true;
+                case SyntaxKind.SizeOfExpression:
+                    kind = CSharp.ExpressionKind.SizeOf;
+                    return true;
+                case SyntaxKind.MakeRefExpression:
+                    kind = CSharp.ExpressionKind.MakeRef;
+                    return true;
+                case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
+                    kind = CSharp.ExpressionKind.ImplicitStackAllocArrayCreation;
+                    return true;
+                case SyntaxKind.InterpolatedStringExpression:
+                    kind = CSharp.ExpressionKind.InterpolatedString;
+                    return true;
+                case SyntaxKind.AwaitExpression:
+                    kind = CSharp.ExpressionKind.Await;
+                    return true;
+                case SyntaxKind.QueryExpression:
+                    kind = CSharp.ExpressionKind.Query;
+                    return true;
+                case SyntaxKind.StackAllocArrayCreationExpression:
+                    kind = CSharp.ExpressionKind.StackAllocArrayCreation;
+                    return true;
+                case SyntaxKind.AnonymousObjectCreationExpression:
+                    kind = CSharp.ExpressionKind.AnonymousObjectCreation;
+                    return true;
+                case SyntaxKind.TupleExpression:
+                    kind = CSharp.ExpressionKind.Tuple;
+                    return true;
+                case SyntaxKind.IsPatternExpression:
+                    kind = CSharp.ExpressionKind.IsPattern;
+                    return true;
+                case SyntaxKind.CheckedExpression:
+                    kind = CSharp.ExpressionKind.Checked;
+                    return true;
+                case SyntaxKind.ConditionalAccessExpression:
+                    kind = CSharp.ExpressionKind.ConditionalAccess;
+                    return true;
+                default:
+                    kind = CSharp.ExpressionKind.Unknown;
+                    return false;
+            }
+        }
+
+        public static StatementKind StatementKind(this StatementSyntax node)
+        {
+            StatementKind kind;
+            if (IsStatement(node, out kind))
+                return kind;
+
+            throw new Exception("Unsupported statement kind");
+        }
+
+        public static bool IsStatement(this SyntaxNode node, out StatementKind kind)
+        {
+            switch (node.Kind())
+            {
+                case SyntaxKind.Block:
+                    kind = CSharp.StatementKind.Block;
+                    return true;
+                case SyntaxKind.BreakStatement:
+                    kind = CSharp.StatementKind.Break;
+                    return true;
+                case SyntaxKind.ForEachStatement:
+                    kind = CSharp.StatementKind.ForEach;
+                    return true;
+                case SyntaxKind.ForEachVariableStatement:
+                    kind = CSharp.StatementKind.ForEachVariable;
+                    return true;
+                case SyntaxKind.ContinueStatement:
+                    kind = CSharp.StatementKind.Continue;
+                    return true;
+                case SyntaxKind.DoStatement:
+                    kind = CSharp.StatementKind.Do;
+                    return true;
+                case SyntaxKind.EmptyStatement:
+                    kind = CSharp.StatementKind.Empty;
+                    return true;
+                case SyntaxKind.ExpressionStatement:
+                    kind = CSharp.StatementKind.Expression;
+                    return true;
+                case SyntaxKind.ForStatement:
+                    kind = CSharp.StatementKind.For;
+                    return true;
+                case SyntaxKind.IfStatement:
+                    kind = CSharp.StatementKind.If;
+                    return true;
+                case SyntaxKind.LocalDeclarationStatement:
+                    kind = CSharp.StatementKind.LocalDeclaration;
+                    return true;
+                case SyntaxKind.LockStatement:
+                    kind = CSharp.StatementKind.Lock;
+                    return true;
+                case SyntaxKind.ReturnStatement:
+                    kind = CSharp.StatementKind.Return;
+                    return true;
+                case SyntaxKind.SwitchStatement:
+                    kind = CSharp.StatementKind.Switch;
+                    return true;
+                case SyntaxKind.ThrowStatement:
+                    kind = CSharp.StatementKind.Throw;
+                    return true;
+                case SyntaxKind.TryStatement:
+                    kind = CSharp.StatementKind.Try;
+                    return true;
+                case SyntaxKind.UsingStatement:
+                    kind = CSharp.StatementKind.Using;
+                    return true;
+                case SyntaxKind.WhileStatement:
+                    kind = CSharp.StatementKind.While;
+                    return true;
+                case SyntaxKind.CheckedStatement:
+                    kind = CSharp.StatementKind.Checked;
+                    return true;
+                case SyntaxKind.UnsafeStatement:
+                    kind = CSharp.StatementKind.Unsafe;
+                    return true;
+                case SyntaxKind.LabeledStatement:
+                    kind = CSharp.StatementKind.Labeled;
+                    return true;
+                case SyntaxKind.GotoStatement:
+                case SyntaxKind.GotoCaseStatement:
+                case SyntaxKind.GotoDefaultStatement:
+                    kind = CSharp.StatementKind.Goto;
+                    return true;
+                case SyntaxKind.FixedStatement:
+                    kind = CSharp.StatementKind.Fixed;
+                    return true;
+                case SyntaxKind.LocalFunctionStatement:
+                    kind = CSharp.StatementKind.LocalFunction;
+                    return true;
+                case SyntaxKind.YieldBreakStatement:
+                case SyntaxKind.YieldReturnStatement:
+                    kind = CSharp.StatementKind.Yield;
+                    return true;
+                default:
+                    kind = CSharp.StatementKind.Unknown;
+                    return false;
+            }
+        }
+
         // Note: Declations -> GetDeclaredSymbol()
         public static string GetFullName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
         {

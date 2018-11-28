@@ -1,0 +1,55 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace CodeBinder.Shared.CSharp
+{
+    public enum ExpressionKind
+    {
+        Unknown,
+        AnonymousMethod,
+        ParenthesizedLambda,
+        SimpleLambda,
+        AnonymousObjectCreation,
+        ArrayCreation,
+        Assignment,
+        Await,
+        Binary,
+        Cast,
+        Checked,
+        ConditionalAccess,
+        Conditional,
+        Declaration,
+        Default,
+        ElementAccess,
+        ElementBinding,
+        ImplicitArrayCreation,
+        ImplicitElementAccess,
+        ImplicitStackAllocArrayCreation,
+        Initializer,
+        Base,
+        This,
+        InterpolatedString,
+        Invocation,
+        IsPattern,
+        Literal,
+        MakeRef,
+        MemberAccess,
+        MemberBinding,
+        ObjectCreation,
+        OmittedArraySize,
+        Parenthesized,
+        PostfixUnary,
+        PrefixUnary,
+        Query,
+        Ref,
+        RefType,
+        RefValue,
+        SizeOf,
+        StackAllocArrayCreation,
+        Throw,
+        Tuple,
+        TypeOf,
+        Type,
+    }
+}

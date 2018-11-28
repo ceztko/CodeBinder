@@ -123,14 +123,16 @@ namespace CodeBinder.Shared.CSharp
                 case SyntaxKind.CheckedStatement:
                 case SyntaxKind.UnsafeStatement:
                 case SyntaxKind.LabeledStatement:
-                case SyntaxKind.GotoStatement:
-                case SyntaxKind.GotoCaseStatement:
-                case SyntaxKind.GotoDefaultStatement:
                 case SyntaxKind.FixedStatement:
                 case SyntaxKind.LocalFunctionStatement:
                 case SyntaxKind.ForEachVariableStatement:
+                // Yield statements
                 case SyntaxKind.YieldBreakStatement:
                 case SyntaxKind.YieldReturnStatement:
+                // Goto statements
+                case SyntaxKind.GotoStatement:
+                case SyntaxKind.GotoCaseStatement:
+                case SyntaxKind.GotoDefaultStatement:
                 // Expressions
                 case SyntaxKind.DeclarationExpression:
                 case SyntaxKind.ThrowExpression:
@@ -138,7 +140,6 @@ namespace CodeBinder.Shared.CSharp
                 case SyntaxKind.AnonymousMethodExpression:
                 case SyntaxKind.ParenthesizedLambdaExpression:
                 case SyntaxKind.SimpleLambdaExpression:
-                case SyntaxKind.PointerType:
                 case SyntaxKind.RefValueExpression:
                 case SyntaxKind.RefTypeExpression:
                 case SyntaxKind.ImplicitArrayCreationExpression:
@@ -153,7 +154,6 @@ namespace CodeBinder.Shared.CSharp
                 case SyntaxKind.QueryExpression:
                 case SyntaxKind.StackAllocArrayCreationExpression:
                 case SyntaxKind.AnonymousObjectCreationExpression:
-                case SyntaxKind.TupleType:
                 case SyntaxKind.TupleExpression:
                 case SyntaxKind.IsPatternExpression:
                 case SyntaxKind.CheckedExpression:
@@ -168,6 +168,9 @@ namespace CodeBinder.Shared.CSharp
                 // Literal expressions
                 case SyntaxKind.ArgListExpression:
                 case SyntaxKind.DefaultLiteralExpression:
+                // Unsupported type expressions
+                case SyntaxKind.TupleType:
+                case SyntaxKind.PointerType:
                 // Linq
                 case SyntaxKind.FromClause:
                 case SyntaxKind.WhereClause:
@@ -234,9 +237,37 @@ namespace CodeBinder.Shared.CSharp
                             break;
                     }
 
+                    var refKind = arg.RefKindKeyword.Kind();
+                    switch (refKind)
+                    {
+                        case SyntaxKind.RefKeyword:
+                        case SyntaxKind.OutKeyword:
+                            break;
+                        default:
+                            Unsupported(node, "Unsupported ref like keyword");
+                            break;
+                    }
+
                     switch (argType.TypeKind)
                     {
                         case TypeKind.Struct:
+                            if (!argType.IsCLRPrimitiveType())
+                            {
+                                switch (refKind)
+                                {
+                                    case SyntaxKind.RefKeyword:
+                                        // Supported structured type pass by reference
+                                        DefaultVisit(node);
+                                        return;
+                                    case SyntaxKind.OutKeyword:
+                                        Unsupported(node, "out keyword supported only for CLR primitive types or enum");
+                                        break;
+                                    default:
+                                        throw new Exception();
+                                }
+                            }
+
+                            break;
                         case TypeKind.Enum:
                             break;
                         default:
@@ -244,52 +275,52 @@ namespace CodeBinder.Shared.CSharp
                             break;
                     }
 
-                    var refKind = arg.RefKindKeyword.Kind();
-                    switch (refKind)
+                    // Must be within an invocation
+                    assertParent(node.Parent, SyntaxKind.InvocationExpression);
+
+                    StatementKind statementKind;
+                    if (node.Parent.Parent.IsStatement(out statementKind))
                     {
-                        case SyntaxKind.RefKeyword:
-                            break;
-                        case SyntaxKind.OutKeyword:
-                            if (!(argType.TypeKind == TypeKind.Enum || argType.IsCLRPrimitiveType()))
-                                Unsupported(node, "out keyword supported only for CLR primitive types or enum");
-                            break;
-                        default:
-                            Unsupported(node, "Unsupported ref like keyword");
-                            break;
+                        switch (statementKind)
+                        {
+                            case StatementKind.Expression:
+                            {
+                                // non-return invocation contained in a block
+                                assertParent(node.Parent.Parent.Parent, SyntaxKind.Block);
+                                break;
+                            }
+                            default:
+                            {
+                                Unsupported(node, "ref like keyword in unsupported context");
+                                break;
+                            }
+                        }
                     }
 
-                    assertParent(node.Parent, SyntaxKind.InvocationExpression);
-                    switch (node.Parent.Parent.Kind())
+                    ExpressionKind expKind;
+                    if (node.Parent.Parent.IsExpression(out expKind))
                     {
-                        case SyntaxKind.ExpressionStatement:
+                        switch (expKind)
                         {
-                            // non-return invocation contained in a block
-                            assertParent(node.Parent.Parent.Parent, SyntaxKind.Block);
-                            break;
-                        }
-                        case SyntaxKind.AddAssignmentExpression:
-                        case SyntaxKind.AndAssignmentExpression:
-                        case SyntaxKind.DivideAssignmentExpression:
-                        case SyntaxKind.ExclusiveOrAssignmentExpression:
-                        case SyntaxKind.LeftShiftAssignmentExpression:
-                        case SyntaxKind.ModuloAssignmentExpression:
-                        case SyntaxKind.MultiplyAssignmentExpression:
-                        case SyntaxKind.OrAssignmentExpression:
-                        case SyntaxKind.RightShiftAssignmentExpression:
-                        case SyntaxKind.SimpleAssignmentExpression:
-                        case SyntaxKind.SubtractAssignmentExpression:
-                        {
-                            // non-return invocation contained in a assignment expressio, contained in a block
-                            assertParent(node.Parent.Parent.Parent, SyntaxKind.ExpressionStatement);
-                            assertParent(node.Parent.Parent.Parent.Parent, SyntaxKind.Block);
-                            break;
+                            case ExpressionKind.Assignment:
+                            {
+                                // non-return invocation contained in a assignment expressio, contained in a block
+                                assertParent(node.Parent.Parent.Parent, SyntaxKind.ExpressionStatement);
+                                assertParent(node.Parent.Parent.Parent.Parent, SyntaxKind.Block);
+                                break;
+                            }
+                            default:
+                            {
+                                Unsupported(node, "ref like keyword in unsupported context");
+                                break;
+                            }
                         }
                     }
+
 
                     break;
                 }
             }
-
 
             DefaultVisit(node);
         }

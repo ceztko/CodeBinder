@@ -14,9 +14,25 @@ namespace CodeBinder.Java
 {
     static partial class JavaExtensions
     {
-        public static IEnumerable<CodeWriter> GetWriters(this StatementSyntax member, ICompilationContextProvider context)
+        public static bool HasReplacementWriter(this StatementSyntax member, ICompilationContextProvider context, out IEnumerable<CodeWriter> writers)
         {
-            return null;
+            if (!member.IsKind(SyntaxKind.ExpressionStatement))
+            {
+                writers = null;
+                return false;
+            }
+
+            var expressionStatement = member as ExpressionStatementSyntax;
+            switch (expressionStatement.Expression.ExpressionKind())
+            {
+                case ExpressionKind.Assignment:
+                    break;
+                case ExpressionKind.Invocation:
+                    break;
+            }
+
+            writers = null;
+            return false;
         }
     }
 }

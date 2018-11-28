@@ -363,7 +363,6 @@ namespace CodeBinder.Java
                 case SyntaxKind.AnonymousMethodExpression:
                 case SyntaxKind.ParenthesizedLambdaExpression:
                 case SyntaxKind.SimpleLambdaExpression:
-                case SyntaxKind.PointerType:
                 case SyntaxKind.RefValueExpression:
                 case SyntaxKind.RefTypeExpression:
                 case SyntaxKind.ImplicitArrayCreationExpression:
@@ -378,12 +377,10 @@ namespace CodeBinder.Java
                 case SyntaxKind.QueryExpression:
                 case SyntaxKind.StackAllocArrayCreationExpression:
                 case SyntaxKind.AnonymousObjectCreationExpression:
-                case SyntaxKind.TupleType:
                 case SyntaxKind.TupleExpression:
                 case SyntaxKind.IsPatternExpression:
                 case SyntaxKind.CheckedExpression:
                 case SyntaxKind.ConditionalAccessExpression:
-                case SyntaxKind.AliasQualifiedName:
                 // Unsupported prefix unary expressions
                 case SyntaxKind.AddressOfExpression:
                 case SyntaxKind.PointerIndirectionExpression:
@@ -394,6 +391,10 @@ namespace CodeBinder.Java
                 // Unsupported literal expressions
                 case SyntaxKind.ArgListExpression:
                 case SyntaxKind.DefaultLiteralExpression:
+                // Unsupported type expressions
+                case SyntaxKind.AliasQualifiedName:
+                case SyntaxKind.TupleType:
+                case SyntaxKind.PointerType:
                 default:
                     throw new Exception();
             }
