@@ -67,7 +67,6 @@ namespace CodeBinder.Java
             builder.Append("do").AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
             builder.Append("while").Space().Parenthesized().Append(syntax.Condition, context).Close().SemiColon();
-
             return builder;
         }
 

@@ -192,17 +192,99 @@ namespace CodeBinder.Shared.CSharp
 
         #region Unsupported syntax
 
+        public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
+        {
+            var leftSymbol = node.Left.GetSymbol(this);
+            if (leftSymbol?.Kind == SymbolKind.Parameter)
+            {
+                var parameter = leftSymbol as IParameterSymbol;
+                if (parameter.Type.TypeKind == TypeKind.Struct
+                        && parameter.RefKind != RefKind.None
+                        && !parameter.Type.IsCLRPrimitiveType())
+                    Unsupported(node, "Assignment of ref/out structured type");
+            }
+
+            DefaultVisit(node);
+        }
+
         public override void VisitArgumentList(ArgumentListSyntax node)
         {
+            void assertParent(SyntaxNode parent, SyntaxKind kind)
+            {
+                if (parent.Kind() != kind)
+                    Unsupported(node, "ref like keyword in unsupported context");
+            }
+
             foreach (var arg in node.Arguments)
             {
                 if (!arg.RefKindKeyword.IsNone())
                 {
-                    // ref/out supported only in a non-return invocation contained in a block
-                    if (node.Parent.Kind() != SyntaxKind.InvocationExpression
-                            || node.Parent.Parent.Kind() != SyntaxKind.ExpressionStatement
-                            || node.Parent.Parent.Parent.Kind() != SyntaxKind.Block)
-                        Unsupported(node, "ref/out keyword in unsupported context");
+                    var argSymbol = arg.Expression.GetSymbol(this);
+                    ITypeSymbol argType = null;
+                    switch (argSymbol.Kind)
+                    {
+                        case SymbolKind.Local:
+                            argType = (argSymbol as ILocalSymbol).Type;
+                            break;
+                        case SymbolKind.Parameter:
+                            argType = (argSymbol as IParameterSymbol).Type;
+                            break;
+                        default:
+                            Unsupported(node, "ref like keyword keyword in non local/parameter expression");
+                            break;
+                    }
+
+                    switch (argType.TypeKind)
+                    {
+                        case TypeKind.Struct:
+                        case TypeKind.Enum:
+                            break;
+                        default:
+                            Unsupported(node, "Unsupported ref like keyword for non-struct/enum type");
+                            break;
+                    }
+
+                    var refKind = arg.RefKindKeyword.Kind();
+                    switch (refKind)
+                    {
+                        case SyntaxKind.RefKeyword:
+                            break;
+                        case SyntaxKind.OutKeyword:
+                            if (!(argType.TypeKind == TypeKind.Enum || argType.IsCLRPrimitiveType()))
+                                Unsupported(node, "out keyword supported only for CLR primitive types or enum");
+                            break;
+                        default:
+                            Unsupported(node, "Unsupported ref like keyword");
+                            break;
+                    }
+
+                    assertParent(node.Parent, SyntaxKind.InvocationExpression);
+                    switch (node.Parent.Parent.Kind())
+                    {
+                        case SyntaxKind.ExpressionStatement:
+                        {
+                            // non-return invocation contained in a block
+                            assertParent(node.Parent.Parent.Parent, SyntaxKind.Block);
+                            break;
+                        }
+                        case SyntaxKind.AddAssignmentExpression:
+                        case SyntaxKind.AndAssignmentExpression:
+                        case SyntaxKind.DivideAssignmentExpression:
+                        case SyntaxKind.ExclusiveOrAssignmentExpression:
+                        case SyntaxKind.LeftShiftAssignmentExpression:
+                        case SyntaxKind.ModuloAssignmentExpression:
+                        case SyntaxKind.MultiplyAssignmentExpression:
+                        case SyntaxKind.OrAssignmentExpression:
+                        case SyntaxKind.RightShiftAssignmentExpression:
+                        case SyntaxKind.SimpleAssignmentExpression:
+                        case SyntaxKind.SubtractAssignmentExpression:
+                        {
+                            // non-return invocation contained in a assignment expressio, contained in a block
+                            assertParent(node.Parent.Parent.Parent, SyntaxKind.ExpressionStatement);
+                            assertParent(node.Parent.Parent.Parent.Parent, SyntaxKind.Block);
+                            break;
+                        }
+                    }
 
                     break;
                 }

@@ -113,15 +113,35 @@ namespace CodeBinder.Java
             {
                 if (!arg.RefKindKeyword.IsNone())
                 {
-                    var argSymbol = arg.Expression.GetSymbol<ILocalSymbol>(context);
-                    string boxType;
-                    if (argSymbol.Type.TypeKind == TypeKind.Enum)
-                        boxType = "IntegerBox";
-                    else
-                        boxType = JavaUtils.GetJavaBoxType(argSymbol.Type.GetFullName());
+                    var argSymbol = arg.Expression.GetSymbol(context);
+                    ITypeSymbol argType;
+                    switch (argSymbol.Kind)
+                    {
+                        case SymbolKind.Local:
+                        {
+                            argType = (argSymbol as ILocalSymbol).Type;
+                            break;
+                        }
+                        case SymbolKind.Parameter:
+                        {
+                            argType = (argSymbol as IParameterSymbol).Type;
+                            break;
+                        }
+                        default:
+                            throw new Exception();
+                    }
 
-                    builder.Append(boxType).Space().Append("__" + argSymbol.Name).Space().Append("=").Space()
-                        .Append("new").Space().Append(boxType).EmptyParameterList().EndOfStatement();
+                    if (argType.TypeKind != TypeKind.Struct)
+                    {
+                        string boxType;
+                        if (argType.TypeKind == TypeKind.Enum)
+                            boxType = "IntegerBox";
+                        else
+                            boxType = JavaUtils.GetJavaBoxType(argType.GetFullName());
+
+                        builder.Append(boxType).Space().Append("__" + argSymbol.Name).Space().Append("=").Space()
+                            .Append("new").Space().Append(boxType).EmptyParameterList().EndOfStatement();
+                    }
                 }
             }
 
@@ -135,19 +155,39 @@ namespace CodeBinder.Java
             {
                 if (!arg.RefKindKeyword.IsNone())
                 {
-                    builder.EndOfStatement();
-                    var argSymbol = arg.Expression.GetSymbol<ILocalSymbol>(context);
-                    builder.Append(argSymbol.Name).Space().Append("=").Space();
-
-                    void appendAssingmentRHS()
+                    var argSymbol = arg.Expression.GetSymbol(context);
+                    ITypeSymbol argType;
+                    switch (argSymbol.Kind)
                     {
-                        builder.Append("__").Append(argSymbol.Name).Dot().Append("value");
+                        case SymbolKind.Local:
+                        {
+                            argType = (argSymbol as ILocalSymbol).Type;
+                            break;
+                        }
+                        case SymbolKind.Parameter:
+                        {
+                            argType = (argSymbol as IParameterSymbol).Type;
+                            break;
+                        }
+                        default:
+                            throw new Exception();
                     }
 
-                    if (argSymbol.Type.TypeKind == TypeKind.Enum)
-                        builder.Append(argSymbol.Type.Name).Dot().Append("fromValue").Parenthesized(() => appendAssingmentRHS());
-                    else
-                        appendAssingmentRHS();
+                    if (argType.TypeKind != TypeKind.Struct)
+                    {
+                        builder.EndOfStatement();
+                        builder.Append(argSymbol.Name).Space().Append("=").Space();
+
+                        void appendAssingmentRHS()
+                        {
+                            builder.Append("__").Append(argSymbol.Name).Dot().Append("value");
+                        }
+
+                        if (argType.TypeKind == TypeKind.Enum)
+                            builder.Append(argType.Name).Dot().Append("fromValue").Parenthesized(() => appendAssingmentRHS());
+                        else
+                            appendAssingmentRHS();
+                    }
                 }
             }
 
