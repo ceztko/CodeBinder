@@ -52,7 +52,6 @@ Supported:
     PostfixUnaryExpression
     PrefixUnaryExpression
     QualifiedName
-    RefExpression
     TypeOfExpression
     ArrayType
     GenericName
@@ -63,6 +62,7 @@ Supported:
     RefType
 	
 Unsupported
+    RefExpression // ref int i2 = ref i;
     DeclarationExpression # out var declaration or a tuple deconstruction 
     ThrowExpression # https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/throw#the-throw-expression
     DefaultExpression

@@ -159,12 +159,6 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, RefExpressionSyntax syntax, ICompilationContextProvider context)
-        {
-            builder.Append("NULL");
-            return builder;
-        }
-
         public static CodeBuilder Append(this CodeBuilder builder, TypeOfExpressionSyntax syntax, ICompilationContextProvider context)
         {
             builder.Append(syntax.Type, context).Append(".class");
@@ -267,8 +261,6 @@ namespace CodeBinder.Java
                 case SyntaxKind.PreIncrementExpression:
                 case SyntaxKind.PreDecrementExpression:
                     return builder.Append(expression as PrefixUnaryExpressionSyntax, context);
-                case SyntaxKind.RefExpression:
-                    return builder.Append(expression as RefExpressionSyntax, context);
                 case SyntaxKind.TypeOfExpression:
                     return builder.Append(expression as TypeOfExpressionSyntax, context);
                 case SyntaxKind.QualifiedName:
@@ -281,6 +273,7 @@ namespace CodeBinder.Java
                 case SyntaxKind.RefType:
                     return builder.Append(expression as TypeSyntax, context);
                 // Unsupported expressions
+                case SyntaxKind.RefExpression:
                 case SyntaxKind.DeclarationExpression:
                 case SyntaxKind.ThrowExpression:
                 case SyntaxKind.DefaultExpression:

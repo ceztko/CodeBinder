@@ -134,6 +134,7 @@ namespace CodeBinder.Shared.CSharp
                 case SyntaxKind.GotoCaseStatement:
                 case SyntaxKind.GotoDefaultStatement:
                 // Expressions
+                case SyntaxKind.RefExpression:
                 case SyntaxKind.DeclarationExpression:
                 case SyntaxKind.ThrowExpression:
                 case SyntaxKind.DefaultExpression:
