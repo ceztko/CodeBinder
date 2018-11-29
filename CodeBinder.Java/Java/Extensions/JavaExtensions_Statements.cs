@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text;
 using CodeBinder.Shared.Java;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics;
 
 namespace CodeBinder.Java
 {
@@ -70,6 +71,14 @@ namespace CodeBinder.Java
         static bool hasReplacementWriters(LocalDeclarationStatementSyntax statement, ICompilationContextProvider context,
           out IEnumerable<CodeWriter> writers)
         {
+            Debug.Assert(statement.Declaration.Variables.Count == 1);
+            var variable = statement.Declaration.Variables[0];
+            if (variable.Initializer != null && variable.Initializer.Value.IsKind(SyntaxKind.InvocationExpression))
+            {
+                return hasReplacementWriters(variable.Initializer.Value as InvocationExpressionSyntax,
+                    statement, context, out writers);
+            }
+
             writers = null;
             return false;
         }
@@ -109,7 +118,7 @@ namespace CodeBinder.Java
                 }));
             }
 
-            writers.Add(CodeWriter.Create((builder) => builder.Append(statement, context).SemiColon()));
+            writers.Add(CodeWriter.Create((builder) => builder.Append(statement, context)));
 
             foreach (var arg in refArguments)
             {
