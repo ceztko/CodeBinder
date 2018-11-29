@@ -36,17 +36,18 @@ namespace CodeBinder.Java
 
         static CodeBuilder Append(this CodeBuilder builder, IEnumerable<StatementSyntax> staments, ICompilationContextProvider context)
         {
+            bool first = true;
             foreach (var statement in staments)
             {
                 IEnumerable<CodeWriter> writers;
                 if (statement.HasReplacementWriter(context, out writers))
                 {
                     foreach (var writer in writers)
-                        builder.Append(writer).AppendLine();
+                        builder.AppendLine(ref first).Append(writer);
                 }
                 else
                 {
-                    builder.Append(statement, context).AppendLine();
+                    builder.AppendLine(ref first).Append(statement, context);
                 }
             }
 
