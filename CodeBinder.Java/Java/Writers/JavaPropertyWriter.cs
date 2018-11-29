@@ -175,11 +175,19 @@ namespace CodeBinder.Java
 
         protected virtual void WriteAccessorParameters(bool setter) { /* Do nothing */ }
 
-        List<SyntaxKind> getSetterModifiers(AccessorDeclarationSyntax accessor)
+        IReadOnlyList<SyntaxKind> getSetterModifiers(AccessorDeclarationSyntax accessor)
         {
             var ret = new List<SyntaxKind>();
-            ret.AddRange(_modifiers.Skip(1));
-            ret.AddRange(accessor.GetCSharpModifiers());
+            var accessorModifiers = accessor.GetCSharpModifiers();
+            if (accessorModifiers.Count == 0)
+            {
+                return _modifiers;
+            }
+            else
+            {
+                ret.AddRange(_modifiers.Skip(1));
+                ret.AddRange(accessorModifiers);
+            }
             return ret;
         }
 
