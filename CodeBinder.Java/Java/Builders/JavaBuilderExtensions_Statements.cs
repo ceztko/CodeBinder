@@ -27,7 +27,7 @@ namespace CodeBinder.Java
                 builder.ResetChildIndent();
                 using (builder.Block(false))
                 {
-                    builder.Append(syntax.Statements, context);
+                    builder.Append(syntax.Statements, context).AppendLine();
                 }
             }
 
@@ -110,7 +110,7 @@ namespace CodeBinder.Java
             builder.Append("if").Space().Parenthesized().Append(syntax.Condition, context).Close().AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
             if (syntax.Else != null)
-                builder.Append(syntax.Else, context);
+                builder.AppendLine().Append(syntax.Else, context);
 
             return builder;
         }

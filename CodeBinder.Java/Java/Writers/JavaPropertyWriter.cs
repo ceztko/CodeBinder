@@ -87,7 +87,9 @@ namespace CodeBinder.Java
             if (!_isParentInterface)
             {
                 var modifiers = getSetterModifiers(accessor);
-                Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(modifiers)).Space();
+                string javaModifiers;
+                if (modifiers.Count != 0 && (javaModifiers = JavaExtensions.GetJavaPropertyModifiersString(modifiers)).Length != 0)
+                    Builder.Append(javaModifiers).Space();
             }
             Builder.Append("void").Space();
             using (Builder.Append(SetterName).ParameterList())
@@ -120,7 +122,7 @@ namespace CodeBinder.Java
                         using (Builder.AppendLine().Block())
                         {
                             if (!Context.Conversion.SkipBody)
-                                Builder.Space().Append(accessor.Body, this, true);
+                                Builder.Space().Append(accessor.Body, this, true).AppendLine();
                         }
                     }
                 }
@@ -164,7 +166,7 @@ namespace CodeBinder.Java
                             if (Context.Conversion.SkipBody)
                                 Builder.Append(Item.Type.GetJavaDefaultReturnStatement(this)).EndOfStatement();
                             else
-                                Builder.Append(accessor.Body, this, true);
+                                Builder.Append(accessor.Body, this, true).AppendLine();
                         }
                     }
                 }
