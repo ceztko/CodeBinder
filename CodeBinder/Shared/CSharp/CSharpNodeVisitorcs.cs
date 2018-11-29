@@ -181,6 +181,8 @@ namespace CodeBinder.Shared.CSharp
                 case SyntaxKind.JoinClause:
                 case SyntaxKind.LetClause:
                 // Misc
+                case SyntaxKind.CasePatternSwitchLabel:
+                case SyntaxKind.CatchFilterClause:
                 case SyntaxKind.ArrowExpressionClause:
                 {
                     Unsupported(node);
@@ -212,10 +214,16 @@ namespace CodeBinder.Shared.CSharp
 
         public override void VisitArgumentList(ArgumentListSyntax node)
         {
-            void assertParent(SyntaxNode parent, SyntaxKind kind)
+            void assertParent(SyntaxNode parent, params SyntaxKind[] kinds)
             {
-                if (parent.Kind() != kind)
-                    Unsupported(node, "ref like keyword in unsupported context");
+                var parentKind = parent.Kind();
+                foreach (var kind in kinds)
+                {
+                    if (parentKind == kind)
+                        return;
+                }
+
+                Unsupported(node, "ref like keyword in unsupported context");
             }
 
             foreach (var arg in node.Arguments)
@@ -282,7 +290,7 @@ namespace CodeBinder.Shared.CSharp
                     if (node.Parent.Parent.IsStatement(out statementKind) && statementKind == StatementKind.Expression)
                     {
                         // non-return invocation contained in a block
-                        assertParent(node.Parent.Parent.Parent, SyntaxKind.Block);
+                        assertParent(node.Parent.Parent.Parent, SyntaxKind.Block, SyntaxKind.SwitchSection);
                         return;
                     }
 
@@ -291,7 +299,7 @@ namespace CodeBinder.Shared.CSharp
                     {
                         // non-return invocation contained in a assignment expressio, contained in a block
                         assertParent(node.Parent.Parent.Parent, SyntaxKind.ExpressionStatement);
-                        assertParent(node.Parent.Parent.Parent.Parent, SyntaxKind.Block);
+                        assertParent(node.Parent.Parent.Parent.Parent, SyntaxKind.Block, SyntaxKind.SwitchSection);
                         return;
                     }
 
@@ -299,7 +307,7 @@ namespace CodeBinder.Shared.CSharp
                     {
                         // Local declaration and assignment with invocation
                         assertParent(node.Parent.Parent.Parent.Parent.Parent, SyntaxKind.LocalDeclarationStatement);
-                        assertParent(node.Parent.Parent.Parent.Parent.Parent.Parent, SyntaxKind.Block);
+                        assertParent(node.Parent.Parent.Parent.Parent.Parent.Parent, SyntaxKind.Block, SyntaxKind.SwitchSection);
                         return;
                     }
 

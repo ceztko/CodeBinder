@@ -221,11 +221,14 @@ namespace CodeBinder.Java
 
         static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, ICompilationContextProvider provider)
         {
-            if (symbol.Kind == SymbolKind.Property)
+            switch (symbol.Kind)
             {
-                // TODO: just temporary. Find correct usage get/set based on syntax parents?
-                builder.Append("get").Append(symbol.Name).EmptyParameterList();
-                return;
+                case SymbolKind.Property:
+                {
+                    // TODO: just temporary. Find correct usage get/set based on syntax parents?
+                    builder.Append("get").Append(symbol.Name).EmptyParameterList();
+                    return;
+                }
             }
 
             var kind = syntax.Kind();

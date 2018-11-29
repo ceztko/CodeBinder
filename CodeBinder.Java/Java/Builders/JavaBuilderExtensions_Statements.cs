@@ -17,26 +17,9 @@ namespace CodeBinder.Java
     {
         public static CodeBuilder Append(this CodeBuilder builder, BlockSyntax syntax, ICompilationContextProvider context, bool skipBraces = false)
         {
-            void writeStatements()
-            {
-                foreach (var statement in syntax.Statements)
-                {
-                    IEnumerable<CodeWriter> writers;
-                    if (statement.HasReplacementWriter(context, out writers))
-                    {
-                        foreach (var writer in writers)
-                            builder.Append(writer).AppendLine();
-                    }
-                    else
-                    {
-                        builder.Append(statement, context).AppendLine();
-                    }
-                }
-            }
-
             if (skipBraces)
             {
-                writeStatements();
+                builder.Append(syntax.Statements, context);
             }
             else
             {
@@ -44,7 +27,26 @@ namespace CodeBinder.Java
                 builder.ResetChildIndent();
                 using (builder.Block(false))
                 {
-                    writeStatements();
+                    builder.Append(syntax.Statements, context);
+                }
+            }
+
+            return builder;
+        }
+
+        static CodeBuilder Append(this CodeBuilder builder, IEnumerable<StatementSyntax> staments, ICompilationContextProvider context)
+        {
+            foreach (var statement in staments)
+            {
+                IEnumerable<CodeWriter> writers;
+                if (statement.HasReplacementWriter(context, out writers))
+                {
+                    foreach (var writer in writers)
+                        builder.Append(writer).AppendLine();
+                }
+                else
+                {
+                    builder.Append(statement, context).AppendLine();
                 }
             }
 
@@ -164,7 +166,7 @@ namespace CodeBinder.Java
                 builder.AppendLine(ref first).Append(catchClause, context);
 
             if (syntax.Finally != null)
-                builder.Append(syntax.Finally, context);
+                builder.AppendLine().Append(syntax.Finally, context);
             return builder;
         }
 
@@ -241,8 +243,6 @@ namespace CodeBinder.Java
             }
         }
 
-
-
         public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, ICompilationContextProvider context)
         {
             Debug.Assert(syntax.Variables.Count == 1);
@@ -266,22 +266,49 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, FinallyClauseSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(CodeWriter.NullWriter());
+            builder.Append("finally").AppendLine().Append(syntax.Block, context);
+            return builder;
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, CatchClauseSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(CodeWriter.NullWriter());
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, SwitchSectionSyntax syntax, ICompilationContextProvider context)
-        {
-            return builder.Append(CodeWriter.NullWriter());
+            builder.Append("catch").Space().Parenthesized().Append(syntax.Declaration.Type, context).Space().Append(syntax.Declaration.Identifier.Text).Close().AppendLine();
+            builder.Append(syntax.Block, context);
+            return builder;
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, ElseClauseSyntax syntax, ICompilationContextProvider context)
         {
-            return builder.Append(CodeWriter.NullWriter());
+            builder.Append("else").AppendLine();
+            builder.IndentChild().Append(syntax.Statement, context);
+            return builder;
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, SwitchSectionSyntax syntax, ICompilationContextProvider context)
+        {
+            foreach (var label in syntax.Labels)
+                builder.Append(label, context).AppendLine();
+
+            builder.IndentChild().Append(syntax.Statements, context);
+            return builder;
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, SwitchLabelSyntax syntax, ICompilationContextProvider context)
+        {
+            builder.Append(syntax.Keyword.Text);
+            switch (syntax.Kind())
+            {
+                case SyntaxKind.DefaultSwitchLabel:
+                    break;
+                case SyntaxKind.CaseSwitchLabel:
+                    var caselabel = syntax as CaseSwitchLabelSyntax;
+                    builder.Space().Append(caselabel.Value, context);
+                    break;
+                default:
+                    throw new Exception();
+            }
+            builder.Colon();
+            return builder;
         }
     }
 }
