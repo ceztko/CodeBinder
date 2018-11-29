@@ -3,9 +3,10 @@
 - Support for C# project macros that are disabled when porting to another language (e.g. CSHARP/NET_FRAMEWORK)
 
 Internals JNI:
-- Mettere AJ2N e AN2J, fare come per i tipi Box (basta uso template specializzato)
+- Add AJ2N e AN2J, do like box types (stop using template specialization)
 
 Possible support:
+- Box for enums on non native methods (look getJavaType() in JavaExtensions_Types.cs)
 - structs:
   blittable structs with simple types [StructLayout(LayoutKind.Sequential)] can be supported
   by annotating Fields with getter/setter C methods

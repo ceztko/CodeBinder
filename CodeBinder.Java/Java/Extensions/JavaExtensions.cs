@@ -43,7 +43,7 @@ namespace CodeBinder.Java
             };
         }
 
-        public static bool HasJavaMethodReplacement(this IMethodSymbol methodSymbol, out string javaReplacement)
+        public static bool HasJavaReplacement(this IMethodSymbol methodSymbol, out string javaSymbolName)
         {
             var containingType = methodSymbol.ContainingType;
             foreach (var iface in containingType.AllInterfaces)
@@ -60,7 +60,7 @@ namespace CodeBinder.Java
                         {
                             if (containingType.FindImplementationForInterfaceMember(member) == methodSymbol)
                             {
-                                javaReplacement = replacement;
+                                javaSymbolName = replacement;
                                 return true;
                             }
                         }
@@ -75,13 +75,20 @@ namespace CodeBinder.Java
                 {
                     if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
                     {
-                        javaReplacement = replacement;
+                        javaSymbolName = replacement;
                         return true;
                     }
                 }
             }
 
-            javaReplacement = null;
+            javaSymbolName = null;
+            return false;
+        }
+
+        public static bool HasJavaReplacement(this IPropertySymbol propertySymbol, bool useSetter, out string javaSymbolName)
+        {
+            // No know properties to replace, so far
+            javaSymbolName = null;
             return false;
         }
 

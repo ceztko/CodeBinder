@@ -171,7 +171,7 @@ namespace CodeBinder.Java
             {
                 // Try first look for replacements
                 var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(this);
-                if (methodSymbol.HasJavaMethodReplacement(out var replacement))
+                if (methodSymbol.HasJavaReplacement(out var replacement))
                     return replacement;
 
                 var methodName = Item.GetName();

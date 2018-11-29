@@ -178,11 +178,19 @@ namespace CodeBinder.Java
                     writeJavaType(builder, typeSymbol?.GetFullName(), syntax, typeSymbol, null, false, provider, out isInterface);
                     return builder;
                 }
+                case SymbolKind.Method:
+                {
+                    writeJavaMethodIdentifier(builder, syntax, symbol as IMethodSymbol, provider);
+                    break;
+                }
+                case SymbolKind.Property:
+                {
+                    writeJavaPropertyIdentifier(builder, syntax, symbol as IPropertySymbol, provider);
+                    break;
+                }
                 case SymbolKind.Local:
                 case SymbolKind.Field:
-                case SymbolKind.Property:
                 case SymbolKind.Parameter:
-                case SymbolKind.Method:
                 {
                     writeJavaIdentifier(builder, syntax, symbol, provider);
                     break;
@@ -207,7 +215,7 @@ namespace CodeBinder.Java
                         break;
                     case TypeKind.Enum:
                         if (isByRef)
-                            return "IntegerBox"; // TODO: Box per gli enum?
+                            return "IntegerBox"; // TODO: Box for enums on non native methods
                         else
                             return "int";
                 }
@@ -219,18 +227,52 @@ namespace CodeBinder.Java
             return builder.ToString();
         }
 
-        static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, JavaCodeConversionContext provider)
+        static void writeJavaMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol symbol, JavaCodeConversionContext provider)
         {
-            switch (symbol.Kind)
+            string methodJavaSymbolName;
+            if (!symbol.HasJavaReplacement(out methodJavaSymbolName))
+                methodJavaSymbolName = symbol.Name.ToJavaCase();
+
+            builder.Append(methodJavaSymbolName);
+        }
+
+        static void writeJavaPropertyIdentifier(CodeBuilder builder, TypeSyntax syntax, IPropertySymbol symbol, JavaCodeConversionContext provider)
+        {
+            bool setter = false;
+            SyntaxNode child = syntax;
+            var parent = syntax.Parent;
+            while (parent != null)
             {
-                case SymbolKind.Property:
+                AssignmentExpressionSyntax assigment;
+                if (parent.IsExpression(out assigment))
                 {
-                    // TODO: just temporary. Find correct usage get/set based on syntax parents?
-                    builder.Append("get").Append(symbol.Name).EmptyParameterList();
-                    return;
+                    if (assigment.Left == child)
+                    {
+                        setter = true;
+                        break;
+                    }
+
+                    break;
                 }
+
+                child = parent;
+                parent = child.Parent;
             }
 
+            string propertyJavaSymbolName;
+            if (symbol.HasJavaReplacement(setter, out propertyJavaSymbolName))
+            {
+                if (setter)
+                    builder.Append("set").Append(symbol.Name); // FIXME
+                else
+                    builder.Append("get").Append(symbol.Name).EmptyParameterList();
+            }
+            else
+                builder.Append(propertyJavaSymbolName);
+        }
+
+        static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, JavaCodeConversionContext provider)
+        {
             var kind = syntax.Kind();
             switch (kind)
             {

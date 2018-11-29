@@ -24,6 +24,20 @@ namespace CodeBinder.Shared.CSharp
             throw new Exception("Unsupported expression kind");
         }
 
+        public static bool IsExpression<TExpression>(this SyntaxNode node, out TExpression expression)
+            where TExpression : ExpressionSyntax
+        {
+            ExpressionKind kind;
+            if (!IsExpression(node, out kind) || getExpressionKind(typeof(TExpression)) != kind)
+            {
+                expression = null;
+                return false;
+            }
+
+            expression = node as TExpression;
+            return true;
+        }
+
         public static bool IsExpression(this SyntaxNode node, out ExpressionKind kind)
         {
             switch (node.Kind())
@@ -225,6 +239,103 @@ namespace CodeBinder.Shared.CSharp
             }
         }
 
+        static ExpressionKind getExpressionKind(Type type)
+        {
+            switch (type.Name)
+            {
+                case nameof(AnonymousMethodExpressionSyntax):
+                    return CSharp.ExpressionKind.AnonymousMethod;
+                case nameof(ParenthesizedLambdaExpressionSyntax):
+                    return CSharp.ExpressionKind.ParenthesizedLambda;
+                case nameof(SimpleLambdaExpressionSyntax):
+                    return CSharp.ExpressionKind.SimpleLambda;
+                case nameof(AnonymousObjectCreationExpressionSyntax):
+                    return CSharp.ExpressionKind.AnonymousObjectCreation;
+                case nameof(ArrayCreationExpressionSyntax):
+                    return CSharp.ExpressionKind.ArrayCreation;
+                case nameof(AssignmentExpressionSyntax):
+                    return CSharp.ExpressionKind.Assignment;
+                case nameof(AwaitExpressionSyntax):
+                    return CSharp.ExpressionKind.Await;
+                case nameof(BinaryExpressionSyntax):
+                    return CSharp.ExpressionKind.Binary;
+                case nameof(CastExpressionSyntax):
+                    return CSharp.ExpressionKind.Cast;
+                case nameof(CheckedExpressionSyntax):
+                    return CSharp.ExpressionKind.Checked;
+                case nameof(ConditionalAccessExpressionSyntax):
+                    return CSharp.ExpressionKind.ConditionalAccess;
+                case nameof(ConditionalExpressionSyntax):
+                    return CSharp.ExpressionKind.Conditional;
+                case nameof(DeclarationExpressionSyntax):
+                    return CSharp.ExpressionKind.Declaration;
+                case nameof(DefaultExpressionSyntax):
+                    return CSharp.ExpressionKind.Default;
+                case nameof(ElementAccessExpressionSyntax):
+                    return CSharp.ExpressionKind.ElementAccess;
+                case nameof(ElementBindingExpressionSyntax):
+                    return CSharp.ExpressionKind.ElementBinding;
+                case nameof(ImplicitArrayCreationExpressionSyntax):
+                    return CSharp.ExpressionKind.ImplicitArrayCreation;
+                case nameof(ImplicitElementAccessSyntax):
+                    return CSharp.ExpressionKind.ImplicitElementAccess;
+                case nameof(ImplicitStackAllocArrayCreationExpressionSyntax):
+                    return CSharp.ExpressionKind.ImplicitStackAllocArrayCreation;
+                case nameof(InitializerExpressionSyntax):
+                    return CSharp.ExpressionKind.Initializer;
+                case nameof(BaseExpressionSyntax):
+                    return CSharp.ExpressionKind.Base;
+                case nameof(ThisExpressionSyntax):
+                    return CSharp.ExpressionKind.This;
+                case nameof(InterpolatedStringExpressionSyntax):
+                    return CSharp.ExpressionKind.InterpolatedString;
+                case nameof(InvocationExpressionSyntax):
+                    return CSharp.ExpressionKind.Invocation;
+                case nameof(IsPatternExpressionSyntax):
+                    return CSharp.ExpressionKind.IsPattern;
+                case nameof(LiteralExpressionSyntax):
+                    return CSharp.ExpressionKind.Literal;
+                case nameof(MakeRefExpressionSyntax):
+                    return CSharp.ExpressionKind.MakeRef;
+                case nameof(MemberAccessExpressionSyntax):
+                    return CSharp.ExpressionKind.MemberAccess;
+                case nameof(MemberBindingExpressionSyntax):
+                    return CSharp.ExpressionKind.MemberBinding;
+                case nameof(ObjectCreationExpressionSyntax):
+                    return CSharp.ExpressionKind.ObjectCreation;
+                case nameof(OmittedArraySizeExpressionSyntax):
+                    return CSharp.ExpressionKind.OmittedArraySize;
+                case nameof(ParenthesizedExpressionSyntax):
+                    return CSharp.ExpressionKind.Parenthesized;
+                case nameof(PostfixUnaryExpressionSyntax):
+                    return CSharp.ExpressionKind.PostfixUnary;
+                case nameof(PrefixUnaryExpressionSyntax):
+                    return CSharp.ExpressionKind.PrefixUnary;
+                case nameof(QueryExpressionSyntax):
+                    return CSharp.ExpressionKind.Query;
+                case nameof(RefExpressionSyntax):
+                    return CSharp.ExpressionKind.Ref;
+                case nameof(RefTypeExpressionSyntax):
+                    return CSharp.ExpressionKind.RefType;
+                case nameof(RefValueExpressionSyntax):
+                    return CSharp.ExpressionKind.RefValue;
+                case nameof(SizeOfExpressionSyntax):
+                    return CSharp.ExpressionKind.SizeOf;
+                case nameof(StackAllocArrayCreationExpressionSyntax):
+                    return CSharp.ExpressionKind.StackAllocArrayCreation;
+                case nameof(ThrowExpressionSyntax):
+                    return CSharp.ExpressionKind.Throw;
+                case nameof(TupleExpressionSyntax):
+                    return CSharp.ExpressionKind.Tuple;
+                case nameof(TypeOfExpressionSyntax):
+                    return CSharp.ExpressionKind.TypeOf;
+                case nameof(TypeSyntax):
+                    return CSharp.ExpressionKind.Type;
+                default:
+                    throw new Exception();
+            }
+        }
+
         public static StatementKind StatementKind(this StatementSyntax node)
         {
             StatementKind kind;
@@ -232,6 +343,20 @@ namespace CodeBinder.Shared.CSharp
                 return kind;
 
             throw new Exception("Unsupported statement kind");
+        }
+
+        public static bool IsStatement<TStatement>(this SyntaxNode node, out TStatement statement)
+            where TStatement : StatementSyntax
+        {
+            StatementKind kind;
+            if (!IsStatement(node, out kind) || getStatementKind(typeof(TStatement)) != kind)
+            {
+                statement = null;
+                return false;
+            }
+
+            statement = node as TStatement;
+            return true;
         }
 
         public static bool IsStatement(this SyntaxNode node, out StatementKind kind)
@@ -319,6 +444,65 @@ namespace CodeBinder.Shared.CSharp
                 default:
                     kind = CSharp.StatementKind.Unknown;
                     return false;
+            }
+        }
+
+        static StatementKind getStatementKind(Type type)
+        {
+            switch (type.Name)
+            {
+                case nameof(BlockSyntax):
+                    return CSharp.StatementKind.Block;
+                case nameof(BreakStatementSyntax):
+                    return CSharp.StatementKind.Break;
+                case nameof(CheckedStatementSyntax):
+                    return CSharp.StatementKind.Checked;
+                case nameof(ForEachStatementSyntax):
+                    return CSharp.StatementKind.ForEach;
+                case nameof(ForEachVariableStatementSyntax):
+                    return CSharp.StatementKind.ForEachVariable;
+                case nameof(ContinueStatementSyntax):
+                    return CSharp.StatementKind.Continue;
+                case nameof(DoStatementSyntax):
+                    return CSharp.StatementKind.Do;
+                case nameof(EmptyStatementSyntax):
+                    return CSharp.StatementKind.Empty;
+                case nameof(ExpressionStatementSyntax):
+                    return CSharp.StatementKind.Expression;
+                case nameof(FixedStatementSyntax):
+                    return CSharp.StatementKind.Fixed;
+                case nameof(ForStatementSyntax):
+                    return CSharp.StatementKind.For;
+                case nameof(GotoStatementSyntax):
+                    return CSharp.StatementKind.Goto;
+                case nameof(IfStatementSyntax):
+                    return CSharp.StatementKind.If;
+                case nameof(LabeledStatementSyntax):
+                    return CSharp.StatementKind.Labeled;
+                case nameof(LocalDeclarationStatementSyntax):
+                    return CSharp.StatementKind.LocalDeclaration;
+                case nameof(LocalFunctionStatementSyntax):
+                    return CSharp.StatementKind.LocalFunction;
+                case nameof(LockStatementSyntax):
+                    return CSharp.StatementKind.Lock;
+                case nameof(ReturnStatementSyntax):
+                    return CSharp.StatementKind.Return;
+                case nameof(SwitchStatementSyntax):
+                    return CSharp.StatementKind.Switch;
+                case nameof(ThrowStatementSyntax):
+                    return CSharp.StatementKind.Throw;
+                case nameof(TryStatementSyntax):
+                    return CSharp.StatementKind.Try;
+                case nameof(UnsafeStatementSyntax):
+                    return CSharp.StatementKind.Unsafe;
+                case nameof(UsingStatementSyntax):
+                    return CSharp.StatementKind.Using;
+                case nameof(WhileStatementSyntax):
+                    return CSharp.StatementKind.While;
+                case nameof(YieldStatementSyntax):
+                    return CSharp.StatementKind.Yield;
+                default:
+                    throw new Exception();
             }
         }
 
