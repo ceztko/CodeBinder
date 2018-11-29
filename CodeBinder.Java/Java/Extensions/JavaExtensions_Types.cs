@@ -16,10 +16,10 @@ namespace CodeBinder.Java
 {
     static partial class JavaExtensions
     {
-        public static string GetJavaDefaultReturnStatement(this TypeSyntax type, JavaCodeConversionContext provider)
+        public static string GetJavaDefaultReturnStatement(this TypeSyntax type, JavaCodeConversionContext context)
         {
             var builder = new CodeBuilder();
-            string defaultLiteral = type.GetJavaDefaultLiteral(provider);
+            string defaultLiteral = type.GetJavaDefaultLiteral(context);
             builder.Append("return");
             if (!string.IsNullOrEmpty(defaultLiteral))
                 builder.Space().Append(defaultLiteral);
@@ -27,9 +27,9 @@ namespace CodeBinder.Java
             return builder.ToString();
         }
 
-        public static string GetJavaDefaultLiteral(this TypeSyntax type, JavaCodeConversionContext provider)
+        public static string GetJavaDefaultLiteral(this TypeSyntax type, JavaCodeConversionContext context)
         {
-            var fullName = type.GetFullName(provider);
+            var fullName = type.GetFullName(context);
             switch(fullName)
             {
                 case "System.Void":
@@ -130,19 +130,19 @@ namespace CodeBinder.Java
             }
         }
 
-        public static string GetJavaType(this TypeSyntax type, JavaCodeConversionContext provider)
+        public static string GetJavaType(this TypeSyntax type, JavaCodeConversionContext context)
         {
             var builder = new CodeBuilder();
             bool isInterface;
-            return type.GetJavaType(provider, out isInterface);
+            return type.GetJavaType(context, out isInterface);
         }
 
 
-        public static string GetJavaType(this TypeSyntax type, JavaCodeConversionContext provider, out bool isInterface)
+        public static string GetJavaType(this TypeSyntax type, JavaCodeConversionContext context, out bool isInterface)
         {
             var builder = new CodeBuilder();
-            var typeSymbol = type.GetTypeSymbol(provider);
-            writeJavaType(builder, typeSymbol?.GetFullName(), type, typeSymbol, null, false, provider, out isInterface);
+            var typeSymbol = type.GetTypeSymbol(context);
+            writeJavaType(builder, typeSymbol?.GetFullName(), type, typeSymbol, null, false, context, out isInterface);
             return builder.ToString();
         }
 
@@ -153,15 +153,15 @@ namespace CodeBinder.Java
             return getJavaType(typeName, null, typeSymbol, flags, null);
         }
 
-        public static string GetJavaType(this TypeSyntax type, JavaTypeFlags flags, JavaCodeConversionContext provider)
+        public static string GetJavaType(this TypeSyntax type, JavaTypeFlags flags, JavaCodeConversionContext context)
         {
-            var symbol = type.GetTypeSymbol(provider);
-            return getJavaType(symbol.GetFullName(), type, symbol, flags, provider);
+            var symbol = type.GetTypeSymbol(context);
+            return getJavaType(symbol.GetFullName(), type, symbol, flags, context);
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, JavaCodeConversionContext provider)
+        public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, JavaCodeConversionContext context)
         {
-            var symbol = syntax.GetSymbol(provider);
+            var symbol = syntax.GetSymbol(context);
             if (symbol == null)
             {
                 builder.Append("NULL");
@@ -175,24 +175,28 @@ namespace CodeBinder.Java
                 {
                     bool isInterface;
                     var typeSymbol = (ITypeSymbol)symbol;
-                    writeJavaType(builder, typeSymbol?.GetFullName(), syntax, typeSymbol, null, false, provider, out isInterface);
+                    writeJavaType(builder, typeSymbol?.GetFullName(), syntax, typeSymbol, null, false, context, out isInterface);
                     return builder;
                 }
                 case SymbolKind.Method:
                 {
-                    writeJavaMethodIdentifier(builder, syntax, symbol as IMethodSymbol, provider);
+                    writeJavaMethodIdentifier(builder, syntax, symbol as IMethodSymbol, context);
                     break;
                 }
                 case SymbolKind.Property:
                 {
-                    writeJavaPropertyIdentifier(builder, syntax, symbol as IPropertySymbol, provider);
+                    writeJavaPropertyIdentifier(builder, syntax, symbol as IPropertySymbol, context);
+                    break;
+                }
+                case SymbolKind.Parameter:
+                {
+                    writeJavaParameterIdentifier(builder, syntax, symbol as IParameterSymbol, context);
                     break;
                 }
                 case SymbolKind.Local:
                 case SymbolKind.Field:
-                case SymbolKind.Parameter:
                 {
-                    writeJavaIdentifier(builder, syntax, symbol, provider);
+                    writeJavaIdentifier(builder, syntax, symbol, context);
                     break;
                 }
                 default:
@@ -202,7 +206,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        static string getJavaType(string typeName, TypeSyntax syntax, ITypeSymbol symbol, JavaTypeFlags flags, JavaCodeConversionContext provider)
+        static string getJavaType(string typeName, TypeSyntax syntax, ITypeSymbol symbol, JavaTypeFlags flags, JavaCodeConversionContext context)
         {
             bool isByRef = flags.HasFlag(JavaTypeFlags.IsByRef);
             if (symbol != null && flags.HasFlag(JavaTypeFlags.NativeMethod))
@@ -223,11 +227,11 @@ namespace CodeBinder.Java
 
             var builder = new CodeBuilder();
             bool isInterface;
-            writeJavaType(builder, typeName, syntax, symbol, null, isByRef, provider, out isInterface);
+            writeJavaType(builder, typeName, syntax, symbol, null, isByRef, context, out isInterface);
             return builder.ToString();
         }
 
-        static void writeJavaMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol symbol, JavaCodeConversionContext provider)
+        static void writeJavaMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol symbol, JavaCodeConversionContext context)
         {
             string methodJavaSymbolName;
             if (!symbol.HasJavaReplacement(out methodJavaSymbolName))
@@ -236,9 +240,9 @@ namespace CodeBinder.Java
             builder.Append(methodJavaSymbolName);
         }
 
-        static void writeJavaPropertyIdentifier(CodeBuilder builder, TypeSyntax syntax, IPropertySymbol symbol, JavaCodeConversionContext provider)
+        static void writeJavaPropertyIdentifier(CodeBuilder builder, TypeSyntax syntax, IPropertySymbol symbol, JavaCodeConversionContext context)
         {
-            bool setter = false;
+            bool isSetter = false;
             SyntaxNode child = syntax;
             var parent = syntax.Parent;
             while (parent != null)
@@ -248,7 +252,7 @@ namespace CodeBinder.Java
                 {
                     if (assigment.Left == child)
                     {
-                        setter = true;
+                        isSetter = true;
                         break;
                     }
 
@@ -260,18 +264,57 @@ namespace CodeBinder.Java
             }
 
             string propertyJavaSymbolName;
-            if (symbol.HasJavaReplacement(setter, out propertyJavaSymbolName))
+            if (symbol.HasJavaReplacement(isSetter, out propertyJavaSymbolName))
             {
-                if (setter)
-                    builder.Append("set").Append(symbol.Name); // FIXME
+                builder.Append(propertyJavaSymbolName);
+            }
+            else
+            {
+                // NOTE: proper use of the setter symbol is done eagerly
+                // while writing AssignmentExpressionSyntax
+                if (isSetter)
+                    builder.Append("set").Append(symbol.Name);
                 else
                     builder.Append("get").Append(symbol.Name).EmptyParameterList();
             }
-            else
-                builder.Append(propertyJavaSymbolName);
         }
 
-        static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, JavaCodeConversionContext provider)
+        static void writeJavaParameterIdentifier(CodeBuilder builder, TypeSyntax syntax, IParameterSymbol symbol, JavaCodeConversionContext context)
+        {
+            void writeBoxValueAccess()
+            {
+                writeJavaIdentifier(builder, syntax, symbol, context);
+                builder.Dot().Append("value");
+            }
+
+            if (symbol.RefKind != RefKind.None)
+            {
+                switch (symbol.Type.TypeKind)
+                {
+                    case TypeKind.Enum:
+                    {
+                        writeBoxValueAccess();
+                        return;
+                    }
+                    case TypeKind.Struct:
+                    {
+                        if (symbol.Type.IsCLRPrimitiveType())
+                        {
+                            writeBoxValueAccess();
+                            return;
+                        }
+
+                        break;
+                    }
+                    default:
+                        throw new Exception();
+                }
+            }
+
+            writeJavaIdentifier(builder, syntax, symbol, context);
+        }
+
+        static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, JavaCodeConversionContext context)
         {
             var kind = syntax.Kind();
             switch (kind)
@@ -292,29 +335,29 @@ namespace CodeBinder.Java
             }
         }
 
-        static CodeBuilder Append(this CodeBuilder builder, TypeArgumentListSyntax syntax, TypeSyntax parent, JavaCodeConversionContext provider)
+        static CodeBuilder Append(this CodeBuilder builder, TypeArgumentListSyntax syntax, TypeSyntax parent, JavaCodeConversionContext context)
         {
             using (builder.TypeParameterList())
             {
                 bool first = true;
                 foreach (var type in syntax.Arguments)
-                    builder.CommaSeparator(ref first).Append(type, parent, provider);
+                    builder.CommaSeparator(ref first).Append(type, parent, context);
             }
 
             return builder;
         }
 
         static CodeBuilder Append(this CodeBuilder builder, TypeSyntax type, TypeSyntax parent,
-            JavaCodeConversionContext provider)
+            JavaCodeConversionContext context)
         {
             bool isInterface;
-            var typeSymbol = type.GetTypeSymbol(provider);
-            writeJavaType(builder, typeSymbol?.GetFullName(), type, typeSymbol, parent, false, provider, out isInterface);
+            var typeSymbol = type.GetTypeSymbol(context);
+            writeJavaType(builder, typeSymbol?.GetFullName(), type, typeSymbol, parent, false, context, out isInterface);
             return builder;
         }
 
         static void writeJavaType(CodeBuilder builder, string typeName, TypeSyntax type, ITypeSymbol symbol,
-            TypeSyntax parent, bool isByRef, JavaCodeConversionContext provider, out bool isInterface)
+            TypeSyntax parent, bool isByRef, JavaCodeConversionContext context, out bool isInterface)
         {
             if (symbol != null)
             {
@@ -352,7 +395,7 @@ namespace CodeBinder.Java
                     return;
                 }
 
-                Debug.Assert(provider != null);
+                Debug.Assert(context != null);
 
                 var kind = type.Kind();
                 switch (kind)
@@ -360,7 +403,7 @@ namespace CodeBinder.Java
                     case SyntaxKind.GenericName:
                     {
                         var arrayType = type as GenericNameSyntax;
-                        builder.Append(javaTypeName).Append(arrayType.TypeArgumentList, type, provider);
+                        builder.Append(javaTypeName).Append(arrayType.TypeArgumentList, type, context);
                         break;
                     }
                     case SyntaxKind.ArrayType:
@@ -399,7 +442,7 @@ namespace CodeBinder.Java
                     return;
                 }
 
-                Debug.Assert(provider != null);
+                Debug.Assert(context != null);
 
                 var kind = type.Kind();
                 switch (kind)
@@ -413,13 +456,13 @@ namespace CodeBinder.Java
                     case SyntaxKind.ArrayType:
                     {
                         var arrayType = type as ArrayTypeSyntax;
-                        builder.Append(arrayType.ElementType, type, provider).Append("[]");
+                        builder.Append(arrayType.ElementType, type, context).Append("[]");
                         break;
                     }
                     case SyntaxKind.GenericName:
                     {
                         var genericType = type as GenericNameSyntax;
-                        builder.Append(genericType.GetName()).Append(genericType.TypeArgumentList, type, provider);
+                        builder.Append(genericType.GetName()).Append(genericType.TypeArgumentList, type, context);
                         break;
                     }
                     case SyntaxKind.NullableType:
@@ -429,7 +472,7 @@ namespace CodeBinder.Java
                         switch (symbol.TypeKind)
                         {
                             case TypeKind.Struct:
-                                builder.Append(nullableType.ElementType, type, provider);
+                                builder.Append(nullableType.ElementType, type, context);
                                 break;
                             case TypeKind.Enum:
                                 throw new Exception("TODO");
@@ -442,7 +485,7 @@ namespace CodeBinder.Java
                     case SyntaxKind.QualifiedName:
                     {
                         var qualifiedName = type as QualifiedNameSyntax;
-                        builder.Append(qualifiedName.Left, type, provider).Dot().Append(qualifiedName.Right, type, provider);
+                        builder.Append(qualifiedName.Left, type, context).Dot().Append(qualifiedName.Right, type, context);
                         break;
                     }
                     default:

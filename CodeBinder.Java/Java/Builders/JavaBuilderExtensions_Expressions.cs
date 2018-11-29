@@ -31,23 +31,19 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, AssignmentExpressionSyntax syntax, JavaCodeConversionContext context)
         {
-            if (syntax.Left.Kind() == SyntaxKind.IdentifierName)
+            var symbol = syntax.Left.GetSymbol(context);
+            if (symbol.Kind == SymbolKind.Property)
             {
-                var symbol = syntax.Left.GetSymbol(context);
-                if (symbol.Kind == SymbolKind.Property)
+                var operatorKind = syntax.OperatorToken.Kind();
+                switch (operatorKind)
                 {
-                    var operatorKind = syntax.OperatorToken.Kind();
-                    switch (operatorKind)
-                    {
-                        case SyntaxKind.EqualsToken:
-                            builder.Append("set").Append((syntax.Left as IdentifierNameSyntax).Identifier.Text)
-                                .Append("(").Append(syntax.Right, context).Append(")");
-                            break;
-                        default:
-                            break;
-                    }
-                    return builder;
+                    case SyntaxKind.EqualsToken:
+                        builder.Append(syntax.Left, context).Parenthesized().Append(syntax.Right, context);
+                        break;
+                    default:
+                        throw new Exception();
                 }
+                return builder;
             }
 
             builder.Append(syntax.Left, context).Space().Append(syntax.GetJavaOperator()).Space().Append(syntax.Right, context);
