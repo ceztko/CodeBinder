@@ -231,16 +231,22 @@ namespace CodeBinder.Java
             return builder.ToString();
         }
 
-        static void writeJavaMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol symbol, JavaCodeConversionContext context)
+        static void writeJavaMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol method, JavaCodeConversionContext context)
         {
             string methodJavaSymbolName;
-            if (!symbol.HasJavaReplacement(out methodJavaSymbolName))
-                methodJavaSymbolName = symbol.Name.ToJavaCase();
+            if (!method.HasJavaReplacement(out methodJavaSymbolName))
+            {
+                if (method.IsNative())
+                    methodJavaSymbolName = method.Name;
+                else
+                    methodJavaSymbolName = method.Name.ToJavaCase();
+            }
 
             builder.Append(methodJavaSymbolName);
+            // TODO: chiamate generiche
         }
 
-        static void writeJavaPropertyIdentifier(CodeBuilder builder, TypeSyntax syntax, IPropertySymbol symbol, JavaCodeConversionContext context)
+        static void writeJavaPropertyIdentifier(CodeBuilder builder, TypeSyntax syntax, IPropertySymbol property, JavaCodeConversionContext context)
         {
             bool isSetter = false;
             SyntaxNode child = syntax;
@@ -264,7 +270,7 @@ namespace CodeBinder.Java
             }
 
             string propertyJavaSymbolName;
-            if (symbol.HasJavaReplacement(isSetter, out propertyJavaSymbolName))
+            if (property.HasJavaReplacement(isSetter, out propertyJavaSymbolName))
             {
                 builder.Append(propertyJavaSymbolName);
             }
@@ -273,23 +279,23 @@ namespace CodeBinder.Java
                 // NOTE: proper use of the setter symbol is done eagerly
                 // while writing AssignmentExpressionSyntax
                 if (isSetter)
-                    builder.Append("set").Append(symbol.Name);
+                    builder.Append("set").Append(property.Name);
                 else
-                    builder.Append("get").Append(symbol.Name).EmptyParameterList();
+                    builder.Append("get").Append(property.Name).EmptyParameterList();
             }
         }
 
-        static void writeJavaParameterIdentifier(CodeBuilder builder, TypeSyntax syntax, IParameterSymbol symbol, JavaCodeConversionContext context)
+        static void writeJavaParameterIdentifier(CodeBuilder builder, TypeSyntax syntax, IParameterSymbol parameter, JavaCodeConversionContext context)
         {
             void writeBoxValueAccess()
             {
-                writeJavaIdentifier(builder, syntax, symbol, context);
+                writeJavaIdentifier(builder, syntax, parameter, context);
                 builder.Dot().Append("value");
             }
 
-            if (symbol.RefKind != RefKind.None)
+            if (parameter.RefKind != RefKind.None)
             {
-                switch (symbol.Type.TypeKind)
+                switch (parameter.Type.TypeKind)
                 {
                     case TypeKind.Enum:
                     {
@@ -298,7 +304,7 @@ namespace CodeBinder.Java
                     }
                     case TypeKind.Struct:
                     {
-                        if (symbol.Type.IsCLRPrimitiveType())
+                        if (parameter.Type.IsCLRPrimitiveType())
                         {
                             writeBoxValueAccess();
                             return;
@@ -311,7 +317,7 @@ namespace CodeBinder.Java
                 }
             }
 
-            writeJavaIdentifier(builder, syntax, symbol, context);
+            writeJavaIdentifier(builder, syntax, parameter, context);
         }
 
         static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, JavaCodeConversionContext context)
@@ -450,6 +456,11 @@ namespace CodeBinder.Java
                     case SyntaxKind.IdentifierName:
                     {
                         var identifierName = type as IdentifierNameSyntax;
+                        if (identifierName.IsTypeInterred())
+                        {
+                            builder.Append(symbol.GetQualifiedName());
+                            break;
+                        }
                         builder.Append(identifierName.GetName());
                         break;
                     }

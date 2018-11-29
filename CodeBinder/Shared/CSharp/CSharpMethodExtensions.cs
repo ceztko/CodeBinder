@@ -15,6 +15,12 @@ namespace CodeBinder.Shared.CSharp
 {
     public static class CSharpMethodExtensions
     {
+        public static bool IsTypeInterred(this IdentifierNameSyntax syntax)
+        {
+            // There's no really better way
+            return syntax.Identifier.Text == "var";
+        }
+
         public static ExpressionKind ExpressionKind(this ExpressionSyntax node)
         {
             ExpressionKind kind;
@@ -690,12 +696,17 @@ namespace CodeBinder.Shared.CSharp
             return ret;
         }
 
+        public static bool IsNative(this IMethodSymbol method)
+        {
+            return method.IsExtern && method.HasAttribute<DllImportAttribute>();
+        }
+
         public static bool IsNative(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
         {
             if (!method.HasAttribute<DllImportAttribute>(provider))
                 return false;
 
-            return method.Modifiers.HasModifier("extern");
+            return method.Modifiers.Any(SyntaxKind.ExternKeyword);
         }
 
         public static bool IsFlag(this EnumDeclarationSyntax node, ICompilationContextProvider provider)
@@ -705,12 +716,12 @@ namespace CodeBinder.Shared.CSharp
 
         public static bool IsRef(this ParameterSyntax parameter)
         {
-            return parameter.Modifiers.HasModifier("ref");
+            return parameter.Modifiers.Any(SyntaxKind.RefKeyword);
         }
 
         public static bool IsOut(this ParameterSyntax parameter)
         {
-            return parameter.Modifiers.HasModifier("out");
+            return parameter.Modifiers.Any(SyntaxKind.OutKeyword);
         }
 
         public static int GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider provider)
@@ -881,17 +892,6 @@ namespace CodeBinder.Shared.CSharp
             }
 
             return ret;
-        }
-
-        public static bool HasModifier(this SyntaxTokenList modifiers, string modifierStr)
-        {
-            foreach (var modifier in modifiers)
-            {
-                if (modifier.Text == modifierStr)
-                    return true;
-            }
-
-            return false;
         }
 
         public static string GetName(this GenericNameSyntax node)

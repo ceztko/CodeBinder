@@ -64,6 +64,12 @@ namespace CodeBinder.Shared
             if (symbol == null)
                 return false;
 
+            return symbol.HasAttribute<TAttribute>();
+        }
+
+        public static bool HasAttribute<TAttribute>(this ISymbol symbol)
+            where TAttribute : Attribute
+        {
             var attributes = symbol.GetAttributes();
             foreach (var attribute in attributes)
             {
