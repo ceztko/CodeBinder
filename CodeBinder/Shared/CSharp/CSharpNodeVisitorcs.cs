@@ -279,45 +279,31 @@ namespace CodeBinder.Shared.CSharp
                     assertParent(node.Parent, SyntaxKind.InvocationExpression);
 
                     StatementKind statementKind;
-                    if (node.Parent.Parent.IsStatement(out statementKind))
+                    if (node.Parent.Parent.IsStatement(out statementKind) && statementKind == StatementKind.Expression)
                     {
-                        switch (statementKind)
-                        {
-                            case StatementKind.Expression:
-                            {
-                                // non-return invocation contained in a block
-                                assertParent(node.Parent.Parent.Parent, SyntaxKind.Block);
-                                break;
-                            }
-                            default:
-                            {
-                                Unsupported(node, "ref like keyword in unsupported context");
-                                break;
-                            }
-                        }
+                        // non-return invocation contained in a block
+                        assertParent(node.Parent.Parent.Parent, SyntaxKind.Block);
+                        return;
                     }
 
-                    ExpressionKind expKind;
-                    if (node.Parent.Parent.IsExpression(out expKind))
+                    ExpressionKind expressionKind;
+                    if (node.Parent.Parent.IsExpression(out expressionKind) && expressionKind == ExpressionKind.Assignment)
                     {
-                        switch (expKind)
-                        {
-                            case ExpressionKind.Assignment:
-                            {
-                                // non-return invocation contained in a assignment expressio, contained in a block
-                                assertParent(node.Parent.Parent.Parent, SyntaxKind.ExpressionStatement);
-                                assertParent(node.Parent.Parent.Parent.Parent, SyntaxKind.Block);
-                                break;
-                            }
-                            default:
-                            {
-                                Unsupported(node, "ref like keyword in unsupported context");
-                                break;
-                            }
-                        }
+                        // non-return invocation contained in a assignment expressio, contained in a block
+                        assertParent(node.Parent.Parent.Parent, SyntaxKind.ExpressionStatement);
+                        assertParent(node.Parent.Parent.Parent.Parent, SyntaxKind.Block);
+                        return;
                     }
 
+                    if (node.Parent.Parent.IsKind(SyntaxKind.EqualsValueClause))
+                    {
+                        // Local declaration and assignment with invocation
+                        assertParent(node.Parent.Parent.Parent.Parent.Parent, SyntaxKind.LocalDeclarationStatement);
+                        assertParent(node.Parent.Parent.Parent.Parent.Parent.Parent, SyntaxKind.Block);
+                        return;
+                    }
 
+                    Unsupported(node, "ref like keyword in unsupported context");
                     break;
                 }
             }

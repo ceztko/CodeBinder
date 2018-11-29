@@ -24,9 +24,8 @@ namespace CodeBinder.Java
                     IEnumerable<CodeWriter> writers;
                     if (statement.HasReplacementWriter(context, out writers))
                     {
-                        bool first = true;
                         foreach (var writer in writers)
-                            builder.AppendLine(ref first).Append(writer);
+                            builder.Append(writer).AppendLine();
                     }
                     else
                     {

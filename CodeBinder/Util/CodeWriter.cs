@@ -19,12 +19,19 @@ namespace CodeBinder.Util
             Builder = null;
         }
 
-        protected abstract void Write();
+        public static CodeWriter Create(Action<CodeBuilder> action)
+        {
+            return new ActionCodeWriter(action);
+        }
 
         public static CodeWriter NullWriter()
         {
             return new NullCodeWriter();
         }
+
+        protected abstract void Write();
+
+        #region Support
 
         class NullCodeWriter : CodeWriter
         {
@@ -33,6 +40,23 @@ namespace CodeBinder.Util
                 Builder.Append("NULL");
             }
         }
+
+        class ActionCodeWriter : CodeWriter
+        {
+            Action<CodeBuilder> _action;
+
+            public ActionCodeWriter(Action<CodeBuilder> action)
+            {
+                _action = action;
+            }
+
+            protected override void Write()
+            {
+                _action(Builder);
+            }
+        }
+
+        #endregion // Support
     }
 
     public abstract class CodeWriter<TItem> : CodeWriter, ICompilationContextProvider

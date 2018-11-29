@@ -109,87 +109,11 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, ICompilationContextProvider context)
         {
-            foreach (var arg in syntax.ArgumentList.Arguments)
-            {
-                if (!arg.RefKindKeyword.IsNone())
-                {
-                    var argSymbol = arg.Expression.GetSymbol(context);
-                    ITypeSymbol argType;
-                    switch (argSymbol.Kind)
-                    {
-                        case SymbolKind.Local:
-                        {
-                            argType = (argSymbol as ILocalSymbol).Type;
-                            break;
-                        }
-                        case SymbolKind.Parameter:
-                        {
-                            argType = (argSymbol as IParameterSymbol).Type;
-                            break;
-                        }
-                        default:
-                            throw new Exception();
-                    }
-
-                    if (argType.TypeKind != TypeKind.Struct)
-                    {
-                        string boxType;
-                        if (argType.TypeKind == TypeKind.Enum)
-                            boxType = "IntegerBox";
-                        else
-                            boxType = JavaUtils.GetJavaBoxType(argType.GetFullName());
-
-                        builder.Append(boxType).Space().Append("__" + argSymbol.Name).Space().Append("=").Space()
-                            .Append("new").Space().Append(boxType).EmptyParameterList().EndOfStatement();
-                    }
-                }
-            }
-
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context);
             if (methodSymbol.ReturnType.TypeKind == TypeKind.Enum)
                 builder.Append(methodSymbol.ReturnType.Name).Dot().Append("fromValue").Parenthesized(() => append(builder, syntax, context));
             else
                 append(builder, syntax, context);
-
-            foreach (var arg in syntax.ArgumentList.Arguments)
-            {
-                if (!arg.RefKindKeyword.IsNone())
-                {
-                    var argSymbol = arg.Expression.GetSymbol(context);
-                    ITypeSymbol argType;
-                    switch (argSymbol.Kind)
-                    {
-                        case SymbolKind.Local:
-                        {
-                            argType = (argSymbol as ILocalSymbol).Type;
-                            break;
-                        }
-                        case SymbolKind.Parameter:
-                        {
-                            argType = (argSymbol as IParameterSymbol).Type;
-                            break;
-                        }
-                        default:
-                            throw new Exception();
-                    }
-
-                    if (argType.TypeKind != TypeKind.Struct)
-                    {
-                        builder.EndOfStatement();
-                        builder.Append(argSymbol.Name).Space().Append("=").Space();
-
-                        void appendAssingmentRHS()
-                        {
-                            builder.Append("__").Append(argSymbol.Name).Dot().Append("value");
-                        }
-
-                        if (argType.TypeKind == TypeKind.Enum)
-                            builder.Append(argType.Name).Dot().Append("fromValue").Parenthesized(() => appendAssingmentRHS());
-                        else
-                            appendAssingmentRHS();
-                    }
-                }
-            }
 
             return builder;
         }
