@@ -15,7 +15,7 @@ namespace CodeBinder.Java
 {
     static partial class JavaBuilderExtension
     {
-        public static CodeBuilder Append(this CodeBuilder builder, ConstructorInitializerSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ConstructorInitializerSyntax syntax, JavaCodeConversionContext context)
         {
             switch (syntax.ThisOrBaseKeyword.Kind())
             {
@@ -33,7 +33,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, CSharpTypeParameters typeParameters, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, CSharpTypeParameters typeParameters, JavaCodeConversionContext context)
         {
             Debug.Assert(typeParameters.Count != 0);
             using (builder.TypeParameterList(typeParameters.Count > 1))
@@ -57,7 +57,7 @@ namespace CodeBinder.Java
 
         static void writeTypeConstraints(CodeBuilder builder,
             TypeParameterConstraintClauseSyntax constraints,
-            ICompilationContextProvider context)
+            JavaCodeConversionContext context)
         {
             bool first = true;
             foreach (var constraint in constraints.Constraints)
@@ -65,7 +65,7 @@ namespace CodeBinder.Java
         }
 
         public static CodeBuilder Append(this CodeBuilder builder,
-            TypeParameterConstraintSyntax syntax, ICompilationContextProvider context)
+            TypeParameterConstraintSyntax syntax, JavaCodeConversionContext context)
         {
             switch (syntax.Kind())
             {

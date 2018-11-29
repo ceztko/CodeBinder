@@ -15,7 +15,7 @@ namespace CodeBinder.Java
     {
         bool _isFlag;
 
-        public EnumTypeWriter(EnumDeclarationSyntax syntax, JavaCodeWriterContext context)
+        public EnumTypeWriter(EnumDeclarationSyntax syntax, JavaCodeConversionContext context)
             : base(syntax, context)
         {
             _isFlag = Item.IsFlag(this);

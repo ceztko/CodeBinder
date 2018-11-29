@@ -16,7 +16,7 @@ namespace CodeBinder.Java
     abstract class BaseTypeWriter<TTypeDeclaration> : JavaCodeWriter<TTypeDeclaration>
         where TTypeDeclaration : BaseTypeDeclarationSyntax
     {
-        protected BaseTypeWriter(TTypeDeclaration syntax, JavaCodeWriterContext context)
+        protected BaseTypeWriter(TTypeDeclaration syntax, JavaCodeConversionContext context)
             : base(syntax, context) { }
 
         protected override void Write()
@@ -76,7 +76,7 @@ namespace CodeBinder.Java
                 else
                     Builder.Space();
 
-                string javaTypeName = type.Type.GetJavaType(this, out isInterface);
+                string javaTypeName = type.Type.GetJavaType(Context, out isInterface);
                 if (isInterface)
                 {
                     if (firstInterface)
@@ -127,7 +127,7 @@ namespace CodeBinder.Java
     {
         PartialDeclarationsTree _partialDeclarations;
 
-        protected TypeWriter(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations, JavaCodeWriterContext context)
+        protected TypeWriter(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations, JavaCodeConversionContext context)
             : base(findMainDeclaration(syntax, partialDeclarations), context)
         {
             _partialDeclarations = partialDeclarations;

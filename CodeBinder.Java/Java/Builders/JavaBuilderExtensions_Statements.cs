@@ -15,7 +15,7 @@ namespace CodeBinder.Java
 {
     static partial class JavaBuilderExtension
     {
-        public static CodeBuilder Append(this CodeBuilder builder, BlockSyntax syntax, ICompilationContextProvider context, bool skipBraces = false)
+        public static CodeBuilder Append(this CodeBuilder builder, BlockSyntax syntax, JavaCodeConversionContext context, bool skipBraces = false)
         {
             if (skipBraces)
             {
@@ -34,7 +34,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        static CodeBuilder Append(this CodeBuilder builder, IEnumerable<StatementSyntax> staments, ICompilationContextProvider context)
+        static CodeBuilder Append(this CodeBuilder builder, IEnumerable<StatementSyntax> staments, JavaCodeConversionContext context)
         {
             bool first = true;
             foreach (var statement in staments)
@@ -54,13 +54,13 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, BreakStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, BreakStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("break").SemiColon();
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ForEachStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ForEachStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("for").Space().Parenthesized().Append(syntax.Type, context).Space().Append(syntax.Identifier.Text)
                 .Space().Colon().Space().Append(syntax.Expression, context).Close().AppendLine();
@@ -68,13 +68,13 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ContinueStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ContinueStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("continue").SemiColon();
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, DoStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, DoStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("do").AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
@@ -82,18 +82,18 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, EmptyStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, EmptyStatementSyntax syntax, JavaCodeConversionContext context)
         {
             return builder.SemiColon();
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ExpressionStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ExpressionStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Expression, context).SemiColon();
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ForStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ForStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("for").Space().Parenthesized(() =>
             {
@@ -105,7 +105,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, IfStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, IfStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("if").Space().Parenthesized().Append(syntax.Condition, context).Close().AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
@@ -115,7 +115,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, LocalDeclarationStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, LocalDeclarationStatementSyntax syntax, JavaCodeConversionContext context)
         {
             if (syntax.IsConst)
                 builder.Append("final").Space();
@@ -124,14 +124,14 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, LockStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, LockStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("synchronized").Space().Parenthesized().Append(syntax.Expression, context).Close().AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ReturnStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ReturnStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("return");
             if (syntax.Expression != null)
@@ -140,7 +140,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, SwitchStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, SwitchStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("switch").Space().Parenthesized().Append(syntax.Expression, context).Close().AppendLine();
             using (builder.Block(false))
@@ -152,13 +152,13 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ThrowStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ThrowStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("throw").Space().Append(syntax.Expression, context).SemiColon();
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, TryStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, TryStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("try").AppendLine();
             builder.Append(syntax.Block, context).AppendLine();
@@ -171,14 +171,14 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, UsingStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, UsingStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("try").Space().Parenthesized().Append(syntax.Declaration, context).Close().AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, WhileStatementSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, WhileStatementSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("while").Space().Append(syntax.Condition, context).AppendLine()
                 .IndentChild().Append(syntax.Statement, context);
@@ -186,7 +186,7 @@ namespace CodeBinder.Java
         }
 
         // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
-        public static CodeBuilder Append(this CodeBuilder builder, StatementSyntax statement, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, StatementSyntax statement, JavaCodeConversionContext context)
         {
             var kind = statement.Kind();
             switch (kind)
@@ -244,14 +244,14 @@ namespace CodeBinder.Java
             }
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, JavaCodeConversionContext context)
         {
             Debug.Assert(syntax.Variables.Count == 1);
             builder.Append(syntax.Type, context).Space().Append(syntax.Variables[0], context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, VariableDeclaratorSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, VariableDeclaratorSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Identifier.Text);
             if (syntax.Initializer != null)
@@ -259,33 +259,33 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, EqualsValueClauseSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, EqualsValueClauseSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("=").Space().Append(syntax.Value, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, FinallyClauseSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, FinallyClauseSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("finally").AppendLine().Append(syntax.Block, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, CatchClauseSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, CatchClauseSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("catch").Space().Parenthesized().Append(syntax.Declaration.Type, context).Space().Append(syntax.Declaration.Identifier.Text).Close().AppendLine();
             builder.Append(syntax.Block, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ElseClauseSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ElseClauseSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("else").AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, SwitchSectionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, SwitchSectionSyntax syntax, JavaCodeConversionContext context)
         {
             foreach (var label in syntax.Labels)
                 builder.Append(label, context).AppendLine();
@@ -294,7 +294,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, SwitchLabelSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, SwitchLabelSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Keyword.Text);
             switch (syntax.Kind())

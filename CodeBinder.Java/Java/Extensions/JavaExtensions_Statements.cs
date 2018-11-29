@@ -16,7 +16,7 @@ namespace CodeBinder.Java
     static partial class JavaExtensions
     {
         public static bool HasReplacementWriter(this StatementSyntax statement,
-            ICompilationContextProvider context, out IEnumerable<CodeWriter> writers)
+            JavaCodeConversionContext context, out IEnumerable<CodeWriter> writers)
         {
             switch (statement.StatementKind())
             {
@@ -36,7 +36,7 @@ namespace CodeBinder.Java
             }
         }
 
-        static bool hasReplacementWriters(ExpressionStatementSyntax statement, ICompilationContextProvider context,
+        static bool hasReplacementWriters(ExpressionStatementSyntax statement, JavaCodeConversionContext context,
           out IEnumerable<CodeWriter> writers)
         {
             switch (statement.Expression.ExpressionKind())
@@ -68,7 +68,7 @@ namespace CodeBinder.Java
             return false;
         }
 
-        static bool hasReplacementWriters(LocalDeclarationStatementSyntax statement, ICompilationContextProvider context,
+        static bool hasReplacementWriters(LocalDeclarationStatementSyntax statement, JavaCodeConversionContext context,
           out IEnumerable<CodeWriter> writers)
         {
             Debug.Assert(statement.Declaration.Variables.Count == 1);
@@ -84,7 +84,7 @@ namespace CodeBinder.Java
         }
 
         static bool hasReplacementWriters(InvocationExpressionSyntax invocation, StatementSyntax statement,
-            ICompilationContextProvider context, out IEnumerable<CodeWriter> writers)
+            JavaCodeConversionContext context, out IEnumerable<CodeWriter> writers)
         {
             var refArguments = getRefArguments(invocation, context);
             foreach (var arg in refArguments)
@@ -101,7 +101,7 @@ namespace CodeBinder.Java
         }
 
         static IEnumerable<CodeWriter> getReplacementWriters(InvocationExpressionSyntax invocation,
-            StatementSyntax statement, List<RefArgument> refArguments, ICompilationContextProvider context)
+            StatementSyntax statement, List<RefArgument> refArguments, JavaCodeConversionContext context)
         {
             var writers = new List<CodeWriter>();
             foreach (var arg in refArguments)
@@ -142,7 +142,7 @@ namespace CodeBinder.Java
             return writers;
         }
 
-        static List<RefArgument> getRefArguments(InvocationExpressionSyntax invocation, ICompilationContextProvider context)
+        static List<RefArgument> getRefArguments(InvocationExpressionSyntax invocation, JavaCodeConversionContext context)
         {
             var ret = new List<RefArgument>();
             foreach (var arg in invocation.ArgumentList.Arguments)

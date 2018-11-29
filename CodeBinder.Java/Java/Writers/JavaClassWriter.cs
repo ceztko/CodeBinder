@@ -11,11 +11,11 @@ namespace CodeBinder.Java
     class ClassTypeWriter : TypeWriter<ClassDeclarationSyntax>
     {
         public ClassTypeWriter(ClassDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
-                JavaCodeWriterContext context) : base(declaration, partialDeclarations, context) { }
+                JavaCodeConversionContext context) : base(declaration, partialDeclarations, context) { }
 
         protected override void WriteTypeParameters()
         {
-            Builder.Append(Item.GetTypeParameters(), this).Space();
+            Builder.Append(Item.GetTypeParameters(), Context).Space();
         }
 
         public override int Arity

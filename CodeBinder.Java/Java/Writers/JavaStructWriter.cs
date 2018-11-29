@@ -11,11 +11,11 @@ namespace CodeBinder.Java
     class StructTypeWriter : TypeWriter<StructDeclarationSyntax>
     {
         public StructTypeWriter(StructDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
-                JavaCodeWriterContext context) : base(declaration, partialDeclarations, context) { }
+                JavaCodeConversionContext context) : base(declaration, partialDeclarations, context) { }
 
         protected override void WriteTypeParameters()
         {
-            Builder.Append(Item.GetTypeParameters(), this).Space();
+            Builder.Append(Item.GetTypeParameters(), Context).Space();
         }
 
         public override int Arity

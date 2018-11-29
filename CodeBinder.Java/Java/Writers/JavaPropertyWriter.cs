@@ -17,7 +17,7 @@ namespace CodeBinder.Java
         bool _isAutoProperty;
         bool _isParentInterface;
 
-        protected PropertyWriter(TProperty syntax, JavaCodeWriterContext context)
+        protected PropertyWriter(TProperty syntax, JavaCodeConversionContext context)
             : base(syntax, context)
         {
             _modifiers = Item.GetCSharpModifiers().ToArray();
@@ -122,7 +122,7 @@ namespace CodeBinder.Java
                         using (Builder.AppendLine().Block())
                         {
                             if (!Context.Conversion.SkipBody)
-                                Builder.Space().Append(accessor.Body, this, true).AppendLine();
+                                Builder.Space().Append(accessor.Body, Context, true).AppendLine();
                         }
                     }
                 }
@@ -164,9 +164,9 @@ namespace CodeBinder.Java
                         using (Builder.AppendLine().Block())
                         {
                             if (Context.Conversion.SkipBody)
-                                Builder.Append(Item.Type.GetJavaDefaultReturnStatement(this)).EndOfStatement();
+                                Builder.Append(Item.Type.GetJavaDefaultReturnStatement(Context)).EndOfStatement();
                             else
-                                Builder.Append(accessor.Body, this, true).AppendLine();
+                                Builder.Append(accessor.Body, Context, true).AppendLine();
                         }
                     }
                 }
@@ -200,7 +200,7 @@ namespace CodeBinder.Java
 
         public string JavaType
         {
-            get { return Item.Type.GetJavaType(this); }
+            get { return Item.Type.GetJavaType(Context); }
         }
 
         public abstract string PropertyName { get; }
@@ -208,7 +208,7 @@ namespace CodeBinder.Java
 
     class PropertyWriter : PropertyWriter<PropertyDeclarationSyntax>
     {
-        public PropertyWriter(PropertyDeclarationSyntax syntax, JavaCodeWriterContext context)
+        public PropertyWriter(PropertyDeclarationSyntax syntax, JavaCodeConversionContext context)
             : base(syntax, context) { }
 
         public override string PropertyName
@@ -219,7 +219,7 @@ namespace CodeBinder.Java
 
     class IndexerWriter : PropertyWriter<IndexerDeclarationSyntax>
     {
-        public IndexerWriter(IndexerDeclarationSyntax syntax, JavaCodeWriterContext context)
+        public IndexerWriter(IndexerDeclarationSyntax syntax, JavaCodeConversionContext context)
             : base(syntax, context) { }
 
         public override string PropertyName
@@ -242,7 +242,7 @@ namespace CodeBinder.Java
             bool first = true;
             foreach (var parameter in Item.ParameterList.Parameters)
             {
-                Builder.CommaSeparator(ref first).Append(parameter.Type, this)
+                Builder.CommaSeparator(ref first).Append(parameter.Type, Context)
                     .Space().Append(parameter.Identifier.Text);
             }
 

@@ -15,7 +15,7 @@ namespace CodeBinder.Java
     static partial class JavaExtensions
     {
         public static IEnumerable<CodeWriter> GetWriters(this MemberDeclarationSyntax member,
-            PartialDeclarationsTree partialDeclarations, JavaCodeWriterContext context)
+            PartialDeclarationsTree partialDeclarations, JavaCodeConversionContext context)
         {
             var kind = member.Kind();
             switch (kind)
@@ -48,7 +48,7 @@ namespace CodeBinder.Java
             }
         }
 
-        static IEnumerable<CodeWriter> getMethodWriters(MethodDeclarationSyntax method, JavaCodeWriterContext context)
+        static IEnumerable<CodeWriter> getMethodWriters(MethodDeclarationSyntax method, JavaCodeConversionContext context)
         {
             var signatures = method.GetMethodSignatures(context);
             if (signatures.Count == 0)

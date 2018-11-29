@@ -16,7 +16,7 @@ namespace CodeBinder.Java
 {
     static partial class JavaExtensions
     {
-        public static string GetJavaDefaultReturnStatement(this TypeSyntax type, ICompilationContextProvider provider)
+        public static string GetJavaDefaultReturnStatement(this TypeSyntax type, JavaCodeConversionContext provider)
         {
             var builder = new CodeBuilder();
             string defaultLiteral = type.GetJavaDefaultLiteral(provider);
@@ -27,7 +27,7 @@ namespace CodeBinder.Java
             return builder.ToString();
         }
 
-        public static string GetJavaDefaultLiteral(this TypeSyntax type, ICompilationContextProvider provider)
+        public static string GetJavaDefaultLiteral(this TypeSyntax type, JavaCodeConversionContext provider)
         {
             var fullName = type.GetFullName(provider);
             switch(fullName)
@@ -130,7 +130,7 @@ namespace CodeBinder.Java
             }
         }
 
-        public static string GetJavaType(this TypeSyntax type, ICompilationContextProvider provider)
+        public static string GetJavaType(this TypeSyntax type, JavaCodeConversionContext provider)
         {
             var builder = new CodeBuilder();
             bool isInterface;
@@ -138,7 +138,7 @@ namespace CodeBinder.Java
         }
 
 
-        public static string GetJavaType(this TypeSyntax type, ICompilationContextProvider provider, out bool isInterface)
+        public static string GetJavaType(this TypeSyntax type, JavaCodeConversionContext provider, out bool isInterface)
         {
             var builder = new CodeBuilder();
             var typeSymbol = type.GetTypeSymbol(provider);
@@ -153,13 +153,13 @@ namespace CodeBinder.Java
             return getJavaType(typeName, null, typeSymbol, flags, null);
         }
 
-        public static string GetJavaType(this TypeSyntax type, JavaTypeFlags flags, ICompilationContextProvider provider)
+        public static string GetJavaType(this TypeSyntax type, JavaTypeFlags flags, JavaCodeConversionContext provider)
         {
             var symbol = type.GetTypeSymbol(provider);
             return getJavaType(symbol.GetFullName(), type, symbol, flags, provider);
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, ICompilationContextProvider provider)
+        public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, JavaCodeConversionContext provider)
         {
             var symbol = syntax.GetSymbol(provider);
             if (symbol == null)
@@ -194,7 +194,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        static string getJavaType(string typeName, TypeSyntax syntax, ITypeSymbol symbol, JavaTypeFlags flags, ICompilationContextProvider provider)
+        static string getJavaType(string typeName, TypeSyntax syntax, ITypeSymbol symbol, JavaTypeFlags flags, JavaCodeConversionContext provider)
         {
             bool isByRef = flags.HasFlag(JavaTypeFlags.IsByRef);
             if (symbol != null && flags.HasFlag(JavaTypeFlags.NativeMethod))
@@ -219,7 +219,7 @@ namespace CodeBinder.Java
             return builder.ToString();
         }
 
-        static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, ICompilationContextProvider provider)
+        static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, JavaCodeConversionContext provider)
         {
             switch (symbol.Kind)
             {
@@ -250,7 +250,7 @@ namespace CodeBinder.Java
             }
         }
 
-        static CodeBuilder Append(this CodeBuilder builder, TypeArgumentListSyntax syntax, TypeSyntax parent, ICompilationContextProvider provider)
+        static CodeBuilder Append(this CodeBuilder builder, TypeArgumentListSyntax syntax, TypeSyntax parent, JavaCodeConversionContext provider)
         {
             using (builder.TypeParameterList())
             {
@@ -263,7 +263,7 @@ namespace CodeBinder.Java
         }
 
         static CodeBuilder Append(this CodeBuilder builder, TypeSyntax type, TypeSyntax parent,
-            ICompilationContextProvider provider)
+            JavaCodeConversionContext provider)
         {
             bool isInterface;
             var typeSymbol = type.GetTypeSymbol(provider);
@@ -272,7 +272,7 @@ namespace CodeBinder.Java
         }
 
         static void writeJavaType(CodeBuilder builder, string typeName, TypeSyntax type, ITypeSymbol symbol,
-            TypeSyntax parent, bool isByRef, ICompilationContextProvider provider, out bool isInterface)
+            TypeSyntax parent, bool isByRef, JavaCodeConversionContext provider, out bool isInterface)
         {
             if (symbol != null)
             {

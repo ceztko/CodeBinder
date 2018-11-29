@@ -14,7 +14,7 @@ namespace CodeBinder.Java
 {
     static partial class JavaBuilderExtension
     {
-        public static CodeBuilder Append(this CodeBuilder builder, ArrayCreationExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ArrayCreationExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("new").Space().Append(syntax.Type, context);
             if (syntax.Initializer != null)
@@ -23,13 +23,13 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, OmittedArraySizeExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, OmittedArraySizeExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("[]");
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, AssignmentExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, AssignmentExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             if (syntax.Left.Kind() == SyntaxKind.IdentifierName)
             {
@@ -54,7 +54,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, BinaryExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, BinaryExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             if (syntax.Kind() == SyntaxKind.AsExpression)
             {
@@ -69,13 +69,13 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Parenthesized().Append(syntax.Type, context).Close().Append(syntax.Expression, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ConditionalExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ConditionalExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Condition, context).Space().QuestionMark().Space()
                 .Append(syntax.WhenTrue, context).Space().Colon().Space()
@@ -83,31 +83,31 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, InitializerExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, InitializerExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Braced().Append(syntax.Expressions, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, BaseExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, BaseExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("super");
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ThisExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ThisExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("this");
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context);
             if (methodSymbol.ReturnType.TypeKind == TypeKind.Enum)
@@ -118,54 +118,54 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        static void append(CodeBuilder builder, InvocationExpressionSyntax syntax, ICompilationContextProvider context)
+        static void append(CodeBuilder builder, InvocationExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Token.Text);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append("new").Space().Append(syntax.Type, context).Append(syntax.ArgumentList, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ParenthesizedExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ParenthesizedExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Parenthesized().Append(syntax.Expression, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, PostfixUnaryExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, PostfixUnaryExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Operand, context).Append(syntax.GetJavaOperator());
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, PrefixUnaryExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, PrefixUnaryExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.GetJavaOperator()).Append(syntax.Operand, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, TypeOfExpressionSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, TypeOfExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Type, context).Append(".class");
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, NullableTypeSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, NullableTypeSyntax syntax, JavaCodeConversionContext context)
         {
             if (syntax.ElementType.Kind() == SyntaxKind.PredefinedType)
             {
@@ -179,7 +179,7 @@ namespace CodeBinder.Java
         }
 
         // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
-        public static CodeBuilder Append(this CodeBuilder builder, ExpressionSyntax expression, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ExpressionSyntax expression, JavaCodeConversionContext context)
         {
             var kind = expression.Kind();
             switch (kind)
@@ -317,19 +317,19 @@ namespace CodeBinder.Java
             }
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Bracketed().Append(syntax.Arguments, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ArgumentListSyntax syntax, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, ArgumentListSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Parenthesized().Append(syntax.Arguments, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, JavaCodeConversionContext context)
         {
             bool first = true;
             foreach (var arg in arguments)
@@ -346,7 +346,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ExpressionSyntax> expressions, ICompilationContextProvider context)
+        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ExpressionSyntax> expressions, JavaCodeConversionContext context)
         {
             bool first = true;
             foreach (var expression in expressions)

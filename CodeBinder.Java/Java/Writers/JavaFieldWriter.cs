@@ -10,7 +10,7 @@ namespace CodeBinder.Java
 {
     class FieldWriter : JavaCodeWriter<FieldDeclarationSyntax>
     {
-        public FieldWriter(FieldDeclarationSyntax syntax, JavaCodeWriterContext context)
+        public FieldWriter(FieldDeclarationSyntax syntax, JavaCodeConversionContext context)
             : base(syntax, context) { }
 
         protected override void Write()
@@ -19,7 +19,7 @@ namespace CodeBinder.Java
             if (!string.IsNullOrEmpty(modifiers))
                 Builder.Append(modifiers).Space();
 
-            Builder.Append(Item.Declaration, this).EndOfStatement();
+            Builder.Append(Item.Declaration, Context).EndOfStatement();
         }
     }
 }

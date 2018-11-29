@@ -80,7 +80,7 @@ namespace CodeBinder.Java
         protected override CodeWriter GetTypeWriter()
         {
             return new InterfaceTypeWriter(TypeContext.Node, TypeContext.ComputePartialDeclarationsTree(),
-                new JavaCodeWriterContext(this, Conversion));
+                new JavaCodeConversionContext(this, Conversion));
         }
     }
 
@@ -92,7 +92,7 @@ namespace CodeBinder.Java
         protected override CodeWriter GetTypeWriter()
         {
             return new ClassTypeWriter(TypeContext.Node, TypeContext.ComputePartialDeclarationsTree(),
-                new JavaCodeWriterContext(this, Conversion));
+                new JavaCodeConversionContext(this, Conversion));
         }
     }
 
@@ -104,7 +104,7 @@ namespace CodeBinder.Java
         protected override CodeWriter GetTypeWriter()
         {
             return new StructTypeWriter(TypeContext.Node, TypeContext.ComputePartialDeclarationsTree(),
-                new JavaCodeWriterContext(this, Conversion));
+                new JavaCodeConversionContext(this, Conversion));
         }
     }
 
@@ -116,7 +116,7 @@ namespace CodeBinder.Java
         protected override CodeWriter GetTypeWriter()
         {
             return new EnumTypeWriter(TypeContext.Node,
-                new JavaCodeWriterContext(this, Conversion));
+                new JavaCodeConversionContext(this, Conversion));
         }
     }
 }

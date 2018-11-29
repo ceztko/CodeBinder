@@ -6,18 +6,18 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    abstract class JavaCodeWriter<TItem> : CodeWriter<TItem, JavaCodeWriterContext>
+    abstract class JavaCodeWriter<TItem> : CodeWriter<TItem, JavaCodeConversionContext>
     {
-        protected JavaCodeWriter(TItem item, JavaCodeWriterContext context)
+        protected JavaCodeWriter(TItem item, JavaCodeConversionContext context)
             : base(item, context, context.Provider) { }
     }
 
-    public class JavaCodeWriterContext : ICompilationContextProvider
+    public class JavaCodeConversionContext : ICompilationContextProvider
     {
         public ICompilationContextProvider Provider { get; private set; }
         public CSToJavaConversion Conversion { get; private set; }
 
-        public JavaCodeWriterContext(ICompilationContextProvider provider, CSToJavaConversion conversion)
+        public JavaCodeConversionContext(ICompilationContextProvider provider, CSToJavaConversion conversion)
         {
             Provider = provider;
             Conversion = conversion;
