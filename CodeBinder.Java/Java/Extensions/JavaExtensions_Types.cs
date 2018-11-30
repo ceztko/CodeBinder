@@ -161,12 +161,13 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, JavaCodeConversionContext context)
         {
-            var symbol = syntax.GetSymbol(context);
-            if (symbol == null)
-            {
-                builder.Append("NULL");
-                return builder;
-            }
+            ISymbol symbol;
+            // Symbol can be null https://github.com/dotnet/roslyn/issues/31471
+            if (syntax.Kind() == SyntaxKind.ArrayType)
+                symbol = syntax.GetTypeSymbol(context);
+            else
+                symbol = syntax.GetSymbol(context);
+
             switch (symbol.Kind)
             {
                 case SymbolKind.TypeParameter:
@@ -174,8 +175,8 @@ namespace CodeBinder.Java
                 case SymbolKind.ArrayType:
                 {
                     bool isInterface;
-                    var typeSymbol = (ITypeSymbol)symbol;
-                    writeJavaType(builder, typeSymbol?.GetFullName(), syntax, typeSymbol, null, false, context, out isInterface);
+                    var typeSymbol = symbol as ITypeSymbol;
+                    writeJavaType(builder, typeSymbol.GetFullName(), syntax, typeSymbol, null, false, context, out isInterface);
                     return builder;
                 }
                 case SymbolKind.Method:
@@ -332,12 +333,7 @@ namespace CodeBinder.Java
                     break;
                 }
                 default:
-                {
-                    // throw new Exception();
-                    builder.Append("NULL");
-                    break;
-                }
-
+                    throw new Exception();
             }
         }
 
