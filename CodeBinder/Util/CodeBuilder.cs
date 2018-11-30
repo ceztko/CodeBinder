@@ -140,6 +140,7 @@ namespace CodeBinder.Util
 
         public override string ToString()
         {
+            closeChild();
             return _writer.ToString();
         }
 
