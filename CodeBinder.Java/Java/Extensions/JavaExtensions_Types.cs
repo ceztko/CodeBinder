@@ -234,17 +234,32 @@ namespace CodeBinder.Java
 
         static void writeJavaMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol method, JavaCodeConversionContext context)
         {
-            string methodJavaSymbolName;
-            if (!method.HasJavaReplacement(out methodJavaSymbolName))
+            string javaMethodName;
+            if (!method.HasJavaReplacement(out javaMethodName))
             {
                 if (method.IsNative())
-                    methodJavaSymbolName = method.Name;
+                    javaMethodName = method.Name;
                 else
-                    methodJavaSymbolName = method.Name.ToJavaCase();
+                    javaMethodName = method.Name.ToJavaCase();
             }
 
-            builder.Append(methodJavaSymbolName);
-            // TODO: chiamate generiche
+            var kind = syntax.Kind();
+            switch (kind)
+            {
+                case SyntaxKind.IdentifierName:
+                {
+                    builder.Append(javaMethodName);
+                    break;
+                }
+                case SyntaxKind.GenericName:
+                {
+                    var genericName = syntax as GenericNameSyntax;
+                    builder.Append(javaMethodName).Append(genericName.TypeArgumentList, genericName, context);
+                    break;
+                }
+                default:
+                    throw new Exception();
+            }
         }
 
         static void writeJavaPropertyIdentifier(CodeBuilder builder, TypeSyntax syntax, IPropertySymbol property, JavaCodeConversionContext context)
@@ -404,8 +419,8 @@ namespace CodeBinder.Java
                 {
                     case SyntaxKind.GenericName:
                     {
-                        var arrayType = type as GenericNameSyntax;
-                        builder.Append(javaTypeName).Append(arrayType.TypeArgumentList, type, context);
+                        var genericType = type as GenericNameSyntax;
+                        builder.Append(javaTypeName).Append(genericType.TypeArgumentList, type, context);
                         break;
                     }
                     case SyntaxKind.ArrayType:
