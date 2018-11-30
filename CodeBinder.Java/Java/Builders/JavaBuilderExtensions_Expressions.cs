@@ -32,7 +32,7 @@ namespace CodeBinder.Java
         public static CodeBuilder Append(this CodeBuilder builder, AssignmentExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             var symbol = syntax.Left.GetSymbol(context);
-            if (symbol.Kind == SymbolKind.Property)
+            if (symbol?.Kind == SymbolKind.Property)
             {
                 var operatorKind = syntax.OperatorToken.Kind();
                 switch (operatorKind)
