@@ -472,6 +472,7 @@ namespace CodeBinder.Java
                 }
 
                 Debug.Assert(context != null);
+                Debug.Assert(symbol != null);
 
                 var kind = type.Kind();
                 switch (kind)
@@ -499,7 +500,16 @@ namespace CodeBinder.Java
                         break;
                     }
                     case SyntaxKind.PredefinedType:
+                        builder.Append(javaTypeName);
+                        break;
                     case SyntaxKind.IdentifierName:
+                        var identifierName = type as IdentifierNameSyntax;
+                        if (symbol.Kind == SymbolKind.ArrayType)
+                        {
+                            builder.Append(javaTypeName).EmptyRankSpecifier();
+                            break;
+                        }
+
                         builder.Append(javaTypeName);
                         break;
                     case SyntaxKind.QualifiedName:
@@ -520,6 +530,7 @@ namespace CodeBinder.Java
                 }
 
                 Debug.Assert(context != null);
+                Debug.Assert(symbol != null);
 
                 var kind = type.Kind();
                 switch (kind)
@@ -550,7 +561,6 @@ namespace CodeBinder.Java
                     }
                     case SyntaxKind.NullableType:
                     {
-                        Debug.Assert(symbol != null);
                         var nullableType = type as NullableTypeSyntax;
                         switch (symbol.TypeKind)
                         {
