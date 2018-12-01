@@ -254,7 +254,7 @@ namespace CodeBinder.Java
                 case SyntaxKind.GenericName:
                 {
                     var genericName = syntax as GenericNameSyntax;
-                    builder.Append(javaMethodName).Append(genericName.TypeArgumentList, genericName, context);
+                    builder.Append(genericName.TypeArgumentList, genericName, context).Append(javaMethodName);
                     break;
                 }
                 default:
