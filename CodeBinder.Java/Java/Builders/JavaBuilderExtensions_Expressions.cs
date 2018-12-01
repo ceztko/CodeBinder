@@ -25,7 +25,7 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, OmittedArraySizeExpressionSyntax syntax, JavaCodeConversionContext context)
         {
-            builder.Append("[]");
+            // Do nothing
             return builder;
         }
 

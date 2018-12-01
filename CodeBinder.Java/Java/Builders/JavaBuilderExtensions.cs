@@ -114,6 +114,11 @@ namespace CodeBinder.Java
             return builder.Append(" ");
         }
 
+        public static CodeBuilder EmptyRankSpecifier(this CodeBuilder builder)
+        {
+            return builder.Append("[]");
+        }
+
         public static CodeBuilder EmptyParameterList(this CodeBuilder builder)
         {
             return builder.Append("()");

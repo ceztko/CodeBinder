@@ -468,10 +468,18 @@ namespace CodeBinder.Shared.CSharp
             DefaultVisit(node);
         }
 
+        public override void VisitArrayType(ArrayTypeSyntax node)
+        {
+            if (node.RankSpecifiers.Count > 1)
+                Unsupported(node, "Unsupported array with rank specifiers > 1");
+
+            DefaultVisit(node);
+        }
+
         public override void VisitArrayRankSpecifier(ArrayRankSpecifierSyntax node)
         {
-            if (node.Rank > 1)
-                Unsupported(node, "Unsupported array with rank > 1");
+            if (node.Rank != 1)
+                Unsupported(node, "Unsupported array with rank != 1");
 
             DefaultVisit(node);
         }

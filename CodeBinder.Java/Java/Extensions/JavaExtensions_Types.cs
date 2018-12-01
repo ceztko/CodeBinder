@@ -364,6 +364,21 @@ namespace CodeBinder.Java
             return builder;
         }
 
+        static CodeBuilder Append(this CodeBuilder builder, ArrayRankSpecifierSyntax syntax, JavaCodeConversionContext context)
+        {
+            if (syntax.Sizes.Count > 0)
+            {
+                Debug.Assert(syntax.Sizes.Count == 1);
+                builder.Bracketed().Append(syntax.Sizes[0], context);
+            }
+            else
+            {
+                builder.EmptyRankSpecifier();
+            }
+
+            return builder;
+        }
+
         static CodeBuilder Append(this CodeBuilder builder, TypeSyntax type, TypeSyntax parent,
             JavaCodeConversionContext context)
         {
@@ -425,8 +440,9 @@ namespace CodeBinder.Java
                     }
                     case SyntaxKind.ArrayType:
                     {
-                        var genericType = type as ArrayTypeSyntax;
-                        builder.Append(javaTypeName).Append("[]");
+                        var arrayType = type as ArrayTypeSyntax;
+                        Debug.Assert(arrayType.RankSpecifiers.Count == 1);
+                        builder.Append(javaTypeName).Append(arrayType.RankSpecifiers[0], context);
                         break;
                     }
                     case SyntaxKind.NullableType:
@@ -478,7 +494,8 @@ namespace CodeBinder.Java
                     case SyntaxKind.ArrayType:
                     {
                         var arrayType = type as ArrayTypeSyntax;
-                        builder.Append(arrayType.ElementType, type, context).Append("[]");
+                        Debug.Assert(arrayType.RankSpecifiers.Count == 1);
+                        builder.Append(arrayType.ElementType, type, context).Append(arrayType.RankSpecifiers[0], context);
                         break;
                     }
                     case SyntaxKind.GenericName:
