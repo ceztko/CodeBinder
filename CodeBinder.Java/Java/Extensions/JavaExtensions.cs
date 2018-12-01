@@ -27,7 +27,7 @@ namespace CodeBinder.Java
                 // java.lang.Object
                 { "System.Object", new Dictionary<string, string>() {
                     { "GetHashCode", "hashCode" },
-                    { "Equals", "hashCode" },
+                    { "Equals", "equals" },
                     { "Clone", "clone" },
                     { "ToString", "toString" },
                 } },
