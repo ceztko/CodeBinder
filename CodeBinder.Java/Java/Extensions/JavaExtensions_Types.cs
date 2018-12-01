@@ -159,6 +159,12 @@ namespace CodeBinder.Java
             return getJavaType(symbol.GetFullName(), type, symbol, flags, context);
         }
 
+        public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, IPropertySymbol symbol, JavaCodeConversionContext context)
+        {
+            writeJavaPropertyIdentifier(builder, syntax, symbol, context);
+            return builder;
+        }
+
         public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, JavaCodeConversionContext context)
         {
             ISymbol symbol;
@@ -262,7 +268,7 @@ namespace CodeBinder.Java
             }
         }
 
-        static void writeJavaPropertyIdentifier(CodeBuilder builder, TypeSyntax syntax, IPropertySymbol property, JavaCodeConversionContext context)
+        static void writeJavaPropertyIdentifier(CodeBuilder builder, SyntaxNode syntax, IPropertySymbol property, JavaCodeConversionContext context)
         {
             bool isSetter = false;
             SyntaxNode child = syntax;
@@ -294,10 +300,20 @@ namespace CodeBinder.Java
             {
                 // NOTE: proper use of the setter symbol is done eagerly
                 // while writing AssignmentExpressionSyntax
-                if (isSetter)
-                    builder.Append("set").Append(property.Name);
+                if (property.IsIndexer)
+                {
+                    if (isSetter)
+                        builder.Append("set");
+                    else
+                        builder.Append("get");
+                }
                 else
-                    builder.Append("get").Append(property.Name).EmptyParameterList();
+                {
+                    if (isSetter)
+                        builder.Append("set").Append(property.Name);
+                    else
+                        builder.Append("get").Append(property.Name).EmptyParameterList();
+                }
             }
         }
 

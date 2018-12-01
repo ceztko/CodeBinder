@@ -201,13 +201,27 @@ namespace CodeBinder.Shared.CSharp
         public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
         {
             var leftSymbol = node.Left.GetSymbol(this);
-            if (leftSymbol?.Kind == SymbolKind.Parameter)
+            if (leftSymbol != null)
             {
-                var parameter = leftSymbol as IParameterSymbol;
-                if (parameter.Type.TypeKind == TypeKind.Struct
-                        && parameter.RefKind != RefKind.None
-                        && !parameter.Type.IsCLRPrimitiveType())
-                    Unsupported(node, "Assignment of ref/out structured type");
+                switch (leftSymbol.Kind)
+                {
+                    case SymbolKind.Parameter:
+                    {
+                        var parameter = leftSymbol as IParameterSymbol;
+                        if (parameter.Type.TypeKind == TypeKind.Struct
+                                && parameter.RefKind != RefKind.None
+                                && !parameter.Type.IsCLRPrimitiveType())
+                            Unsupported(node, "Assignment of ref/out structured type");
+                        break;
+                    }
+                    case SymbolKind.Property:
+                    {
+                        if (!node.OperatorToken.IsKind(SyntaxKind.EqualsToken))
+                            Unsupported(node, "Assigment with lhs property and non equals token");
+
+                        break;
+                    }
+                }
             }
 
             DefaultVisit(node);

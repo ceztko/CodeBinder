@@ -39,12 +39,22 @@ namespace CodeBinder.Java
                 switch (operatorKind)
                 {
                     case SyntaxKind.EqualsToken:
+                    {
+                        if (syntax.Left.Kind() == SyntaxKind.ElementAccessExpression)
+                        {
+                            var elementAccess = syntax.Left as ElementAccessExpressionSyntax;
+                            builder.Append(elementAccess.Expression, context).Dot()
+                                .Append(elementAccess, symbol as IPropertySymbol, context)
+                                    .Parenthesized().Append(elementAccess.ArgumentList, false, context).CommaSeparator().Append(syntax.Right, context); ;
+                            return builder;
+                        }
+
                         builder.Append(syntax.Left, context).Parenthesized().Append(syntax.Right, context);
-                        break;
+                        return builder;
+                    }
                     default:
                         throw new Exception();
                 }
-                return builder;
             }
 
             builder.Append(syntax.Left, context).Space().Append(syntax.GetJavaOperator()).Space().Append(syntax.Right, context);
@@ -313,7 +323,17 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, JavaCodeConversionContext context)
         {
-            builder.Bracketed().Append(syntax.Arguments, context);
+            builder.Append(syntax, true, context);
+            return builder;
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, bool bracketed, JavaCodeConversionContext context)
+        {
+            if (bracketed)
+                builder.Bracketed().Append(syntax.Arguments, context);
+            else
+                builder.Append(syntax.Arguments, context);
+
             return builder;
         }
 
