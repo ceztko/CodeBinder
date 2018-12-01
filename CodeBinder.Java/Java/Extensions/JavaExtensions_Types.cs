@@ -165,6 +165,31 @@ namespace CodeBinder.Java
             return builder;
         }
 
+        public static bool TryToReplace(this CodeBuilder builder, SyntaxNode syntax, JavaCodeConversionContext context)
+        {
+            var symbol = syntax.GetSymbol(context);
+            if (symbol == null)
+                return false;
+
+            switch (symbol.Kind)
+            {
+                case SymbolKind.Field:
+                    var field = symbol as IFieldSymbol;
+                    if (field.HasJavaReplacement(out var replacement))
+                    {
+                        builder.Append(replacement);
+                        return true;
+                    }
+                    break;
+                case SymbolKind.Property:
+                case SymbolKind.Method:
+                    // TODO
+                    break;
+            }
+
+            return false;
+        }
+
         public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, JavaCodeConversionContext context)
         {
             ISymbol symbol;
@@ -291,10 +316,13 @@ namespace CodeBinder.Java
                 parent = child.Parent;
             }
 
-            string propertyJavaSymbolName;
-            if (property.HasJavaReplacement(isSetter, out propertyJavaSymbolName))
+            PropertyReplacement propertyReplacement;
+            if (property.HasJavaReplacement(out propertyReplacement))
             {
-                builder.Append(propertyJavaSymbolName);
+                if (isSetter)
+                    builder.Append(propertyReplacement.Setter);
+                else
+                    builder.Append(propertyReplacement.Getter);
             }
             else
             {

@@ -135,6 +135,9 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, JavaCodeConversionContext context)
         {
+            if (builder.TryToReplace(syntax, context))
+                return builder;
+
             builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
             return builder;
         }
@@ -166,19 +169,6 @@ namespace CodeBinder.Java
         public static CodeBuilder Append(this CodeBuilder builder, TypeOfExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             builder.Append(syntax.Type, context).Append(".class");
-            return builder;
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, NullableTypeSyntax syntax, JavaCodeConversionContext context)
-        {
-            if (syntax.ElementType.Kind() == SyntaxKind.PredefinedType)
-            {
-                var prededefined = syntax.ElementType as PredefinedTypeSyntax;
-                builder.Append(prededefined.GetJavaType());
-                return builder;
-            }
-
-            builder.Append(syntax.ElementType, context);
             return builder;
         }
 

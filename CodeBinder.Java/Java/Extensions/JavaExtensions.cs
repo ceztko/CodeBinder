@@ -31,6 +31,9 @@ namespace CodeBinder.Java
                     { "Clone", "clone" },
                     { "ToString", "toString" },
                 } },
+                { "System.IntPtr", new Dictionary<string, string>() {
+                    { "Zero", "0" },
+                } },
                 // java.lang.AutoCloseable
                 { "System.Collections.Generic.List<T>", new Dictionary<string, string>() {
                     { "Add", "add" },
@@ -85,10 +88,19 @@ namespace CodeBinder.Java
             return false;
         }
 
-        public static bool HasJavaReplacement(this IPropertySymbol propertySymbol, bool useSetter, out string javaSymbolName)
+        public static bool HasJavaReplacement(this IPropertySymbol propertySymbol, out PropertyReplacement replacement)
         {
-            // No know properties to replace, so far
-            javaSymbolName = null;
+            // TODO No know properties to replace, so far
+            replacement = null;
+            return false;
+        }
+
+        public static bool HasJavaReplacement(this IFieldSymbol fieldSymbol, out string symbolReplacement)
+        {
+            if (_replacements.TryGetValue(fieldSymbol.ContainingType.GetFullName(), out var replacements))
+                return replacements.TryGetValue(fieldSymbol.Name, out symbolReplacement);
+
+            symbolReplacement = null;
             return false;
         }
 
