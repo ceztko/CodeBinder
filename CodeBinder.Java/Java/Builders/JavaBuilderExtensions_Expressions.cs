@@ -55,10 +55,7 @@ namespace CodeBinder.Java
         {
             if (syntax.Kind() == SyntaxKind.AsExpression)
             {
-                builder.Parenthesized().Append(syntax.Left, context).Space().Append("istanceof").Space().Append(syntax.Right, context).Close().Space()
-                    .QuestionMark().Space().Parenthesized().Append(syntax.Right, context).Close().Append(syntax.Left, context).Space()
-                    .Colon().Append("null");
-
+                builder.Append("BinderUtils").Dot().Append("as").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context).Dot().Append("class");
                 return builder;
             }
 
