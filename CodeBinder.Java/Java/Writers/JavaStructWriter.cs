@@ -13,6 +13,14 @@ namespace CodeBinder.Java
         public StructTypeWriter(StructDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
                 JavaCodeConversionContext context) : base(declaration, partialDeclarations, context) { }
 
+        protected override void WriteTypeMembers()
+        {
+            // Add public default constructor
+            Builder.Append("public").Space().Append(TypeName).EmptyParameterList().Space().EmptyBody().AppendLine();
+            Builder.AppendLine();
+            base.WriteTypeMembers();
+        }
+
         protected override void WriteTypeParameters()
         {
             Builder.Append(Item.GetTypeParameters(), Context).Space();

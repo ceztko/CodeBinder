@@ -124,6 +124,11 @@ namespace CodeBinder.Java
             return builder.Append("()");
         }
 
+        public static CodeBuilder EmptyBody(this CodeBuilder builder)
+        {
+            return builder.Append("{ }");
+        }
+
         /// <remarks>One line</remarks>
         public static CodeBuilder Parenthesized(this CodeBuilder builder, Action parenthesized)
         {

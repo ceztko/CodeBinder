@@ -597,6 +597,18 @@ namespace CodeBinder.Java
 
             switch (typeName)
             {
+                case "System.Exception":
+                {
+                    knownJavaType = "RuntimeException";
+                    isInterface = true;
+                    return true;
+                }
+                case "System.NotImplementedException":
+                {
+                    knownJavaType = "UnsupportedOperationException";
+                    isInterface = true;
+                    return true;
+                }
                 case "System.IDisposable":
                 {
                     knownJavaType = "AutoCloseable";

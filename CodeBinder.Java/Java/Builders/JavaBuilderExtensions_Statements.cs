@@ -302,13 +302,27 @@ namespace CodeBinder.Java
                 case SyntaxKind.DefaultSwitchLabel:
                     break;
                 case SyntaxKind.CaseSwitchLabel:
-                    var caselabel = syntax as CaseSwitchLabelSyntax;
-                    builder.Space().Append(caselabel.Value, context);
+                    builder.Space().Append(syntax as CaseSwitchLabelSyntax, context);
                     break;
                 default:
                     throw new Exception();
             }
             builder.Colon();
+            return builder;
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, CaseSwitchLabelSyntax syntax, JavaCodeConversionContext context)
+        {
+            var typeSymbol = syntax.Value.GetTypeSymbol(context);
+            if (typeSymbol.TypeKind == TypeKind.Enum)
+            {
+                // Shitty Java wants enum elements to be written unqualified
+                var symbol = syntax.Value.GetSymbol<IFieldSymbol>(context);
+                builder.Append(symbol.Name);
+                return builder;
+            }
+
+            builder.Append(syntax.Value, context);
             return builder;
         }
     }
