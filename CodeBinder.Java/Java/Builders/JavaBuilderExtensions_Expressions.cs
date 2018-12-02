@@ -362,22 +362,44 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, ArgumentListSyntax syntax, JavaCodeConversionContext context)
         {
-            builder.Parenthesized().Append(syntax.Arguments, context);
+            var parentSymbol = syntax.Parent.GetSymbol(context);
+            bool isNativeInvocation = false;
+            if (parentSymbol?.Kind == SymbolKind.Method && (parentSymbol as IMethodSymbol).IsNative())
+                isNativeInvocation = true;
+
+            builder.Parenthesized().Append(syntax.Arguments, isNativeInvocation, context);
             return builder;
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, JavaCodeConversionContext context)
+        {
+            builder.Append(arguments, false, context);
+            return builder;
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, bool native, JavaCodeConversionContext context)
         {
             bool first = true;
             foreach (var arg in arguments)
             {
                 builder.CommaSeparator(ref first);
 
-                // For ref/out variables
-                if (!arg.RefKindKeyword.IsNone())
-                    builder.Append("__");
+                if (native)
+                {
+                    // In native invocations, prepend "__" for ref/out arguments
+                    if (!arg.RefKindKeyword.IsNone())
+                        builder.Append("__");
+                }
 
                 builder.Append(arg.Expression, context);
+
+                if (native)
+                {
+                    // In native invocations, append ".value" for enum arguments
+                    var typeSymbol = arg.Expression.GetTypeSymbol(context);
+                    if (typeSymbol.TypeKind == TypeKind.Enum)
+                        builder.Dot().Append("value");
+                }
             }
 
             return builder;
