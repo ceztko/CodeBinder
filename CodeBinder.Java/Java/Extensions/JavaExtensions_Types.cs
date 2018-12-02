@@ -446,6 +446,7 @@ namespace CodeBinder.Java
         static void writeJavaType(CodeBuilder builder, string typeName, TypeSyntax type, ITypeSymbol symbol,
             TypeSyntax parent, bool isByRef, JavaCodeConversionContext context, out bool isInterface)
         {
+            // CHECK-ME: This first part, checking for symbol, is OK...
             if (symbol != null)
             {
                 // Try to adjust the typename, looking for know types
@@ -473,6 +474,8 @@ namespace CodeBinder.Java
                 }
             }
 
+            // CHECK-ME: ...this second part, after checking for know java type could maybe be
+            // replaced by trying to write directly the symbol, if availabe. Compare writeJavaInferredType()
             string javaTypeName;
             if (IsKnownJavaType(typeName, isByRef, parent, out javaTypeName, out isInterface))
             {
@@ -511,18 +514,28 @@ namespace CodeBinder.Java
                         break;
                     }
                     case SyntaxKind.PredefinedType:
+                    {
                         builder.Append(javaTypeName);
                         break;
+                    }
                     case SyntaxKind.IdentifierName:
-                        var identifierName = type as IdentifierNameSyntax;
+                    {
                         if (symbol.Kind == SymbolKind.ArrayType)
                         {
                             builder.Append(javaTypeName).EmptyRankSpecifier();
                             break;
                         }
 
+                        var identifierName = type as IdentifierNameSyntax;
+                        if (identifierName.IsTypeInterred())
+                        {
+                            writeJavaInferredType(builder, javaTypeName, symbol);
+                            break;
+                        }
+
                         builder.Append(javaTypeName);
                         break;
+                    }
                     case SyntaxKind.QualifiedName:
                     {
                         var qualifiedName = type as QualifiedNameSyntax;
@@ -597,6 +610,31 @@ namespace CodeBinder.Java
                 }
 
                 isInterface = symbol?.TypeKind == TypeKind.Interface;
+            }
+        }
+
+        static void writeJavaInferredType(CodeBuilder builder, string typeName, ITypeSymbol symbol)
+        {
+            switch (symbol.Kind)
+            {
+                case SymbolKind.NamedType:
+                {
+                    builder.Append(typeName);
+                    var namedType = symbol as INamedTypeSymbol;
+                    if (namedType.IsGenericType)
+                    {
+                        using (builder.TypeParameterList())
+                        {
+                            bool first = true;
+                            foreach (var parameter in namedType.TypeArguments)
+                                builder.CommaSeparator(ref first).Append(parameter.GetQualifiedName());
+                        }
+                    }
+
+                    break;
+                }
+                default:
+                    throw new Exception();
             }
         }
 
