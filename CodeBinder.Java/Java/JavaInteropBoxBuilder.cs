@@ -8,17 +8,14 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    class InteropBoxBuilder : ConversionBuilder
+    class InteropBoxBuilder : JavaConversionBuilder
     {
-        string _Basepath;
         JavaInteropType _primitiveType;
-        CSToJavaConversion _conversion;
 
         public InteropBoxBuilder(JavaInteropType primitiveType, CSToJavaConversion conversion)
+            : base(conversion)
         {
-            _conversion = conversion;
             _primitiveType = primitiveType;
-            _Basepath = string.IsNullOrEmpty(conversion.BaseNamespace) ? null : conversion.BaseNamespace.Replace('.', Path.DirectorySeparatorChar);
         }
 
         public override string FileName
@@ -28,7 +25,7 @@ namespace CodeBinder.Java
 
         public override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space().Append(_conversion.BaseNamespace).EndOfStatement();
+            builder.Append("package").Space().Append(Conversion.BaseNamespace).EndOfStatement();
             builder.AppendLine();
             builder.Append("class").Space().Append(BoxTypeName).AppendLine();
             using (builder.Block())
@@ -64,11 +61,6 @@ namespace CodeBinder.Java
         public override string GeneratedPreamble
         {
             get { return CSToJavaConversion.SourcePreamble; }
-        }
-
-        public override string BasePath
-        {
-            get { return _Basepath; }
         }
     }
 }

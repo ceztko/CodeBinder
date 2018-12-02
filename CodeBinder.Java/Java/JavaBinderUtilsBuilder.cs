@@ -5,18 +5,14 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    class JavaBinderUtilsBuilder : ConversionBuilder
+    class JavaBinderUtilsBuilder : JavaConversionBuilder
     {
-        CSToJavaConversion _conversion;
-
         public JavaBinderUtilsBuilder(CSToJavaConversion conversion)
-        {
-            _conversion = conversion;
-        }
+            : base(conversion) { }
 
         public override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space().Append(_conversion.BaseNamespace).EndOfStatement();
+            builder.Append("package").Space().Append(Conversion.BaseNamespace).EndOfStatement();
             builder.AppendLine();
             builder.Append(ClassCode);
         }
