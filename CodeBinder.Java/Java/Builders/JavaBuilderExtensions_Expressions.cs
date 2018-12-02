@@ -43,9 +43,14 @@ namespace CodeBinder.Java
                     {
                         if (syntax.Left.Kind() == SyntaxKind.ElementAccessExpression)
                         {
+                            // Determine if the LHS of the assignment is an indexer set operation
+                            var property = symbol as IPropertySymbol;
+                            if (!property.IsIndexer)
+                                break;
+
                             var elementAccess = syntax.Left as ElementAccessExpressionSyntax;
                             builder.Append(elementAccess.Expression, context).Dot()
-                                .Append(elementAccess, symbol as IPropertySymbol, context)
+                                .Append(elementAccess, property, context)
                                     .Parenthesized().Append(elementAccess.ArgumentList, false, context).CommaSeparator().Append(syntax.Right, context); ;
                             return builder;
                         }

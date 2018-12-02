@@ -313,7 +313,8 @@ namespace CodeBinder.Java
                 AssignmentExpressionSyntax assigment;
                 if (parent.IsExpression(out assigment))
                 {
-                    if (assigment.Left == child)
+                    // Determine if the LHS of an assiment is the current property symbol
+                    if (assigment.Left == child && assigment.Left.GetSymbol(context) == property)
                     {
                         isSetter = true;
                         break;
