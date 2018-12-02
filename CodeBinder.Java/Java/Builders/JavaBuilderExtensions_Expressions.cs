@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Text;
 using CodeBinder.Shared.Java;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics;
 
 namespace CodeBinder.Java
 {
@@ -89,6 +90,15 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, JavaCodeConversionContext context)
         {
+            var symbol = syntax.GetSymbol(context);
+            if (symbol?.Kind == SymbolKind.Property)
+            {
+                var property = symbol as IPropertySymbol;
+                Debug.Assert(property.IsIndexer);
+                builder.Append(syntax, property, context).Parenthesized().Append(syntax.ArgumentList, false, context);
+                return builder;
+            }
+
             builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
             return builder;
         }
