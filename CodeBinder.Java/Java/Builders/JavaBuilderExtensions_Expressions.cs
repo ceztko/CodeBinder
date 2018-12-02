@@ -145,6 +145,17 @@ namespace CodeBinder.Java
                 builder.Parenthesized().Parenthesized().Append(javaBoxType).Close().Append(syntax.Expression, context).Close().Dot().Append(syntax.Name, context);
                 return builder;
             }
+
+            var symbol = syntax.GetSymbol(context);
+            if (symbol.Kind == SymbolKind.Property
+                && symbol.OriginalDefinition.ContainingType.GetFullName() == "System.Nullable<T>"
+                && symbol.Name == "Value")
+            {
+                // There are no nullable types in Java, just discard ".Value" accessor
+                builder.Append(syntax.Expression, context);
+                return builder;
+            }
+
             builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
             return builder;
         }

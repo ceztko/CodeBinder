@@ -105,12 +105,12 @@ namespace CodeBinder.Java
             return false;
         }
 
-        public static bool HasJavaReplacement(this IFieldSymbol fieldSymbol, out SymbolReplacement javaReplacement)
+        public static bool HasJavaReplacement(this IFieldSymbol fieldSymbol, out SymbolReplacement replacement)
         {
             if (_replacements.TryGetValue(fieldSymbol.ContainingType.GetFullName(), out var replacements))
-                return replacements.TryGetValue(fieldSymbol.Name, out javaReplacement);
+                return replacements.TryGetValue(fieldSymbol.Name, out replacement);
 
-            javaReplacement = null;
+            replacement = null;
             return false;
         }
 
