@@ -274,7 +274,7 @@ namespace CodeBinder.Java
             string javaMethodName;
             if (method.HasJavaReplacement(out replacement))
             {
-                javaMethodName = method.Name;
+                javaMethodName = replacement.Name;
             }
             else
             {
