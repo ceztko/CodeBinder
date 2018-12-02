@@ -79,6 +79,18 @@ namespace CodeBinder.Shared
             return false;
         }
 
+        public static ITypeSymbol GetFirstDeclaringType(this IMethodSymbol method)
+        {
+            var overriddenMethod = method.OverriddenMethod;
+            while (overriddenMethod != null)
+            {
+                method = overriddenMethod;
+                overriddenMethod = method.OverriddenMethod;
+            }
+
+            return method.ContainingType;
+        }
+
         public static ImmutableArray<AttributeData> GetAttributes(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var symbol = node.GetDeclaredSymbol(provider);

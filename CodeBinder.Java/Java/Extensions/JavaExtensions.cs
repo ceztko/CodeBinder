@@ -73,7 +73,7 @@ namespace CodeBinder.Java
 
             if (methodSymbol.OverriddenMethod != null)
             {
-                var overridenMethodContaningType = methodSymbol.OverriddenMethod.ContainingType.GetFullName();
+                var overridenMethodContaningType = methodSymbol.GetFirstDeclaringType().GetFullName();
                 if (_replacements.TryGetValue(overridenMethodContaningType, out var replacements))
                 {
                     if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
