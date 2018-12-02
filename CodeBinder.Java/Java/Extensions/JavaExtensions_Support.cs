@@ -4,9 +4,17 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    class PropertyReplacement
+    class SymbolReplacement
     {
-        public string Getter { get; set; }
-        public string Setter { get; set; }
-}
+        public string Name { get; set; }
+        public string SetterName { get; set; }
+        public SymbolReplacementKind Kind { get; set; }
+    }
+
+    enum SymbolReplacementKind
+    {
+        Method,
+        Field,
+        Literal
+    }
 }

@@ -165,6 +165,7 @@ namespace CodeBinder.Java
             return builder;
         }
 
+        // TODO: This method should just handle whole replacements, also member access, example IntPtr.Zero -> 0
         public static bool TryToReplace(this CodeBuilder builder, SyntaxNode syntax, JavaCodeConversionContext context)
         {
             var symbol = syntax.GetSymbol(context);
@@ -174,17 +175,21 @@ namespace CodeBinder.Java
             switch (symbol.Kind)
             {
                 case SymbolKind.Field:
+                {
                     var field = symbol as IFieldSymbol;
                     if (field.HasJavaReplacement(out var replacement))
                     {
-                        builder.Append(replacement);
+                        builder.Append(replacement.Name);
                         return true;
                     }
                     break;
+                }
                 case SymbolKind.Property:
                 case SymbolKind.Method:
+                {
                     // TODO
                     break;
+                }
             }
 
             return false;
@@ -265,8 +270,13 @@ namespace CodeBinder.Java
 
         static void writeJavaMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol method, JavaCodeConversionContext context)
         {
+            SymbolReplacement replacement;
             string javaMethodName;
-            if (!method.HasJavaReplacement(out javaMethodName))
+            if (method.HasJavaReplacement(out replacement))
+            {
+                javaMethodName = method.Name;
+            }
+            else
             {
                 if (method.IsNative())
                     javaMethodName = method.Name;
@@ -316,13 +326,14 @@ namespace CodeBinder.Java
                 parent = child.Parent;
             }
 
-            PropertyReplacement propertyReplacement;
+            // TODO: Better handle symbol replacements need/not need of parameter list
+            SymbolReplacement propertyReplacement;
             if (property.HasJavaReplacement(out propertyReplacement))
             {
                 if (isSetter)
-                    builder.Append(propertyReplacement.Setter);
+                    builder.Append(propertyReplacement.SetterName);
                 else
-                    builder.Append(propertyReplacement.Getter);
+                    builder.Append(propertyReplacement.Name);
             }
             else
             {

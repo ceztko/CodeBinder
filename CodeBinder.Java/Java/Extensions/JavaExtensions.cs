@@ -18,35 +18,42 @@ namespace CodeBinder.Java
     {
         delegate bool ModifierGetter(SyntaxKind modifier, out string javaModifier);
 
-        static Dictionary<string, Dictionary<string, string>> _replacements;
+        static Dictionary<string, Dictionary<string, SymbolReplacement>> _replacements;
 
         static JavaExtensions()
         {
-            _replacements = new Dictionary<string, Dictionary<string, string>>()
+            _replacements = new Dictionary<string, Dictionary<string, SymbolReplacement>>()
             {
                 // java.lang.Object
-                { "System.Object", new Dictionary<string, string>() {
-                    { "GetHashCode", "hashCode" },
-                    { "Equals", "equals" },
-                    { "Clone", "clone" },
-                    { "ToString", "toString" },
+                { "System.Object", new Dictionary<string, SymbolReplacement>() {
+                    { "GetHashCode", new SymbolReplacement() { Name = "hashCode", Kind = SymbolReplacementKind.Method } },
+                    { "Equals", new SymbolReplacement() { Name = "equals", Kind = SymbolReplacementKind.Method } },
+                    { "Clone", new SymbolReplacement() { Name = "clone", Kind = SymbolReplacementKind.Method } },
+                    { "ToString", new SymbolReplacement() { Name = "toString", Kind = SymbolReplacementKind.Method } },
                 } },
-                { "System.IntPtr", new Dictionary<string, string>() {
-                    { "Zero", "0" },
+                { "System.IntPtr", new Dictionary<string, SymbolReplacement>() {
+                    { "Zero", new SymbolReplacement() { Name = "0", Kind = SymbolReplacementKind.Literal } },
                 } },
-                // java.lang.AutoCloseable
-                { "System.Collections.Generic.List<T>", new Dictionary<string, string>() {
-                    { "Add", "add" },
-                    { "Clear", "clear" },
+                { "System.Array", new Dictionary<string, SymbolReplacement>() {
+                    { "Length", new SymbolReplacement() { Name = "length", Kind = SymbolReplacementKind.Field } },
                 } },
                 // java.lang.AutoCloseable
-                { "System.IDisposable", new Dictionary<string, string>() { { "Dispose", "close" } } },
+                { "System.Collections.Generic.List<T>", new Dictionary<string, SymbolReplacement>() {
+                    { "Add", new SymbolReplacement() { Name = "add", Kind = SymbolReplacementKind.Method } },
+                    { "Clear", new SymbolReplacement() { Name = "clear", Kind = SymbolReplacementKind.Method } },
+                } },
+                // java.lang.AutoCloseable
+                { "System.IDisposable", new Dictionary<string, SymbolReplacement>() {
+                    { "Dispose", new SymbolReplacement() { Name = "close", Kind = SymbolReplacementKind.Method } }
+                } },
                 // java.lang.Iterable<T>
-                { "System.Collections.Generic.IEnumerable<out T>", new Dictionary<string, string>() { { "GetEnumerator", "iterator" } } },
+                { "System.Collections.Generic.IEnumerable<out T>", new Dictionary<string, SymbolReplacement>() {
+                    { "GetEnumerator", new SymbolReplacement() { Name = "iterator", Kind = SymbolReplacementKind.Method } }
+                } },
             };
         }
 
-        public static bool HasJavaReplacement(this IMethodSymbol methodSymbol, out string javaSymbolName)
+        public static bool HasJavaReplacement(this IMethodSymbol methodSymbol, out SymbolReplacement javaReplacement)
         {
             var containingType = methodSymbol.ContainingType;
             foreach (var iface in containingType.AllInterfaces)
@@ -63,7 +70,7 @@ namespace CodeBinder.Java
                         {
                             if (containingType.FindImplementationForInterfaceMember(member) == methodSymbol)
                             {
-                                javaSymbolName = replacement;
+                                javaReplacement = replacement;
                                 return true;
                             }
                         }
@@ -78,29 +85,32 @@ namespace CodeBinder.Java
                 {
                     if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
                     {
-                        javaSymbolName = replacement;
+                        javaReplacement = replacement;
                         return true;
                     }
                 }
             }
 
-            javaSymbolName = null;
+            javaReplacement = null;
             return false;
         }
 
-        public static bool HasJavaReplacement(this IPropertySymbol propertySymbol, out PropertyReplacement replacement)
+        public static bool HasJavaReplacement(this IPropertySymbol propertySymbol, out SymbolReplacement javaReplacement)
         {
-            // TODO No know properties to replace, so far
-            replacement = null;
+            // TODO: look for interface/overridden class
+            if (_replacements.TryGetValue(propertySymbol.ContainingType.GetFullName(), out var replacements))
+                return replacements.TryGetValue(propertySymbol.Name, out javaReplacement);
+
+            javaReplacement = null;
             return false;
         }
 
-        public static bool HasJavaReplacement(this IFieldSymbol fieldSymbol, out string symbolReplacement)
+        public static bool HasJavaReplacement(this IFieldSymbol fieldSymbol, out SymbolReplacement javaReplacement)
         {
             if (_replacements.TryGetValue(fieldSymbol.ContainingType.GetFullName(), out var replacements))
-                return replacements.TryGetValue(fieldSymbol.Name, out symbolReplacement);
+                return replacements.TryGetValue(fieldSymbol.Name, out javaReplacement);
 
-            symbolReplacement = null;
+            javaReplacement = null;
             return false;
         }
 
