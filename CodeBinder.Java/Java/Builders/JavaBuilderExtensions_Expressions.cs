@@ -138,6 +138,13 @@ namespace CodeBinder.Java
             if (builder.TryToReplace(syntax, context))
                 return builder;
 
+            var typeSymbol = syntax.Expression.GetTypeSymbol(context);
+            if (typeSymbol.IsCLRPrimitiveType())
+            {
+                string javaBoxType = JavaUtils.GetJavaBoxType(typeSymbol.GetFullName());
+                builder.Parenthesized().Parenthesized().Append(javaBoxType).Close().Append(syntax.Expression, context).Close().Dot().Append(syntax.Name, context);
+                return builder;
+            }
             builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
             return builder;
         }
