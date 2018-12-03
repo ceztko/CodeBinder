@@ -1,5 +1,6 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
+using CodeBinder.Attributes;
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
@@ -8,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace CodeBinder.Java
@@ -40,9 +42,20 @@ namespace CodeBinder.Java
             get { return CSToJavaConversion.SourcePreamble; }
         }
 
-        public virtual IEnumerable<string> Imports
+        public IEnumerable<string> Imports
         {
-            get { yield return "java.util.*"; }
+            get
+            {
+                yield return "java.util.*";
+                foreach (var import in OtherImports)
+                    yield return import;
+
+            }
+        }
+
+        public virtual IEnumerable<string> OtherImports
+        {
+            get { return GetImports(TypeContext.Node); }
         }
 
         public sealed override void Write(CodeBuilder builder)
@@ -60,6 +73,20 @@ namespace CodeBinder.Java
                 builder.AppendLine();
 
             builder.Append(GetTypeWriter());
+        }
+
+        protected IEnumerable<string> GetImports(SyntaxNode node)
+        {
+            var attributes = node.GetAttributes(this);
+            foreach (var attribute in attributes)
+            {
+                if (attribute.IsAttribute<ImportAttribute>())
+                {
+                    Debug.Assert(attribute.ConstructorArguments.Length == 1);
+                    var constructorParam = attribute.ConstructorArguments[0];
+                    yield return (string)constructorParam.Value;
+                }
+            }
         }
 
         protected abstract CodeWriter GetTypeWriter();
