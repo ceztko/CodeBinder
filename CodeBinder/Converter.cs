@@ -9,7 +9,13 @@ using System.Text;
 
 namespace CodeBinder
 {
-    public class GeneratorArgs
+    public class ConverterOptions
+    {
+        /// <summary>Plaform specific preprocessor symbols that won't be removed during compilation</summary>
+        public IReadOnlyList<string> PlatformPreprocessorDefinitions { get; set; }
+    }
+
+    public class GeneratorOptions
     {
         public string SourceRootPath;
         /// <summary>Create string before writing to file. For DEBUG</summary>
@@ -18,7 +24,12 @@ namespace CodeBinder
 
     public abstract class Converter
     {
-        internal Converter() { }
+        public ConverterOptions Options { get; private set; }
+
+        internal Converter()
+        {
+            Options = new ConverterOptions();
+        }
 
         public LanguageConversion Conversion
         {
@@ -31,7 +42,7 @@ namespace CodeBinder
 
         internal protected abstract IEnumerable<ConversionDelegate> Convert();
 
-        public void ConvertAndWrite(GeneratorArgs args)
+        public void ConvertAndWrite(GeneratorOptions args)
         {
             foreach (var conversion in Convert().Concat(Conversion.DefaultConversionDelegates))
             {

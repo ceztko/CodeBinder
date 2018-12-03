@@ -19,7 +19,7 @@ namespace ConsoleApp1
             MSBuildLocator.RegisterDefaults();
             MSBuildWorkspace workspace = MSBuildWorkspace.Create();
 
-            GeneratorArgs genargs = new GeneratorArgs();
+            GeneratorOptions genargs = new GeneratorOptions();
 
             //Solution solution = workspace.OpenSolutionAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet.sln").Result;
             //var conv = SolutionConverter.CreateFor<CSToJavaConversion>(solution);
@@ -32,8 +32,10 @@ namespace ConsoleApp1
             {
                 // Java conversion
                 var conv = ProjectConverter.CreateFor<CSToJavaConversion>(project);
-                conv.Conversion.SkipBody = true;
+                conv.Options.PlatformPreprocessorDefinitions = new string[] { "CSHARP", "NET_FRAMEWORK" };
+                conv.Conversion.SkipBody = false;
                 conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
+                //genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\alt\java";
                 genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\main\java";
                 genargs.EagerStringConversion = true;
                 conv.ConvertAndWrite(genargs);
@@ -41,11 +43,12 @@ namespace ConsoleApp1
             else
             {
                 // JNI conversion
-                var conv2 = ProjectConverter.CreateFor<CSToJNIConversion>(project);
-                conv2.Conversion.BaseNamespace = "com.euronovate.libpdf";
+                var conv = ProjectConverter.CreateFor<CSToJNIConversion>(project);
+                conv.Options.PlatformPreprocessorDefinitions = new string[] { "CSHARP", "NET_FRAMEWORK" };
+                conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
                 genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJni";
                 genargs.EagerStringConversion = true;
-                conv2.ConvertAndWrite(genargs);
+                conv.ConvertAndWrite(genargs);
             }
         }
     }

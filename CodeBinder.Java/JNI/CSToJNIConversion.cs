@@ -21,9 +21,9 @@ namespace CodeBinder.JNI
             return new JNICompilationContext(this);
         }
 
-        public override IEnumerable<string> CondictionaCompilationSymbols
+        public override IReadOnlyList<string> PreprocessorDefinitions
         {
-            get { yield return "JNI"; }
+            get { return new string[] { "JNI" }; }
         }
 
         public override IEnumerable<ConversionBuilder> DefaultConversions

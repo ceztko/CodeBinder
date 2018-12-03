@@ -39,9 +39,9 @@ namespace CodeBinder.Java
             return new JavaEnumConversion(this);
         }
 
-        public override IEnumerable<string> CondictionaCompilationSymbols
+        public override IReadOnlyList<string> PreprocessorDefinitions
         {
-            get { yield return "JAVA"; }
+            get { return new string[] { "JAVA" }; }
         }
 
         public override bool UseUTF8Bom

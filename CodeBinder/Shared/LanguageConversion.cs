@@ -23,10 +23,10 @@ namespace CodeBinder.Shared
             get { return true; }
         }
 
-        /// <summary>Preprocessor definitions</summary>
-        public virtual IEnumerable<string> CondictionaCompilationSymbols
+        /// <summary>Conditional compilation symbols</summary>
+        public virtual IReadOnlyList<string> PreprocessorDefinitions
         {
-            get { yield break; }
+            get { return new string[0]; }
         }
 
         internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
