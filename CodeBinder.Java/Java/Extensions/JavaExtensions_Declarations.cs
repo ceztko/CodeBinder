@@ -53,7 +53,16 @@ namespace CodeBinder.Java
             var signatures = method.GetMethodSignatures(context);
             if (signatures.Count == 0)
             {
-                yield return new MethodWriter(method, context);
+                for (int i = method.ParameterList.Parameters.Count - 1; i >= 0; i--)
+                {
+                    var parameter = method.ParameterList.Parameters[i];
+                    if (parameter.Default == null)
+                        break;
+
+                    yield return new MethodWriter(method, i, context);
+                }
+
+                yield return new MethodWriter(method, -1, context);
             }
             else
             {

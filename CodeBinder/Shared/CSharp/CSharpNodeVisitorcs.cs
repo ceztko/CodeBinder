@@ -344,8 +344,8 @@ namespace CodeBinder.Shared.CSharp
 
         public override void VisitParameter(ParameterSyntax node)
         {
-            if (node.Default != null)
-                Unsupported(node, "Optional parameter");
+            if (node.Default != null && !node.Parent.Parent.IsKind(SyntaxKind.MethodDeclaration))
+                Unsupported(node, "Optional parameter in unsopperted context");
 
             DefaultVisit(node);
         }

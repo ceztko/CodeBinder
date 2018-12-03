@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using CodeBinder.Shared.Java;
 using Microsoft.CodeAnalysis;
+using System.Diagnostics;
 
 namespace CodeBinder.Java
 {
@@ -32,15 +33,16 @@ namespace CodeBinder.Java
 
         protected virtual void WriteParameters()
         {
-            if (Item.ParameterList.Parameters.Count == 0)
+            int parameterCount = ParameterCount;
+            if (parameterCount == 0)
             {
                 Builder.EmptyParameterList();
             }
-            else if (Item.ParameterList.Parameters.Count == 1)
+            else if (parameterCount == 1)
             {
                 using (Builder.ParameterList())
                 {
-                    writeParameters(Item.ParameterList);
+                    writeParameters(Item.ParameterList, parameterCount);
                 }
             }
             else
@@ -49,7 +51,7 @@ namespace CodeBinder.Java
                 {
                     using (Builder.ParameterList(true))
                     {
-                        writeParameters(Item.ParameterList);
+                        writeParameters(Item.ParameterList, parameterCount);
                         Builder.AppendLine();
                     }
                 }
@@ -70,7 +72,7 @@ namespace CodeBinder.Java
 
         void writeMethodBody()
         {
-            if (Item.Body == null || !WriteMethodBody)
+            if (Item.Body == null)
             {
                 Builder.EndOfStatement();
             }
@@ -79,17 +81,18 @@ namespace CodeBinder.Java
                 using (Builder.AppendLine().Block())
                 {
                     WriteMethodBodyInternal();
-                    if (!Context.Conversion.SkipBody)
+                    if (WriteMethodBody && !Context.Conversion.SkipBody)
                         Builder.Append(Item.Body, Context, true).AppendLine();
                 }
             }
         }
 
-        private void writeParameters(ParameterListSyntax list)
+        private void writeParameters(ParameterListSyntax list, int parameterCount)
         {
             bool first = true;
-            foreach (var parameter in list.Parameters)
+            for (int i = 0; i < parameterCount; i++)
             {
+                var parameter = list.Parameters[i];
                 Builder.CommaAppendLine(ref first);
                 writeParameter(parameter);
             }
@@ -125,6 +128,11 @@ namespace CodeBinder.Java
             get { return 0; }
         }
 
+        public virtual int ParameterCount
+        {
+            get { return Item.ParameterList.Parameters.Count; }
+        }
+
         public abstract string MethodName { get; }
 
         public abstract bool IsNative { get; }
@@ -132,8 +140,13 @@ namespace CodeBinder.Java
 
     class MethodWriter : MethodWriter<MethodDeclarationSyntax>
     {
-        public MethodWriter(MethodDeclarationSyntax method, JavaCodeConversionContext context)
-            : base(method, context) { }
+        int _optionalIndex;
+
+        public MethodWriter(MethodDeclarationSyntax method, int optionalIndex, JavaCodeConversionContext context)
+            : base(method, context)
+        {
+            _optionalIndex = optionalIndex;
+        }
 
         protected override void WriteModifiers()
         {
@@ -156,8 +169,39 @@ namespace CodeBinder.Java
 
         protected override void WriteMethodBodyInternal()
         {
-            if (Context.Conversion.SkipBody)
-                Builder.Append(Item.ReturnType.GetJavaDefaultReturnStatement(Context)).EndOfStatement();
+            if (_optionalIndex >= 0)
+            {
+                var typeSymbol = Item.ReturnType.GetTypeSymbol(Context);
+                if (typeSymbol.SpecialType != SpecialType.System_Void)
+                    Builder.Append("return").Space();
+
+                using (Builder.Append(MethodName).ParameterList())
+                {
+                    for (int i = 0; i < Item.ParameterList.Parameters.Count; i++)
+                    {
+                        var parameter = Item.ParameterList.Parameters[i];
+                        if (i > 0)
+                            Builder.CommaSeparator();
+
+                        if (i < _optionalIndex)
+                        {
+                            Builder.Append(parameter.Identifier.Text);
+                        }
+                        else
+                        {
+                            Debug.Assert(parameter.Default != null);
+                            Builder.Append(parameter.Default.Value, Context);
+                        }
+                    }
+                }
+
+                Builder.EndOfStatement();
+            }
+            else
+            {
+                if (Context.Conversion.SkipBody)
+                    Builder.Append(Item.ReturnType.GetJavaDefaultReturnStatement(Context)).EndOfStatement();
+            }
         }
 
         public bool IsParentInterface
@@ -182,6 +226,11 @@ namespace CodeBinder.Java
             }
         }
 
+        public override bool WriteMethodBody
+        {
+            get { return _optionalIndex == -1; }
+        }
+
         public override bool IsNative
         {
             get { return Item.IsNative(this); }
@@ -190,6 +239,17 @@ namespace CodeBinder.Java
         public override int Arity
         {
             get { return Item.Arity; }
+        }
+
+        public override int ParameterCount
+        {
+            get
+            {
+                if (_optionalIndex == -1)
+                    return base.ParameterCount;
+
+                return _optionalIndex;
+            }
         }
     }
 
@@ -232,11 +292,6 @@ namespace CodeBinder.Java
         public override string MethodName
         {
             get { return _signature.MethodName; }
-        }
-
-        public override bool WriteMethodBody
-        {
-            get { return false; }
         }
 
         public override bool IsNative
