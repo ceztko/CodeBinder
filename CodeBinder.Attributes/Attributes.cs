@@ -19,22 +19,6 @@ namespace CodeBinder.Attributes
         public string Name { get; private set; }
     }
 
-    // TODO: Remove me
-    [Obsolete]
-    [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
-    public sealed class NamespaceAttribute: Attribute
-    {
-        public NamespaceAttribute(string name)
-        {
-            Name = name;
-        }
-
-        public string Name { get; private set; }
-    }
-
-    // TODO: Remove me
-    [Obsolete]
     [Conditional("DEBUG")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class ImportAttribute : Attribute
@@ -60,14 +44,14 @@ namespace CodeBinder.Attributes
     }
 
     [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
+    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class IgnoreAttribute : Attribute
     {
 
     }
 
     [Conditional("DEBUG")]
-    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum)]
+    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class RequiresAttribute : Attribute
     {
         private string[] _policies;
