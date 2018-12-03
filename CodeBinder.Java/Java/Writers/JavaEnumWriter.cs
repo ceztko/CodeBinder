@@ -13,12 +13,22 @@ namespace CodeBinder.Java
 {
     class EnumTypeWriter : BaseTypeWriter<EnumDeclarationSyntax>
     {
-        bool _isFlag;
+        bool _isOrdinalEnum;
 
         public EnumTypeWriter(EnumDeclarationSyntax syntax, JavaCodeConversionContext context)
             : base(syntax, context)
         {
-            _isFlag = Item.IsFlag(this);
+            _isOrdinalEnum = !Item.IsFlag(this);
+            if (_isOrdinalEnum)
+            {
+                for (int i = 0; i < syntax.Members.Count; i++)
+                {
+                    var member = syntax.Members[i];
+                    int value = member.GetEnumValue(this);
+                    if (value != i)
+                        _isOrdinalEnum = false;
+                }
+            }
         }
 
         protected override void WriteTypeMembers()
@@ -47,7 +57,7 @@ namespace CodeBinder.Java
         private void WriteMember(EnumMemberDeclarationSyntax member)
         {
             Builder.Append(member.GetName());
-            if (_isFlag)
+            if (!_isOrdinalEnum)
             {
                 Builder.Append("(");
                 Builder.Append(member.GetEnumValue(this).ToString());
@@ -58,18 +68,18 @@ namespace CodeBinder.Java
         private void WriteConstructor()
         {
             Builder.Append(TypeName);
-            if (_isFlag)
-                Builder.Parenthesized().Append("int value");
-            else
+            if (_isOrdinalEnum)
                 Builder.EmptyParameterList();
+            else
+                Builder.Parenthesized().Append("int value");
 
             Builder.AppendLine();
             using (Builder.Block())
             {
-                if (_isFlag)
-                    Builder.Append("this.value = value").EndOfStatement();
-                else
+                if (_isOrdinalEnum)
                     Builder.Append("value = this.ordinal()").EndOfStatement();
+                else
+                    Builder.Append("this.value = value").EndOfStatement();
             }
         }
 
@@ -79,7 +89,23 @@ namespace CodeBinder.Java
                 .Append("fromValue(int value)").AppendLine();
             using (Builder.Block())
             {
-                if (_isFlag)
+                if (_isOrdinalEnum)
+                {
+                    Builder.Append("try").AppendLine();
+                    using (Builder.Block())
+                    {
+                        Builder.Append("return").Space();
+                        Builder.Append(TypeName);
+                        Builder.Append(".values()[value]").EndOfStatement();
+                    }
+                    Builder.Append("catch (Exception e)").AppendLine();
+                    using (Builder.Block())
+                    {
+                        Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum").Space()
+                            .Append(TypeName).Append("\")").EndOfStatement();
+                    }
+                }
+                else
                 {
                     Builder.Append(TypeName);
                     Builder.Append("[] values =").Space();
@@ -95,22 +121,6 @@ namespace CodeBinder.Java
                     }
                     Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum").Space()
                         .Append(TypeName).Append("\")").EndOfStatement();
-                }
-                else
-                {
-                    Builder.Append("try").AppendLine();
-                    using (Builder.Block())
-                    {
-                        Builder.Append("return").Space();
-                        Builder.Append(TypeName);
-                        Builder.Append(".values()[value]").EndOfStatement();
-                    }
-                    Builder.Append("catch (Exception e)").AppendLine();
-                    using (Builder.Block())
-                    {
-                        Builder.Append("throw new RuntimeException(\"Invalid value \" + value + \" for enum").Space()
-                            .Append(TypeName).Append("\")").EndOfStatement();
-                    }
                 }
             }
         }

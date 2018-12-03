@@ -724,9 +724,10 @@ namespace CodeBinder.Shared.CSharp
             return parameter.Modifiers.Any(SyntaxKind.OutKeyword);
         }
 
-        public static int GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider provider)
+        public static int GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider context)
         {
-            return node.EqualsValue.Value.GetValue<int>(provider);
+            var symbol = node.GetDeclaredSymbol(context) as IFieldSymbol;
+            return (int)symbol.ConstantValue;
         }
 
         public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this BaseFieldDeclarationSyntax node)
