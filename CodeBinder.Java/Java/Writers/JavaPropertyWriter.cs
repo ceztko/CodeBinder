@@ -122,7 +122,7 @@ namespace CodeBinder.Java
                         using (Builder.AppendLine().Block())
                         {
                             if (!Context.Conversion.SkipBody)
-                                Builder.Space().Append(accessor.Body, Context, true).AppendLine();
+                                Builder.Append(accessor.Body, Context, true).AppendLine();
                         }
                     }
                 }
