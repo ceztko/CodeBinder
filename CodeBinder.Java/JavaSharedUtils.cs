@@ -31,11 +31,12 @@ namespace CodeBinder.Shared.Java
         String,
     }
 
+    [Flags]
     enum JavaTypeFlags
     {
         None = 0,
-        NativeMethod,
-        IsByRef
+        NativeMethod = 1,
+        IsByRef = 2,
     }
 
     public static class JavaUtils

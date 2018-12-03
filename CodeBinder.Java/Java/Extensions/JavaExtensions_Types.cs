@@ -251,7 +251,7 @@ namespace CodeBinder.Java
                 switch (symbol.TypeKind)
                 {
                     case TypeKind.Struct:
-                        if (isByRef)
+                        if (isByRef && !symbol.IsCLRPrimitiveType())
                             return "long";
                         break;
                     case TypeKind.Enum:
