@@ -18,6 +18,9 @@ namespace CodeBinder.Shared.CSharp
         // https://github.com/dotnet/roslyn/issues/48#issuecomment-75641847
         public static bool IsEmptyPartialMethod(this IMethodSymbol method)
         {
+            if (method.IsDefinedInMetadata())
+                return false;
+
             foreach (var reference in method.DeclaringSyntaxReferences)
             {
                 var syntax = reference.GetSyntax();
@@ -30,6 +33,12 @@ namespace CodeBinder.Shared.CSharp
             }
 
             return true;
+        }
+
+        /// <returns>False if it's not defined in source</returns>
+        public static bool IsDefinedInMetadata(this ISymbol symbol)
+        {
+            return symbol.Locations.Any(loc => loc.IsInMetadata);
         }
 
         public static bool IsTypeInterred(this IdentifierNameSyntax syntax)
