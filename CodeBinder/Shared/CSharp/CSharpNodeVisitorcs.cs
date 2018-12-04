@@ -358,14 +358,6 @@ namespace CodeBinder.Shared.CSharp
             DefaultVisit(node);
         }
 
-        public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
-        {
-            if (node.Modifiers.Any(SyntaxKind.PartialKeyword))
-                Unsupported(node, "Partial method");
-
-            DefaultVisit(node);
-        }
-
         public override void VisitIdentifierName(IdentifierNameSyntax node)
         {
             var symbol = node.GetSymbol(this);

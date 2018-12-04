@@ -53,6 +53,9 @@ namespace CodeBinder.Java
             var signatures = method.GetMethodSignatures(context);
             if (signatures.Count == 0)
             {
+                if (method.GetCSharpModifiers().Contains(SyntaxKind.PartialKeyword) && method.Body == null)
+                    yield break;
+
                 for (int i = method.ParameterList.Parameters.Count - 1; i >= 0; i--)
                 {
                     var parameter = method.ParameterList.Parameters[i];

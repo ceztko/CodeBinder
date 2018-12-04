@@ -403,6 +403,9 @@ namespace CodeBinder.Java
                 case SyntaxKind.AbstractKeyword:
                     javaModifier = "abstract";
                     return true;
+                case SyntaxKind.PartialKeyword:
+                    javaModifier = null;
+                    return false;
                 case SyntaxKind.NewKeyword:
                     javaModifier = null;
                     return false;

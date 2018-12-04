@@ -15,6 +15,23 @@ namespace CodeBinder.Shared.CSharp
 {
     public static class CSharpMethodExtensions
     {
+        // https://github.com/dotnet/roslyn/issues/48#issuecomment-75641847
+        public static bool IsEmptyPartialMethod(this IMethodSymbol method)
+        {
+            foreach (var reference in method.DeclaringSyntaxReferences)
+            {
+                var syntax = reference.GetSyntax();
+                if (syntax.Kind() != SyntaxKind.MethodDeclaration)
+                    continue;
+
+                var node = syntax as MethodDeclarationSyntax;
+                if (node.Body != null || !node.Modifiers.Any(SyntaxKind.PartialKeyword))
+                    return false;
+            }
+
+            return true;
+        }
+
         public static bool IsTypeInterred(this IdentifierNameSyntax syntax)
         {
             // There's no really better way
@@ -821,6 +838,7 @@ namespace CodeBinder.Shared.CSharp
                     case SyntaxKind.SealedKeyword:
                     case SyntaxKind.ExternKeyword:
                     case SyntaxKind.NewKeyword:
+                    case SyntaxKind.PartialKeyword:
                         break;
                     default:
                         throw new Exception();

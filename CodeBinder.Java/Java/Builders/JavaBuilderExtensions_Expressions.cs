@@ -129,6 +129,9 @@ namespace CodeBinder.Java
         public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context);
+            if (methodSymbol.IsEmptyPartialMethod())
+                return builder;
+
             if (methodSymbol.IsNative() && methodSymbol.ReturnType.TypeKind == TypeKind.Enum)
                 builder.Append(methodSymbol.ReturnType.Name).Dot().Append("fromValue").Parenthesized(() => append(builder, syntax, context));
             else
