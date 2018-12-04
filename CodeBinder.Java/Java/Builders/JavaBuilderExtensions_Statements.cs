@@ -40,7 +40,7 @@ namespace CodeBinder.Java
             foreach (var statement in staments)
             {
                 IEnumerable<CodeWriter> writers;
-                if (statement.HasReplacementWriter(context, out writers))
+                if (statement.HasReplacementWriters(context, out writers))
                 {
                     foreach (var writer in writers)
                         builder.AppendLine(ref first).Append(writer);

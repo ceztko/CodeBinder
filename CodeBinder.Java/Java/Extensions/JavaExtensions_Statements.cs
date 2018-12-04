@@ -15,7 +15,7 @@ namespace CodeBinder.Java
 {
     static partial class JavaExtensions
     {
-        public static bool HasReplacementWriter(this StatementSyntax statement,
+        public static bool HasReplacementWriters(this StatementSyntax statement,
             JavaCodeConversionContext context, out IEnumerable<CodeWriter> writers)
         {
             switch (statement.StatementKind())
@@ -28,12 +28,35 @@ namespace CodeBinder.Java
                 {
                     return hasReplacementWriters(statement as LocalDeclarationStatementSyntax, context, out writers);
                 }
+                case StatementKind.Return:
+                {
+                    return hasReplacementWriters(statement as ReturnStatementSyntax, context, out writers);
+                }
                 default:
                 {
                     writers = null;
                     return false;
                 }
             }
+        }
+
+        static bool hasReplacementWriters(ReturnStatementSyntax statement, JavaCodeConversionContext context,
+          out IEnumerable<CodeWriter> writers)
+        {
+            switch (statement.Expression.ExpressionKind())
+            {
+                case ExpressionKind.Invocation:
+                {
+                    var invocation = statement.Expression as InvocationExpressionSyntax;
+                    if (hasReplacementWriters(invocation, statement, context, out writers))
+                        return true;
+
+                    break;
+                }
+            }
+
+            writers = null;
+            return false;
         }
 
         static bool hasReplacementWriters(ExpressionStatementSyntax statement, JavaCodeConversionContext context,
@@ -118,7 +141,19 @@ namespace CodeBinder.Java
                 }));
             }
 
-            writers.Add(CodeWriter.Create((builder) => builder.Append(statement, context)));
+            if (statement.StatementKind() == StatementKind.Return)
+            {
+                writers.Add(CodeWriter.Create((builder) =>
+                {
+                    var method = invocation.GetSymbol<IMethodSymbol>(context);
+                    builder.Append(method.ReturnType).Space().Append("__ret").Space()
+                        .Append("=").Space().Append(invocation, context).SemiColon(); 
+                }));
+            }
+            else
+            {
+                writers.Add(CodeWriter.Create((builder) => builder.Append(statement, context)));
+            }
 
             foreach (var arg in refArguments)
             {
@@ -138,6 +173,9 @@ namespace CodeBinder.Java
                     builder.SemiColon();
                 }));
             }
+
+            if (statement.StatementKind() == StatementKind.Return)
+                writers.Add(CodeWriter.Create((builder) => builder.Append("return").Space().Append("__ret").SemiColon()));
 
             return writers;
         }

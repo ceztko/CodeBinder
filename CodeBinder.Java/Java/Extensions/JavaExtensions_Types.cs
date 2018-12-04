@@ -195,6 +195,13 @@ namespace CodeBinder.Java
             return false;
         }
 
+        public static CodeBuilder Append(this CodeBuilder builder, ITypeSymbol symbol)
+        {
+            bool isInterface;
+            writeJavaType(builder, symbol.GetFullName(), null, symbol, null, false, null, out isInterface);
+            return builder;
+        }
+
         public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, JavaCodeConversionContext context)
         {
             ISymbol symbol;
@@ -447,7 +454,7 @@ namespace CodeBinder.Java
         static void writeJavaType(CodeBuilder builder, string typeName, TypeSyntax type, ITypeSymbol symbol,
             TypeSyntax parent, bool isByRef, JavaCodeConversionContext context, out bool isInterface)
         {
-            // CHECK-ME: This first part, checking for symbol, is OK...
+            // CHECK-ME: This first part, checking for symbol, seems OK...
             if (symbol != null)
             {
                 // Try to adjust the typename, looking for know types
@@ -476,7 +483,8 @@ namespace CodeBinder.Java
             }
 
             // CHECK-ME: ...this second part, after checking for know java type could maybe be
-            // replaced by trying to write directly the symbol, if availabe. Compare writeJavaInferredType()
+            // replaced by trying to write directly the symbol, if availabe, handling correctly
+            // array type. Compare writeJavaInferredType()
             string javaTypeName;
             if (IsKnownJavaType(typeName, isByRef, parent, out javaTypeName, out isInterface))
             {
@@ -550,6 +558,15 @@ namespace CodeBinder.Java
             {
                 if (type == null)
                 {
+                    if (symbol != null)
+                    {
+                        builder.Append(symbol.GetQualifiedName());
+                        if (symbol.Kind == SymbolKind.ArrayType)
+                            builder.EmptyRankSpecifier();
+
+                        return;
+                    }
+
                     builder.Append(typeName);
                     return;
                 }
