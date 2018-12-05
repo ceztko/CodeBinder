@@ -1,3 +1,22 @@
+SYNTAX
+======
+
+Usage: CodeBinder [OPTIONS]
+
+Options:
+  -p, --project=VALUE        The project to be converted
+  -s, --solution=VALUE       The solution to be converted
+  -d, --definition=VALUE     Preprocessor definition to be removed during
+                               conversion
+  -n, --namespace=VALUE      The base namespace of the converted project
+  -l, --language=VALUE       The target language for the conversion
+  -r, --rootpath=VALUE       The target root path for the conversion
+  -h, --help                 Show this message and exit
+
+Example:
+
+CodeBinder --project=project.csproj --definition=CSHARP --definition=NET_FRAMEWORK --language=Java --namespace=com.library --rootpath=D:\target\java
+
 BUILD
 =====
 
