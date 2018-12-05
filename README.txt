@@ -1,3 +1,13 @@
+BUILD
+=====
+
+Command line:
+* Download nuget[1] and put it in a PATH visible folder, like 
+	C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\
+* Run build-release.cmd
+
+[1] https://www.nuget.org/downloads, Windows x86 Commandline
+
 Statements
 ==========
 
