@@ -20,7 +20,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.Attributes", "Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.Java", "CodeBinder.Java\CodeBinder.Java.csproj", "{7BB1A9CD-D845-4EBE-BC6C-184F596B6AD1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeBinderExe", "CodeBinderExe\CodeBinder.csproj", "{F7A720CD-9296-428A-868F-1B248B639EFD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeBinder", "CodeBinder\CodeBinder.csproj", "{F7A720CD-9296-428A-868F-1B248B639EFD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
