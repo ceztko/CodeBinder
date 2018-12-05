@@ -1,6 +1,7 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
 using CodeBinder.Shared;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -31,16 +32,34 @@ namespace CodeBinder
             Options = new ConverterOptions();
         }
 
-        public LanguageConversion Conversion
+        public static ProjectConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Project project, IProgress<string> progress = null)
+            where TLanguageConversion : LanguageConversion, new()
         {
-            get { return GetConversion(); }
+            return new ProjectConverter<TLanguageConversion>(project, new TLanguageConversion());
         }
 
-        public bool IgnoreCompilationErrors { get; set; }
+        public static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Solution solution, IProgress<string> progress = null)
+            where TLanguageConversion : LanguageConversion, new()
+        {
+            return CreateFor<TLanguageConversion>(solution, solution.Projects, progress);
+        }
 
-        protected abstract LanguageConversion GetConversion();
+        public static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(IEnumerable<Project> projectsToConvert,
+            IProgress<string> progress = null)
+            where TLanguageConversion : LanguageConversion, new()
+        {
+            return CreateFor<TLanguageConversion>(null, projectsToConvert, progress);
+        }
 
-        internal protected abstract IEnumerable<ConversionDelegate> Convert();
+        private static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Solution solution,
+            IEnumerable<Project> projectsToConvert, IProgress<string> progress)
+            where TLanguageConversion : LanguageConversion, new()
+        {
+            if (solution == null)
+                solution = projectsToConvert.First().Solution;
+
+            return new SolutionConverter<TLanguageConversion>(solution, projectsToConvert, new TLanguageConversion(), progress);
+        }
 
         public void ConvertAndWrite(GeneratorOptions args)
         {
@@ -61,6 +80,33 @@ namespace CodeBinder
                     }
                 }
             }
+        }
+
+        public LanguageConversion Conversion
+        {
+            get { return GetConversion(); }
+        }
+
+        public bool IgnoreCompilationErrors { get; set; }
+
+        protected abstract LanguageConversion GetConversion();
+
+        internal protected abstract IEnumerable<ConversionDelegate> Convert();
+    }
+
+    public abstract class Converter<TConversion> : Converter
+        where TConversion : LanguageConversion
+    {
+        public new TConversion Conversion { get; private set; }
+        
+        internal Converter(TConversion conversion)
+        {
+            Conversion = conversion;
+        }
+
+        protected override LanguageConversion GetConversion()
+        {
+            return Conversion;
         }
     }
 }

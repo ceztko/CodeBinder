@@ -31,7 +31,7 @@ namespace ConsoleApp1
             if (true)
             {
                 // Java conversion
-                var conv = ProjectConverter.CreateFor<CSToJavaConversion>(project);
+                var conv = Converter.CreateFor<CSToJavaConversion>(project);
                 conv.Options.PlatformPreprocessorDefinitions = new string[] { "CSHARP", "NET_FRAMEWORK" };
                 conv.Conversion.SkipBody = false;
                 conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
@@ -43,7 +43,7 @@ namespace ConsoleApp1
             else
             {
                 // JNI conversion
-                var conv = ProjectConverter.CreateFor<CSToJNIConversion>(project);
+                var conv = Converter.CreateFor<CSToJNIConversion>(project);
                 conv.Options.PlatformPreprocessorDefinitions = new string[] { "CSHARP", "NET_FRAMEWORK" };
                 conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
                 genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJni";

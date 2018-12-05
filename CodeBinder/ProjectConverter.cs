@@ -15,19 +15,15 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace CodeBinder
 {
-    public abstract class ProjectConverter : Converter
+    public class ProjectConverter<TConversion> : Converter<TConversion>
+         where TConversion : LanguageConversion
     {
         Project _project;
 
-        protected ProjectConverter(Project project)
+        internal ProjectConverter(Project project, TConversion conversion)
+            : base(conversion)
         {
             _project = project;
-        }
-
-        public static ProjectConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Project project, IProgress<string> progress = null)
-            where TLanguageConversion : LanguageConversion, new()
-        {
-            return new ProjectConverter<TLanguageConversion>(project, new TLanguageConversion());
         }
 
         internal protected override IEnumerable<ConversionDelegate> Convert()
@@ -102,38 +98,4 @@ namespace CodeBinder
             return ret;
         }
     }
-
-    public class ProjectConverter<TLanguageConversion> : ProjectConverter
-            where TLanguageConversion : LanguageConversion
-    {
-        public new TLanguageConversion Conversion { get; private set; }
-
-        internal ProjectConverter(Project project, TLanguageConversion conversion)
-            : base(project)
-        {
-            Conversion = conversion;
-        }
-
-        protected override LanguageConversion GetConversion()
-        {
-            return Conversion;
-        }
-    }
-
-    class ProjectConverterSimple : ProjectConverter
-    {
-        LanguageConversion _Conversion;
-
-        public ProjectConverterSimple(Project project, LanguageConversion conversion)
-            : base(project)
-        {
-            _Conversion = conversion;
-        }
-
-        protected override LanguageConversion GetConversion()
-        {
-            return _Conversion;
-        }
-    }
-
 }
