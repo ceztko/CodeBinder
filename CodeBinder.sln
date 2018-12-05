@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder", "CodeBinder\CodeBinder.csproj", "{7EA075C6-6406-445C-AB77-6C47AFF88D58}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.Common", "CodeBinder.Common\CodeBinder.Common.csproj", "{7EA075C6-6406-445C-AB77-6C47AFF88D58}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{40A4828C-D6D2-43C5-A452-36CB06649680}"
 	ProjectSection(SolutionItems) = preProject
@@ -20,7 +20,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.Attributes", "Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.Java", "CodeBinder.Java\CodeBinder.Java.csproj", "{7BB1A9CD-D845-4EBE-BC6C-184F596B6AD1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeBinderExe", "CodeBinderExe\CodeBinderExe.csproj", "{F7A720CD-9296-428A-868F-1B248B639EFD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeBinderExe", "CodeBinderExe\CodeBinder.csproj", "{F7A720CD-9296-428A-868F-1B248B639EFD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

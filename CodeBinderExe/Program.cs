@@ -27,10 +27,10 @@ namespace CodeBinder
             var options = new OptionSet {
                 { "p|project=", "The project to be converted", p => projectPath = p },
                 { "s|solution=", "The solution to be converted", s => solutionPath = s },
-                { "n|namespace", "The base namespace of the converted project", n => namespaceStr = n },
-                { "l|language", "The target language for the conversion", l => namespaceStr = l },
-                { "r|rootpath", "The root path for the conversion", r => sourceRootPath = r },
-                { "d|definition", "Preprocessor definition to be removed during conversion", d => definitions.Add(d) },
+                { "n|namespace=", "The base namespace of the converted project", n => namespaceStr = n },
+                { "l|language=", "The target language for the conversion", l => namespaceStr = l },
+                { "r|rootpath=", "The root path for the conversion", r => sourceRootPath = r },
+                { "d|definition=", "Preprocessor definition to be removed during conversion", d => definitions.Add(d) },
                 { "h|help", "Show this message and exit", h => shouldShowHelp = h != null },
             };
 
@@ -76,7 +76,7 @@ namespace CodeBinder
                     else if (solution != null)
                         javaConversion = Converter.CreateFor<CSToJavaConversion>(solution);
                     else
-                        throw new Exception();
+                        throw new Exception("A project or a solution must be specified");
                     break;
                 }
                 case "JNI":
@@ -86,11 +86,11 @@ namespace CodeBinder
                     else if (solution != null)
                         jniConversion = Converter.CreateFor<CSToJNIConversion>(solution);
                     else
-                        throw new Exception();
+                        throw new Exception("A project or a solution must be specified");
                     break;
                 }
                 default:
-                    throw new Exception();
+                    throw new Exception("Target language is missing or unsupported");
             }
 
             Converter converter;

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>CodeBinder</AssemblyName>
+    <AssemblyName>CodeBinder.Common</AssemblyName>
     <RootNamespace>CodeBinder</RootNamespace>
     <Product>CodeBinder</Product>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>

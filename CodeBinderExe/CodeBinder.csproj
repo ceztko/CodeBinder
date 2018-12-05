@@ -214,9 +214,9 @@
       <Project>{7bb1a9cd-d845-4ebe-bc6c-184f596b6ad1}</Project>
       <Name>CodeBinder.Java</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CodeBinder\CodeBinder.csproj">
+    <ProjectReference Include="..\CodeBinder.Common\CodeBinder.Common.csproj">
       <Project>{7ea075c6-6406-445c-ab77-6c47aff88d58}</Project>
-      <Name>CodeBinder</Name>
+      <Name>CodeBinder.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
