@@ -50,28 +50,19 @@ namespace CodeBinder.Java
 
         static IEnumerable<CodeWriter> getMethodWriters(MethodDeclarationSyntax method, JavaCodeConversionContext context)
         {
-            var signatures = method.GetMethodSignatures(context);
-            if (signatures.Count == 0)
+            if (method.GetCSharpModifiers().Contains(SyntaxKind.PartialKeyword) && method.Body == null)
+                yield break;
+
+            for (int i = method.ParameterList.Parameters.Count - 1; i >= 0; i--)
             {
-                if (method.GetCSharpModifiers().Contains(SyntaxKind.PartialKeyword) && method.Body == null)
-                    yield break;
+                var parameter = method.ParameterList.Parameters[i];
+                if (parameter.Default == null)
+                    break;
 
-                for (int i = method.ParameterList.Parameters.Count - 1; i >= 0; i--)
-                {
-                    var parameter = method.ParameterList.Parameters[i];
-                    if (parameter.Default == null)
-                        break;
-
-                    yield return new MethodWriter(method, i, context);
-                }
-
-                yield return new MethodWriter(method, -1, context);
+                yield return new MethodWriter(method, i, context);
             }
-            else
-            {
-                foreach (var signature in signatures)
-                    yield return new SignatureMethodWriter(signature, method, context);
-            }
+
+            yield return new MethodWriter(method, -1, context);
         }
     }
 }

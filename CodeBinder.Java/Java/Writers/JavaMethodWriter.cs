@@ -253,53 +253,6 @@ namespace CodeBinder.Java
         }
     }
 
-    class SignatureMethodWriter : MethodWriter<MethodDeclarationSyntax>
-    {
-        MethodSignatureInfo _signature;
-
-        public SignatureMethodWriter(MethodSignatureInfo signature, MethodDeclarationSyntax method, JavaCodeConversionContext context)
-            : base(method, context)
-        {
-            _signature = signature;
-        }
-
-        protected override void WriteModifiers()
-        {
-            Builder.Append(_signature.GetJavaModifiersString()).Space();
-        }
-
-        protected override void WriteReturnType()
-        {
-            Builder.Append(_signature.ReturnType.GetJavaType(JavaTypeFlags.NativeMethod)).Space();
-        }
-
-        protected override void WriteMethodBodyInternal()
-        {
-            Builder.EndOfStatement();
-        }
-
-        protected override void WriteParameters()
-        {
-            for (int i = 0; i < _signature.Parameters.Length; i++)
-                WriteParameter(ref _signature.Parameters[i]);
-        }
-
-        private void WriteParameter(ref MethodParameterInfo parameter)
-        {
-            Builder.CommaSeparator().Append(parameter.GetJavaType(JavaTypeFlags.NativeMethod)).Space().Append(parameter.Name);
-        }
-
-        public override string MethodName
-        {
-            get { return _signature.MethodName; }
-        }
-
-        public override bool IsNative
-        {
-            get { return true; } // TODO: Check if the method is really native?
-        }
-    }
-
     class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
     {
         bool _isStatic;

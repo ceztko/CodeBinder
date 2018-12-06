@@ -28,19 +28,7 @@ namespace CodeBinder.JNI
                 foreach (var module in _compilation.Modules)
                 {
                     foreach (var method in module.Methods)
-                    {
-                        var signatures = method.GetMethodSignatures(module);
-                        if (signatures.Count == 0)
-                        {
-                            builder.Append("(void *)").Append(method.GetJNIMethodName(module)).AppendLine(",");
-                        }
-                        else
-                        {
-                            foreach (var signature in signatures)
-                                builder.Append("(void *)").Append(signature.GetJNIMethodName(method, module)).AppendLine(",");
-                        }
-
-                    }
+                        builder.Append("(void *)").Append(method.GetJNIMethodName(module)).AppendLine(",");
                 }
             }
 

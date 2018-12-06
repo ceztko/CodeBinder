@@ -56,20 +56,8 @@ namespace CodeBinder.JNI
         {
             foreach (var method in TypeContext.Methods)
             {
-                var signatures = method.GetMethodSignatures(this);
-                if (signatures.Count == 0)
-                {
-                    builder.Append(MethodWriter.Create(method, this));
-                    builder.AppendLine();
-                }
-                else
-                {
-                    foreach (var signature in signatures)
-                    {
-                        builder.Append(MethodWriter.Create(signature, method, this));
-                        builder.AppendLine();
-                    }
-                }
+                builder.Append(MethodWriter.Create(method, this));
+                builder.AppendLine();
             }
         }
 

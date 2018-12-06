@@ -277,11 +277,6 @@ namespace CodeBinder.Java
             return GetJavaPropertyModifiersString(modifiers);
         }
 
-        public static string GetJavaModifiersString(this MethodSignatureInfo signature)
-        {
-            return GetJavaMethodModifiersString(signature.Modifiers);
-        }
-
         public static string GetJavaFieldModifiersString(IEnumerable<SyntaxKind> modifiers)
         {
             return getJavaModifiersString(modifiers, getJavaFieldModifier);

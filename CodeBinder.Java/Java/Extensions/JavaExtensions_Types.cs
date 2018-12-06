@@ -146,13 +146,6 @@ namespace CodeBinder.Java
             return builder.ToString();
         }
 
-        public static string GetJavaType(ref this MethodParameterInfo parameter, JavaTypeFlags flags)
-        {
-            ITypeSymbol typeSymbol;
-            string typeName = parameter.GetTypeName(out typeSymbol);
-            return getJavaType(typeName, null, typeSymbol, flags, null);
-        }
-
         public static string GetJavaType(this TypeSyntax type, JavaTypeFlags flags, JavaCodeConversionContext context)
         {
             var symbol = type.GetTypeSymbol(context);

@@ -18,11 +18,6 @@ namespace CodeBinder.JNI
             return getJNIMethodName(method.GetName(), method, module);
         }
 
-        public static string GetJNIMethodName(this MethodSignatureInfo signature, MethodDeclarationSyntax method, JNIModuleContext module)
-        {
-            return getJNIMethodName(signature.MethodName, method, module);
-        }
-
         static string getJNIMethodName(string methodName, MethodDeclarationSyntax method, JNIModuleContext module)
         {
             var parentType = method.Parent.GetDeclaredSymbol(module);
@@ -30,13 +25,6 @@ namespace CodeBinder.JNI
             builder.Append("Java_").Append(module.Compilation.Conversion.BaseNamespace.Replace('.', '_')).Append("_")
                 .Append(parentType.GetQualifiedName().Replace('.', '_')).Append("_").Append(methodName);
             return builder.ToString();
-        }
-
-        public static string GetJNITypeName(ref this MethodParameterInfo parameter)
-        {
-            ITypeSymbol typeSymbol;
-            string typeName = parameter.GetTypeName(out typeSymbol);
-            return getJNIType(typeName, typeSymbol, false);
         }
 
         public static string GetJNIType(this TypeSyntax type, bool isByRef, ICompilationContextProvider provider)

@@ -20,12 +20,6 @@ namespace CodeBinder.JNI
             return new SyntaxSignatureMethodWriter(method, module);
         }
 
-        public static MethodWriter Create(MethodSignatureInfo signature, MethodDeclarationSyntax method,
-            JNIModuleConversion module)
-        {
-            return new CustomSignatureMethodWriter(signature, method, module);
-        }
-
         protected override void Write()
         {
             Builder.Append("JNIEXPORT").Space();
@@ -84,38 +78,6 @@ namespace CodeBinder.JNI
             private void WriteType(TypeSyntax type, bool isRef)
             {
                 Builder.Append(type.GetJNIType(isRef, this)).Space();
-            }
-        }
-
-        class CustomSignatureMethodWriter : MethodWriter
-        {
-            MethodSignatureInfo _signature;
-
-            public CustomSignatureMethodWriter(MethodSignatureInfo signature, MethodDeclarationSyntax method, JNIModuleConversion module)
-                : base(method, module)
-            {
-                _signature = signature;
-            }
-
-            protected override void WriteParameters()
-            {
-                for (int i = 0; i < _signature.Parameters.Length; i++)
-                    WriteParameter(ref _signature.Parameters[i]);
-            }
-
-            private void WriteParameter(ref MethodParameterInfo parameter)
-            {
-                Builder.CommaSeparator().Append(parameter.GetJNITypeName()).Space().Append(parameter.Name);
-            }
-
-            public override string ReturnType
-            {
-                get { return _signature.ReturnType.GetJNITypeName(); }
-            }
-
-            public override string MethodName
-            {
-                get { return _signature.GetJNIMethodName(Item.Method, Item.Module.TypeContext); }
             }
         }
     }
