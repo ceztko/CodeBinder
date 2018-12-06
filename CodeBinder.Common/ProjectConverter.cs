@@ -60,12 +60,16 @@ namespace CodeBinder
                 }
             }
 
-            // Convert also out-of-context types
+            // Convert also non-syntax tree types
             foreach (var type in compilationContext.RootTypes)
             {
                 foreach (var builder in type.Conversion.Builders)
                     yield return new ConversionDelegate(builder);
             }
+
+            // Emit also out of context items
+            foreach (var defaultConversion in compilationContext.DefaultConversionDelegates)
+                yield return defaultConversion;
         }
 
         private Dictionary<string, List<TypeContext>> getSyntaxTreeContextTypes(CompilationContext compilation, IEnumerable<SyntaxTree> syntaxTrees)

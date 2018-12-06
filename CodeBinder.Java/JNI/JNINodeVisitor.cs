@@ -28,7 +28,7 @@ namespace CodeBinder.JNI
         {
             JNIModuleContextChild module = null;
             string moduleName;
-            if (TryGetModule(type, out moduleName))
+            if (TryGetModuleName(type, out moduleName))
             {
                 JNIModuleContextParent parent;
                 if (!Compilation.TryGetModule(moduleName, out parent))
@@ -64,7 +64,7 @@ namespace CodeBinder.JNI
             }
         }
 
-        bool TryGetModule(TypeDeclarationSyntax type, out string moduleName)
+        bool TryGetModuleName(TypeDeclarationSyntax type, out string moduleName)
         {
             var attributes = type.GetAttributes(this);
             foreach (var attribute in attributes)
