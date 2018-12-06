@@ -16,10 +16,13 @@ namespace CodeBinder.Shared.CSharp
     public static class CSharpMethodExtensions
     {
         // https://github.com/dotnet/roslyn/issues/48#issuecomment-75641847
-        public static bool IsEmptyPartialMethod(this IMethodSymbol method)
+        public static bool IsPartialMethod(this IMethodSymbol method, out bool hasEmptyBody)
         {
             if (method.IsDefinedInMetadata())
+            {
+                hasEmptyBody = false;
                 return false;
+            }
 
             foreach (var reference in method.DeclaringSyntaxReferences)
             {
@@ -28,10 +31,14 @@ namespace CodeBinder.Shared.CSharp
                     continue;
 
                 var node = syntax as MethodDeclarationSyntax;
-                if (node.Body != null || !node.Modifiers.Any(SyntaxKind.PartialKeyword))
+                if (!node.Modifiers.Any(SyntaxKind.PartialKeyword))
+                {
+                    hasEmptyBody = false;
                     return false;
+                }
             }
 
+            hasEmptyBody = method.PartialImplementationPart == null || method.PartialDefinitionPart != null;
             return true;
         }
 
@@ -740,6 +747,33 @@ namespace CodeBinder.Shared.CSharp
             return node.HasAttribute<FlagsAttribute>(provider);
         }
 
+        public static bool ShouldDiscard(this SyntaxNode node, ICompilationContextProvider provider)
+        {
+            // TODO: More support for RequiresAttribute
+            return node.HasAttribute<IgnoreAttribute>(provider) || node.HasAttribute<RequiresAttribute>(provider);
+        }
+
+        public static bool HasAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider)
+            where TAttribute : Attribute
+        {
+            ISymbol symbol;
+            if (node.IsKind(SyntaxKind.FieldDeclaration))
+            {
+                var field = node as FieldDeclarationSyntax;
+                Debug.Assert(field.Declaration.Variables.Count == 1);
+                symbol = field.Declaration.Variables[0].GetDeclaredSymbol(provider);
+            }
+            else
+            {
+                symbol = node.GetDeclaredSymbol(provider);
+            }
+
+            if (symbol == null)
+                return false;
+
+            return symbol.HasAttribute<TAttribute>();
+        }
+
         public static bool IsRef(this ParameterSyntax parameter)
         {
             return parameter.Modifiers.Any(SyntaxKind.RefKeyword);
@@ -769,6 +803,7 @@ namespace CodeBinder.Shared.CSharp
                     case SyntaxKind.PrivateKeyword:
                         explicitAccessibility = true;
                         break;
+                    case SyntaxKind.StaticKeyword:
                     case SyntaxKind.NewKeyword:
                     case SyntaxKind.ConstKeyword:
                         break;

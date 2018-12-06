@@ -677,13 +677,13 @@ namespace CodeBinder.Java
                 case "System.Exception":
                 {
                     knownJavaType = "RuntimeException";
-                    isInterface = true;
+                    isInterface = false;
                     return true;
                 }
                 case "System.NotImplementedException":
                 {
                     knownJavaType = "UnsupportedOperationException";
-                    isInterface = true;
+                    isInterface = false;
                     return true;
                 }
                 case "System.IDisposable":
@@ -713,7 +713,7 @@ namespace CodeBinder.Java
                 case "System.Collections.Generic.KeyValuePair<TKey, TValue>":
                 {
                     knownJavaType = "Map.Entry";
-                    isInterface = false;
+                    isInterface = true;
                     return true;
                 }
                 default:

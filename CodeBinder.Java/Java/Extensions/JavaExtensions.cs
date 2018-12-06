@@ -331,6 +331,9 @@ namespace CodeBinder.Java
                 case SyntaxKind.PrivateKeyword:
                     javaModifier = "private";
                     return true;
+                case SyntaxKind.StaticKeyword:
+                    javaModifier = "static";
+                    return true;
                 case SyntaxKind.ReadOnlyKeyword:
                     javaModifier = "final";
                     return true;

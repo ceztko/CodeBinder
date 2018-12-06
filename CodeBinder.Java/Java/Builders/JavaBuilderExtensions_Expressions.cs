@@ -129,7 +129,8 @@ namespace CodeBinder.Java
         public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, JavaCodeConversionContext context)
         {
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context);
-            if (methodSymbol.IsEmptyPartialMethod())
+            bool hasEmptyBody;
+            if (methodSymbol.IsPartialMethod(out hasEmptyBody) && (hasEmptyBody || methodSymbol.PartialImplementationPart.ShouldDiscard()))
                 return builder;
 
             if (methodSymbol.IsNative() && methodSymbol.ReturnType.TypeKind == TypeKind.Enum)

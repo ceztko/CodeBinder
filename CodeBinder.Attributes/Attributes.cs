@@ -63,9 +63,10 @@ namespace CodeBinder.Attributes
 
     public static class Policies
     {
+        public const string Delegates = "{0CA8BB17-A589-41A9-A97C-0E1870837AB4}";
         public const string OperatorOverloading = "{B19FE437-C7FE-41A5-841F-D9170CCEEBA1}";
         public const string ReifiedGenerics = "{E3D821B4-562B-4C9F-8753-1E9C6F4D93A1}";
-        public const string Yield = "{6D4647AE-CA4C-49F0-8BE6-138512992E21}";
+        public const string YieldReturn = "{6D4647AE-CA4C-49F0-8BE6-138512992E21}";
         public const string NETFramework = "{5DD7ECEA-0F59-4781-BCA2-1DC916EB3CFC}";
         public const string ValueTypes = "{5DD7ECEA-0F59-4781-BCA2-1DC916EB3CFC}";
         public const string PassByRef = "{5B8D618C-93E8-46F2-85FE-DE28FEE86196}";

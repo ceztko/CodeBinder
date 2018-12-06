@@ -39,10 +39,10 @@ namespace CodeBinder.Shared
             }
         }
 
-        public static bool ShouldDiscard(this SyntaxNode node, ICompilationContextProvider provider)
+        public static bool ShouldDiscard(this IMethodSymbol method)
         {
             // TODO: More support for RequiresAttribute
-            return node.HasAttribute<IgnoreAttribute>(provider) || node.HasAttribute<RequiresAttribute>(provider);
+            return method.HasAttribute<IgnoreAttribute>() || method.HasAttribute<RequiresAttribute>();
         }
 
         public static bool IsAttribute<TAttribute>(this AttributeData attribute)
@@ -55,16 +55,6 @@ namespace CodeBinder.Shared
         {
             var model = node.GetSemanticModel(provider);
             return model.GetTypeInfo(node);
-        }
-
-        public static bool HasAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider)
-            where TAttribute : Attribute
-        {
-            var symbol = node.GetDeclaredSymbol(provider);
-            if (symbol == null)
-                return false;
-
-            return symbol.HasAttribute<TAttribute>();
         }
 
         public static bool HasAttribute<TAttribute>(this ISymbol symbol)
