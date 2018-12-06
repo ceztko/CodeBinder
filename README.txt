@@ -6,7 +6,7 @@ Usage: CodeBinder [OPTIONS]
 Options:
   -p, --project=VALUE        The project to be converted
   -s, --solution=VALUE       The solution to be converted
-  -d, --definition=VALUE     Preprocessor definition to be removed during
+  -d, --nodef=VALUE          Preprocessor definition to be removed during
                                conversion
   -n, --namespace=VALUE      The base namespace of the converted project
   -l, --language=VALUE       The target language for the conversion
@@ -15,7 +15,7 @@ Options:
 
 Example:
 
-CodeBinder --project=project.csproj --definition=CSHARP --definition=NET_FRAMEWORK --language=Java --namespace=com.library --rootpath=D:\target\java
+CodeBinder --project=project.csproj --nodef=CSHARP --nodef=NET_FRAMEWORK --language=Java --namespace=com.library --rootpath=D:\target\java
 
 BUILD
 =====

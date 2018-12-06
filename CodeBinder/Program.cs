@@ -44,12 +44,12 @@ namespace CodeBinder
             string namespaceStr = null;
             string targetRootPath = null;
             string language = null;
-            var definitions = new List<string>();
+            var definitionsToRemove = new List<string>();
             bool shouldShowHelp = false;
             var options = new OptionSet {
                 { "p|project=", "The project to be converted", p => projectPath = p },
                 { "s|solution=", "The solution to be converted", s => solutionPath = s },
-                { "d|definition=", "Preprocessor definition to be removed during conversion", d => definitions.Add(d) },
+                { "d|nodef=", "Preprocessor definition to be removed during conversion", d => definitionsToRemove.Add(d) },
                 { "n|namespace=", "The base namespace of the converted project", n => namespaceStr = n },
                 { "l|language=", "The target language for the conversion", l => language = l },
                 { "r|rootpath=", "The target root path for the conversion", r => targetRootPath = r },
@@ -126,7 +126,7 @@ namespace CodeBinder
             else
                 throw new Exception();
 
-            converter.Options.PlatformPreprocessorDefinitions = definitions;
+            converter.Options.PlatformPreprocessorDefinitions = definitionsToRemove;
 
             GeneratorOptions genargs = new GeneratorOptions();
             genargs.SourceRootPath = targetRootPath;
