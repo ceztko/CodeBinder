@@ -57,6 +57,9 @@ namespace CodeBinder
                 codeBuilder.AppendLine(preamble);
 
             _builder.Write(codeBuilder);
+
+            // NOTE: Flush the writer: needed when writing to filestream
+            writer.Flush();
         }
     }
 }
