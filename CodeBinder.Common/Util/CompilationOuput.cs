@@ -23,7 +23,7 @@ namespace CodeBinder.Util
         {
             var diagnostics = compilation.GetDiagnostics()
                 .Where(d => d.Severity == DiagnosticSeverity.Error)
-                .Select(d => $"{d.Id}: {d.GetMessage()}")
+                .Select(d => $"{d.Location}, {d.Id}: {d.GetMessage()}")
                 .ToList();
             return diagnostics;
         }
