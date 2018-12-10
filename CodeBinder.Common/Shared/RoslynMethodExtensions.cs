@@ -39,6 +39,17 @@ namespace CodeBinder.Shared
             }
         }
 
+        public static bool IsNullable(this ITypeSymbol symbol)
+        {
+            return symbol.SpecialType == SpecialType.System_Nullable_T;
+        }
+
+        public static bool IsGeneric(this ITypeSymbol symbol)
+        {
+            var named = symbol as INamedTypeSymbol;
+            return named?.IsGenericType == true;
+        }
+
         public static bool ShouldDiscard(this IMethodSymbol method)
         {
             // TODO: More support for RequiresAttribute

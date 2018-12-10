@@ -15,6 +15,18 @@ namespace CodeBinder.Shared.CSharp
 {
     public static class CSharpMethodExtensions
     {
+        public static MethodDeclarationSyntax GetDeclarationSyntax(this IMethodSymbol method)
+        {
+            foreach (var reference in method.DeclaringSyntaxReferences)
+            {
+                var syntax = reference.GetSyntax();
+                if (syntax.Kind() == SyntaxKind.MethodDeclaration)
+                    return syntax as MethodDeclarationSyntax;
+            }
+
+            return null;
+        }
+
         // https://github.com/dotnet/roslyn/issues/48#issuecomment-75641847
         public static bool IsPartialMethod(this IMethodSymbol method, out bool hasEmptyBody)
         {

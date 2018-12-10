@@ -146,7 +146,8 @@ namespace CodeBinder.Java
                 writers.Add(CodeWriter.Create((builder) =>
                 {
                     var method = invocation.GetSymbol<IMethodSymbol>(context);
-                    builder.Append(method.ReturnType).Space().Append("__ret").Space()
+                    var declaration = method.GetDeclarationSyntax();
+                    builder.Append(declaration.ReturnType, context).Space().Append("__ret").Space()
                         .Append("=").Space().Append(invocation, context).SemiColon(); 
                 }));
             }
