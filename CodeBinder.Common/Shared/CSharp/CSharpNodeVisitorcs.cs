@@ -293,6 +293,11 @@ namespace CodeBinder.Shared.CSharp
                             break;
                         case TypeKind.Enum:
                             break;
+                        case TypeKind.Class:
+                            if (argType.GetFullName() != "System.String")
+                                goto default;
+
+                            break;
                         default:
                             Unsupported(node, "Unsupported ref like keyword for non-struct/enum type");
                             break;
