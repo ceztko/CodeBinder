@@ -100,7 +100,7 @@ namespace CodeBinder.Java
             {
                 var property = symbol as IPropertySymbol;
                 Debug.Assert(property.IsIndexer);
-                builder.Append(syntax, property, context).Parenthesized().Append(syntax.ArgumentList, false, context);
+                builder.Append(syntax.Expression, context).Dot().Append(syntax, property, context).Parenthesized().Append(syntax.ArgumentList, false, context);
                 return builder;
             }
 
