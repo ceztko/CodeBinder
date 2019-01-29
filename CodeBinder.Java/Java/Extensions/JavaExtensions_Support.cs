@@ -9,6 +9,7 @@ namespace CodeBinder.Java
         public string Name { get; set; }
         public string SetterName { get; set; }
         public SymbolReplacementKind Kind { get; set; }
+        public bool Negate { get; set; }
     }
 
     enum SymbolReplacementKind

@@ -31,6 +31,11 @@ namespace CodeBinder.Java
                     { "Clone", new SymbolReplacement() { Name = "clone", Kind = SymbolReplacementKind.Method } },
                     { "ToString", new SymbolReplacement() { Name = "toString", Kind = SymbolReplacementKind.Method } },
                 } },
+                // java.lang.String
+                { "System.String", new Dictionary<string, SymbolReplacement>() {
+                    { "op_Equality", new SymbolReplacement() { Name = "equals", Kind = SymbolReplacementKind.Method } },
+                    { "op_Inequality", new SymbolReplacement() { Name = "equals", Kind = SymbolReplacementKind.Method, Negate = true } },
+                } },
                 { "System.IntPtr", new Dictionary<string, SymbolReplacement>() {
                     { "Zero", new SymbolReplacement() { Name = "0", Kind = SymbolReplacementKind.Literal } },
                 } },
@@ -56,10 +61,11 @@ namespace CodeBinder.Java
         public static bool HasJavaReplacement(this IMethodSymbol methodSymbol, out SymbolReplacement javaReplacement)
         {
             var containingType = methodSymbol.ContainingType;
+            Dictionary<string, SymbolReplacement> replacements;
             foreach (var iface in containingType.AllInterfaces)
             {
                 string ifaceName = iface.GetFullName();
-                if (_replacements.TryGetValue(ifaceName, out var replacements))
+                if (_replacements.TryGetValue(ifaceName, out replacements))
                 {
                     foreach (var member in iface.GetMembers())
                     {
@@ -78,16 +84,18 @@ namespace CodeBinder.Java
                 }
             }
 
-            if (methodSymbol.OverriddenMethod != null)
+            string containingTypeFullname;
+            if (methodSymbol.OverriddenMethod == null)
+                containingTypeFullname = containingType.GetFullName();
+            else
+                containingTypeFullname = methodSymbol.GetFirstDeclaringType().GetFullName();
+
+            if (_replacements.TryGetValue(containingTypeFullname, out replacements))
             {
-                var overridenMethodContaningType = methodSymbol.GetFirstDeclaringType().GetFullName();
-                if (_replacements.TryGetValue(overridenMethodContaningType, out var replacements))
+                if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
                 {
-                    if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
-                    {
-                        javaReplacement = replacement;
-                        return true;
-                    }
+                    javaReplacement = replacement;
+                    return true;
                 }
             }
 

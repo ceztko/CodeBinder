@@ -10,6 +10,7 @@ using System.Text;
 using CodeBinder.Shared.Java;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace CodeBinder.Java
 {
@@ -69,10 +70,36 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, BinaryExpressionSyntax syntax, JavaCodeConversionContext context)
         {
-            if (syntax.Kind() == SyntaxKind.AsExpression)
+            var kind = syntax.Kind(); 
+            switch (kind)
             {
-                builder.Append("BinderUtils").Dot().Append("as").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context).Dot().Append("class");
-                return builder;
+                case SyntaxKind.AsExpression:
+                {
+                    builder.Append("BinderUtils").Dot().Append("as").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context).Dot().Append("class");
+                    return builder;
+                }
+                case SyntaxKind.EqualsExpression:
+                case SyntaxKind.NotEqualsExpression:
+                {
+                    var method = syntax.GetSymbol<IMethodSymbol>(context);
+                    if (method != null)
+                    {
+                        SymbolReplacement replacement;
+                        if (method.HasJavaReplacement(out replacement))
+                        {
+                            if (replacement.Negate)
+                                builder.ExclamationMark();
+
+                            builder.Append(syntax.Left, context).Dot().Append(replacement.Name).Parenthesized().Append(syntax.Right, context);
+                            return builder;
+                        }
+                    }
+                    break;
+                }
+                default:
+                {
+                    break;
+                }
             }
 
             builder.Append(syntax.Left, context).Space().Append(syntax.GetJavaOperator()).Space().Append(syntax.Right, context);

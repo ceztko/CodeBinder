@@ -84,6 +84,11 @@ namespace CodeBinder.Java
             return builder.Append(";");
         }
 
+        public static CodeBuilder ExclamationMark(this CodeBuilder builder)
+        {
+            return builder.Append("!");
+        }
+
         public static CodeBuilder QuestionMark(this CodeBuilder builder)
         {
             return builder.Append("?");

@@ -98,6 +98,18 @@ namespace CodeBinder.Shared
             return symbol.GetAttributes();
         }
 
+        public static IOperation GetOperation(this SyntaxNode node, ICompilationContextProvider provider)
+        {
+            var model = node.GetSemanticModel(provider);
+            return model.GetOperation(node);
+        }
+
+        public static TOperation GetOperation<TOperation>(this SyntaxNode node, ICompilationContextProvider provider)
+            where TOperation : IOperation
+        {
+            return (TOperation)GetOperation(node, provider);
+        }
+
         public static TSymbol GetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
             where TSymbol : ISymbol
         {
