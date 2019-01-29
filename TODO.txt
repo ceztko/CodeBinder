@@ -3,6 +3,7 @@
 - Better symbol replacement framework. Support to replace method generic calls, property/indexer usages. Better Support If the calls are "ABI" compatible
 (mening for example the method call has same number/types of parameters) or a total replacement of the call with something else is needed.
 Example, calling a method instead of a field
+- Check to not allow Explicit Interface Implementation;
 
 Internals JNI:
 - Add AJ2N e AN2J, do like box types (stop using template specialization)

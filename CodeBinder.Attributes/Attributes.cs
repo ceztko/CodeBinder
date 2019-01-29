@@ -69,5 +69,6 @@ namespace CodeBinder.Attributes
         public const string NETFramework = "{5DD7ECEA-0F59-4781-BCA2-1DC916EB3CFC}";
         public const string ValueTypes = "{5DD7ECEA-0F59-4781-BCA2-1DC916EB3CFC}";
         public const string PassByRef = "{5B8D618C-93E8-46F2-85FE-DE28FEE86196}";
+        public const string ExplicitInterfaceImplementation = "E0B93847-8DF4-4DE8-B7C8-7F002410EC76";
     }
 }
