@@ -34,7 +34,7 @@ namespace CodeBinder.Java
         return null;
     }
 
-    public static bool equals(String lhs, String rhs)
+    public static boolean equals(String lhs, String rhs)
     {
         if (lhs == null)
         {
