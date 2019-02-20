@@ -33,8 +33,8 @@ namespace CodeBinder.Java
                 } },
                 // java.lang.String
                 { "System.String", new Dictionary<string, SymbolReplacement>() {
-                    { "op_Equality", new SymbolReplacement() { Name = "equals", Kind = SymbolReplacementKind.Method } },
-                    { "op_Inequality", new SymbolReplacement() { Name = "equals", Kind = SymbolReplacementKind.Method, Negate = true } },
+                    { "op_Equality", new SymbolReplacement() { Name = "BinderUtils.equals", Kind = SymbolReplacementKind.StaticMethod } },
+                    { "op_Inequality", new SymbolReplacement() { Name = "BinderUtils.equals", Kind = SymbolReplacementKind.StaticMethod, Negate = true } },
                 } },
                 { "System.IntPtr", new Dictionary<string, SymbolReplacement>() {
                     { "Zero", new SymbolReplacement() { Name = "0", Kind = SymbolReplacementKind.Literal } },

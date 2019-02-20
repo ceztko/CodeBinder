@@ -15,6 +15,7 @@ namespace CodeBinder.Java
     enum SymbolReplacementKind
     {
         Method,
+        StaticMethod,
         Field,
         Literal
     }

@@ -87,11 +87,21 @@ namespace CodeBinder.Java
                         SymbolReplacement replacement;
                         if (method.HasJavaReplacement(out replacement))
                         {
-                            if (replacement.Negate)
-                                builder.ExclamationMark();
+                            switch(replacement.Kind)
+                            {
+                                case SymbolReplacementKind.StaticMethod:
+                                {
+                                    if (replacement.Negate)
+                                        builder.ExclamationMark();
 
-                            builder.Append(syntax.Left, context).Dot().Append(replacement.Name).Parenthesized().Append(syntax.Right, context);
-                            return builder;
+                                    builder.Append(replacement.Name).Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context);
+                                    return builder;
+                                }
+                                default:
+                                {
+                                    throw new NotImplementedException();
+                                }
+                            }
                         }
                     }
                     break;

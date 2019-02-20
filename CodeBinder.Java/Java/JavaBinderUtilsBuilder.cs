@@ -33,6 +33,21 @@ namespace CodeBinder.Java
 
         return null;
     }
+
+    public static bool equals(String lhs, String rhs)
+    {
+        if (lhs == null)
+        {
+            if (rhs == null)
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            return lhs.equals(rhs);
+        }
+    }
 }
 ";
     }
