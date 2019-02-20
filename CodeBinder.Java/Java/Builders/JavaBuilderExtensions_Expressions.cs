@@ -185,7 +185,7 @@ namespace CodeBinder.Java
                 return builder;
 
             var typeSymbol = syntax.Expression.GetTypeSymbol(context);
-            if (typeSymbol.IsCLRPrimitiveType())
+            if (typeSymbol?.IsCLRPrimitiveType() == true)
             {
                 string javaBoxType = JavaUtils.GetJavaBoxType(typeSymbol.GetFullName());
                 builder.Parenthesized().Parenthesized().Append(javaBoxType).Close().Append(syntax.Expression, context).Close().Dot().Append(syntax.Name, context);

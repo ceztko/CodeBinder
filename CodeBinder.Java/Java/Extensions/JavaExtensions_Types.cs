@@ -229,6 +229,14 @@ namespace CodeBinder.Java
                     writeJavaIdentifier(builder, syntax, symbol, context);
                     break;
                 }
+                case SymbolKind.Namespace:
+                {
+                    // CHECK-ME: Evaluate substitution? Seems ok like this.
+                    // Maybe better append the syntax instead of the symbol name?
+                    // Evaluate and comment
+                    builder.Append(symbol.Name);
+                    break;
+                }
                 default:
                     throw new Exception();
             }
