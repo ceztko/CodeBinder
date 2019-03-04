@@ -31,10 +31,12 @@ namespace CodeBinder
             // Add some language specific preprocessor options
             var options = _project.ParseOptions as CSharpParseOptions;
             var preprocessorSymbols = options.PreprocessorSymbolNames;
-            if (Options.PlatformPreprocessorDefinitions != null)
-                preprocessorSymbols.Except(Options.PlatformPreprocessorDefinitions);
+            if (Options.PreprocessorDefinitionsRemoved != null)
+                preprocessorSymbols.Except(Options.PreprocessorDefinitionsRemoved);
 
-            options = options.WithPreprocessorSymbols(preprocessorSymbols.Concat(Conversion.PreprocessorDefinitions));
+            options = options.WithPreprocessorSymbols(preprocessorSymbols
+                .Concat(Conversion.PreprocessorDefinitions)
+                .Concat(Options.PreprocessorDefinitionsAdded ?? new string[0]));
             var project = _project.WithParseOptions(options);
 
             var solutionFilePath = project.Solution.FilePath;

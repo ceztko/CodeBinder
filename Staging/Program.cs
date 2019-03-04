@@ -32,19 +32,24 @@ namespace ConsoleApp1
             {
                 // Java conversion
                 var conv = Converter.CreateFor<CSToJavaConversion>(project);
-                conv.Options.PlatformPreprocessorDefinitions = new string[] { "CSHARP", "NET_FRAMEWORK" };
+                conv.Options.PreprocessorDefinitionsRemoved = new string[] { "CSHARP", "NET_FRAMEWORK" };
                 conv.Conversion.SkipBody = false;
                 conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
                 //genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\alt\java";
                 genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\main\java";
                 genargs.EagerStringConversion = true;
+                //conv.ConvertAndWrite(genargs);
+
+                // Android
+                conv.Options.PreprocessorDefinitionsAdded = new string[] { "ANDROID" };
+                genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\android\java";
                 conv.ConvertAndWrite(genargs);
             }
             else
             {
                 // JNI conversion
                 var conv = Converter.CreateFor<CSToJNIConversion>(project);
-                conv.Options.PlatformPreprocessorDefinitions = new string[] { "CSHARP", "NET_FRAMEWORK" };
+                conv.Options.PreprocessorDefinitionsRemoved = new string[] { "CSHARP", "NET_FRAMEWORK" };
                 conv.Conversion.BaseNamespace = "com.euronovate.libpdf";
                 genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJni";
                 genargs.EagerStringConversion = true;

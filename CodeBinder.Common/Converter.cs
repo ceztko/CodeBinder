@@ -12,8 +12,10 @@ namespace CodeBinder
 {
     public class ConverterOptions
     {
-        /// <summary>Plaform specific preprocessor symbols that won't be removed during compilation</summary>
-        public IReadOnlyList<string> PlatformPreprocessorDefinitions { get; set; }
+        /// <summary>Plaform specific preprocessor symbols that will be added during compilation</summary>
+        public IReadOnlyList<string> PreprocessorDefinitionsAdded { get; set; }
+        /// <summary>Preprocessor symbols that will be be removed during compilation</summary>
+        public IReadOnlyList<string> PreprocessorDefinitionsRemoved { get; set; }
     }
 
     public class GeneratorOptions
