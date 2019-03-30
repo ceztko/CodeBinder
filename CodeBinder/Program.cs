@@ -42,7 +42,6 @@ namespace CodeBinder
         {
             string projectPath = null;
             string solutionPath = null;
-            string namespaceStr = null;
             string targetRootPath = null;
             string language = null;
             var definitionsToAdd = new List<string>();
@@ -70,8 +69,8 @@ namespace CodeBinder
             if (projectPath == null && solutionPath == null)
                 throw new Exception("A project or a solution must be specified");
 
-            if (namespaceStr == null)
-                throw new Exception("A base namespace must be specified");
+            if (namespaceMappings.Count == 0)
+                throw new Exception("Namespace mappings must be specified");
 
             if (targetRootPath == null)
                 throw new Exception("A target root path must be specified");
