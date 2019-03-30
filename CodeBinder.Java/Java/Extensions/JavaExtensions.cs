@@ -468,7 +468,7 @@ namespace CodeBinder.Java
             }
         }
 
-        public static string ToJavaCase(this string text)
+        public static string ToJavaLowerCase(this string text)
         {
             if (string.IsNullOrEmpty(text) || char.IsLower(text, 0))
                 return text;

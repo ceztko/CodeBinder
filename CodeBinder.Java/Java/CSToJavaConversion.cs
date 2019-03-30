@@ -12,12 +12,21 @@ namespace CodeBinder.Java
 {
     public class CSToJavaConversion : CSharpLanguageConversion
     {
+        internal const string CodeBinderNamespace = "CodeBinder";
+
+        public NamespaceMappingTree NamespaceMapping { get; private set; }
+
         public bool SkipBody { get; set; }
+
+        public bool MethodsLowerCase { get; set; }
 
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 
-        /// <summary>Base namespace of the package, to be set outside</summary>
-        public string BaseNamespace { get; set; }
+        public CSToJavaConversion()
+        {
+            NamespaceMapping = new NamespaceMappingTree();
+            MethodsLowerCase = true;
+        }
 
         public override TypeConversion<CSharpClassTypeContext> GetClassTypeConversion()
         {

@@ -42,7 +42,7 @@ namespace CodeBinder
             var solutionFilePath = project.Solution.FilePath;
             var solutionDir = Path.GetDirectoryName(solutionFilePath);
             var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
-            if (!IgnoreCompilationErrors)
+            if (!Options.IgnoreCompilationErrors)
             {
                 string errors = CompilationOuput.ErrorsForCompilation(compilation, "source");
                 if (!string.IsNullOrEmpty(errors))

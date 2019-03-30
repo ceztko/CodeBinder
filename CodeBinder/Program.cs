@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
 using CodeBinder.JNI;
 using Mono.Options;
+using CodeBinder.Util;
 
 namespace CodeBinder
 {
@@ -46,13 +47,14 @@ namespace CodeBinder
             string language = null;
             var definitionsToAdd = new List<string>();
             var definitionsToRemove = new List<string>();
+            var namespaceMappings = new List<string>();
             bool shouldShowHelp = false;
             var options = new OptionSet {
                 { "p|project=", "The project to be converted", p => projectPath = p },
                 { "s|solution=", "The solution to be converted", s => solutionPath = s },
                 { "d|def=", "Preprocessor definition to be added during conversion", d => definitionsToAdd.Add(d) },
                 { "n|nodef=", "Preprocessor definition to be removed during conversion", d => definitionsToRemove.Add(d) },
-                { "ns|namespace=", "The base namespace of the converted project", n => namespaceStr = n },
+                { "ns|nsmapping=", "Mapping for the namespace, must be a colon separated", ns => namespaceMappings.Add(ns) },
                 { "l|language=", "The target language for the conversion", l => language = l },
                 { "r|rootpath=", "The target root path for the conversion", r => targetRootPath = r },
                 { "h|help", "Show this message and exit", h => shouldShowHelp = h != null },
@@ -115,18 +117,29 @@ namespace CodeBinder
             }
 
             Converter converter;
+            NamespaceMappingTree nsmappings;
             if (javaConversion != null)
             {
-                javaConversion.Conversion.BaseNamespace = namespaceStr;
+
+                nsmappings = javaConversion.Conversion.NamespaceMapping;
                 converter = javaConversion;
             }
             else if (jniConversion != null)
             {
-                jniConversion.Conversion.BaseNamespace = namespaceStr;
+                nsmappings = jniConversion.Conversion.NamespaceMapping;
                 converter = jniConversion;
             }
             else
                 throw new Exception();
+
+            foreach (var nsmapping in namespaceMappings)
+            {
+                var splitted = nsmapping.Split(':');
+                if (splitted.Length != 2)
+                    throw new Exception("Mapping must be in the form ns:mappens");
+
+                nsmappings.PushMapping(splitted[0], splitted[1]);
+            }
 
             converter.Options.PreprocessorDefinitionsAdded = definitionsToAdd;
             converter.Options.PreprocessorDefinitionsRemoved = definitionsToRemove;

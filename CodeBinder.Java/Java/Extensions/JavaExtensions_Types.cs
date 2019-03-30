@@ -280,9 +280,13 @@ namespace CodeBinder.Java
             else
             {
                 if (method.IsNative())
+                {
                     javaMethodName = method.Name;
+                }
                 else
-                    javaMethodName = method.Name.ToJavaCase();
+                {
+                    javaMethodName = context.Conversion.MethodsLowerCase ? method.Name.ToJavaLowerCase() : method.Name;
+                }
             }
 
             var kind = syntax.Kind();

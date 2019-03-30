@@ -12,9 +12,14 @@ namespace CodeBinder.Java
 
         public override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space().Append(Conversion.BaseNamespace).EndOfStatement();
+            builder.Append("package").Space().Append(CSToJavaConversion.CodeBinderNamespace).EndOfStatement();
             builder.AppendLine();
             builder.Append(ClassCode);
+        }
+
+        public override string BasePath
+        {
+            get { return CSToJavaConversion.CodeBinderNamespace; }
         }
 
         public override string FileName
@@ -23,7 +28,7 @@ namespace CodeBinder.Java
         }
 
         const string ClassCode =
-@"class BinderUtils
+@"public class BinderUtils
 {
     // Simulates as operator https://stackoverflow.com/a/148949/213871
     public static <T> T as(Object obj, Class<T> clazz)

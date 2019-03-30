@@ -193,7 +193,7 @@ namespace CodeBinder.Java
 
         public string UnderlyingFieldName
         {
-            get { return "__" + PropertyName.ToJavaCase(); }
+            get { return "__" + (Context.Conversion.MethodsLowerCase ? PropertyName.ToJavaLowerCase() : PropertyName); }
         }
 
         public virtual string GetterName

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CodeBinder.Util
 {
-    class NamespaceMappingTree
+    public class NamespaceMappingTree
     {
         Node m_root;
 
@@ -20,7 +20,16 @@ namespace CodeBinder.Util
             for (int i = 0; i < splitted.Length; i++)
                 node = node.GetChildren(splitted[i]);
 
-            node.MappedNamespaceDirect = mappedns;
+            node.MappedNamespace = mappedns;
+        }
+
+        public string GetMappedNamespace(string refns)
+        {
+            string ret = GetMappedNamespace(refns, out string leftoverns);
+            if (leftoverns != null)
+                throw new Exception("Couldn't find a mapped namespace for " + refns);
+
+            return ret;
         }
 
         public string GetMappedNamespace(string refns, out string leftoverns)
@@ -42,7 +51,11 @@ namespace CodeBinder.Util
 
             if (i != 0)
             {
-                leftoverns = getSubNamespace(splitted, i);
+                if (node.MappedNamespace == null)
+                    leftoverns = refns;
+                else
+                    leftoverns = getSubNamespace(splitted, i);
+
                 return node.MappedNamespace;
             }
 
@@ -116,17 +129,7 @@ namespace CodeBinder.Util
 
             public string Namespace { get; private set; }
             public string FullNamespace { get; private set; }
-            public string MappedNamespaceDirect { get; set; }
-            public string MappedNamespace
-            {
-                get
-                {
-                    if (MappedNamespaceDirect == null)
-                        return FullNamespace;
-
-                    return MappedNamespaceDirect;
-                }
-            }
+            public string MappedNamespace { get; set; }
         }
     }
 }

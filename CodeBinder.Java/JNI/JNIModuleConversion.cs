@@ -15,14 +15,9 @@ namespace CodeBinder.JNI
 {
     public class JNIModuleConversion : TypeConversion<JNIModuleContext, CSToJNIConversion>
     {
-        public string Namespace { get; private set; }
-        string _Basepath;
-
         public JNIModuleConversion(CSToJNIConversion conversion)
             : base(conversion)
         {
-            Namespace = conversion.BaseNamespace;
-            _Basepath = string.IsNullOrEmpty(Namespace) ? null : Namespace.Replace('.', Path.DirectorySeparatorChar);
         }
 
         public override string FileName

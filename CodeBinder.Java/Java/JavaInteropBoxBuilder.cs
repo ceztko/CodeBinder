@@ -23,11 +23,16 @@ namespace CodeBinder.Java
             get { return BoxTypeName + ".java"; }
         }
 
+        public override string BasePath
+        {
+            get { return CSToJavaConversion.CodeBinderNamespace; }
+        }
+
         public override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space().Append(Conversion.BaseNamespace).EndOfStatement();
+            builder.Append("package").Space().Append(CSToJavaConversion.CodeBinderNamespace).EndOfStatement();
             builder.AppendLine();
-            builder.Append("class").Space().Append(BoxTypeName).AppendLine();
+            builder.Append("public class").Space().Append(BoxTypeName).AppendLine();
             using (builder.Block())
             {
                 // Field

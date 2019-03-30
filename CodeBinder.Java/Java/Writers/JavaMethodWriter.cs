@@ -220,9 +220,17 @@ namespace CodeBinder.Java
 
                 var methodName = Item.GetName();
                 if (IsNative)
+                {
                     return methodName;
+                }
                 else
-                    return methodName.ToJavaCase();
+                {
+                    if (Context.Conversion.MethodsLowerCase)
+                        return methodName.ToJavaLowerCase();
+                    else
+                        return methodName;
+                }
+
             }
         }
 

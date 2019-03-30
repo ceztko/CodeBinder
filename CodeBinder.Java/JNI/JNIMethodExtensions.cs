@@ -22,7 +22,8 @@ namespace CodeBinder.JNI
         {
             var parentType = method.Parent.GetDeclaredSymbol(module);
             StringBuilder builder = new StringBuilder();
-            builder.Append("Java_").Append(module.Compilation.Conversion.BaseNamespace.Replace('.', '_')).Append("_")
+            string mappedns = module.Compilation.Conversion.NamespaceMapping.GetMappedNamespace(method.GetContainingNamespace(module));
+            builder.Append("Java_").Append(mappedns.Replace('.', '_')).Append("_")
                 .Append(parentType.GetQualifiedName().Replace('.', '_')).Append("_").Append(methodName);
             return builder.ToString();
         }

@@ -13,8 +13,12 @@ namespace CodeBinder.JNI
     {
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 
-        /// <summary>Base namespace of the package, to be set outside</summary>
-        public string BaseNamespace { get; set; }
+        public NamespaceMappingTree NamespaceMapping { get; private set; }
+
+        public CSToJNIConversion()
+        {
+            NamespaceMapping = new NamespaceMappingTree();
+        }
 
         protected override JNICompilationContext createCompilationContext()
         {

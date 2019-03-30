@@ -14,8 +14,11 @@ namespace CodeBinder
     {
         /// <summary>Plaform specific preprocessor symbols that will be added during compilation</summary>
         public IReadOnlyList<string> PreprocessorDefinitionsAdded { get; set; }
+
         /// <summary>Preprocessor symbols that will be be removed during compilation</summary>
         public IReadOnlyList<string> PreprocessorDefinitionsRemoved { get; set; }
+
+        public bool IgnoreCompilationErrors { get; set; }
     }
 
     public class GeneratorOptions
@@ -88,8 +91,6 @@ namespace CodeBinder
         {
             get { return GetConversion(); }
         }
-
-        public bool IgnoreCompilationErrors { get; set; }
 
         protected abstract LanguageConversion GetConversion();
 

@@ -10,17 +10,9 @@ namespace CodeBinder.Java
     {
         public CSToJavaConversion Conversion { get; private set; }
 
-        string _Basepath;
-
         public JavaConversionBuilder(CSToJavaConversion conversion)
         {
             Conversion = conversion;
-            _Basepath = string.IsNullOrEmpty(conversion.BaseNamespace) ? null : conversion.BaseNamespace.Replace('.', Path.DirectorySeparatorChar);
-        }
-
-        public override string BasePath
-        {
-            get { return _Basepath; }
         }
     }
 }

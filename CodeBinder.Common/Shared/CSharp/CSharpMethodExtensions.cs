@@ -15,6 +15,18 @@ namespace CodeBinder.Shared.CSharp
 {
     public static class CSharpMethodExtensions
     {
+        public static string GetContainingNamespace(this BaseTypeDeclarationSyntax node, ICompilationContextProvider provider)
+        {
+            var symbol = node.GetDeclaredSymbol(provider);
+            return symbol.ContainingNamespace.GetFullName();
+        }
+
+        public static string GetContainingNamespace(this MethodDeclarationSyntax node, ICompilationContextProvider provider)
+        {
+            var symbol = node.GetDeclaredSymbol(provider);
+            return symbol.ContainingNamespace.GetFullName();
+        }
+
         public static MethodDeclarationSyntax GetDeclarationSyntax(this IMethodSymbol method)
         {
             foreach (var reference in method.DeclaringSyntaxReferences)

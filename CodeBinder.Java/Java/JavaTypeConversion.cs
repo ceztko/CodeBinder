@@ -11,25 +11,32 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace CodeBinder.Java
 {
     abstract partial class JavaBaseTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext, CSToJavaConversion>
         where TTypeContext : CSharpBaseTypeContext
     {
-        public string Namespace { get; private set; }
-        string _Basepath;
-
         protected JavaBaseTypeConversion(CSToJavaConversion conversion)
-            : base(conversion)
+            : base(conversion) { }
+
+        public string Namespace
         {
-            Namespace = conversion.BaseNamespace;
-            _Basepath = string.IsNullOrEmpty(Namespace) ? null : Namespace.Replace('.', Path.DirectorySeparatorChar);
+            get
+            {
+                return Conversion.NamespaceMapping.GetMappedNamespace(
+                    TypeContext.Node.GetContainingNamespace(this));
+            }
         }
 
         public override string BasePath
         {
-            get { return _Basepath; }
+            get
+            {
+                var ns = Namespace;
+                return ns == null ? null : ns.Replace('.', Path.DirectorySeparatorChar);
+            }
         }
 
         public override string FileName
@@ -47,6 +54,24 @@ namespace CodeBinder.Java
             get
             {
                 yield return "java.util.*";
+                yield return CSToJavaConversion.CodeBinderNamespace + ".*";
+                var splittedNs = Namespace?.Split('.');
+                if (splittedNs != null)
+                {
+                    var builder = new StringBuilder();
+                    bool first = true;
+                    for (int i = 0; i < splittedNs.Length - 1; i++)
+                    {
+                        if (first)
+                            first = false;
+                        else
+                            builder.Append(".");
+
+                        builder.Append(splittedNs[i]);
+                        yield return builder.ToString() + ".*";
+                    }
+                }
+
                 foreach (var import in OtherImports)
                     yield return import;
 
