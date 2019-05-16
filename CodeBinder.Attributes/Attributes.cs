@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace CodeBinder.Attributes
 {
-    [Conditional("DEBUG")]
+    [Conditional("CODE_BINDER")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class ModuleAttribute : Attribute
     {
@@ -17,7 +17,7 @@ namespace CodeBinder.Attributes
         public string Name { get; private set; }
     }
 
-    [Conditional("DEBUG")]
+    [Conditional("CODE_BINDER")]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class ImportAttribute : Attribute
     {
@@ -29,7 +29,7 @@ namespace CodeBinder.Attributes
         public string ImportName { get; private set; }
     }
 
-    [Conditional("DEBUG")]
+    [Conditional("CODE_BINDER")]
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
     public sealed class OrderAttribute : Attribute
     {
@@ -41,14 +41,14 @@ namespace CodeBinder.Attributes
         }
     }
 
-    [Conditional("DEBUG")]
+    [Conditional("CODE_BINDER")]
     [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class IgnoreAttribute : Attribute
     {
 
     }
 
-    [Conditional("DEBUG")]
+    [Conditional("CODE_BINDER")]
     [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class RequiresAttribute : Attribute
     {

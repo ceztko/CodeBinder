@@ -35,6 +35,7 @@ namespace CodeBinder
                 preprocessorSymbols.Except(Options.PreprocessorDefinitionsRemoved);
 
             options = options.WithPreprocessorSymbols(preprocessorSymbols
+                .Concat(new[] { "CODE_BINDER" })
                 .Concat(Conversion.PreprocessorDefinitions)
                 .Concat(Options.PreprocessorDefinitionsAdded ?? new string[0]));
             var project = _project.WithParseOptions(options);
