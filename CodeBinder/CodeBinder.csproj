@@ -17,4 +17,8 @@
     <ProjectReference Include="..\CodeBinder.Java\CodeBinder.Java.csproj" />
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="echo @echo off &gt; &quot;$(OutDir)$(TargetName).bat&quot;&#xD;&#xA;echo|set /p=&quot;dotnet %%0.dll %%*&quot; &gt;&gt; &quot;$(OutDir)$(TargetName).bat&quot;" />
+  </Target>
+
 </Project>
