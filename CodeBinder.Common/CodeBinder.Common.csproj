@@ -17,7 +17,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CodeBinder.Attributes\CodeBinder.Attributes.csproj" />
+    <ProjectReference Include="..\CodeBinder.Redist\CodeBinder.Redist.csproj" />
   </ItemGroup>
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>

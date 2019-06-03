@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "JNITypes.h"
+#include "JNIShared.h"
 
 #undef jBooleanBox
 #undef jCharacterBox
@@ -11,6 +12,7 @@
 #undef jFloatBox
 #undef jDoubleBox
 #undef jStringBox
+#undef jHandleRef
 
 // Template for box types
 template <typename BaseT>
@@ -37,6 +39,7 @@ class _jLongBox;
 class _jFloatBox;
 class _jDoubleBox;
 class _jStringBox;
+class _jHandleRef;
 
 // Typedef for box type pointers
 typedef _jBooleanBox * jBooleanBox;
@@ -48,6 +51,7 @@ typedef _jLongBox * jLongBox;
 typedef _jFloatBox * jFloatBox;
 typedef _jDoubleBox * jDoubleBox;
 typedef _jStringBox * jStringBox;
+typedef _jHandleRef * jHandleRef;
 
 class _jBooleanBoxBase : public _jobject
 {
@@ -176,4 +180,17 @@ jfieldID _jTypeBox<BaseT>::getFieldId(JNIEnv *env) const
 {
     auto cls = env->GetObjectClass((jobject)this);
     return env->GetFieldID(cls, "value", this->getFieldIdSignature());
+}
+
+class _jHandleRef : public _jobject
+{
+public:
+    template <typename T>
+    inline T * GetHandle(JNIEnv *env);
+};
+
+template <typename T>
+T * _jHandleRef::GetHandle(JNIEnv *env)
+{
+    return (T *)::GetHandle(env, this);
 }

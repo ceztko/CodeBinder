@@ -11,3 +11,4 @@
 #define jFloatBox jobject
 #define jDoubleBox jobject
 #define jStringBox jobject
+#define jHandleRef jobject

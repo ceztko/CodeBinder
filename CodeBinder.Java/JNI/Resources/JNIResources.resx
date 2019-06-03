@@ -118,6 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="JNIBinderUtils_cpp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>JNIBinderUtils.cpp;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="JNIBoxesTemplate_h" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>JNIBoxesTemplate.h;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
@@ -126,6 +129,12 @@
   </data>
   <data name="JNIBoxes_h" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>JNIBoxes.h;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="JNIShared_cpp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>JNIShared.cpp;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="JNIShared_h" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>JNIShared.h;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="JNITypesPrivate_h" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>JNITypesPrivate.h;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>

@@ -5,10 +5,17 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    class JavaBinderUtilsBuilder : JavaConversionBuilder
+    class JavaClassBuilder : JavaConversionBuilder
     {
-        public JavaBinderUtilsBuilder(CSToJavaConversion conversion)
-            : base(conversion) { }
+        public string ClassName { get; private set; }
+        public string ClassCode { get; private set; }
+
+        public JavaClassBuilder(CSToJavaConversion conversion, string className, string classCode)
+            : base(conversion)
+        {
+            ClassName = className;
+            ClassCode = classCode;
+        }
 
         public override void Write(CodeBuilder builder)
         {
@@ -24,36 +31,7 @@ namespace CodeBinder.Java
 
         public override string FileName
         {
-            get { return "BinderUtils.java"; }
+            get { return ClassName + ".java"; }
         }
-
-        const string ClassCode =
-@"public class BinderUtils
-{
-    // Simulates as operator https://stackoverflow.com/a/148949/213871
-    public static <T> T as(Object obj, Class<T> clazz)
-    {
-        if (clazz.isInstance(obj))
-            return clazz.cast(obj);
-
-        return null;
-    }
-
-    public static boolean equals(String lhs, String rhs)
-    {
-        if (lhs == null)
-        {
-            if (rhs == null)
-                return true;
-            else
-                return false;
-        }
-        else
-        {
-            return lhs.equals(rhs);
-        }
-    }
-}
-";
     }
 }

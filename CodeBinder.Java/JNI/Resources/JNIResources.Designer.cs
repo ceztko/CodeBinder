@@ -61,24 +61,54 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to #include &lt;jni.h&gt;
+        ///
+        ///extern &quot;C&quot;
+        ///{
+        ///    JNIEXPORT jlong JNICALL CodeBinder_BinderUtils_NewGlobalRef(
+        ///        JNIEnv *env, jclass, jobject obj)
+        ///    {
+        ///        return (jlong)env-&gt;NewGlobalRef(obj);
+        ///    }
+        ///
+        ///    JNIEXPORT void JNICALL CodeBinder_BinderUtils_DeleteGlobalRef(
+        ///        JNIEnv *env, jclass, jlong globalref)
+        ///    {
+        ///        env-&gt;DeleteGlobalRef((jobject)globalref);
+        ///    }
+        ///	
+        ///	JNIEXPORT jlong JNICALL CodeBinder_BinderUtils_NewGlobalWeakRef(
+        ///		JNIEnv *env, jclass, jobject obj)
+        ///	{
+        ///        return [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string JNIBinderUtils_cpp {
+            get {
+                return ResourceManager.GetString("JNIBinderUtils_cpp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to #include &quot;JNIBoxes.h&quot;
         ///
-        ///BJ2NImpl&lt;jBooleanBox, jboolean&gt; BJ2N(JNIEnv * env, jBooleanBox box, bool commit)
+        ///BJ2NImpl&lt;_jBooleanBox&gt; BJ2N(JNIEnv * env, jBooleanBox box, bool commit)
         ///{
-        ///    return BJ2NImpl&lt;jBooleanBox, jboolean&gt;(env, box, commit);
+        ///    return BJ2NImpl&lt;_jBooleanBox&gt;(env, box, commit);
         ///}
         ///
-        ///BJ2NImpl&lt;jCharacterBox, jchar&gt; BJ2N(JNIEnv * env, jCharacterBox box, bool commit)
+        ///BJ2NImpl&lt;_jCharacterBox&gt; BJ2N(JNIEnv * env, jCharacterBox box, bool commit)
         ///{
-        ///    return BJ2NImpl&lt;jCharacterBox, jchar&gt;(env, box, commit);
+        ///    return BJ2NImpl&lt;_jCharacterBox&gt;(env, box, commit);
         ///}
         ///
-        ///BJ2NImpl&lt;jByteBox, jbyte&gt; BJ2N(JNIEnv * env, jByteBox box, bool commit)
+        ///BJ2NImpl&lt;_jByteBox&gt; BJ2N(JNIEnv * env, jByteBox box, bool commit)
         ///{
-        ///    return BJ2NImpl&lt;jByteBox, jbyte&gt;(env, box, commit);
+        ///    return BJ2NImpl&lt;_jByteBox&gt;(env, box, commit);
         ///}
         ///
-        ///BJ2NImpl&lt;jShortBox, jshort&gt; BJ2N(JNIEnv * e [rest of string was truncated]&quot;;.
+        ///BJ2NImpl&lt;_jShortBox&gt; BJ2N(JNIEnv * env, jShortBox box, bool commit)
+        ///{
+        ///    return BJ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxes_cpp {
             get {
@@ -91,12 +121,12 @@ namespace CodeBinder.JNI.Resources {
         ///
         ///#include &quot;JNIBoxesTemplate.h&quot;
         ///
-        ///BJ2NImpl&lt;jBooleanBox, jboolean&gt; BJ2N(JNIEnv *env, jBooleanBox box, bool commit = true);
-        ///BJ2NImpl&lt;jCharacterBox, jchar&gt; BJ2N(JNIEnv *env, jCharacterBox box, bool commit = true);
-        ///BJ2NImpl&lt;jByteBox, jbyte&gt; BJ2N(JNIEnv *env, jByteBox box, bool commit = true);
-        ///BJ2NImpl&lt;jShortBox, jshort&gt; BJ2N(JNIEnv *env, jShortBox box, bool commit = true);
-        ///BJ2NImpl&lt;jIntegerBox, jint&gt; BJ2N(JNIEnv *env, jIntegerBox box, bool commit = true);
-        ///BJ2NImpl&lt;jLongBox, jlong&gt; BJ2N(JNIEn [rest of string was truncated]&quot;;.
+        ///BJ2NImpl&lt;_jBooleanBox&gt; BJ2N(JNIEnv *env, jBooleanBox box, bool commit = true);
+        ///BJ2NImpl&lt;_jCharacterBox&gt; BJ2N(JNIEnv *env, jCharacterBox box, bool commit = true);
+        ///BJ2NImpl&lt;_jByteBox&gt; BJ2N(JNIEnv *env, jByteBox box, bool commit = true);
+        ///BJ2NImpl&lt;_jShortBox&gt; BJ2N(JNIEnv *env, jShortBox box, bool commit = true);
+        ///BJ2NImpl&lt;_jIntegerBox&gt; BJ2N(JNIEnv *env, jIntegerBox box, bool commit = true);
+        ///BJ2NImpl&lt;_jLongBox&gt; BJ2N(JNIEnv *env, jLongBox box, bool commit = tru [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxes_h {
             get {
@@ -111,28 +141,71 @@ namespace CodeBinder.JNI.Resources {
         ///#include &quot;JNITypesPrivate.h&quot;
         ///
         ///// Wraps custom java box type
-        ///template &lt;typename TJBox, typename T&gt;
+        ///template &lt;typename TJBox, typename TN = typename TJBox::ValueType&gt;
         ///class BJ2NImpl
         ///{
         ///public:
-        ///    BJ2NImpl(JNIEnv *env, TJBox box, bool commit);
+        ///    BJ2NImpl(JNIEnv *env, typename TJBox::BoxPtr box, bool commit);
         ///    ~BJ2NImpl();
         ///public:
-        ///    inline T * ptr() { return &amp;Value; }
-        ///    inline T &amp; ref() { return Value; }
-        ///    inline operator T *() { return &amp;Value; }
-        ///    inline operator T &amp;() { return Value; }
+        ///    inline TN * ptr() { return &amp;Value; }
+        ///    inline TN &amp; ref() { return Value; }
+        ///    inline operator TN *() { return &amp;Value; }
+        ///    inline operator TN &amp;() { return Value; }
         ///public:
-        ///    T Value;
+        ///    TN Value;
         ///private:
-        ///    JNIEnv *m_env;
-        ///    TJBox m_box;
-        ///    bool m_commit;
-        ///}; [rest of string was truncated]&quot;;.
+        ///    JNIEn [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxesTemplate_h {
             get {
                 return ResourceManager.GetString("JNIBoxesTemplate_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #include &lt;jni.h&gt;
+        ///#include &lt;cassert&gt;
+        ///#include &quot;JNIShared.h&quot;
+        ///
+        ///#define JNI_VERSION JNI_VERSION_1_6
+        ///
+        ///static jfieldID handleFieldID;
+        ///
+        ///jlong GetHandle(JNIEnv *env, jHandleRef handleref)
+        ///{
+        ///    return env-&gt;GetLongField(handleref, handleFieldID);
+        ///}
+        ///
+        ///JNIEnv * GetEnv(JavaVM *jvm)
+        ///{
+        ///    // GetEnv can be used only if current thread was created
+        ///    // with Java, otherwise AttachCurrentProcess should be used
+        ///    // instead
+        ///    JNIEnv *env;
+        ///#ifdef __ANDROID__
+        ///    jint rs = jvm-&gt;GetEnv(&amp;env, NULL);
+        ///#els [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string JNIShared_cpp {
+            get {
+                return ResourceManager.GetString("JNIShared_cpp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #pragma once
+        ///
+        ///#include &quot;JNITypesPrivate.h&quot;
+        ///
+        ///jlong GetHandle(JNIEnv *env, jHandleRef handleref);
+        ///JNIEnv * GetEnv(JavaVM *jvm);
+        ///JavaVM * GetJvm(JNIEnv *env);
+        ///.
+        /// </summary>
+        internal static string JNIShared_h {
+            get {
+                return ResourceManager.GetString("JNIShared_h", resourceCulture);
             }
         }
         
@@ -144,12 +217,12 @@ namespace CodeBinder.JNI.Resources {
         ///    return &quot;Z&quot;;
         ///}
         ///
-        ///jboolean _jBooleanBoxBase::getValue(JNIEnv * env, jfieldID field) const
+        ///_jBooleanBoxBase::ValueType _jBooleanBoxBase::getValue(JNIEnv * env, jfieldID field) const
         ///{
         ///    return env-&gt;GetBooleanField((jobject)this, field);
         ///}
         ///
-        ///void _jBooleanBoxBase::setValue(JNIEnv * env, jfieldID field, jboolean value)
+        ///void _jBooleanBoxBase::setValue(JNIEnv * env, jfieldID field, ValueType value)
         ///{
         ///    env-&gt;SetBooleanField(this, field, value);
         ///}
@@ -159,7 +232,7 @@ namespace CodeBinder.JNI.Resources {
         ///    return &quot;C&quot;;
         ///}
         ///
-        ///jchar _jCharacterBoxBase::getValue(JNIEnv * env,  [rest of string was truncated]&quot;;.
+        ///_jCharacterBoxBase::ValueType [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNITypes_cpp {
             get {
@@ -181,6 +254,7 @@ namespace CodeBinder.JNI.Resources {
         ///#define jFloatBox jobject
         ///#define jDoubleBox jobject
         ///#define jStringBox jobject
+        ///#define jHandleRef jobject
         ///.
         /// </summary>
         internal static string JNITypes_h {
@@ -193,6 +267,7 @@ namespace CodeBinder.JNI.Resources {
         ///   Looks up a localized string similar to #pragma once
         ///
         ///#include &quot;JNITypes.h&quot;
+        ///#include &quot;JNIShared.h&quot;
         ///
         ///#undef jBooleanBox
         ///#undef jCharacterBox
@@ -203,20 +278,17 @@ namespace CodeBinder.JNI.Resources {
         ///#undef jFloatBox
         ///#undef jDoubleBox
         ///#undef jStringBox
+        ///#undef jHandleRef
         ///
         ///// Template for box types
         ///template &lt;typename BaseT&gt;
         ///class _jTypeBox : public BaseT
         ///{
         ///public:
-        ///    typename BaseT::Type GetValue(JNIEnv *env) const;
-        ///    void SetValue(JNIEnv *env, typename BaseT::Type value);
+        ///    typename BaseT::ValueType GetValue(JNIEnv *env) const;
+        ///    void SetValue(JNIEnv *env, typename BaseT::ValueType value);
         ///private:
-        ///    jfieldID getFieldId(JNIEnv *env) const;
-        ///};
-        ///
-        ///////////////////////
-        ///// [rest of string was truncated]&quot;;.
+        ///    jfieldID getFieldI [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNITypesPrivate_h {
             get {

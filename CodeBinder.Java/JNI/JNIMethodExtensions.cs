@@ -77,6 +77,8 @@ namespace CodeBinder.JNI
                     return "jobject";
                 case "System.String":
                     return "jstring";
+                case "System.Runtime.InteropServices.HandleRef":
+                    return "jHandleRef";
                 case "System.IntPtr":
                     return "jlong";
                 case "System.Boolean":

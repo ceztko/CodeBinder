@@ -62,7 +62,8 @@ namespace CodeBinder.Java
         {
             get
             {
-                yield return new JavaBinderUtilsBuilder(this);
+                yield return new JavaClassBuilder(this, nameof(JavaClasses.BinderUtils), JavaClasses.BinderUtils);
+                yield return new JavaClassBuilder(this, nameof(JavaClasses.HandleRef), JavaClasses.HandleRef);
                 yield return new InteropBoxBuilder(JavaInteropType.Boolean, this);
                 yield return new InteropBoxBuilder(JavaInteropType.Character, this);
                 yield return new InteropBoxBuilder(JavaInteropType.Byte, this);

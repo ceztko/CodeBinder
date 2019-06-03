@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		TODO.txt = TODO.txt
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.Attributes", "CodeBinder.Attributes\CodeBinder.Attributes.csproj", "{987A3F7D-C314-4A61-A2DB-7483131A918E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.Redist", "CodeBinder.Redist\CodeBinder.Redist.csproj", "{987A3F7D-C314-4A61-A2DB-7483131A918E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.Java", "CodeBinder.Java\CodeBinder.Java.csproj", "{7BB1A9CD-D845-4EBE-BC6C-184F596B6AD1}"
 EndProject
