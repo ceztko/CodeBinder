@@ -28,7 +28,7 @@ namespace ConsoleApp1
             Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj").Result;
 
 
-            if (false)
+            if (true)
             {
                 // Java conversion
                 var conv = Converter.CreateFor<CSToJavaConversion>(project);

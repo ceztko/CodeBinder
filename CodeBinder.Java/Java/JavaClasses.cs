@@ -32,16 +32,28 @@ namespace CodeBinder.Java
             return lhs.equals(rhs);
         }
     }
-}
-";
+
+    // TODO: Consider moving this methods to generation of exising .NET class BinderUtils.
+    // See CodeBinder.Redist
+    public static native long newGlobalRef(Object obj);
+    public static native void deleteGlobalRef(long globalref);
+    public static native long newGlobalWeakRef(Object obj);
+    public static native void deleteGlobalWeakRef(long globalref);
+}";
         // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
         public const string HandleRef =
-@"public class HandleRef
+@"// https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
+public class HandleRef
 {
     public final Object wrapper;
     public final long handle;
 
-    // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
+    public HandleRef()
+    {
+        this.wrapper = null;
+        this.handle = 0;
+    }
+
     public HandleRef(Object wrapper, long handle)
     {
         this.wrapper = wrapper;
