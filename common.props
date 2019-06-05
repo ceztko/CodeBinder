@@ -3,6 +3,5 @@
   <PropertyGroup>
     <BaseIntermediateOutputPath>$(SolutionDir)obj\$(Configuration)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <OutputPath>$(SolutionDir)bin\$(Configuration)\</OutputPath>
-    <OutDir>$(OutputPath)</OutDir>
   </PropertyGroup>
 </Project>

@@ -24,8 +24,8 @@ namespace ConsoleApp1
             //Solution solution = workspace.OpenSolutionAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet.sln").Result;
             //var conv = SolutionConverter.CreateFor<CSToJavaConversion>(solution);
             //Project project = workspace.OpenProjectAsync(@"D:\Staging\TestJava\ENLibPdfNet.csproj").Result;
-            Project project = workspace.OpenProjectAsync(@"D:\Staging\TestJava\ENLibPdfNetLite.csproj").Result;
-            //Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj").Result;
+            //Project project = workspace.OpenProjectAsync(@"D:\Staging\TestJava\ENLibPdfNetLite.csproj").Result;
+            Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj").Result;
 
 
             if (false)
