@@ -17,11 +17,7 @@ JNIEnv * GetEnv(JavaVM *jvm)
     // with Java, otherwise AttachCurrentProcess should be used
     // instead
     JNIEnv *env;
-#ifdef __ANDROID__
-    jint rs = jvm->GetEnv(&env, NULL);
-#else
-    jint rs = jvm->GetEnv((void **)&env, NULL);
-#endif
+    jint rs = jvm->GetEnv((void **)&env, JNI_VERSION);
     assert(rs == JNI_OK);
     return env;
 }

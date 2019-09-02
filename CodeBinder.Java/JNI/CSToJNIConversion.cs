@@ -36,7 +36,6 @@ namespace CodeBinder.JNI
             {
                 yield return new StringConversionBuilder("JNIShared.h", () => JNIResources.JNIShared_h);
                 yield return new StringConversionBuilder("JNIShared.cpp", () => JNIResources.JNIShared_cpp);
-                yield return new StringConversionBuilder("JNILoad.cpp", () => JNIResources.JNIBinderUtils_cpp);
                 yield return new StringConversionBuilder("JNITypes.cpp", () => JNIResources.JNITypes_cpp);
                 yield return new StringConversionBuilder("JNITypesPrivate.h", () => JNIResources.JNITypesPrivate_h);
                 yield return new StringConversionBuilder("JNITypes.h", () => JNIResources.JNITypes_h);

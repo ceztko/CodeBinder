@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "JNITypes.h"
-#include "JNIShared.h"
 
 #undef jBooleanBox
 #undef jCharacterBox
@@ -187,10 +186,12 @@ class _jHandleRef : public _jobject
 public:
     template <typename T>
     inline T * GetHandle(JNIEnv *env);
+private:
+    jlong getHandle(JNIEnv *env);
 };
 
 template <typename T>
 T * _jHandleRef::GetHandle(JNIEnv *env)
 {
-    return (T *)::GetHandle(env, this);
+    return (T *)getHandle(env);
 }
