@@ -24,9 +24,9 @@ namespace CodeBinder.Java
             builder.Append(ClassCode);
         }
 
-        public override string BasePath
+        protected override string GetBasePath()
         {
-            get { return CSToJavaConversion.CodeBinderNamespace; }
+            return CSToJavaConversion.CodeBinderNamespace;
         }
 
         public override string FileName

@@ -65,22 +65,21 @@ namespace CodeBinder.JNI.Resources {
         ///
         ///extern &quot;C&quot;
         ///{
-        ///    JNIEXPORT jlong JNICALL CodeBinder_BinderUtils_NewGlobalRef(
+        ///    JNIEXPORT jlong JNICALL Java_CodeBinder_BinderUtils_newGlobalRef(
         ///        JNIEnv *env, jclass, jobject obj)
         ///    {
         ///        return (jlong)env-&gt;NewGlobalRef(obj);
         ///    }
         ///
-        ///    JNIEXPORT void JNICALL CodeBinder_BinderUtils_DeleteGlobalRef(
+        ///    JNIEXPORT void JNICALL Java_CodeBinder_BinderUtils_deleteGlobalRef(
         ///        JNIEnv *env, jclass, jlong globalref)
         ///    {
         ///        env-&gt;DeleteGlobalRef((jobject)globalref);
         ///    }
         ///	
-        ///	JNIEXPORT jlong JNICALL CodeBinder_BinderUtils_NewGlobalWeakRef(
+        ///	JNIEXPORT jlong JNICALL Java_CodeBinder_BinderUtils_newGlobalWeakRef(
         ///		JNIEnv *env, jclass, jobject obj)
-        ///	{
-        ///        return [rest of string was truncated]&quot;;.
+        ///	{        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBinderUtils_cpp {
             get {
@@ -183,9 +182,8 @@ namespace CodeBinder.JNI.Resources {
         ///    // with Java, otherwise AttachCurrentProcess should be used
         ///    // instead
         ///    JNIEnv *env;
-        ///#ifdef __ANDROID__
-        ///    jint rs = jvm-&gt;GetEnv(&amp;env, NULL);
-        ///#els [rest of string was truncated]&quot;;.
+        ///    jint rs = jvm-&gt;GetEnv((void **)&amp;env, JNI_VERSION);
+        ///    asse [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIShared_cpp {
             get {
@@ -264,10 +262,26 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to #include &quot;JNITypesPrivate.h&quot;
+        ///
+        ///#include &quot;JNIShared.h&quot;
+        ///
+        ///jlong _jHandleRef::getHandle(JNIEnv *env)
+        ///{
+        ///    return ::GetHandle(env, this);
+        ///}
+        ///.
+        /// </summary>
+        internal static string JNITypesPrivate_cpp {
+            get {
+                return ResourceManager.GetString("JNITypesPrivate_cpp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to #pragma once
         ///
         ///#include &quot;JNITypes.h&quot;
-        ///#include &quot;JNIShared.h&quot;
         ///
         ///#undef jBooleanBox
         ///#undef jCharacterBox
@@ -288,7 +302,8 @@ namespace CodeBinder.JNI.Resources {
         ///    typename BaseT::ValueType GetValue(JNIEnv *env) const;
         ///    void SetValue(JNIEnv *env, typename BaseT::ValueType value);
         ///private:
-        ///    jfieldID getFieldI [rest of string was truncated]&quot;;.
+        ///    jfieldID getFieldId(JNIEnv *env) const;
+        ///} [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNITypesPrivate_h {
             get {

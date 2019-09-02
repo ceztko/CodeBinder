@@ -70,7 +70,9 @@ namespace CodeBinder
         {
             foreach (var conversion in Convert().Concat(Conversion.DefaultConversionDelegates))
             {
-                var basepath = Path.Combine(args.SourceRootPath, conversion.TargetBasePath ?? "");
+                var targetBasePath = conversion.TargetBasePath ?? "";
+                targetBasePath = targetBasePath.Replace('\\', Path.PathSeparator).Replace('/', Path.PathSeparator);
+                var basepath = Path.Combine(args.SourceRootPath, targetBasePath);
                 Directory.CreateDirectory(basepath);
                 var filepath = Path.Combine(basepath, conversion.TargetFileName);
                 if (args.EagerStringConversion)

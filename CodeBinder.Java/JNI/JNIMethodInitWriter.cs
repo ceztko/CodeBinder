@@ -17,7 +17,6 @@ namespace CodeBinder.JNI
 
         public override void Write(CodeBuilder builder)
         {
-            builder.AppendLine("#include \"JNITypesPrivate.h\"");
             foreach (var module in _compilation.Modules)
                 builder.Append("#include \"JNI").Append(module.Name).AppendLine(".h\"");
 

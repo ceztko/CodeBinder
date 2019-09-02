@@ -5,21 +5,41 @@ using System.Text;
 
 namespace CodeBinder.Util
 {
-    public abstract class ConversionBuilder : IConversionBuilder
+    public abstract class ConversionBuilderBase : IConversionBuilder
     {
         public virtual string GeneratedPreamble
         {
             get { return null; }
         }
 
-        public virtual string BasePath
+        protected virtual string GetBasePath()
         {
-            get { return null; }
+            return null;
+        }
+
+        public string BasePath
+        {
+            get { return GetBasePath(); }
         }
 
         public abstract string FileName { get; }
 
         public abstract void Write(CodeBuilder builder);
+
+        string IConversionBuilder.BasePath
+        {
+            get { return GetBasePath(); }
+        }
+    }
+
+    public abstract class ConversionBuilder : ConversionBuilderBase
+    {
+        protected override string GetBasePath()
+        {
+            return BasePath;
+        }
+
+        public new string BasePath { get; set; }
     }
 
     public interface IConversionBuilder

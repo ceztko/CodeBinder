@@ -58,7 +58,7 @@ namespace CodeBinder.Java
             get { return false; }
         }
 
-        public override IEnumerable<ConversionBuilder> DefaultConversions
+        public override IEnumerable<IConversionBuilder> DefaultConversions
         {
             get
             {

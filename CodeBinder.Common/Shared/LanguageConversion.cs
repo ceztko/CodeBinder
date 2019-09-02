@@ -13,7 +13,7 @@ namespace CodeBinder.Shared
     {
         internal LanguageConversion() { }
 
-        public virtual IEnumerable<ConversionBuilder> DefaultConversions
+        public virtual IEnumerable<IConversionBuilder> DefaultConversions
         {
             get { yield break; }
         }

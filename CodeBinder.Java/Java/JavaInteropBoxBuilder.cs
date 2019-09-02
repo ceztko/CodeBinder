@@ -23,9 +23,9 @@ namespace CodeBinder.Java
             get { return BoxTypeName + ".java"; }
         }
 
-        public override string BasePath
+        protected override string GetBasePath()
         {
-            get { return CSToJavaConversion.CodeBinderNamespace; }
+            return CSToJavaConversion.CodeBinderNamespace;
         }
 
         public override void Write(CodeBuilder builder)
