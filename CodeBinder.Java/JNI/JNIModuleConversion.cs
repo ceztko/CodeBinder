@@ -34,7 +34,7 @@ namespace CodeBinder.JNI
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
-            builder.AppendLine("#include \"Private/JNITypes.h\"");
+            builder.AppendLine("#include \"Internal/JNITypes.h\"");
             builder.AppendLine();
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("extern \"C\"");
