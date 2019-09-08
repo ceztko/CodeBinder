@@ -28,7 +28,7 @@ namespace ConsoleApp1
             Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj").Result;
 
 
-            if (false)
+            if (true)
             {
                 // Java conversion
                 var conv = Converter.CreateFor<CSToJavaConversion>(project);
@@ -39,12 +39,12 @@ namespace ConsoleApp1
                 //genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\alt\java";
                 genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\main\java";
                 genargs.EagerStringConversion = true;
-                //conv.ConvertAndWrite(genargs);
+                conv.ConvertAndWrite(genargs);
 
                 // Android
                 conv.Options.PreprocessorDefinitionsAdded = new string[] { "ANDROID" };
                 genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\android\java";
-                conv.ConvertAndWrite(genargs);
+                //conv.ConvertAndWrite(genargs);
             }
             else
             {

@@ -4,6 +4,13 @@ using System.Text;
 
 namespace CodeBinder.Util
 {
+
+    public enum NamespaceNormalization
+    {
+        None = 0,
+        LowerCase
+    }
+
     public class NamespaceMappingTree
     {
         Node m_root;
@@ -23,13 +30,21 @@ namespace CodeBinder.Util
             node.MappedNamespace = mappedns;
         }
 
-        public string GetMappedNamespace(string refns)
+        public string GetMappedNamespace(string refns,
+            NamespaceNormalization leftOverNorm = NamespaceNormalization.None)
         {
             string ret = GetMappedNamespace(refns, out string leftoverns);
-            if (leftoverns != null)
-                throw new Exception("Couldn't find a mapped namespace for " + refns);
-
-            return ret;
+            if (leftoverns == null)
+                return ret;
+            switch (leftOverNorm)
+            {
+                case NamespaceNormalization.None:
+                    return ret + "." + leftoverns;
+                case NamespaceNormalization.LowerCase:
+                    return ret + "." + leftoverns.ToLower();
+                default:
+                    throw new Exception();
+            }
         }
 
         public string GetMappedNamespace(string refns, out string leftoverns)

@@ -25,8 +25,10 @@ namespace CodeBinder.Java
         {
             get
             {
+
                 return Conversion.NamespaceMapping.GetMappedNamespace(
-                    TypeContext.Node.GetContainingNamespace(this));
+                    TypeContext.Node.GetContainingNamespace(this),
+                        NamespaceNormalization.LowerCase);
             }
         }
 
