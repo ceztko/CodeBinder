@@ -28,11 +28,11 @@ namespace ConsoleApp1
             Project project = workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj").Result;
 
 
-            if (true)
+            if (false)
             {
                 // Java conversion
                 var conv = Converter.CreateFor<CSToJavaConversion>(project);
-                conv.Options.PreprocessorDefinitionsRemoved = new string[] { "CSHARP", "NET_FRAMEWORK" };
+                conv.Options.PreprocessorDefinitionsRemoved = new string[] { "CSHARP", "DOTNET", "NET_FRAMEWORK" };
                 conv.Conversion.SkipBody = false;
                 conv.Conversion.NamespaceMapping.PushMapping("Euronovate.LibPdf", "com.euronovate.libpdf");
                 conv.Conversion.NamespaceMapping.PushMapping("Euronovate.LibPdf.Java", "com.euronovate.libpdf");
@@ -44,13 +44,13 @@ namespace ConsoleApp1
                 // Android
                 conv.Options.PreprocessorDefinitionsAdded = new string[] { "ANDROID" };
                 genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\android\java";
-                //conv.ConvertAndWrite(genargs);
+                conv.ConvertAndWrite(genargs);
             }
             else
             {
                 // JNI conversion
                 var conv = Converter.CreateFor<CSToJNIConversion>(project);
-                conv.Options.PreprocessorDefinitionsRemoved = new string[] { "CSHARP", "NET_FRAMEWORK" };
+                conv.Options.PreprocessorDefinitionsRemoved = new string[] { "CSHARP", "DOTNET", "NET_FRAMEWORK" };
                 conv.Conversion.NamespaceMapping.PushMapping("Euronovate.LibPdf", "com.euronovate.libpdf");
                 genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJni";
                 genargs.EagerStringConversion = true;
