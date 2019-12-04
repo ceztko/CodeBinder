@@ -6,5 +6,6 @@ for /f "usebackq tokens=*" %%i in (`"%VSWHERECMD%" -version 16.0 -requires Micro
 	set "MSBUILDCMD=%%i"
 )
 
+"%MSBUILDCMD%" -version || exit /b 1
 "%MSBUILDCMD%" CodeBinder.sln /p:Configuration=Release /p:Platform="Any CPU" /t:build /restore || exit /b 1
 pause
