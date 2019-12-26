@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace CodeBinder.Attributes
 {
@@ -75,6 +76,62 @@ namespace CodeBinder.Attributes
     public class ParameterBinderAttribute : CodeBinderAttribute
     {
         protected ParameterBinderAttribute() { }
+    }
+
+    /// <summary>
+    /// Attribute to pass interop string parameter
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PString
+    {
+        public static implicit operator string(PString pstr)
+        {
+            return pstr.String;
+        }
+
+        public static implicit operator PString(string str)
+        {
+            return new PString(str);
+        }
+
+        public PString(string str)
+        {
+            String = str;
+            Lenght = new IntPtr(str.Length);
+        }
+
+        [MarshalAs(UnmanagedType.LPWStr, SizeParamIndex = 1)]
+        public string String;
+        public IntPtr Lenght;
+    }
+
+    /// <summary>
+    /// Attribute to return interop string
+    /// </summary>
+    /// <remarks>We need a separate struct for return values
+    /// because PString is not blittable. We do manual manual marshalling</remarks>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RString : IDisposable
+    {
+        public static implicit operator string(RString rstr)
+        {
+            int length = rstr.Lenght.ToInt32();
+            if (rstr.String == IntPtr.Zero)
+                return null;
+
+            return Marshal.PtrToStringUni(rstr.String, length);
+        }
+
+        public void Dispose()
+        {
+            Marshal.FreeCoTaskMem(String);
+            String = IntPtr.Zero;
+        }
+
+        public IntPtr String;
+
+        // Length is IntPtr so size is variable depdending on address size
+        public IntPtr Lenght;
     }
 
     public static class Policies
