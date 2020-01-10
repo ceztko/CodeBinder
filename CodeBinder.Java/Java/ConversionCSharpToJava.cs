@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.Java
 {
-    public class CSToJavaConversion : CSharpLanguageConversion
+    public class ConversionCSharpToJava : CSharpLanguageConversion
     {
         internal const string CodeBinderNamespace = "CodeBinder";
 
@@ -22,7 +22,7 @@ namespace CodeBinder.Java
 
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 
-        public CSToJavaConversion()
+        public ConversionCSharpToJava()
         {
             NamespaceMapping = new NamespaceMappingTree();
             MethodsLowerCase = true;

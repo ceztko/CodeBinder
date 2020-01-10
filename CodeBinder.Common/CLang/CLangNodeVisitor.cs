@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using CodeBinder.Shared;
 using CodeBinder.Attributes;
+using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.CLang
 {
@@ -16,6 +17,13 @@ namespace CodeBinder.CLang
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
+            var sym = node.GetDeclaredSymbol<ITypeSymbol>(this);
+            if (sym.Inherits<NativeTypeBinder>())
+            {
+                // These are the binders for types
+                Compilation.AddType(node);
+            }
+
             visitType(node);
         }
 
@@ -26,18 +34,18 @@ namespace CodeBinder.CLang
 
         private void visitType(TypeDeclarationSyntax type)
         {
-            JNIModuleContextChild module = null;
+            CLangModuleContextChild module = null;
             string moduleName;
             if (TryGetModuleName(type, out moduleName))
             {
-                JNIModuleContextParent parent;
+                CLangModuleContextParent parent;
                 if (!Compilation.TryGetModule(moduleName, out parent))
                 {
-                    parent = new JNIModuleContextParent(moduleName, Compilation);
+                    parent = new CLangModuleContextParent(moduleName, Compilation);
                     Compilation.AddModule(Compilation, parent);
                 }
 
-                module = new JNIModuleContextChild(Compilation);
+                module = new CLangModuleContextChild(Compilation);
                 Compilation.AddModuleChild(Compilation, module, parent);
             }
 
@@ -57,7 +65,10 @@ namespace CodeBinder.CLang
                     case SyntaxKind.ClassDeclaration:
                         visitType(member as ClassDeclarationSyntax);
                         break;
-                    case SyntaxKind.StructKeyword:
+                    case SyntaxKind.StructDeclaration:
+                        visitType(member as StructDeclarationSyntax);
+                        break;
+                    case SyntaxKind.EnumDeclaration:
                         visitType(member as StructDeclarationSyntax);
                         break;
                 }
@@ -71,13 +82,21 @@ namespace CodeBinder.CLang
             {
                 if (attribute.IsAttribute<ModuleAttribute>())
                 {
-                    moduleName = attribute.ConstructorArguments[0].Value.ToString();
+                    moduleName = attribute.GetConstructorArgument<string>(0);
                     return true;
                 }
             }
 
             moduleName = null;
             return false;
+        }
+
+        public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
+        {
+            if (!node.GetAttributes(this).HasAttribute<NativeBindingAttribute>())
+                return;
+
+            Compilation.AddEnum(node);
         }
     }
 }

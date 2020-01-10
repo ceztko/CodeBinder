@@ -10,11 +10,14 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using CodeBinder.Attributes;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace CodeBinder.Shared.CSharp
 {
     public static class CSharpMethodExtensions
     {
+        static Regex _splitCamelCase;
+
         public static string GetContainingNamespace(this BaseTypeDeclarationSyntax node, ICompilationContextProvider provider)
         {
             var symbol = node.GetDeclaredSymbol(provider);
@@ -662,22 +665,45 @@ namespace CodeBinder.Shared.CSharp
         public static bool HasAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider)
             where TAttribute : Attribute
         {
-            ISymbol symbol;
+            return GetDefaultDeclarationSymbol(node, provider)?.HasAttribute<TAttribute>() == true;
+        }
+
+
+        public static bool TryGetAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider, out AttributeData data)
+            where TAttribute : Attribute
+        {
+            var symbol = GetDefaultDeclarationSymbol(node, provider);
+            if (symbol == null)
+            {
+                data = null;
+                return false;
+            }
+
+            return symbol.TryGetAttribute<TAttribute>(out data);
+        }
+
+        public static AttributeData GetAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider)
+            where TAttribute : Attribute
+        {
+            AttributeData ret;
+            if (!TryGetAttribute<TAttribute>(node, provider, out ret))
+                throw new Exception($"Missing attribute {typeof(TAttribute).Name}");
+
+            return ret;
+        }
+
+        private static ISymbol GetDefaultDeclarationSymbol(SyntaxNode node, ICompilationContextProvider provider)
+        {
             if (node.IsKind(SyntaxKind.FieldDeclaration))
             {
                 var field = node as FieldDeclarationSyntax;
                 Debug.Assert(field.Declaration.Variables.Count == 1);
-                symbol = field.Declaration.Variables[0].GetDeclaredSymbol(provider);
+                return field.Declaration.Variables[0].GetDeclaredSymbol(provider);
             }
             else
             {
-                symbol = node.GetDeclaredSymbol(provider);
+                return node.GetDeclaredSymbol(provider);
             }
-
-            if (symbol == null)
-                return false;
-
-            return symbol.HasAttribute<TAttribute>();
         }
 
         public static bool IsRef(this ParameterSyntax parameter)
@@ -690,10 +716,10 @@ namespace CodeBinder.Shared.CSharp
             return parameter.Modifiers.Any(SyntaxKind.OutKeyword);
         }
 
-        public static int GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider context)
+        public static long GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider context)
         {
             var symbol = node.GetDeclaredSymbol(context) as IFieldSymbol;
-            return (int)symbol.ConstantValue;
+            return Convert.ToInt64(symbol.ConstantValue);
         }
 
         public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this BaseFieldDeclarationSyntax node)
@@ -887,5 +913,29 @@ namespace CodeBinder.Shared.CSharp
         {
             return node.Identifier.Text;
         }
+
+        public static string[] SplitCamelCase(this string str)
+        {
+            var splitCamelCase = GetSplitCamelCaseRegex();
+            return splitCamelCase.Split(str);
+        }
+
+        static Regex GetSplitCamelCaseRegex()
+        {
+            if (_splitCamelCase != null)
+                return _splitCamelCase;
+
+            lock (typeof(CSharpMethodExtensions))
+            {
+                if (_splitCamelCase != null)
+                    return _splitCamelCase;
+
+                // https://stackoverflow.com/a/7594052/213871
+                _splitCamelCase = new Regex(@"(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])", RegexOptions.Compiled);
+                return _splitCamelCase;
+            }
+        }
+
+
     }
 }

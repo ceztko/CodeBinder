@@ -6,11 +6,11 @@ using System.Text;
 
 namespace CodeBinder.JNI
 {
-    public class JNICompilationContext : CompilationContext<JNISyntaxTreeContext, JNIModuleContext, CSToJNIConversion>
+    public class JNICompilationContext : CompilationContext<JNISyntaxTreeContext, JNIModuleContext, ConversionCSharpToJNI>
     {
         Dictionary<string, JNIModuleContextParent> _modules;
 
-        public JNICompilationContext(CSToJNIConversion conversion)
+        public JNICompilationContext(ConversionCSharpToJNI conversion)
             : base(conversion)
         {
             _modules = new Dictionary<string, JNIModuleContextParent>();
@@ -46,7 +46,7 @@ namespace CodeBinder.JNI
         {
             get
             {
-                yield return new MethodInitWriter(this);
+                yield return new JNIMethodInitBuilder(this);
             }
         }
     }

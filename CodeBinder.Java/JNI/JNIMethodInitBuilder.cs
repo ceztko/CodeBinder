@@ -6,11 +6,11 @@ using System.Text;
 
 namespace CodeBinder.JNI
 {
-    class MethodInitWriter : ConversionBuilder
+    class JNIMethodInitBuilder : ConversionBuilder
     {
         JNICompilationContext _compilation;
 
-        public MethodInitWriter(JNICompilationContext compilation)
+        public JNIMethodInitBuilder(JNICompilationContext compilation)
         {
             _compilation = compilation;
         }
@@ -36,7 +36,7 @@ namespace CodeBinder.JNI
 
         public override string GeneratedPreamble
         {
-            get { return CSToJNIConversion.SourcePreamble; }
+            get { return ConversionCSharpToJNI.SourcePreamble; }
         }
 
         public override string FileName

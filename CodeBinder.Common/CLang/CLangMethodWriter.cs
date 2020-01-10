@@ -14,21 +14,19 @@ namespace CodeBinder.CLang
         protected CLangMethodWriter(MethodDeclarationSyntax method, CLangModuleConversion module)
             : base((method, module), module) { }
 
-        public static CLangMethodWriter Create(MethodDeclarationSyntax method,
+        public static CLangMethodWriter Create(MethodDeclarationSyntax method, bool widechar,
             CLangModuleConversion module)
         {
-            return new SyntaxSignatureMethodWriter(method, module);
+            return new SyntaxSignatureMethodWriter(method, widechar, module);
         }
 
         protected override void Write()
         {
-            Builder.Append("JNIEXPORT").Space();
+            Builder.Append("BINDER_EXPORT").Space();
             Builder.Append(ReturnType).Space();
-            Builder.Append("JNICALL").Space();
             Builder.Append(MethodName).AppendLine("(");
             using (Builder.Indent())
             {
-                Builder.Append("JNIEnv *, jclass");
                 WriteParameters();
                 Builder.Append(")").EndOfLine();
             }
@@ -48,8 +46,13 @@ namespace CodeBinder.CLang
 
         class SyntaxSignatureMethodWriter : CLangMethodWriter
         {
-            public SyntaxSignatureMethodWriter(MethodDeclarationSyntax method, CLangModuleConversion module)
-                : base(method, module) { }
+            public bool WideChar { get; private set; }
+
+            public SyntaxSignatureMethodWriter(MethodDeclarationSyntax method, bool widechar, CLangModuleConversion module)
+                : base(method, module)
+            {
+                WideChar = widechar;
+            }
 
             protected override void WriteParameters()
             {
@@ -72,7 +75,7 @@ namespace CodeBinder.CLang
 
             public override string MethodName
             {
-                get { return Item.Method.GetJNIMethodName(Item.Module.TypeContext); }
+                get { return Item.Method.GetCLangMethodName(WideChar, Item.Module.TypeContext); }
             }
 
             private void WriteType(TypeSyntax type, bool isRef)

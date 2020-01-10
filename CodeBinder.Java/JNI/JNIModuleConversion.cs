@@ -13,9 +13,9 @@ using System.Text;
 
 namespace CodeBinder.JNI
 {
-    public class JNIModuleConversion : TypeConversion<JNIModuleContext, CSToJNIConversion>
+    public class JNIModuleConversion : TypeConversion<JNIModuleContext, ConversionCSharpToJNI>
     {
-        public JNIModuleConversion(CSToJNIConversion conversion)
+        public JNIModuleConversion(ConversionCSharpToJNI conversion)
             : base(conversion)
         {
         }
@@ -58,7 +58,7 @@ namespace CodeBinder.JNI
 
         public override string GeneratedPreamble
         {
-            get { return CSToJNIConversion.SourcePreamble; }
+            get { return ConversionCSharpToJNI.SourcePreamble; }
         }
     }
 }

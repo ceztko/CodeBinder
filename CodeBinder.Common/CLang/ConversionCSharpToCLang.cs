@@ -13,11 +13,8 @@ namespace CodeBinder.CLang
     {
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 
-        public NamespaceMappingTree NamespaceMapping { get; private set; }
-
         public ConversionCSharpToCLang()
         {
-            NamespaceMapping = new NamespaceMappingTree();
         }
 
         protected override CLangCompilationContext createCompilationContext()
@@ -34,8 +31,11 @@ namespace CodeBinder.CLang
         {
             get
             {
+                yield return new StringConversionBuilder("BaseTypes.h", () => CLangResources.BaseTypes_h) { BasePath = "Internal" };
                 yield return new StringConversionBuilder("cstrings.h", () => CLangResources.cstrings_h) { BasePath = "Internal" };
             }
         }
+
+        
     }
 }

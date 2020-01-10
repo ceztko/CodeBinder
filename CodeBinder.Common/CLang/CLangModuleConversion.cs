@@ -22,19 +22,20 @@ namespace CodeBinder.CLang
 
         public override string FileName
         {
-            get { return JNIModuleName + ".h"; }
+            get { return ModuleName + ".h"; }
         }
 
-        public string JNIModuleName
+        public string ModuleName
         {
-            get { return "JNI" + TypeContext.Name; }
+            get { return TypeContext.Name; }
         }
 
         public sealed override void Write(CodeBuilder builder)
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
-            builder.AppendLine("#include \"Internal/JNITypes.h\"");
+            builder.AppendLine("#include \"libsdefs.h\"");
+            builder.AppendLine("#include \"Types.h\"");
             builder.AppendLine();
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("extern \"C\"");
@@ -49,11 +50,17 @@ namespace CodeBinder.CLang
 
         private void WriteMethods(CodeBuilder builder)
         {
-            foreach (var method in TypeContext.Methods)
+            void writeMethods(bool widechar)
             {
-                builder.Append(CLangMethodWriter.Create(method, this));
-                builder.AppendLine();
+                foreach (var method in TypeContext.Methods)
+                {
+                    builder.Append(CLangMethodWriter.Create(method, widechar, this));
+                    builder.AppendLine();
+                }
             }
+
+            writeMethods(true);
+            //writeMethods(false);
         }
 
         public override string GeneratedPreamble

@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Microsoft.CodeAnalysis.FindSymbols;
 using System.Text;
 
 namespace CodeBinder.Shared
@@ -68,15 +69,73 @@ namespace CodeBinder.Shared
             return model.GetTypeInfo(node);
         }
 
-        public static bool HasAttribute<TAttribute>(this ISymbol symbol)
+        public static AttributeData GetAttribute<TAttribute>(this IEnumerable<AttributeData> attributes)
             where TAttribute : Attribute
         {
-            var attributes = symbol.GetAttributes();
+            AttributeData ret;
+            if (!TryGetAttribute<TAttribute>(attributes, out ret))
+                throw new Exception($"Missing attribute {typeof(TAttribute).Name}");
+
+            return ret;
+        }
+
+        public static bool TryGetAttribute<TAttribute>(this IEnumerable<AttributeData> attributes, out AttributeData attribute)
+            where TAttribute : Attribute
+        {
+            foreach (var attrib in attributes)
+            {
+                if (attrib.IsAttribute<TAttribute>())
+                {
+                    attribute = attrib;
+                    return true;
+                }
+            }
+
+            attribute = null;
+            return false;
+        }
+
+        public static bool HasAttribute<TAttribute>(this IEnumerable<AttributeData> attributes)
+            where TAttribute : Attribute
+        {
             foreach (var attribute in attributes)
             {
                 if (attribute.IsAttribute<TAttribute>())
                     return true;
             }
+            return false;
+        }
+
+        public static bool HasAttribute<TAttribute>(this ISymbol symbol)
+            where TAttribute : Attribute
+        {
+            return symbol.GetAttributes().HasAttribute<TAttribute>();
+        }
+
+        public static bool TryGetAttribute<TAttribute>(this ISymbol symbol, out AttributeData attribute)
+            where TAttribute : Attribute
+        {
+            return symbol.GetAttributes().TryGetAttribute<TAttribute>(out attribute);
+        }
+
+        public static AttributeData GetAttribute<TAttribute>(this ISymbol symbol)
+            where TAttribute : Attribute
+        {
+            return symbol.GetAttributes().GetAttribute<TAttribute>();
+        }
+
+        public static bool Inherits<T>(this ITypeSymbol symbol)
+            where T : class
+        {
+            var baseType = symbol.BaseType;
+            while (baseType != null)
+            {
+                if (baseType.GetFullName() == typeof(T).FullName)
+                    return true;
+
+                baseType = baseType.BaseType;
+            }
+
             return false;
         }
 
@@ -90,6 +149,54 @@ namespace CodeBinder.Shared
             }
 
             return method.ContainingType;
+        }
+
+        public static T GetConstructorArgument<T>(this AttributeData data, int index)
+        {
+            if (index < 0 || index >= data.ConstructorArguments.Length)
+                throw new IndexOutOfRangeException();
+
+            return (T)data.ConstructorArguments[index].Value;
+        }
+
+        public static T GetConstructorArgumentOrDefault<T>(this AttributeData data, int index, T def)
+        {
+            if (index < 0 || index >= data.ConstructorArguments.Length)
+                return def;
+
+            return (T)data.ConstructorArguments[index].Value;
+        }
+
+        public static T GetConstructorArgumentOrDefault<T>(this AttributeData data, int index)
+        {
+            return GetConstructorArgumentOrDefault(data, index, default(T));
+        }
+
+        public static T GetNamedArgument<T>(this AttributeData data, string name)
+        {
+            foreach (var pair in data.NamedArguments)
+            {
+                if (pair.Key == name)
+                    return (T)pair.Value.Value;
+            }
+
+            throw new KeyNotFoundException();
+        }
+
+        public static T GetNamedArgumentOrDefault<T>(this AttributeData data, string name)
+        {
+            return GetNamedArgumentOrDefault(data, name, default(T));
+        }
+
+        public static T GetNamedArgumentOrDefault<T>(this AttributeData data, string name, T def)
+        {
+            foreach (var pair in data.NamedArguments)
+            {
+                if (pair.Key == name)
+                    return (T)pair.Value.Value;
+            }
+
+            return def;
         }
 
         public static ImmutableArray<AttributeData> GetAttributes(this SyntaxNode node, ICompilationContextProvider provider)

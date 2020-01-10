@@ -12,7 +12,7 @@ namespace CodeBinder.Java
     {
         JavaInteropType _primitiveType;
 
-        public InteropBoxBuilder(JavaInteropType primitiveType, CSToJavaConversion conversion)
+        public InteropBoxBuilder(JavaInteropType primitiveType, ConversionCSharpToJava conversion)
             : base(conversion)
         {
             _primitiveType = primitiveType;
@@ -25,12 +25,12 @@ namespace CodeBinder.Java
 
         protected override string GetBasePath()
         {
-            return CSToJavaConversion.CodeBinderNamespace;
+            return ConversionCSharpToJava.CodeBinderNamespace;
         }
 
         public override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space().Append(CSToJavaConversion.CodeBinderNamespace).EndOfStatement();
+            builder.Append("package").Space().Append(ConversionCSharpToJava.CodeBinderNamespace).EndOfStatement();
             builder.AppendLine();
             builder.Append("public class").Space().Append(BoxTypeName).AppendLine();
             using (builder.Block())
@@ -65,7 +65,7 @@ namespace CodeBinder.Java
 
         public override string GeneratedPreamble
         {
-            get { return CSToJavaConversion.SourcePreamble; }
+            get { return ConversionCSharpToJava.SourcePreamble; }
         }
     }
 }

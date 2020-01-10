@@ -15,10 +15,10 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    abstract partial class JavaBaseTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext, CSToJavaConversion>
+    abstract partial class JavaBaseTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext, ConversionCSharpToJava>
         where TTypeContext : CSharpBaseTypeContext
     {
-        protected JavaBaseTypeConversion(CSToJavaConversion conversion)
+        protected JavaBaseTypeConversion(ConversionCSharpToJava conversion)
             : base(conversion) { }
 
         public string Namespace
@@ -48,7 +48,7 @@ namespace CodeBinder.Java
 
         public override string GeneratedPreamble
         {
-            get { return CSToJavaConversion.SourcePreamble; }
+            get { return ConversionCSharpToJava.SourcePreamble; }
         }
 
         public IEnumerable<string> Imports
@@ -56,7 +56,7 @@ namespace CodeBinder.Java
             get
             {
                 yield return "java.util.*";
-                yield return CSToJavaConversion.CodeBinderNamespace + ".*";
+                yield return ConversionCSharpToJava.CodeBinderNamespace + ".*";
                 var splittedNs = Namespace?.Split('.');
                 if (splittedNs != null)
                 {
@@ -108,11 +108,7 @@ namespace CodeBinder.Java
             foreach (var attribute in attributes)
             {
                 if (attribute.IsAttribute<ImportAttribute>())
-                {
-                    Debug.Assert(attribute.ConstructorArguments.Length == 1);
-                    var constructorParam = attribute.ConstructorArguments[0];
-                    yield return (string)constructorParam.Value;
-                }
+                    yield return attribute.GetConstructorArgument<string>(0);
             }
         }
 
@@ -122,13 +118,13 @@ namespace CodeBinder.Java
     abstract partial class JavaTypeConversion<TTypeContext> : JavaBaseTypeConversion<TTypeContext>
         where TTypeContext : CSharpTypeContext
     {
-        protected JavaTypeConversion(CSToJavaConversion conversion)
+        protected JavaTypeConversion(ConversionCSharpToJava conversion)
             : base(conversion) { }
     }
 
     class JavaInterfaceConversion : JavaTypeConversion<CSharpInterfaceTypeContext>
     {
-        public JavaInterfaceConversion(CSToJavaConversion conversion)
+        public JavaInterfaceConversion(ConversionCSharpToJava conversion)
             : base(conversion) { }
 
         protected override CodeWriter GetTypeWriter()
@@ -140,7 +136,7 @@ namespace CodeBinder.Java
 
     class JavaClassConversion : JavaTypeConversion<CSharpClassTypeContext>
     {
-        public JavaClassConversion(CSToJavaConversion conversion)
+        public JavaClassConversion(ConversionCSharpToJava conversion)
             : base(conversion) { }
 
         protected override CodeWriter GetTypeWriter()
@@ -152,7 +148,7 @@ namespace CodeBinder.Java
 
     class JavaStructConversion : JavaTypeConversion<CSharpStructTypeContext>
     {
-        public JavaStructConversion(CSToJavaConversion conversion)
+        public JavaStructConversion(ConversionCSharpToJava conversion)
             : base(conversion) { }
 
         protected override CodeWriter GetTypeWriter()
@@ -164,7 +160,7 @@ namespace CodeBinder.Java
 
     class JavaEnumConversion : JavaBaseTypeConversion<CSharpEnumTypeContext>
     {
-        public JavaEnumConversion(CSToJavaConversion conversion)
+        public JavaEnumConversion(ConversionCSharpToJava conversion)
             : base(conversion) { }
 
         protected override CodeWriter GetTypeWriter()

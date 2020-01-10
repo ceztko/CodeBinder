@@ -61,6 +61,28 @@ namespace CodeBinder.CLang.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to #pragma once
+        ///
+        ///#ifdef __cplusplus
+        ///#include &lt;cstdint&gt;
+        ///#include &lt;cuchar&gt;
+        ///extern &quot;C&quot;
+        ///{
+        ///#else // __cplusplus
+        ///#include &lt;stdint.h&gt;
+        ///#include &lt;uchar.h&gt;
+        ///#endif // __cplusplus
+        ///
+        ///#define BBool signed char
+        ///.
+        /// </summary>
+        internal static string BaseTypes_h {
+            get {
+                return ResourceManager.GetString("BaseTypes_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to #include &lt;cstring&gt;
         ///#include &lt;string&gt;
         ///#include &lt;stdexcept&gt;

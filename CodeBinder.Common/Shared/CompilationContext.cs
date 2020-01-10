@@ -42,6 +42,7 @@ namespace CodeBinder.Shared
             }
         }
 
+        // Compilation wide default converions, see CLangCompilationContext for some examples
         public virtual IEnumerable<ConversionBuilder> DefaultConversions
         {
             get { yield break; }

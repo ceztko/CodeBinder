@@ -104,6 +104,7 @@ namespace CodeBinder.Shared.Java
         {
             switch (typeName)
             {
+                case "CodeBinder.PString":
                 case "System.String":
                     boxTypeName = "StringBox";
                     return true;

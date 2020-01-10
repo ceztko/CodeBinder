@@ -8,9 +8,9 @@ namespace CodeBinder.Java
 {
     abstract class JavaConversionBuilder : ConversionBuilderBase
     {
-        public CSToJavaConversion Conversion { get; private set; }
+        public ConversionCSharpToJava Conversion { get; private set; }
 
-        public JavaConversionBuilder(CSToJavaConversion conversion)
+        public JavaConversionBuilder(ConversionCSharpToJava conversion)
         {
             Conversion = conversion;
         }

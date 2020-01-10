@@ -13,20 +13,12 @@ namespace CodeBinder.CLang
 {
     static class CLangMethodExtensions
     {
-        public static string GetJNIMethodName(this MethodDeclarationSyntax method, CLangModuleContext module)
+        public static string GetCLangMethodName(this MethodDeclarationSyntax method, bool widechar, CLangModuleContext module)
         {
-            return getJNIMethodName(method.GetName(), method, module);
-        }
-
-        static string getJNIMethodName(string methodName, MethodDeclarationSyntax method, CLangModuleContext module)
-        {
-            var parentType = method.Parent.GetDeclaredSymbol(module);
-            StringBuilder builder = new StringBuilder();
-            string mappedns = module.Compilation.Conversion.NamespaceMapping.GetMappedNamespace(method.GetContainingNamespace(module),
-                NamespaceNormalization.LowerCase);
-            builder.Append("Java_").Append(mappedns.Replace('.', '_')).Append("_")
-                .Append(parentType.GetQualifiedName().Replace('.', '_')).Append("_").Append(methodName);
-            return builder.ToString();
+            if (widechar)
+                return $"{method.GetName()}W";
+            else
+                return method.GetName();
         }
 
         public static string GetJNIType(this TypeSyntax type, bool isByRef, ICompilationContextProvider provider)
@@ -107,12 +99,7 @@ namespace CodeBinder.CLang
                 case "System.Double":
                     return "jdouble";
                 default:
-                {
-                    if (symbol == null || symbol.TypeKind == TypeKind.Class)
-                        return "jobject";
-                    else
-                        throw new Exception("Unsupported by type " + typeName);
-                }
+                    throw new Exception("Unsupported by type " + typeName);
             }
         }
 
@@ -123,7 +110,7 @@ namespace CodeBinder.CLang
                 case "System.IntPtr":
                     return "jLongBox";
                 case "System.Boolean":
-                    return "jBooleanBox";
+                    return "BBool";
                 case "System.Char":
                     return "jCharacterBox";
                 case "System.Byte":
@@ -171,6 +158,12 @@ namespace CodeBinder.CLang
         public static CodeBuilder CommaSeparator(this CodeBuilder builder)
         {
             return builder.Append(", ");
+        }
+
+        public static CodeBuilder TypeBlock(this CodeBuilder builder, bool appendLine = true)
+        {
+            builder.AppendLine("{");
+            return builder.Indent("};", appendLine);
         }
     }
 }

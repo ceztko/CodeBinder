@@ -24,7 +24,7 @@ namespace CodeBinder.Java
                 for (int i = 0; i < syntax.Members.Count; i++)
                 {
                     var member = syntax.Members[i];
-                    int value = member.GetEnumValue(this);
+                    long value = member.GetEnumValue(this);
                     if (value != i)
                         _isOrdinalEnum = false;
                 }

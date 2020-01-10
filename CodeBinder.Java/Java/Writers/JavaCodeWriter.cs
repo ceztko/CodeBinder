@@ -15,9 +15,9 @@ namespace CodeBinder.Java
     public class JavaCodeConversionContext : ICompilationContextProvider
     {
         public ICompilationContextProvider Provider { get; private set; }
-        public CSToJavaConversion Conversion { get; private set; }
+        public ConversionCSharpToJava Conversion { get; private set; }
 
-        public JavaCodeConversionContext(ICompilationContextProvider provider, CSToJavaConversion conversion)
+        public JavaCodeConversionContext(ICompilationContextProvider provider, ConversionCSharpToJava conversion)
         {
             Provider = provider;
             Conversion = conversion;

@@ -87,16 +87,16 @@ namespace CodeBinder
             else
                 throw new Exception();
 
-            Converter<CSToJavaConversion> javaConversion = null;
-            Converter<CSToJNIConversion> jniConversion = null;
+            Converter<ConversionCSharpToJava> javaConversion = null;
+            Converter<ConversionCSharpToJNI> jniConversion = null;
             switch (language)
             {
                 case "Java":
                 {
                     if (project != null)
-                        javaConversion = Converter.CreateFor<CSToJavaConversion>(project);
+                        javaConversion = Converter.CreateFor<ConversionCSharpToJava>(project);
                     else if (solution != null)
-                        javaConversion = Converter.CreateFor<CSToJavaConversion>(solution);
+                        javaConversion = Converter.CreateFor<ConversionCSharpToJava>(solution);
                     else
                         throw new Exception();
                     break;
@@ -104,9 +104,9 @@ namespace CodeBinder
                 case "JNI":
                 {
                     if (project != null)
-                        jniConversion = Converter.CreateFor<CSToJNIConversion>(project);
+                        jniConversion = Converter.CreateFor<ConversionCSharpToJNI>(project);
                     else if (solution != null)
-                        jniConversion = Converter.CreateFor<CSToJNIConversion>(solution);
+                        jniConversion = Converter.CreateFor<ConversionCSharpToJNI>(solution);
                     else
                         throw new Exception();
                     break;

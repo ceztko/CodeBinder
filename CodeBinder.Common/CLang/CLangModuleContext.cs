@@ -22,11 +22,11 @@ namespace CodeBinder.CLang
         }
     }
 
-    public class JNIModuleContextParent : CLangModuleContext
+    public class CLangModuleContextParent : CLangModuleContext
     {
         private string _Name;
 
-        public JNIModuleContextParent(string name, CLangCompilationContext context)
+        public CLangModuleContextParent(string name, CLangCompilationContext context)
             : base(context)
         {
             _Name = name;
@@ -57,11 +57,11 @@ namespace CodeBinder.CLang
         }
     }
 
-    public class JNIModuleContextChild : CLangModuleContext
+    public class CLangModuleContextChild : CLangModuleContext
     {
         private List<MethodDeclarationSyntax> _methods;
 
-        public JNIModuleContextChild(CLangCompilationContext context)
+        public CLangModuleContextChild(CLangCompilationContext context)
             : base(context)
         {
             _methods = new List<MethodDeclarationSyntax>();

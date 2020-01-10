@@ -9,7 +9,7 @@ using CodeBinder.Attributes;
 
 namespace CodeBinder.JNI
 {
-    class JNINodeVisitor : CSharpNodeVisitor<JNISyntaxTreeContext, JNICompilationContext, CSToJNIConversion>
+    class JNINodeVisitor : CSharpNodeVisitor<JNISyntaxTreeContext, JNICompilationContext, ConversionCSharpToJNI>
     {
         public JNINodeVisitor(JNISyntaxTreeContext treeContext)
             : base(treeContext, treeContext.Compilation, treeContext.Compilation.Conversion) { }
@@ -71,7 +71,7 @@ namespace CodeBinder.JNI
             {
                 if (attribute.IsAttribute<ModuleAttribute>())
                 {
-                    moduleName = attribute.ConstructorArguments[0].Value.ToString();
+                    moduleName = attribute.GetConstructorArgument<string>(0);
                     return true;
                 }
             }

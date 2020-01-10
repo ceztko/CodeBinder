@@ -10,7 +10,7 @@ namespace CodeBinder.Java
         public string ClassName { get; private set; }
         public string ClassCode { get; private set; }
 
-        public JavaClassBuilder(CSToJavaConversion conversion, string className, string classCode)
+        public JavaClassBuilder(ConversionCSharpToJava conversion, string className, string classCode)
             : base(conversion)
         {
             ClassName = className;
@@ -19,14 +19,14 @@ namespace CodeBinder.Java
 
         public override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space().Append(CSToJavaConversion.CodeBinderNamespace).EndOfStatement();
+            builder.Append("package").Space().Append(ConversionCSharpToJava.CodeBinderNamespace).EndOfStatement();
             builder.AppendLine();
             builder.Append(ClassCode);
         }
 
         protected override string GetBasePath()
         {
-            return CSToJavaConversion.CodeBinderNamespace;
+            return ConversionCSharpToJava.CodeBinderNamespace;
         }
 
         public override string FileName

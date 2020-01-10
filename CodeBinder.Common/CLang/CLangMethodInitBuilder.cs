@@ -6,29 +6,31 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    class CLangMethodInitWriter : ConversionBuilder
+    class CLangMethodInitBuilder : CLangCompilationContextBuilder
     {
-        CLangCompilationContext _compilation;
-
-        public CLangMethodInitWriter(CLangCompilationContext compilation)
-        {
-            _compilation = compilation;
-        }
+        public CLangMethodInitBuilder(CLangCompilationContext compilation)
+            : base(compilation) { }
 
         public override void Write(CodeBuilder builder)
         {
-            foreach (var module in _compilation.Modules)
+            foreach (var module in Compilation.Modules)
                 builder.Append("#include \"C").Append(module.Name).AppendLine(".h\"");
 
             builder.AppendLine();
             builder.AppendLine("static void* funcs[] = {");
             using (builder.Indent())
             {
-                foreach (var module in _compilation.Modules)
+                void writeMethods(bool widechar)
                 {
-                    foreach (var method in module.Methods)
-                        builder.Append("(void *)").Append(method.GetJNIMethodName(module)).AppendLine(",");
+                    foreach (var module in Compilation.Modules)
+                    {
+                        foreach (var method in module.Methods)
+                            builder.Append("(void *)").Append(method.GetCLangMethodName(widechar, module)).AppendLine(",");
+                    }
                 }
+
+                writeMethods(true);
+                writeMethods(false);
             }
 
             builder.Append("}").EndOfLine();
