@@ -13,7 +13,7 @@ using System.Text;
 
 namespace CodeBinder.JNI
 {
-    public class JNIModuleConversion : TypeConversion<JNIModuleContext, ConversionCSharpToJNI>
+    public class JNIModuleConversion : TypeConversion<JNIModuleContext, JNICompilationContext, ConversionCSharpToJNI>
     {
         public JNIModuleConversion(ConversionCSharpToJNI conversion)
             : base(conversion)
@@ -27,7 +27,7 @@ namespace CodeBinder.JNI
 
         public string JNIModuleName
         {
-            get { return "JNI" + TypeContext.Name; }
+            get { return "JNI" + Context.Name; }
         }
 
         public sealed override void Write(CodeBuilder builder)
@@ -49,7 +49,7 @@ namespace CodeBinder.JNI
 
         private void WriteMethods(CodeBuilder builder)
         {
-            foreach (var method in TypeContext.Methods)
+            foreach (var method in Context.Methods)
             {
                 builder.Append(MethodWriter.Create(method, this));
                 builder.AppendLine();
@@ -59,6 +59,11 @@ namespace CodeBinder.JNI
         public override string GeneratedPreamble
         {
             get { return ConversionCSharpToJNI.SourcePreamble; }
+        }
+
+        public override JNICompilationContext Compilation
+        {
+            get { return Context.Compilation; }
         }
     }
 }

@@ -31,32 +31,44 @@ namespace CodeBinder.Shared
             get { return string.Empty; }
         }
 
-        public TypeContext TypeContext
+        public TypeContext Context
         {
-            get { return GetTypeContext(); }
+            get { return GetContext(); }
         }
 
         public CompilationContext Compilation
         {
-            get { return TypeContext.Compilation; }
+            get { return Context.Compilation; }
         }
 
-        protected abstract TypeContext GetTypeContext();
+        protected abstract TypeContext GetContext();
     }
 
     public abstract class TypeConversion<TTypeContext> : TypeConversion
         where TTypeContext : TypeContext
     {
-        // FIXME: Find a way to make it internal again, look JNI JNIModuleContextParent
-        public new TTypeContext TypeContext { get; /* internal */ set; }
+        internal TypeConversion() { }
 
-        protected override TypeContext GetTypeContext()
+        // FIXME: Find a way to make it internal again, look JNI JNIModuleContextParent
+        public new TTypeContext Context { get; /* internal */ set; }
+
+        protected override TypeContext GetContext()
         {
-            return TypeContext;
+            return Context;
         }
     }
 
-    public abstract class TypeConversion<TTypeContext, TLanguageConversion> : TypeConversion<TTypeContext>
+    public abstract class TypeConversion<TTypeContext, TCompilationContext> : TypeConversion<TTypeContext>
+        where TCompilationContext : CompilationContext
+        where TTypeContext : TypeContext
+    {
+        internal TypeConversion() { }
+
+        public abstract new TCompilationContext Compilation { get; }
+    }
+
+    public abstract class TypeConversion<TTypeContext, TCompilationContext, TLanguageConversion> : TypeConversion<TTypeContext, TCompilationContext>
+        where TCompilationContext : CompilationContext
         where TTypeContext : TypeContext
         where TLanguageConversion : LanguageConversion
     {

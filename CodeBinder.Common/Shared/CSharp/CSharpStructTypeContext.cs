@@ -12,7 +12,7 @@ namespace CodeBinder.Shared.CSharp
                 TypeConversion<CSharpStructTypeContext> conversion)
             : base(node, compilation, conversion)
         {
-            conversion.TypeContext = this;
+            conversion.Context = this;
         }
     }
 }

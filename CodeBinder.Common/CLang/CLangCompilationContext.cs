@@ -1,4 +1,5 @@
-﻿using CodeBinder.Shared;
+﻿using CodeBinder.Attributes;
+using CodeBinder.Shared;
 using CodeBinder.Util;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,12 +15,20 @@ namespace CodeBinder.CLang
         List<EnumDeclarationSyntax> _enums;
         List<ClassDeclarationSyntax> _types;
 
+        public string LibraryName { get; private set; }
+
         public CLangCompilationContext(ConversionCSharpToCLang conversion)
             : base(conversion)
         {
             _modules = new Dictionary<string, CLangModuleContextParent>();
             _enums = new List<EnumDeclarationSyntax>();
             _types = new List<ClassDeclarationSyntax>();
+            CompilationSet += CLangCompilationContext_CompilationSet;
+        }
+
+        private void CLangCompilationContext_CompilationSet(object sender, EventArgs e)
+        {
+            LibraryName = Compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0).ToUpper();
         }
 
         public void AddModule(CompilationContext compilation, CLangModuleContextParent module)

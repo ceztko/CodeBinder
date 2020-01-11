@@ -15,7 +15,8 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    abstract partial class JavaBaseTypeConversion<TTypeContext> : CSharpTypeConversion<TTypeContext, ConversionCSharpToJava>
+    abstract partial class JavaBaseTypeConversion<TTypeContext>
+        : CSharpTypeConversion<TTypeContext, ConversionCSharpToJava>
         where TTypeContext : CSharpBaseTypeContext
     {
         protected JavaBaseTypeConversion(ConversionCSharpToJava conversion)
@@ -27,7 +28,7 @@ namespace CodeBinder.Java
             {
 
                 return Conversion.NamespaceMapping.GetMappedNamespace(
-                    TypeContext.Node.GetContainingNamespace(this),
+                    Context.Node.GetContainingNamespace(this),
                         NamespaceNormalization.LowerCase);
             }
         }
@@ -43,7 +44,7 @@ namespace CodeBinder.Java
 
         public override string FileName
         {
-            get { return TypeContext.Node.GetName() + ".java"; }
+            get { return Context.Node.GetName() + ".java"; }
         }
 
         public override string GeneratedPreamble
@@ -82,7 +83,7 @@ namespace CodeBinder.Java
 
         public virtual IEnumerable<string> OtherImports
         {
-            get { return GetImports(TypeContext.Node); }
+            get { return GetImports(Context.Node); }
         }
 
         public sealed override void Write(CodeBuilder builder)
@@ -129,7 +130,7 @@ namespace CodeBinder.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new InterfaceTypeWriter(TypeContext.Node, TypeContext.ComputePartialDeclarationsTree(),
+            return new InterfaceTypeWriter(Context.Node, Context.ComputePartialDeclarationsTree(),
                 new JavaCodeConversionContext(this, Conversion));
         }
     }
@@ -141,7 +142,7 @@ namespace CodeBinder.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new ClassTypeWriter(TypeContext.Node, TypeContext.ComputePartialDeclarationsTree(),
+            return new ClassTypeWriter(Context.Node, Context.ComputePartialDeclarationsTree(),
                 new JavaCodeConversionContext(this, Conversion));
         }
     }
@@ -153,7 +154,7 @@ namespace CodeBinder.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new StructTypeWriter(TypeContext.Node, TypeContext.ComputePartialDeclarationsTree(),
+            return new StructTypeWriter(Context.Node, Context.ComputePartialDeclarationsTree(),
                 new JavaCodeConversionContext(this, Conversion));
         }
     }
@@ -165,7 +166,7 @@ namespace CodeBinder.Java
 
         protected override CodeWriter GetTypeWriter()
         {
-            return new EnumTypeWriter(TypeContext.Node,
+            return new EnumTypeWriter(Context.Node,
                 new JavaCodeConversionContext(this, Conversion));
         }
     }

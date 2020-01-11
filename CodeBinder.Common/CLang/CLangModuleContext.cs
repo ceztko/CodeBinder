@@ -35,7 +35,7 @@ namespace CodeBinder.CLang
         protected override TypeConversion GetConversion()
         {
             var ret = new CLangModuleConversion(Compilation.Conversion);
-            ret.TypeContext = this;
+            ret.Context = this;
             return ret;
         }
 

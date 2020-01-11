@@ -13,12 +13,10 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    public class CLangModuleConversion : TypeConversion<CLangModuleContext, ConversionCSharpToCLang>
+    public class CLangModuleConversion : TypeConversion<CLangModuleContext, CLangCompilationContext, ConversionCSharpToCLang>
     {
         public CLangModuleConversion(ConversionCSharpToCLang conversion)
-            : base(conversion)
-        {
-        }
+            : base(conversion) { }
 
         public override string FileName
         {
@@ -27,7 +25,7 @@ namespace CodeBinder.CLang
 
         public string ModuleName
         {
-            get { return TypeContext.Name; }
+            get { return Context.Name; }
         }
 
         public sealed override void Write(CodeBuilder builder)
@@ -52,7 +50,7 @@ namespace CodeBinder.CLang
         {
             void writeMethods(bool widechar)
             {
-                foreach (var method in TypeContext.Methods)
+                foreach (var method in Context.Methods)
                 {
                     builder.Append(CLangMethodWriter.Create(method, widechar, this));
                     builder.AppendLine();
@@ -66,6 +64,11 @@ namespace CodeBinder.CLang
         public override string GeneratedPreamble
         {
             get { return ConversionCSharpToCLang.SourcePreamble; }
+        }
+
+        public override CLangCompilationContext Compilation
+        {
+            get { return Context.Compilation; }
         }
     }
 }

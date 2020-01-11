@@ -41,7 +41,7 @@ namespace CodeBinder.Shared
         internal CompilationContext GetCompilationContext(Compilation compilation)
         {
             var ret = CreateCompilationContext();
-            ret.Compilation = compilation;
+            ret.SetCompilation(compilation);
             return ret;
         }
 

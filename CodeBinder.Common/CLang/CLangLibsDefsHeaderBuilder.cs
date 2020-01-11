@@ -18,7 +18,7 @@ namespace CodeBinder.CLang
 
         public override void Write(CodeBuilder builder)
         {
-            string libnameUpper = Compilation.Compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0).ToUpper();
+            string libnameUpper = Compilation.LibraryName.ToUpper();
             string LIBRARY_STATIC = $"{libnameUpper}_STATIC";
             string LIBRARY_SHARED = $"{libnameUpper}_SHARED";
             string LIBRARY_SHARED_API = $"{libnameUpper}_SHARED_API";
@@ -35,6 +35,7 @@ namespace CodeBinder.CLang
                 builder.IndentChild().Append("#define").Space().Append(LIBRARY_SHARED_API).Space().AppendLine("__declspec(dllexport)").Close();
                 builder.AppendLine("#else // Non MVSC");
                 builder.IndentChild().Append("#define").Space().Append(LIBRARY_SHARED_API).Space().AppendLine("__attribute__ ((visibility (\"default\")))").Close();
+                builder.AppendLine("#endif");
             }
             builder.AppendLine("#else");
             using (builder.Indent())
@@ -44,6 +45,7 @@ namespace CodeBinder.CLang
                 builder.IndentChild().Append("#define").Space().Append(LIBRARY_SHARED_API).Space().AppendLine("__declspec(dllimport)").Close();
                 builder.AppendLine("#else // Non MVSC");
                 builder.IndentChild().Append("#define").Space().Append(LIBRARY_SHARED_API).Space().AppendLine("__attribute__ ((visibility (\"default\")))").Close();
+                builder.AppendLine("#endif");
             }
 
             builder.AppendLine("#else");

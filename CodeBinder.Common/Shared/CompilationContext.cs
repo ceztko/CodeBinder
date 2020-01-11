@@ -10,12 +10,20 @@ namespace CodeBinder.Shared
     public abstract class CompilationContext : ICompilationContextProvider
     {
         private Dictionary<SyntaxTree, SemanticModel> _modelCache;
-        public Compilation Compilation { get; internal set; }
+        private Compilation _compilation;
 
         internal CompilationContext()
         {
             _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
         }
+
+        internal void SetCompilation(Compilation compilation)
+        {
+            _compilation = compilation;
+            CompilationSet?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler CompilationSet;
 
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
@@ -27,6 +35,11 @@ namespace CodeBinder.Shared
             }
 
             return model;
+        }
+
+        public Compilation Compilation
+        {
+            get { return _compilation; }
         }
 
         internal abstract SyntaxTreeContext CreateSyntaxTreeContext();

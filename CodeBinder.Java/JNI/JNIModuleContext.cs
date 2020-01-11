@@ -35,7 +35,7 @@ namespace CodeBinder.JNI
         protected override TypeConversion GetConversion()
         {
             var ret = new JNIModuleConversion(Compilation.Conversion);
-            ret.TypeContext = this;
+            ret.Context = this;
             return ret;
         }
 

@@ -9,10 +9,10 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    abstract class CLangMethodWriter : CodeWriter<(MethodDeclarationSyntax Method, CLangModuleConversion Module)>
+    abstract class CLangMethodWriter : CodeWriter<MethodDeclarationSyntax, CLangModuleConversion>
     {
         protected CLangMethodWriter(MethodDeclarationSyntax method, CLangModuleConversion module)
-            : base((method, module), module) { }
+            : base(method, module, module) { }
 
         public static CLangMethodWriter Create(MethodDeclarationSyntax method, bool widechar,
             CLangModuleConversion module)
@@ -22,7 +22,7 @@ namespace CodeBinder.CLang
 
         protected override void Write()
         {
-            Builder.Append("BINDER_EXPORT").Space();
+            Builder.Append(Context.Compilation.LibraryName.ToUpper()).Append("_SHARED_API").Space();
             Builder.Append(ReturnType).Space();
             Builder.Append(MethodName).AppendLine("(");
             using (Builder.Indent())
@@ -56,7 +56,7 @@ namespace CodeBinder.CLang
 
             protected override void WriteParameters()
             {
-                foreach (var parameter in Item.Method.ParameterList.Parameters)
+                foreach (var parameter in Item.ParameterList.Parameters)
                     WriteParameter(parameter);
             }
 
@@ -70,12 +70,12 @@ namespace CodeBinder.CLang
 
             public override string ReturnType
             {
-                get { return Item.Method.ReturnType.GetJNIType(false, this); }
+                get { return Item.ReturnType.GetJNIType(false, this); }
             }
 
             public override string MethodName
             {
-                get { return Item.Method.GetCLangMethodName(WideChar, Item.Module.TypeContext); }
+                get { return Item.GetCLangMethodName(WideChar, Context.Context); }
             }
 
             private void WriteType(TypeSyntax type, bool isRef)
