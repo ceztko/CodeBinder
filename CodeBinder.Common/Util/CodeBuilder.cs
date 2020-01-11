@@ -89,18 +89,34 @@ namespace CodeBinder.Util
             }
         }
 
+        /// <summary>
+        /// Create a disposable context on this istance
+        /// </summary>
+        /// <param name="appendString">The string that will be appended when the context has been disposed</param>
+        /// <returns></returns>
         public CodeBuilder Using(string appendString)
         {
             doChecks();
             return disposable(0, appendString, false);
         }
 
+        /// <summary>
+        /// Create an indented disposable context on this istance
+        /// </summary>
+        /// <param name="appendString">The string that will be appended when the context has been disposed</param>
+        /// <param name="appendLine">True if a line should be appended on the disposing of this context</param>
         public CodeBuilder Indent(string appendString = null, bool appendLine = false)
         {
             doChecks();
             return disposable(1, appendString, appendLine);
         }
 
+        /// <summary>
+        /// Create an indented disposable context on this istance
+        /// </summary>
+        /// <param name="indentCount">The number of indentation levels</param>
+        /// <param name="appendString">The string that will be appended when the context has been disposed</param>
+        /// <param name="appendLine">True if a line should be appended on the disposing of this context</param>
         public CodeBuilder Indent(uint indentCount, string appendString = null, bool appendLine = false)
         {
             doChecks();
@@ -110,14 +126,20 @@ namespace CodeBinder.Util
             return disposable(indentCount, appendString, appendLine);
         }
 
-        /// <summary>Return a new child instance that can be used in a using directive</summary>
+        /// <summary>Return a new disposable child instance</summary>
+        /// A child is similar to a regular disposable conext but can be used inline,
+        /// example builder.IndentChild().Append("Indented").Close()
+        /// <param name="appendString">The string that will be appended when the context has been disposed</param>
         public CodeBuilder UsingChild(string appendString)
         {
             doChecks();
             return newChild(0).disposable(0, appendString, false);
         }
 
-        /// <summary>Return a new indented child instance</summary>
+        /// <summary>Return a new indented disposable child instance</summary>
+        /// A child is similar to a regular disposable conext but can be used inline,
+        /// example builder.IndentChild().Append("Indented").Close()
+        /// <param name="indentCount">The number of indentation levels</param>
         public CodeBuilder IndentChild(uint indentCount = 1)
         {
             doChecks();
