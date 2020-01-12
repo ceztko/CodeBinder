@@ -56,32 +56,43 @@ namespace CodeBinder.CLang
 
             protected override void WriteParameters()
             {
-                foreach (var parameter in Item.ParameterList.Parameters)
-                    WriteParameter(parameter);
-            }
-
-            private void WriteParameter(ParameterSyntax parameter)
-            {
-                Builder.CommaSeparator();
-                bool isRef = parameter.IsRef() || parameter.IsOut();
-                WriteType(parameter.Type, isRef);
-                Builder.Append(parameter.Identifier.Text);
+                Builder.Append(new CLangParameterListWriter(Item.ParameterList, Context));
             }
 
             public override string ReturnType
             {
-                get { return Item.ReturnType.GetJNIType(false, this); }
+                get { return Item.ReturnType.GetCLangType(false, this); }
             }
 
             public override string MethodName
             {
                 get { return Item.GetCLangMethodName(WideChar, Context.Context); }
             }
+        }
+    }
 
-            private void WriteType(TypeSyntax type, bool isRef)
-            {
-                Builder.Append(type.GetJNIType(isRef, this)).Space();
-            }
+    class CLangParameterListWriter : CodeWriter<ParameterListSyntax, ICompilationContextProvider>
+    {
+        public CLangParameterListWriter(ParameterListSyntax list, ICompilationContextProvider module)
+            : base(list, module, module) { }
+
+        protected override void Write()
+        {
+            foreach (var parameter in Item.Parameters)
+                WriteParameter(parameter);
+        }
+
+        private void WriteParameter(ParameterSyntax parameter)
+        {
+            Builder.CommaSeparator();
+            bool isRef = parameter.IsRef() || parameter.IsOut();
+            WriteType(parameter.Type, isRef);
+            Builder.Append(parameter.Identifier.Text);
+        }
+
+        private void WriteType(TypeSyntax type, bool isRef)
+        {
+            Builder.Append(type.GetCLangType(isRef, this)).Space();
         }
     }
 }

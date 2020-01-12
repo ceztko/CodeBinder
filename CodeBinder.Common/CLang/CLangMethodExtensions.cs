@@ -21,13 +21,13 @@ namespace CodeBinder.CLang
                 return method.GetName();
         }
 
-        public static string GetJNIType(this TypeSyntax type, bool isByRef, ICompilationContextProvider provider)
+        public static string GetCLangType(this TypeSyntax type, bool isByRef, ICompilationContextProvider provider)
         {
             var symbol = type.GetTypeSymbol(provider);
-            return getJNIType(symbol, isByRef);
+            return getCLangType(symbol, isByRef);
         }
 
-        private static string getJNIType(ITypeSymbol symbol, bool isByRef)
+        private static string getCLangType(ITypeSymbol symbol, bool isByRef)
         {
             return getJNIType(symbol.GetFullName(), symbol, isByRef);
         }

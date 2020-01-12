@@ -7,6 +7,7 @@ using System.Text;
 using CodeBinder.Shared;
 using CodeBinder.Attributes;
 using Microsoft.CodeAnalysis;
+using System.Runtime.InteropServices;
 
 namespace CodeBinder.CLang
 {
@@ -71,8 +72,19 @@ namespace CodeBinder.CLang
                     case SyntaxKind.EnumDeclaration:
                         visitType(member as StructDeclarationSyntax);
                         break;
+                    case SyntaxKind.DelegateDeclaration:
+                        visitType(member as DelegateDeclarationSyntax);
+                        break;
                 }
             }
+        }
+
+        public void visitType(DelegateDeclarationSyntax node)
+        {
+            if (!node.HasAttribute<UnmanagedFunctionPointerAttribute>(this))
+                return;
+
+            Compilation.AddCallback(node);
         }
 
         bool TryGetModuleName(TypeDeclarationSyntax type, out string moduleName)

@@ -24,13 +24,18 @@ namespace CodeBinder.CLang
             builder.AppendLine();
             builder.AppendLine("#include \"Internal/BaseTypes.h\"");
             builder.AppendLine();
-            writeTypes(builder);
+            writeOpaqueTypes(builder);
+            builder.AppendLine("#ifdef __cplusplus");
+            builder.AppendLine("extern \"C\"");
+            builder.AppendLine("#endif // __cplusplus");
+            writeEnums(builder);
+            writeCallbacks(builder);
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("}");
             builder.AppendLine("#endif // __cplusplus");
         }
 
-        void writeTypes(CodeBuilder builder)
+        void writeOpaqueTypes(CodeBuilder builder)
         {
             // Opaque types
             builder.AppendLine("// Opaque types");
@@ -41,7 +46,10 @@ namespace CodeBinder.CLang
             }
 
             builder.AppendLine();
+        }
 
+        private void writeEnums(CodeBuilder builder)
+        {
             // Enums
             builder.AppendLine("// Enums");
             builder.AppendLine();
@@ -95,6 +103,20 @@ namespace CodeBinder.CLang
                 }
 
                 builder.AppendLine();
+            }
+        }
+
+        private void writeCallbacks(CodeBuilder builder)
+        {
+            // Callbacks
+            builder.AppendLine("// Callbacks");
+            builder.AppendLine();
+            foreach (var callback in Compilation.Callbacks)
+            {
+                builder.Append("typedef").Space().Append(callback.ReturnType.GetCLangType(false, Compilation))
+                    .Append("(*").Append(callback.Identifier.Text).Append(")")
+                    .Append("(").Append(new CLangParameterListWriter(callback.ParameterList, Compilation)).Append(")")
+                    .EndOfLine();
             }
         }
 

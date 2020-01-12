@@ -14,6 +14,7 @@ namespace CodeBinder.CLang
         Dictionary<string, CLangModuleContextParent> _modules;
         List<EnumDeclarationSyntax> _enums;
         List<ClassDeclarationSyntax> _types;
+        List<DelegateDeclarationSyntax> _callbacks;
 
         public string LibraryName { get; private set; }
 
@@ -23,6 +24,7 @@ namespace CodeBinder.CLang
             _modules = new Dictionary<string, CLangModuleContextParent>();
             _enums = new List<EnumDeclarationSyntax>();
             _types = new List<ClassDeclarationSyntax>();
+            _callbacks = new List<DelegateDeclarationSyntax>();
             CompilationSet += CLangCompilationContext_CompilationSet;
         }
 
@@ -52,6 +54,11 @@ namespace CodeBinder.CLang
             _enums.Add(enm);
         }
 
+        public void AddCallback(DelegateDeclarationSyntax callback)
+        {
+            _callbacks.Add(callback);
+        }
+
         public void AddType(ClassDeclarationSyntax type)
         {
             _types.Add(type);
@@ -75,6 +82,11 @@ namespace CodeBinder.CLang
         public IEnumerable<ClassDeclarationSyntax> Types
         {
             get { return _types; }
+        }
+
+        public IEnumerable<DelegateDeclarationSyntax> Callbacks
+        {
+            get { return _callbacks; }
         }
 
         public override IEnumerable<ConversionBuilder> DefaultConversions
