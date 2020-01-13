@@ -60,24 +60,18 @@ namespace CodeBinder.JNI
             private void WriteParameter(ParameterSyntax parameter)
             {
                 Builder.CommaSeparator();
-                bool isRef = parameter.IsRef() || parameter.IsOut();
-                WriteType(parameter.Type, isRef);
+                Builder.Append(parameter.GetJNIType(this)).Space();
                 Builder.Append(parameter.Identifier.Text);
             }
 
             public override string ReturnType
             {
-                get { return Item.ReturnType.GetJNIType(false, this); }
+                get { return Item.GetJNIReturnType(this); }
             }
 
             public override string MethodName
             {
                 get { return Item.GetJNIMethodName(Context.Context); }
-            }
-
-            private void WriteType(TypeSyntax type, bool isRef)
-            {
-                Builder.Append(type.GetJNIType(isRef, this)).Space();
             }
         }
     }

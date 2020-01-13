@@ -29,10 +29,17 @@ namespace CodeBinder.JNI
             return builder.ToString();
         }
 
-        public static string GetJNIType(this TypeSyntax type, bool isByRef, ICompilationContextProvider provider)
+        public static string GetJNIType(this ParameterSyntax parameter, ICompilationContextProvider provider)
         {
-            var symbol = type.GetTypeSymbol(provider);
+            var symbol = parameter.Type.GetTypeSymbol(provider);
+            bool isByRef = parameter.IsRef() || parameter.IsOut();
             return getJNIType(symbol, isByRef);
+        }
+
+        public static string GetJNIReturnType(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        {
+            var symbol = method.ReturnType.GetTypeSymbol(provider);
+            return getJNIType(symbol, false);
         }
 
         private static string getJNIType(ITypeSymbol symbol, bool isByRef)
