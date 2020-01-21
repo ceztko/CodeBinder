@@ -57,8 +57,8 @@ namespace CodeBinder.CLang
                 }
             }
 
-            writeMethods(true);
-            //writeMethods(false);
+            //writeMethods(true);
+            writeMethods(false);
         }
 
         public override string GeneratedPreamble

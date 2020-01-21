@@ -124,6 +124,12 @@ namespace CodeBinder.Shared
             return symbol.GetAttributes().GetAttribute<TAttribute>();
         }
 
+        public static bool Inherits<T>(this AttributeData data)
+            where T : Attribute
+        {
+            return data.AttributeClass.Inherits<T>();
+        }
+
         public static bool Inherits<T>(this ITypeSymbol symbol)
             where T : class
         {
@@ -153,10 +159,23 @@ namespace CodeBinder.Shared
 
         public static T GetConstructorArgument<T>(this AttributeData data, int index)
         {
-            if (index < 0 || index >= data.ConstructorArguments.Length)
+            T ret;
+            if (!TryGetConstructorArgument(data, index, out ret))
                 throw new IndexOutOfRangeException();
 
-            return (T)data.ConstructorArguments[index].Value;
+            return ret;
+        }
+
+        public static bool TryGetConstructorArgument<T>(this AttributeData data, int index, out T value)
+        {
+            if (index < 0 || index >= data.ConstructorArguments.Length)
+            {
+                value = default(T);
+                return false;
+            }
+
+            value = (T)data.ConstructorArguments[index].Value;
+            return true;
         }
 
         public static T GetConstructorArgumentOrDefault<T>(this AttributeData data, int index, T def)
@@ -174,13 +193,26 @@ namespace CodeBinder.Shared
 
         public static T GetNamedArgument<T>(this AttributeData data, string name)
         {
+            T ret;
+            if (!TryGetNamedArgument(data, name, out ret))
+                throw new KeyNotFoundException();
+
+            return ret;
+        }
+
+        public static bool TryGetNamedArgument<T>(this AttributeData data, string name, out T value)
+        {
             foreach (var pair in data.NamedArguments)
             {
                 if (pair.Key == name)
-                    return (T)pair.Value.Value;
+                {
+                    value = (T)pair.Value.Value;
+                    return true;
+                }
             }
 
-            throw new KeyNotFoundException();
+            value = default(T);
+            return false;
         }
 
         public static T GetNamedArgumentOrDefault<T>(this AttributeData data, string name)

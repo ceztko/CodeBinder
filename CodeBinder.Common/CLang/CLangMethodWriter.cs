@@ -61,7 +61,7 @@ namespace CodeBinder.CLang
 
             public override string ReturnType
             {
-                get { return Item.ReturnType.GetCLangType(false, this); }
+                get { return Item.GetCLangReturnType(this); }
             }
 
             public override string MethodName
@@ -78,21 +78,16 @@ namespace CodeBinder.CLang
 
         protected override void Write()
         {
+            bool first = true;
             foreach (var parameter in Item.Parameters)
-                WriteParameter(parameter);
-        }
+            {
+                if (first)
+                    first = false;
+                else
+                    Builder.CommaSeparator();
 
-        private void WriteParameter(ParameterSyntax parameter)
-        {
-            Builder.CommaSeparator();
-            bool isRef = parameter.IsRef() || parameter.IsOut();
-            WriteType(parameter.Type, isRef);
-            Builder.Append(parameter.Identifier.Text);
-        }
-
-        private void WriteType(TypeSyntax type, bool isRef)
-        {
-            Builder.Append(type.GetCLangType(isRef, this)).Space();
+                Builder.Append(parameter, this);
+            }
         }
     }
 }

@@ -113,8 +113,15 @@ namespace CodeBinder.CLang
             builder.AppendLine();
             foreach (var callback in Compilation.Callbacks)
             {
-                builder.Append("typedef").Space().Append(callback.ReturnType.GetCLangType(false, Compilation))
-                    .Append("(*").Append(callback.Identifier.Text).Append(")")
+                string name;
+                AttributeData bidingAttrib;
+                if (callback.TryGetAttribute<NativeBindingAttribute>(Compilation, out bidingAttrib))
+                    name = bidingAttrib.GetConstructorArgument<string>(0);
+                else
+                    name = callback.Identifier.Text;
+
+                builder.Append("typedef").Space().Append(callback.GetCLangReturnType(Compilation))
+                    .Append("(*").Append(name).Append(")")
                     .Append("(").Append(new CLangParameterListWriter(callback.ParameterList, Compilation)).Append(")")
                     .EndOfLine();
             }

@@ -7,6 +7,9 @@ using System.Text;
 
 namespace CodeBinder.Util
 {
+    /// <summary>
+    /// Util class to generate code of a generic item and append to a CodeBuilder, optionally with a context
+    /// </summary>
     public abstract class CodeWriter
     {
         protected CodeBuilder Builder { get; private set; }
@@ -59,6 +62,7 @@ namespace CodeBinder.Util
         #endregion // Support
     }
 
+    /// <typeparam name="TItem">Type of the item to write</typeparam>
     public abstract class CodeWriter<TItem> : CodeWriter, ICompilationContextProvider
     {
         public CompilationContext Compilation { get; private set; }
@@ -71,6 +75,8 @@ namespace CodeBinder.Util
         }
     }
 
+    /// <typeparam name="TItem">Type of the item to write</typeparam>
+    /// <typeparam name="TContext">Type of the context</typeparam>
     public abstract class CodeWriter<TItem, TContext> : CodeWriter<TItem>
         where TContext : ICompilationContextProvider
     {

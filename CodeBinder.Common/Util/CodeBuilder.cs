@@ -8,6 +8,9 @@ using System.IO;
 namespace CodeBinder.Util
 {
     // TODO: Add function to disable trim trailing whitespace
+    /// <summary>
+    /// Low level util class to append code on a TextWriter, with facilities to ease creation of blocks or parenthesized statements
+    /// </summary>
     public class CodeBuilder : IDisposable
     {
         CodeBuilder _parent;

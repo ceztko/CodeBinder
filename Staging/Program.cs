@@ -49,6 +49,7 @@ namespace ConsoleApp1
             }
             else
             {
+                if (true)
                 {
                     var conv = Converter.CreateFor<ConversionCSharpToCLang>(project);
                     conv.Options.PreprocessorDefinitionsRemoved = new string[] { "CSHARP", "DOTNET", "NET_FRAMEWORK" };
@@ -56,7 +57,7 @@ namespace ConsoleApp1
                     genargs.EagerStringConversion = true;
                     conv.ConvertAndWrite(genargs);
                 }
-                return;
+                else
                 {
                     // JNI conversion
                     var conv = Converter.CreateFor<ConversionCSharpToJNI>(project);

@@ -81,7 +81,8 @@ namespace CodeBinder.CLang
 
         public void visitType(DelegateDeclarationSyntax node)
         {
-            if (!node.HasAttribute<UnmanagedFunctionPointerAttribute>(this))
+            var attributes = node.GetAttributes(this);
+            if (!attributes.HasAttribute<UnmanagedFunctionPointerAttribute>() || attributes.HasAttribute<NativeIgnoreAttribute>())
                 return;
 
             Compilation.AddCallback(node);

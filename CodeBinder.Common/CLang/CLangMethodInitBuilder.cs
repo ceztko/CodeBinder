@@ -29,7 +29,7 @@ namespace CodeBinder.CLang
                     }
                 }
 
-                writeMethods(true);
+                //writeMethods(true);
                 writeMethods(false);
             }
 

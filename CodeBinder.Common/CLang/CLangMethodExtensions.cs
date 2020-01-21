@@ -5,14 +5,36 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
 using CodeBinder.Shared;
+using CodeBinder.Attributes;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace CodeBinder.CLang
 {
     static class CLangMethodExtensions
     {
+        enum ParameterType
+        {
+            Regular,
+            ByRef,
+            Return
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter, ICompilationContextProvider provider)
+        {
+            bool isByRef = parameter.IsRef() || parameter.IsOut();
+            var symbol = parameter.Type.GetTypeSymbol(provider);
+            string suffix;
+            string type = getCLangType(symbol, parameter.GetDeclaredSymbol(provider).GetAttributes(),
+                isByRef ? ParameterType.ByRef : ParameterType.Regular, out suffix);
+            builder.Append(type).Space().Append(parameter.Identifier.Text).Append(suffix);
+            return builder;
+        }
+
         public static string GetCLangMethodName(this MethodDeclarationSyntax method, bool widechar, CLangModuleContext module)
         {
             if (widechar)
@@ -21,127 +43,191 @@ namespace CodeBinder.CLang
                 return method.GetName();
         }
 
-        public static string GetCLangType(this TypeSyntax type, bool isByRef, ICompilationContextProvider provider)
+        public static string GetCLangReturnType(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
         {
-            var symbol = type.GetTypeSymbol(provider);
-            return getCLangType(symbol, isByRef);
+            var symbol = method.GetDeclaredSymbol<IMethodSymbol>(provider);
+            return getCLangReturnType(symbol);
         }
 
-        private static string getCLangType(ITypeSymbol symbol, bool isByRef)
+        public static string GetCLangReturnType(this DelegateDeclarationSyntax dlg, ICompilationContextProvider provider)
         {
-            return getJNIType(symbol.GetFullName(), symbol, isByRef);
+            var symbol = dlg.GetDeclaredSymbol<INamedTypeSymbol>(provider);
+            return getCLangReturnType(symbol.DelegateInvokeMethod);
         }
-        private static string getJNIType(string typeName, ITypeSymbol symbol, bool isByRef)
+
+        private static string getCLangReturnType(IMethodSymbol method)
         {
-            if (symbol?.TypeKind == TypeKind.Enum)
+            string suffix;
+            string type = getCLangType(method.ReturnType, method.GetReturnTypeAttributes(), ParameterType.Return, out suffix);
+            if (suffix == null)
+                return type;
+            else
+                return $"{type} {suffix}";
+        }
+
+        private static string getCLangType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes, ParameterType type, out string suffix)
+        {
+            suffix = null;
+            if (symbol.TypeKind == TypeKind.Enum)
             {
-                if (isByRef)
-                    return "jIntegerBox";
+                var bindingAttr = symbol.GetAttribute<NativeBindingAttribute>();
+                string binded = bindingAttr.GetConstructorArgument<string>(0);
+                if (type == ParameterType.ByRef)
+                    return $"{binded} *";
                 else
-                    return "jint";
+                    return binded;
             }
 
-            string jniTypeSuffix = string.Empty;
-            if (symbol?.TypeKind == TypeKind.Array)
+            string typeName;
+            bool constParameter = false;
+            if (symbol.TypeKind == TypeKind.Array)
             {
                 var arrayType = symbol as IArrayTypeSymbol;
-
                 typeName = arrayType.ElementType.GetFullName();
-                jniTypeSuffix = "Array";
+
+                if (type == ParameterType.Return)
+                {
+                    if (attributes.HasAttribute<ConstAttribute>())
+                        constParameter = true;
+                }
+                else
+                {
+                    if (attributes.HasAttribute<InAttribute>())
+                        constParameter = true;
+
+                    int fixedSizeArray;
+                    if (attributes.TryGetAttribute<MarshalAsAttribute>(out var marshalAsAttr) &&
+                        marshalAsAttr.TryGetNamedArgument("SizeConst", out fixedSizeArray))
+                    {
+                        suffix = $"[{fixedSizeArray}]";
+                    }
+                    else
+                    {
+                        suffix = "[]";
+                    }
+                }
+            }
+            else
+            {
+                typeName = symbol.GetFullName();
             }
 
-            string jniTypeName;
-            if (isByRef)
-                jniTypeName = getJNIByRefType(typeName, symbol);
-            else
-                jniTypeName = getJNIType(typeName, symbol);
+            string bindedType;
+            switch (type)
+            {
+                case ParameterType.Regular:
+                    bindedType = getCLangType(typeName, attributes, false, ref constParameter);
+                    break;
+                case ParameterType.Return:
+                    if (symbol.TypeKind == TypeKind.Array)
+                        bindedType = getCLangPointerType(typeName, attributes);
+                    else
+                        bindedType = getCLangType(typeName, attributes, true, ref constParameter);
 
-            return jniTypeName + jniTypeSuffix;
+                    break;
+                case ParameterType.ByRef:
+                    bindedType = getCLangPointerType(typeName, attributes);
+                    break;
+                default:
+                    throw new Exception();
+            }
+
+            if (constParameter)
+                return $"const {bindedType}";
+            else
+                return bindedType;
         }
 
-
-        static string getJNIType(string typeName, ITypeSymbol symbol)
+        static string getCLangType(string typeName, IEnumerable<AttributeData> attributes, bool returnType, ref bool constParameter)
         {
             switch (typeName)
             {
                 case "System.Void":
                     return "void";
-                case "System.Object":
-                    return "jobject";
                 case "System.String":
-                    return "jstring";
+                    if (returnType)
+                        constParameter |= true;
+
+                    return "char16_t *";
                 case "System.Runtime.InteropServices.HandleRef":
-                    return "jHandleRef";
                 case "System.IntPtr":
-                    return "jlong";
+                    var binder = attributes.FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
+                    if (binder != null)
+                        return $"{binder.AttributeClass.Name} *";
+
+                    return "void *";
                 case "System.Boolean":
-                    return "jboolean";
+                    // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
+                    return "BBool";
                 case "System.Char":
-                    return "jchar";
+                    return "char16_t";
                 case "System.Byte":
-                    return "jbyte";
+                    return "uint8_t";
                 case "System.SByte":
-                    return "jbyte";
+                    return "int8_t";
                 case "System.Int16":
-                    return "jshort";
+                    return "int16_t";
                 case "System.UInt16":
-                    return "jshort";
+                    return "uint16_t";
                 case "System.Int32":
-                    return "jint";
+                    // TODO: Add CodeBinder.Attributes attribute to specify explicitly sized 32 bit signed integer
+                    return "int";
                 case "System.UInt32":
-                    return "jint";
+                    return "uint32_t";
                 case "System.Int64":
-                    return "jlong";
+                    return "int64_t";
                 case "System.UInt64":
-                    return "jlong";
+                    return "uint64_t";
                 case "System.Single":
-                    return "jfloat";
+                    return "float";
                 case "System.Double":
-                    return "jdouble";
+                    return "double";
                 default:
-                    throw new Exception("Unsupported by type " + typeName);
+                    throw new Exception($"Unsupported by type {typeName}");
             }
         }
 
-        static string getJNIByRefType(string typeName, ITypeSymbol symbol)
+        static string getCLangPointerType(string typeName, IEnumerable<AttributeData> attributes)
         {
             switch (typeName)
             {
-                case "System.IntPtr":
-                    return "jLongBox";
-                case "System.Boolean":
-                    return "BBool";
-                case "System.Char":
-                    return "jCharacterBox";
-                case "System.Byte":
-                    return "jByteBox";
-                case "System.SByte":
-                    return "jByteBox";
-                case "System.Int16":
-                    return "jShortBox";
-                case "System.UInt16":
-                    return "jShortBox";
-                case "System.Int32":
-                    return "jIntegerBox";
-                case "System.UInt32":
-                    return "jIntegerBox";
-                case "System.Int64":
-                    return "jLongBox";
-                case "System.UInt64":
-                    return "jLongBox";
-                case "System.Single":
-                    return "jFloatBox";
-                case "System.Double":
-                    return "jDoubleBox";
                 case "System.String":
-                    return "jStringBox";
+                    return "char16_t **";
+                case "System.Runtime.InteropServices.HandleRef":
+                case "System.IntPtr":
+                    var binder = attributes.FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
+                    if (binder != null)
+                        return $"{binder.AttributeClass.Name} **";
+
+                    return "void **";
+                case "System.Boolean":
+                    // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
+                    return "BBool *";
+                case "System.Char":
+                    return "char16_t *";
+                case "System.Byte":
+                    return "uint8_t *";
+                case "System.SByte":
+                    return "int8_t *";
+                case "System.Int16":
+                    return "int16_t *";
+                case "System.UInt16":
+                    return "uint16_t *";
+                case "System.Int32":
+                    // TODO: Add CodeBinder.Attributes attribute to specify explicitly sized 32 bit signed integer
+                    return "int *";
+                case "System.UInt32":
+                    return "uint32_t *";
+                case "System.Int64":
+                    return "int64_t *";
+                case "System.UInt64":
+                    return "uint64_t *";
+                case "System.Single":
+                    return "float *";
+                case "System.Double":
+                    return "double *";
                 default:
-                {
-                    if (symbol?.TypeKind == TypeKind.Struct)
-                        return "jlong";
-                    else
-                        throw new Exception("Unsupported by ref type " + typeName); 
-                }
+                    throw new Exception($"Unsupported by type {typeName}");
             }
         }
 

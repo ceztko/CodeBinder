@@ -78,7 +78,7 @@ namespace CodeBinder.Attributes
     }
 
     [Conditional(ConditionString)]
-    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field)]
+    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Delegate)]
     public sealed class NativeBindingAttribute : CodeBinderAttribute
     {
         public NativeBindingAttribute(string name)
@@ -91,7 +91,7 @@ namespace CodeBinder.Attributes
     }
 
     [Conditional(ConditionString)]
-    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Enum)]
+    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Enum )]
     public sealed class NativeSubstitutionAttribute : CodeBinderAttribute
     {
         public NativeSubstitutionAttribute(string pattern, string replacement)
@@ -102,6 +102,12 @@ namespace CodeBinder.Attributes
 
         public string Pattern { get; private set; }
         public string Replacement { get; private set; }
+    }
+
+    [Conditional(ConditionString)]
+    [AttributeUsage(AttributeTargets.ReturnValue)]
+    public sealed class ConstAttribute : CodeBinderAttribute
+    {
     }
 
     /// <summary>Ignore native code generation for this element</summary>

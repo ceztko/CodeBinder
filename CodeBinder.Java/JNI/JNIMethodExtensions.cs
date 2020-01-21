@@ -48,7 +48,7 @@ namespace CodeBinder.JNI
         }
         private static string getJNIType(string typeName, ITypeSymbol symbol, bool isByRef)
         {
-            if (symbol?.TypeKind == TypeKind.Enum)
+            if (symbol.TypeKind == TypeKind.Enum)
             {
                 if (isByRef)
                     return "jIntegerBox";
