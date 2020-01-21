@@ -35,7 +35,5 @@ namespace CodeBinder.CLang
                 yield return new StringConversionBuilder("cstrings.h", () => CLangResources.cstrings_h) { BasePath = "Internal" };
             }
         }
-
-        
     }
 }

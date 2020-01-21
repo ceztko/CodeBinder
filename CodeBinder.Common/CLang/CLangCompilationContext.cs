@@ -30,7 +30,7 @@ namespace CodeBinder.CLang
 
         private void CLangCompilationContext_CompilationSet(object sender, EventArgs e)
         {
-            LibraryName = Compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0).ToUpper();
+            LibraryName = Compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0);
         }
 
         public void AddModule(CompilationContext compilation, CLangModuleContextParent module)
@@ -93,6 +93,7 @@ namespace CodeBinder.CLang
         {
             get
             {
+                yield return new CLangLibraryHeaderBuilder(this);
                 yield return new CLangLibsDefsHeaderBuilder(this);
                 yield return new CLangTypesHeaderBuilder(this);
                 yield return new CLangMethodInitBuilder(this);

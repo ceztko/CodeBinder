@@ -32,7 +32,7 @@ namespace CodeBinder.CLang
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
-            builder.AppendLine("#include \"libsdefs.h\"");
+            builder.AppendLine("#include \"libdefs.h\"");
             builder.AppendLine("#include \"Types.h\"");
             builder.AppendLine();
             builder.AppendLine("#ifdef __cplusplus");

@@ -14,7 +14,7 @@ namespace CodeBinder.CLang
         {
         }
 
-        public override string FileName => "libsdefs.h";
+        public override string FileName => "libdefs.h";
 
         public override void Write(CodeBuilder builder)
         {
@@ -26,8 +26,8 @@ namespace CodeBinder.CLang
             string LIBRARY_EXPORT = $"{libnameUpper}_EXPORT";
             builder.AppendLine("#pragma once");
             builder.AppendLine();
-            builder.Append("if").Space().Append("defined(").Append(LIBRARY_SHARED).Append(") || !defined(").Append(LIBRARY_STATIC).AppendLine(")");
-
+            builder.Append("#if").Space().Append("defined(").Append(LIBRARY_SHARED).Append(") || !defined(").Append(LIBRARY_STATIC).AppendLine(")");
+            builder.AppendLine();
             builder.Append("#ifdef").Space().AppendLine(LIBRARY_EXPORT);
             using(builder.Indent())
             {
@@ -47,7 +47,8 @@ namespace CodeBinder.CLang
                 builder.IndentChild().Append("#define").Space().Append(LIBRARY_SHARED_API).Space().AppendLine("__attribute__ ((visibility (\"default\")))").Close();
                 builder.AppendLine("#endif");
             }
-
+            builder.AppendLine("#endif");
+            builder.AppendLine();
             builder.AppendLine("#else");
             using (builder.Indent())
             {

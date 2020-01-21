@@ -14,7 +14,7 @@ namespace CodeBinder.CLang
         public override void Write(CodeBuilder builder)
         {
             foreach (var module in Compilation.Modules)
-                builder.Append("#include \"C").Append(module.Name).AppendLine(".h\"");
+                builder.Append("#include \"").Append(module.Name).AppendLine(".h\"");
 
             builder.AppendLine();
             builder.AppendLine("static void* funcs[] = {");

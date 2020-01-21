@@ -67,15 +67,25 @@ namespace CodeBinder.CLang
 
         private static string getCLangType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes, ParameterType type, out string suffix)
         {
-            suffix = null;
-            if (symbol.TypeKind == TypeKind.Enum)
+            switch(symbol.TypeKind)
             {
-                var bindingAttr = symbol.GetAttribute<NativeBindingAttribute>();
-                string binded = bindingAttr.GetConstructorArgument<string>(0);
-                if (type == ParameterType.ByRef)
-                    return $"{binded} *";
-                else
-                    return binded;
+                // Handle some special types first
+                case TypeKind.Enum:
+                {
+                    suffix = null;
+                    var bindingAttr = symbol.GetAttribute<NativeBindingAttribute>();
+                    string binded = bindingAttr.GetConstructorArgument<string>(0);
+                    if (type == ParameterType.ByRef)
+                        return $"{binded} *";
+                    else
+                        return binded;
+                }
+                case TypeKind.Delegate:
+                {
+                    suffix = null;
+                    var bindingAttr = symbol.GetAttribute<NativeBindingAttribute>();
+                    return bindingAttr.GetConstructorArgument<string>(0);
+                }
             }
 
             string typeName;
@@ -87,6 +97,7 @@ namespace CodeBinder.CLang
 
                 if (type == ParameterType.Return)
                 {
+                    suffix = null;
                     if (attributes.HasAttribute<ConstAttribute>())
                         constParameter = true;
                 }
@@ -109,6 +120,7 @@ namespace CodeBinder.CLang
             }
             else
             {
+                suffix = null;
                 typeName = symbol.GetFullName();
             }
 
@@ -145,7 +157,7 @@ namespace CodeBinder.CLang
                 case "System.Void":
                     return "void";
                 case "System.String":
-                    if (returnType)
+                    if (!returnType && !attributes.HasAttribute<NonConstAttribute>())
                         constParameter |= true;
 
                     return "char16_t *";

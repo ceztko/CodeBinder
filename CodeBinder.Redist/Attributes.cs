@@ -104,9 +104,21 @@ namespace CodeBinder.Attributes
         public string Replacement { get; private set; }
     }
 
+    /// <summary>
+    /// Set the return value const
+    /// </summary>
     [Conditional(ConditionString)]
     [AttributeUsage(AttributeTargets.ReturnValue)]
     public sealed class ConstAttribute : CodeBinderAttribute
+    {
+    }
+
+    /// <summary>
+    /// Set the parameter non const
+    /// </summary>
+    [Conditional(ConditionString)]
+    [AttributeUsage(AttributeTargets.Parameter)]
+    public sealed class NonConstAttribute : CodeBinderAttribute
     {
     }
 

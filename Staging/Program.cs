@@ -53,7 +53,7 @@ namespace ConsoleApp1
                 {
                     var conv = Converter.CreateFor<ConversionCSharpToCLang>(project);
                     conv.Options.PreprocessorDefinitionsRemoved = new string[] { "CSHARP", "DOTNET", "NET_FRAMEWORK" };
-                    genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfCLang";
+                    genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdf";
                     genargs.EagerStringConversion = true;
                     conv.ConvertAndWrite(genargs);
                 }

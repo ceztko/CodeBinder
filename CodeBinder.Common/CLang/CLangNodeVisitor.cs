@@ -56,7 +56,8 @@ namespace CodeBinder.CLang
                 switch (kind)
                 {
                     case SyntaxKind.MethodDeclaration:
-                        if (module != null && !member.ShouldDiscard(this))
+                        // TODO: Chehck for policies. Fix/extend ShouldDiscard
+                        if (module != null && !member.HasAttribute<NativeIgnoreAttribute>(this))//!member.ShouldDiscard(this))
                         {
                             var method = member as MethodDeclarationSyntax;
                             if (method.IsNative(this))

@@ -27,9 +27,11 @@ namespace CodeBinder.CLang
             writeOpaqueTypes(builder);
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("extern \"C\"");
+            builder.AppendLine("{");
             builder.AppendLine("#endif // __cplusplus");
             writeEnums(builder);
             writeCallbacks(builder);
+            builder.AppendLine();
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("}");
             builder.AppendLine("#endif // __cplusplus");
