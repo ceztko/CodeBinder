@@ -253,6 +253,11 @@ namespace CodeBinder.CLang
             return builder.Append(" ");
         }
 
+        public static CodeBuilder Comma(this CodeBuilder builder)
+        {
+            return builder.Append(",");
+        }
+
         public static CodeBuilder CommaSeparator(this CodeBuilder builder)
         {
             return builder.Append(", ");

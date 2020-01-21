@@ -96,7 +96,7 @@ namespace CodeBinder.CLang
                             bindedItemName = getCLangSplittedIdentifier(tmpbuilder, stem, splitted);
                         }
 
-                        builder.Append(bindedItemName).Space().Append("=").Space().Append(value.ToString()).CommaSeparator().AppendLine();
+                        builder.Append(bindedItemName).Space().Append("=").Space().Append(value.ToString()).Comma().AppendLine();
                     }
 
                     // Add 32 bit maximum value to enforce enum size
