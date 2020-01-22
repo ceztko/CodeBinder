@@ -9,16 +9,12 @@ using CodeBinder.Util;
 
 namespace CodeBinder.JNI
 {
+    [ConversionLanguageName("JNI")]
     public class ConversionCSharpToJNI : LanguageConversion<JNICompilationContext, JNISyntaxTreeContext, JNIModuleContext>
     {
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 
-        public NamespaceMappingTree NamespaceMapping { get; private set; }
-
-        public ConversionCSharpToJNI()
-        {
-            NamespaceMapping = new NamespaceMappingTree();
-        }
+        public ConversionCSharpToJNI() { }
 
         protected override JNICompilationContext createCompilationContext()
         {

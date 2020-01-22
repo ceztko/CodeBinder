@@ -11,6 +11,9 @@ namespace CodeBinder.Util
         LowerCase
     }
 
+    /// <summary>
+    /// Structure where to efficiently store namespace mappings
+    /// </summary>
     public class NamespaceMappingTree
     {
         Node m_root;

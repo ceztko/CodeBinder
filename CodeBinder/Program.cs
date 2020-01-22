@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CodeBinder.Java;
 using CodeBinder;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
-using CodeBinder.JNI;
 using Mono.Options;
-using CodeBinder.Util;
+using System.Reflection;
+using System.IO;
+using CodeBinder.CLang;
+using CodeBinder.Shared;
 
 namespace CodeBinder
 {
@@ -38,7 +39,7 @@ namespace CodeBinder
             return 0;
         }
 
-        static void main(string[] args)
+        static void main(string[] cmdArgs)
         {
             string projectPath = null;
             string solutionPath = null;
@@ -59,7 +60,7 @@ namespace CodeBinder
                 { "h|help", "Show this message and exit", h => shouldShowHelp = h != null },
             };
 
-            List<string> extra = options.Parse(args);
+            List<string> extra = options.Parse(cmdArgs);
             if (shouldShowHelp)
             {
                 ShowHelp(options);
@@ -75,69 +76,51 @@ namespace CodeBinder
             if (targetRootPath == null)
                 throw new Exception("A target root path must be specified");
 
+            var conversions = GetConverterInfos();
+
             MSBuildLocator.RegisterDefaults();
             MSBuildWorkspace workspace = MSBuildWorkspace.Create();
 
-            Project project = null;
-            Solution solution = null;
+            object item = null;
             if (projectPath != null)
-                project = workspace.OpenProjectAsync(projectPath).Result;
+            {
+                item = workspace.OpenProjectAsync(projectPath).Result;
+            }
             else if (solutionPath != null)
-                solution = workspace.OpenSolutionAsync(solutionPath).Result;
-            else
-                throw new Exception();
-
-            Converter<ConversionCSharpToJava> javaConversion = null;
-            Converter<ConversionCSharpToJNI> jniConversion = null;
-            switch (language)
             {
-                case "Java":
-                {
-                    if (project != null)
-                        javaConversion = Converter.CreateFor<ConversionCSharpToJava>(project);
-                    else if (solution != null)
-                        javaConversion = Converter.CreateFor<ConversionCSharpToJava>(solution);
-                    else
-                        throw new Exception();
-                    break;
-                }
-                case "JNI":
-                {
-                    if (project != null)
-                        jniConversion = Converter.CreateFor<ConversionCSharpToJNI>(project);
-                    else if (solution != null)
-                        jniConversion = Converter.CreateFor<ConversionCSharpToJNI>(solution);
-                    else
-                        throw new Exception();
-                    break;
-                }
-                default:
-                    throw new Exception("Target language is missing or unsupported");
-            }
-
-            Converter converter;
-            NamespaceMappingTree nsmappings;
-            if (javaConversion != null)
-            {
-
-                nsmappings = javaConversion.Conversion.NamespaceMapping;
-                converter = javaConversion;
-            }
-            else if (jniConversion != null)
-            {
-                nsmappings = jniConversion.Conversion.NamespaceMapping;
-                converter = jniConversion;
+                item = workspace.OpenSolutionAsync(solutionPath).Result;
             }
             else
                 throw new Exception();
 
+            ConversionInfo conversionInfo;
+            try
+            {
+                conversionInfo = conversions.First((info) => language == info.LanguageName);
+            }
+            catch
+            {
+                throw new Exception("Target language is missing or unsupported");
+            }
+
+            // Find all Converter.CreateFor methods
+            var createForMEthods = (from method in typeof(Converter).GetMethods() where method.Name == nameof(Converter.CreateFor) select method).ToArray();
+
+            // Bind the CreateFor methods with the provided item
+            var arguments = new object[] { item };
+            var createFor = (MethodInfo)Type.DefaultBinder.BindToMethod(BindingFlags.Public | BindingFlags.Static, createForMEthods, ref arguments, null, null, null, out var state);
+
+            // Istantiate the generic method with the desired conversion type
+            Converter converter = (Converter)createFor.MakeGenericMethod(conversionInfo.Type).Invoke(null, arguments);
+
+            // Set the namespace mappings in the conversion
             foreach (var nsmapping in namespaceMappings)
             {
                 var splitted = nsmapping.Split(':');
                 if (splitted.Length != 2)
                     throw new Exception("Mapping must be in the form ns:mappens");
 
-                nsmappings.PushMapping(splitted[0], splitted[1]);
+                converter.Conversion.NamespaceMapping.PushMapping(splitted[0], splitted[1]);
             }
 
             converter.Options.PreprocessorDefinitionsAdded = definitionsToAdd;
@@ -148,12 +131,58 @@ namespace CodeBinder
             converter.ConvertAndWrite(genargs);
         }
 
-        static void ShowHelp(OptionSet p)
+        static IReadOnlyList<ConversionInfo> GetConverterInfos()
+        {
+            var exclusionList = new string[] { "CodeBinder.Common.dll", "CodeBinder.Redist.dll" };
+
+            var types = new List<ConversionInfo>();
+            string exepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            foreach (var dllpath in Directory.GetFiles(exepath, "CodeBinder.*.dll"))
+            {
+                string filename = Path.GetFileName(dllpath);
+                if (exclusionList.Contains(filename))
+                    continue;
+
+                Assembly assembly;
+                try
+                {
+                    assembly = Assembly.LoadFile(dllpath);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                foreach (var type in assembly.GetTypes())
+                {
+                    CustomAttributeData attr = null;
+                    if (!type.IsSubclassOf(typeof(LanguageConversion)) ||
+                        (attr = type.CustomAttributes.First((data) => { return data.AttributeType == typeof(ConversionLanguageName); })) == null)
+                    {
+                        continue;
+                    }
+
+                    types.Add(new ConversionInfo() { Type = type, LanguageName = (string)attr.ConstructorArguments[0].Value });
+                }
+            }
+
+            // Add default 
+            types.Add(new ConversionInfo() { Type = typeof(ConversionCSharpToCLang), LanguageName = ConversionCSharpToCLang.LanguageName });
+            return types;
+        }
+
+        struct ConversionInfo
+        {
+            public Type Type;
+            public string LanguageName;
+        }
+
+        static void ShowHelp(OptionSet options)
         {
             Console.WriteLine("Usage: CodeBinder [OPTIONS]");
             Console.WriteLine();
             Console.WriteLine("Options:");
-            p.WriteOptionDescriptions(Console.Out);
+            options.WriteOptionDescriptions(Console.Out);
         }
     }
 }

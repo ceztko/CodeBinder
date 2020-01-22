@@ -10,11 +10,10 @@ using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.Java
 {
+    [ConversionLanguageName("Java")]
     public class ConversionCSharpToJava : CSharpLanguageConversion
     {
         internal const string CodeBinderNamespace = "CodeBinder";
-
-        public NamespaceMappingTree NamespaceMapping { get; private set; }
 
         public bool SkipBody { get; set; }
 
@@ -24,7 +23,6 @@ namespace CodeBinder.Java
 
         public ConversionCSharpToJava()
         {
-            NamespaceMapping = new NamespaceMappingTree();
             MethodsLowerCase = true;
         }
 

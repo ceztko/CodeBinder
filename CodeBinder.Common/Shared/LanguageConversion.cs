@@ -11,7 +11,15 @@ namespace CodeBinder.Shared
 {
     public abstract class LanguageConversion
     {
-        internal LanguageConversion() { }
+        internal LanguageConversion()
+        {
+            NamespaceMapping = new NamespaceMappingTree();
+        }
+
+        /// <summary>
+        /// Namespace mapping store
+        /// </summary>
+        public NamespaceMappingTree NamespaceMapping { get; private set; }
 
         public virtual IEnumerable<IConversionBuilder> DefaultConversions
         {
