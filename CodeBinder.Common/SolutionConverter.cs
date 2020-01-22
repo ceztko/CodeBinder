@@ -27,7 +27,7 @@ namespace CodeBinder
             _progress = showProgressMessage ?? new Progress<string>();
         }
 
-        internal protected override IEnumerable<ConversionDelegate> Convert()
+        internal protected override IEnumerable<ConversionDelegate> GetConversionDelegates()
         {
             return _projectsToConvert.SelectMany(project => ConvertProject(project));
         }
@@ -35,7 +35,7 @@ namespace CodeBinder
         private IEnumerable<ConversionDelegate> ConvertProject(Project project)
         {
             _progress.Report($"Converting {project.Name}, this may take a some time...");
-            return new ProjectConverter<LanguageConversion>(project, Conversion).Convert();
+            return new ProjectConverter<LanguageConversion>(project, Conversion).GetConversionDelegates();
         }
     }
 }

@@ -68,7 +68,7 @@ namespace CodeBinder
 
         public void ConvertAndWrite(GeneratorOptions args)
         {
-            foreach (var conversion in Convert().Concat(Conversion.DefaultConversionDelegates))
+            foreach (var conversion in GetConversionDelegates().Concat(Conversion.DefaultConversionDelegates))
             {
                 var targetBasePath = conversion.TargetBasePath ?? "";
                 targetBasePath = targetBasePath.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
@@ -96,7 +96,10 @@ namespace CodeBinder
 
         protected abstract LanguageConversion GetConversion();
 
-        internal protected abstract IEnumerable<ConversionDelegate> Convert();
+        /// <summary>
+        /// Get delegates to be iterated to write conversions
+        /// </summary>
+        internal protected abstract IEnumerable<ConversionDelegate> GetConversionDelegates();
     }
 
     public abstract class Converter<TConversion> : Converter

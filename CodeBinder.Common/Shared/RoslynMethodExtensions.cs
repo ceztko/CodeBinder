@@ -302,6 +302,9 @@ namespace CodeBinder.Shared
             return provider.Compilation.GetSemanticModel(tree);
         }
 
+        /// <summary>
+        /// Get namespace qualified name
+        /// </summary>
         // Other implementations:
         // * https://github.com/GuOrg/Gu.Roslyn.Extensions/blob/master/Gu.Roslyn.AnalyzerExtensions/Symbols/INamedTypeSymbolExtensions.cs
         // * https://stackoverflow.com/a/27106959/213871
@@ -311,10 +314,61 @@ namespace CodeBinder.Shared
             return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.FullnameFormat);
         }
 
-        /// <summary>No namespace</summary>
+        /// <summary>
+        /// Get no namespace qualified name
+        /// </summary>
         public static string GetQualifiedName(this ISymbol symbol)
         {
             return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.QualifiedFormat);
+        }
+
+        // From https://stackoverflow.com/a/23308759/213871
+        // Feature Request in roslyn https://github.com/dotnet/roslyn/issues/1891
+        /// <summary>
+        /// Get CLR Metadata type name that can be used with Type.GetType(name)
+        /// </summary>
+        public static string GetAssemblyQualifiedName(this ITypeSymbol symbol)
+        {
+            return symbol.ContainingNamespace
+                + "." + symbol.Name
+                + ", " + symbol.ContainingAssembly;
+        }
+
+        /// <summary>
+        /// Construct an attribute from AttributeData
+        /// </summary>
+        public static TAttrib Construct<TAttrib>(this AttributeData data)
+            where TAttrib : Attribute
+        {
+            Type[] types = new Type[data.ConstructorArguments.Length];
+            object[] objects = new object[data.ConstructorArguments.Length];
+            for (int i = 0; i < data.ConstructorArguments.Length; i++)
+            {
+                var arg = data.ConstructorArguments[i];
+                types[i] = Type.GetType(arg.Type.GetAssemblyQualifiedName());
+                objects[i] = arg.Value;
+            }
+
+            var attrib = (TAttrib)typeof(TAttrib).GetConstructor(types).Invoke(objects);
+            for (int i = 0; i < data.NamedArguments.Length; i++)
+            {
+                var arg = data.NamedArguments[i];
+                var property = typeof(TAttrib).GetProperty(arg.Key);
+                if (property == null)
+                {
+                    var field = typeof(TAttrib).GetField(arg.Key);
+                    if (field == null)
+                        throw new Exception($"Missing property or field with name {arg.Key}");
+
+                    field.SetValue(attrib, arg.Value.Value);
+                }
+                else
+                {
+                    property.SetValue(attrib, arg.Value.Value);
+                }
+            }
+
+            return attrib;
         }
     }
 }

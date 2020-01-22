@@ -26,7 +26,7 @@ namespace CodeBinder
             _project = project;
         }
 
-        internal protected override IEnumerable<ConversionDelegate> Convert()
+        internal protected override IEnumerable<ConversionDelegate> GetConversionDelegates()
         {
             // Add some language specific preprocessor options
             var options = _project.ParseOptions as CSharpParseOptions;
