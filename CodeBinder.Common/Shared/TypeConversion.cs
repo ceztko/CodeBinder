@@ -50,7 +50,7 @@ namespace CodeBinder.Shared
         internal TypeConversion() { }
 
         // FIXME: Find a way to make it internal again, look JNI JNIModuleContextParent
-        public new TTypeContext Context { get; /* internal */ set; }
+        public new TTypeContext Context { get; /* internal */ set; } = null!;
 
         protected override TypeContext GetContext()
         {

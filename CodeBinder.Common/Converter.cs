@@ -13,17 +13,17 @@ namespace CodeBinder
     public class ConverterOptions
     {
         /// <summary>Plaform specific preprocessor symbols that will be added during compilation</summary>
-        public IReadOnlyList<string> PreprocessorDefinitionsAdded { get; set; }
+        public IReadOnlyList<string>? PreprocessorDefinitionsAdded { get; set; }
 
         /// <summary>Preprocessor symbols that will be be removed during compilation</summary>
-        public IReadOnlyList<string> PreprocessorDefinitionsRemoved { get; set; }
+        public IReadOnlyList<string>? PreprocessorDefinitionsRemoved { get; set; }
 
         public bool IgnoreCompilationErrors { get; set; }
     }
 
     public class GeneratorOptions
     {
-        public string SourceRootPath;
+        public string? TargetRootPath;
         /// <summary>Create string before writing to file. For DEBUG</summary>
         public bool EagerStringConversion;
     }
@@ -37,27 +37,27 @@ namespace CodeBinder
             Options = new ConverterOptions();
         }
 
-        public static ProjectConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Project project, IProgress<string> progress = null)
+        public static ProjectConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Project project, IProgress<string>? progress = null)
             where TLanguageConversion : LanguageConversion, new()
         {
             return new ProjectConverter<TLanguageConversion>(project, new TLanguageConversion());
         }
 
-        public static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Solution solution, IProgress<string> progress = null)
+        public static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Solution solution, IProgress<string>? progress = null)
             where TLanguageConversion : LanguageConversion, new()
         {
             return CreateFor<TLanguageConversion>(solution, solution.Projects, progress);
         }
 
         public static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(IEnumerable<Project> projectsToConvert,
-            IProgress<string> progress = null)
+            IProgress<string>? progress = null)
             where TLanguageConversion : LanguageConversion, new()
         {
             return CreateFor<TLanguageConversion>(null, projectsToConvert, progress);
         }
 
-        private static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Solution solution,
-            IEnumerable<Project> projectsToConvert, IProgress<string> progress)
+        private static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Solution? solution,
+            IEnumerable<Project> projectsToConvert, IProgress<string>? progress)
             where TLanguageConversion : LanguageConversion, new()
         {
             if (solution == null)
@@ -68,11 +68,14 @@ namespace CodeBinder
 
         public void ConvertAndWrite(GeneratorOptions args)
         {
+            if (args.TargetRootPath == null)
+                throw new ArgumentNullException("args.TargtetRootPath");
+
             foreach (var conversion in GetConversionDelegates().Concat(Conversion.DefaultConversionDelegates))
             {
                 var targetBasePath = conversion.TargetBasePath ?? "";
                 targetBasePath = targetBasePath.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
-                var basepath = Path.Combine(args.SourceRootPath, targetBasePath);
+                var basepath = Path.Combine(args.TargetRootPath, targetBasePath);
                 Directory.CreateDirectory(basepath);
                 var filepath = Path.Combine(basepath, conversion.TargetFileName);
                 if (args.EagerStringConversion)

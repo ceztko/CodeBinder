@@ -14,8 +14,6 @@ namespace CodeBinder.Shared
             get { return GetCompilationContext(); }
         }
 
-        public SyntaxTree SyntaxTree { get; private set; }
-
         internal SyntaxTreeContext() { }
 
         public abstract void Visit(SyntaxTree node);

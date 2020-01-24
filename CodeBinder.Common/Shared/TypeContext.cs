@@ -39,7 +39,7 @@ namespace CodeBinder.Shared
     {
         private List<TTypeContext> _Children;
 
-        public TTypeContext Parent { get; internal set; }
+        public TTypeContext? Parent { get; internal set; }
 
         internal TypeContext()
         {

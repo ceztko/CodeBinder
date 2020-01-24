@@ -3,6 +3,7 @@ using CodeBinder.Util;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace CodeBinder.Util
@@ -12,14 +13,16 @@ namespace CodeBinder.Util
     /// </summary>
     public abstract class CodeWriter
     {
-        protected CodeBuilder Builder { get; private set; }
+        CodeBuilder? _builder;
+
+        protected CodeBuilder Builder => _builder ?? throw new Exception($"Can't use {nameof(Builder)} right now");
 
         // Append an ISyntaxWriter with CodeBuilder
         internal void Write(CodeBuilder builder)
         {
-            Builder = builder;
+            _builder = builder;
             Write();
-            Builder = null;
+            _builder = null;
         }
 
         public static CodeWriter Create(Action<CodeBuilder> action)

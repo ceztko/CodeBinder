@@ -11,7 +11,7 @@ namespace CodeBinder.Util
 {
     internal static class CompilationOuput
     {
-        public static string ErrorsForCompilation(Compilation compilation, string compilationDescription)
+        public static string? ErrorsForCompilation(Compilation compilation, string compilationDescription)
         {
             var targetErrors = GetDiagnostics(compilation);
             return targetErrors.Any()

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CodeBinder.Shared;
-using CodeBinder.CLang.Resources;
+
 using CodeBinder.Util;
 
 namespace CodeBinder.CLang

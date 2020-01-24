@@ -41,10 +41,10 @@ namespace CodeBinder
 
         static void main(string[] cmdArgs)
         {
-            string projectPath = null;
-            string solutionPath = null;
-            string targetRootPath = null;
-            string language = null;
+            string? projectPath = null;
+            string? solutionPath = null;
+            string? targetRootPath = null;
+            string? language = null;
             var definitionsToAdd = new List<string>();
             var definitionsToRemove = new List<string>();
             var namespaceMappings = new List<string>();
@@ -81,7 +81,7 @@ namespace CodeBinder
             MSBuildLocator.RegisterDefaults();
             MSBuildWorkspace workspace = MSBuildWorkspace.Create();
 
-            object item = null;
+            object item;
             if (projectPath != null)
             {
                 item = workspace.OpenProjectAsync(projectPath).Result;
@@ -107,11 +107,11 @@ namespace CodeBinder
             var createForMEthods = (from method in typeof(Converter).GetMethods() where method.Name == nameof(Converter.CreateFor) select method).ToArray();
 
             // Bind the CreateFor methods with the provided item
-            var arguments = new object[] { item };
+            var arguments = new object?[] { item };
             var createFor = (MethodInfo)Type.DefaultBinder.BindToMethod(BindingFlags.Public | BindingFlags.Static, createForMEthods, ref arguments, null, null, null, out var state);
 
             // Istantiate the generic method with the desired conversion type
-            Converter converter = (Converter)createFor.MakeGenericMethod(conversionInfo.Type).Invoke(null, arguments);
+            Converter converter = (Converter)createFor.MakeGenericMethod(conversionInfo.Type).Invoke(null, arguments)!;
 
             // Set the namespace mappings in the conversion
             foreach (var nsmapping in namespaceMappings)
@@ -127,7 +127,7 @@ namespace CodeBinder
             converter.Options.PreprocessorDefinitionsRemoved = definitionsToRemove;
 
             GeneratorOptions genargs = new GeneratorOptions();
-            genargs.SourceRootPath = targetRootPath;
+            genargs.TargetRootPath = targetRootPath;
             converter.ConvertAndWrite(genargs);
         }
 
@@ -136,7 +136,7 @@ namespace CodeBinder
             var exclusionList = new string[] { "CodeBinder.Common.dll", "CodeBinder.Redist.dll" };
 
             var types = new List<ConversionInfo>();
-            string exepath = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            string exepath = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
             foreach (var dllpath in Directory.GetFiles(exepath, "CodeBinder.*.dll"))
             {
                 string filename = Path.GetFileName(dllpath);
@@ -155,14 +155,14 @@ namespace CodeBinder
 
                 foreach (var type in assembly.GetTypes())
                 {
-                    CustomAttributeData attr = null;
+                    CustomAttributeData? attr = null;
                     if (!type.IsSubclassOf(typeof(LanguageConversion)) ||
                         (attr = type.CustomAttributes.First((data) => { return data.AttributeType == typeof(ConversionLanguageName); })) == null)
                     {
                         continue;
                     }
 
-                    types.Add(new ConversionInfo() { Type = type, LanguageName = (string)attr.ConstructorArguments[0].Value });
+                    types.Add(new ConversionInfo() { Type = type, LanguageName = (string)attr.ConstructorArguments[0].Value! });
                 }
             }
 

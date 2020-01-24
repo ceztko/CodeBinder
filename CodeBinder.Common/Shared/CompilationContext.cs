@@ -10,7 +10,7 @@ namespace CodeBinder.Shared
     public abstract class CompilationContext : ICompilationContextProvider
     {
         private Dictionary<SyntaxTree, SemanticModel> _modelCache;
-        private Compilation _compilation;
+        private Compilation _compilation = null!;
 
         internal CompilationContext()
         {
@@ -23,11 +23,11 @@ namespace CodeBinder.Shared
             CompilationSet?.Invoke(this, EventArgs.Empty);
         }
 
-        public event EventHandler CompilationSet;
+        public event EventHandler? CompilationSet;
 
         public SemanticModel GetSemanticModel(SyntaxTree tree)
         {
-            SemanticModel model;
+            SemanticModel? model;
             if (!_modelCache.TryGetValue(tree, out model))
             {
                 model = Compilation.GetSemanticModel(tree, true);
@@ -82,7 +82,7 @@ namespace CodeBinder.Shared
             _rootTypes = new List<TTypeContext>();
         }
 
-        protected void AddType(TTypeContext type, TTypeContext parent)
+        protected void AddType(TTypeContext type, TTypeContext? parent)
         {
             if (type.Parent != null)
                 throw new Exception("Can't re-add root type");
@@ -122,7 +122,7 @@ namespace CodeBinder.Shared
                 _rootTypes = new List<TTypeContext>();
             }
 
-            protected void AddType(TTypeContext type, TTypeContext parent)
+            protected void AddType(TTypeContext type, TTypeContext? parent)
             {
                 if (type.Parent != null)
                     throw new Exception("Can't re-add root type");

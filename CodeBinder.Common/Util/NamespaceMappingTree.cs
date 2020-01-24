@@ -16,7 +16,7 @@ namespace CodeBinder.Util
     /// </summary>
     public class NamespaceMappingTree
     {
-        Node m_root;
+        Node? m_root;
 
         public NamespaceMappingTree() { }
 
@@ -33,12 +33,13 @@ namespace CodeBinder.Util
             node.MappedNamespace = mappedns;
         }
 
-        public string GetMappedNamespace(string refns,
+        public string? GetMappedNamespace(string refns,
             NamespaceNormalization leftOverNorm = NamespaceNormalization.None)
         {
-            string ret = GetMappedNamespace(refns, out string leftoverns);
+            string? ret = GetMappedNamespace(refns, out string? leftoverns);
             if (leftoverns == null)
                 return ret;
+
             switch (leftOverNorm)
             {
                 case NamespaceNormalization.None:
@@ -50,7 +51,7 @@ namespace CodeBinder.Util
             }
         }
 
-        public string GetMappedNamespace(string refns, out string leftoverns)
+        public string? GetMappedNamespace(string refns, out string? leftoverns)
         {
             var splitted = refns.Split('.');
             if (m_root == null)
@@ -60,11 +61,11 @@ namespace CodeBinder.Util
             int i = 0;
             for (; i < splitted.Length; i++)
             {
-                Node found;
+                Node? found;
                 if (!node.TryGetChildren(splitted[i], out found))
                     break;
 
-                node = found;
+                node = found!;
             }
 
             if (i != 0)
@@ -82,7 +83,7 @@ namespace CodeBinder.Util
             return null;
         }
 
-        string getSubNamespace(string[] splitted, int index, int npos = -1)
+        string? getSubNamespace(string[] splitted, int index, int npos = -1)
         {
             if (npos == 0 || index >= splitted.Length)
                 return null;
@@ -102,7 +103,7 @@ namespace CodeBinder.Util
 
         class Node
         {
-            Dictionary<string, Node> m_children;
+            Dictionary<string, Node>? m_children;
 
             public Node()
             {
@@ -110,7 +111,7 @@ namespace CodeBinder.Util
                 FullNamespace = null;
             }
 
-            public Node(string parentns, string nspart)
+            public Node(string? parentns, string nspart)
             {
                 Namespace = nspart;
                 if (parentns == null)
@@ -119,7 +120,7 @@ namespace CodeBinder.Util
                     FullNamespace = parentns + "." + nspart;
             }
 
-            public bool TryGetChildren(string nspart, out Node node)
+            public bool TryGetChildren(string nspart, out Node? node)
             {
                 if (m_children == null)
                 {
@@ -135,7 +136,7 @@ namespace CodeBinder.Util
                 if (m_children == null)
                     m_children = new Dictionary<string, Node>();
 
-                Node ret;
+                Node? ret;
                 if (!m_children.TryGetValue(nspart, out ret))
                 {
                     ret = new Node(FullNamespace, nspart);
@@ -145,9 +146,9 @@ namespace CodeBinder.Util
                 return ret;
             }
 
-            public string Namespace { get; private set; }
-            public string FullNamespace { get; private set; }
-            public string MappedNamespace { get; set; }
+            public string? Namespace { get; private set; }
+            public string? FullNamespace { get; private set; }
+            public string? MappedNamespace { get; set; }
         }
     }
 }

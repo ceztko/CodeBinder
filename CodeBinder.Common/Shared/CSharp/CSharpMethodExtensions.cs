@@ -11,12 +11,13 @@ using System.Runtime.InteropServices;
 using CodeBinder.Attributes;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.Shared.CSharp
 {
     public static class CSharpMethodExtensions
     {
-        static Regex _splitCamelCase;
+        static Regex? _splitCamelCase;
 
         public static string GetContainingNamespace(this BaseTypeDeclarationSyntax node, ICompilationContextProvider provider)
         {
@@ -30,13 +31,13 @@ namespace CodeBinder.Shared.CSharp
             return symbol.ContainingNamespace.GetFullName();
         }
 
-        public static MethodDeclarationSyntax GetDeclarationSyntax(this IMethodSymbol method)
+        public static MethodDeclarationSyntax? GetDeclarationSyntax(this IMethodSymbol method)
         {
             foreach (var reference in method.DeclaringSyntaxReferences)
             {
                 var syntax = reference.GetSyntax();
                 if (syntax.Kind() == SyntaxKind.MethodDeclaration)
-                    return syntax as MethodDeclarationSyntax;
+                    return (MethodDeclarationSyntax)syntax;
             }
 
             return null;
@@ -57,7 +58,7 @@ namespace CodeBinder.Shared.CSharp
                 if (syntax.Kind() != SyntaxKind.MethodDeclaration)
                     continue;
 
-                var node = syntax as MethodDeclarationSyntax;
+                var node = (MethodDeclarationSyntax)syntax;
                 if (!node.Modifiers.Any(SyntaxKind.PartialKeyword))
                 {
                     hasEmptyBody = false;
@@ -90,7 +91,7 @@ namespace CodeBinder.Shared.CSharp
             throw new Exception("Unsupported expression kind");
         }
 
-        public static bool IsExpression<TExpression>(this SyntaxNode node, out TExpression expression)
+        public static bool IsExpression<TExpression>(this SyntaxNode node, out TExpression? expression)
             where TExpression : ExpressionSyntax
         {
             ExpressionKind kind;
@@ -100,7 +101,7 @@ namespace CodeBinder.Shared.CSharp
                 return false;
             }
 
-            expression = node as TExpression;
+            expression = (TExpression)node;
             return true;
         }
 
@@ -411,7 +412,7 @@ namespace CodeBinder.Shared.CSharp
             throw new Exception("Unsupported statement kind");
         }
 
-        public static bool IsStatement<TStatement>(this SyntaxNode node, out TStatement statement)
+        public static bool IsStatement<TStatement>(this SyntaxNode node, out TStatement? statement)
             where TStatement : StatementSyntax
         {
             StatementKind kind;
@@ -421,7 +422,7 @@ namespace CodeBinder.Shared.CSharp
                 return false;
             }
 
-            statement = node as TStatement;
+            statement = (TStatement)node;
             return true;
         }
 
@@ -600,6 +601,12 @@ namespace CodeBinder.Shared.CSharp
             return symbol.GetQualifiedName();
         }
 
+        public static ITypeSymbol GetTypeSymbol(this TypeSyntax node, ICompilationContextProvider provider)
+        {
+            var info = node.GetTypeInfo(provider);
+            return info.ConvertedType!;
+        }
+
         public static CSharpTypeParameters GetTypeParameters(this MethodDeclarationSyntax syntax, ICompilationContextProvider provider)
         {
             var symbol = syntax.GetDeclaredSymbol<IMethodSymbol>(provider);
@@ -608,15 +615,15 @@ namespace CodeBinder.Shared.CSharp
                 // Java requires all constraints to be written as well
                 Debug.Assert(symbol.OverriddenMethod.DeclaringSyntaxReferences.Length == 1);
                 var parentDeclaration = (MethodDeclarationSyntax)symbol.OverriddenMethod.DeclaringSyntaxReferences[0].GetSyntax();
-                return mergeTypeConstraint(syntax.TypeParameterList.Parameters, parentDeclaration.ConstraintClauses);
+                return mergeTypeConstraint(syntax.TypeParameterList!.Parameters, parentDeclaration.ConstraintClauses);
             }
 
-            return mergeTypeConstraint(syntax.TypeParameterList.Parameters, syntax.ConstraintClauses);
+            return mergeTypeConstraint(syntax.TypeParameterList!.Parameters, syntax.ConstraintClauses);
         }
 
         public static CSharpTypeParameters GetTypeParameters(this TypeDeclarationSyntax syntax)
         {
-            return mergeTypeConstraint(syntax.TypeParameterList.Parameters, syntax.ConstraintClauses);
+            return mergeTypeConstraint(syntax.TypeParameterList!.Parameters, syntax.ConstraintClauses);
         }
 
         private static CSharpTypeParameters mergeTypeConstraint(
@@ -669,7 +676,7 @@ namespace CodeBinder.Shared.CSharp
         }
 
 
-        public static bool TryGetAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider, out AttributeData data)
+        public static bool TryGetAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)] out AttributeData? data)
             where TAttribute : Attribute
         {
             var symbol = GetDefaultDeclarationSymbol(node, provider);
@@ -685,18 +692,18 @@ namespace CodeBinder.Shared.CSharp
         public static AttributeData GetAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider)
             where TAttribute : Attribute
         {
-            AttributeData ret;
+            AttributeData? ret;
             if (!TryGetAttribute<TAttribute>(node, provider, out ret))
                 throw new Exception($"Missing attribute {typeof(TAttribute).Name}");
 
-            return ret;
+            return ret!;
         }
 
         private static ISymbol GetDefaultDeclarationSymbol(SyntaxNode node, ICompilationContextProvider provider)
         {
             if (node.IsKind(SyntaxKind.FieldDeclaration))
             {
-                var field = node as FieldDeclarationSyntax;
+                var field = (FieldDeclarationSyntax)node;
                 Debug.Assert(field.Declaration.Variables.Count == 1);
                 return field.Declaration.Variables[0].GetDeclaredSymbol(provider);
             }
@@ -718,7 +725,7 @@ namespace CodeBinder.Shared.CSharp
 
         public static long GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider context)
         {
-            var symbol = node.GetDeclaredSymbol(context) as IFieldSymbol;
+            var symbol = (IFieldSymbol)node.GetDeclaredSymbol(context);
             return Convert.ToInt64(symbol.ConstantValue);
         }
 

@@ -27,7 +27,7 @@ namespace ConsoleApp1
             //Project project = await workspace.OpenProjectAsync(@"D:\Staging\Euronovate\CodeBinderInternal\Test\SimpleLibrary\SimpleLibrary.csproj");
             //Project project = await workspace.OpenProjectAsync(@"D:\Staging\Euronovate\CodeBinderInternal\Test\ENLibPdfNetLite.csproj");
             Project project = await workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj");
-            genargs.SourceRootPath = @"D:\Staging\Euronovate\CodeBinderInternal\Test\";
+            genargs.TargetRootPath = @"D:\Staging\Euronovate\CodeBinderInternal\Test\";
 
             if (false)
             {
@@ -44,26 +44,25 @@ namespace ConsoleApp1
 
                 // Android
                 conv.Options.PreprocessorDefinitionsAdded = new string[] { "ANDROID" };
-                genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\android\java";
+                genargs.TargetRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\android\java";
                 conv.ConvertAndWrite(genargs);
             }
             else
             {
-                if (true)
                 {
+                    // CLang covnersion
                     var conv = Converter.CreateFor<ConversionCSharpToCLang>(project);
                     conv.Options.PreprocessorDefinitionsRemoved = new string[] { "CSHARP", "DOTNET", "NET_FRAMEWORK" };
-                    genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdf";
+                    genargs.TargetRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdf";
                     genargs.EagerStringConversion = true;
                     conv.ConvertAndWrite(genargs);
                 }
-                else
                 {
                     // JNI conversion
                     var conv = Converter.CreateFor<ConversionCSharpToJNI>(project);
                     conv.Options.PreprocessorDefinitionsRemoved = new string[] { "CSHARP", "DOTNET", "NET_FRAMEWORK" };
                     conv.Conversion.NamespaceMapping.PushMapping("Euronovate.LibPdf", "com.euronovate.libpdf");
-                    genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJni";
+                    genargs.TargetRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJni";
                     genargs.EagerStringConversion = true;
                     conv.ConvertAndWrite(genargs);
                 }

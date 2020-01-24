@@ -14,7 +14,7 @@ namespace CodeBinder.Shared.CSharp
     {
         private Stack<CSharpBaseTypeContext> _parents;
 
-        public CSharpBaseTypeContext CurrentParent
+        public CSharpBaseTypeContext? CurrentParent
         {
             get
             {
@@ -35,7 +35,7 @@ namespace CodeBinder.Shared.CSharp
             }
         }
 
-        private void Unsupported(SyntaxNode node, string message = null)
+        private void Unsupported(SyntaxNode node, string? message = null)
         {
             if (message == null)
                 throw new Exception("Unsupported node: " + node);
@@ -207,7 +207,7 @@ namespace CodeBinder.Shared.CSharp
                 {
                     case SymbolKind.Parameter:
                     {
-                        var parameter = leftSymbol as IParameterSymbol;
+                        var parameter = (IParameterSymbol)leftSymbol;
                         if (parameter.Type.TypeKind == TypeKind.Struct
                                 && parameter.RefKind != RefKind.None
                                 && !parameter.Type.IsCLRPrimitiveType())
@@ -246,14 +246,14 @@ namespace CodeBinder.Shared.CSharp
                 if (!arg.RefKindKeyword.IsNone())
                 {
                     var argSymbol = arg.Expression.GetSymbol(this);
-                    ITypeSymbol argType = null;
-                    switch (argSymbol.Kind)
+                    ITypeSymbol argType = null!;
+                    switch (argSymbol!.Kind)
                     {
                         case SymbolKind.Local:
-                            argType = (argSymbol as ILocalSymbol).Type;
+                            argType = (argSymbol as ILocalSymbol)!.Type;
                             break;
                         case SymbolKind.Parameter:
-                            argType = (argSymbol as IParameterSymbol).Type;
+                            argType = (argSymbol as IParameterSymbol)!.Type;
                             break;
                         default:
                             Unsupported(node, "ref like keyword keyword in non local/parameter expression");
@@ -384,7 +384,7 @@ namespace CodeBinder.Shared.CSharp
         public override void VisitIdentifierName(IdentifierNameSyntax node)
         {
             var symbol = node.GetSymbol(this);
-            switch (symbol.Kind)
+            switch (symbol!.Kind)
             {
                 case SymbolKind.DynamicType:
                     Unsupported(node, "Dynamic type specifier");
@@ -527,14 +527,13 @@ namespace CodeBinder.Shared.CSharp
             isPartial = type.Modifiers.Any(SyntaxKind.PartialKeyword);
             if (isPartial)
             {
-                Debug.Assert(type.Parent != null);
                 var parentKind = type.Parent.Kind();
                 switch (parentKind)
                 {
                     case SyntaxKind.ClassDeclaration:
                     case SyntaxKind.InterfaceDeclaration:
                     case SyntaxKind.StructDeclaration:
-                        var parentType = type.Parent as TypeDeclarationSyntax;
+                        var parentType = (TypeDeclarationSyntax)type.Parent;
                         if (!parentType.Modifiers.Any(SyntaxKind.PartialKeyword))
                             Unsupported(type, "Nested partial types must have partial parent");
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace CodeBinder.Shared.CSharp
@@ -19,7 +20,7 @@ namespace CodeBinder.Shared.CSharp
             return new CSharpSyntaxTreeContext(this);
         }
 
-        public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpTypeContext type, CSharpBaseTypeContext parent)
+        public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpTypeContext type, CSharpBaseTypeContext? parent)
         {
             if (_partialTypes.TryGetValue(qualifiedName, out var partialType))
             {
@@ -33,7 +34,7 @@ namespace CodeBinder.Shared.CSharp
             }
         }
 
-        public bool TryGetPartialType(string qualifiedName, out CSharpTypeContext partialType)
+        public bool TryGetPartialType(string qualifiedName, [NotNullWhen(true)]out CSharpTypeContext? partialType)
         {
             return _partialTypes.TryGetValue(qualifiedName, out partialType);
         }

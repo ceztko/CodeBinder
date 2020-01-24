@@ -29,7 +29,7 @@ namespace CodeBinder
         internal protected override IEnumerable<ConversionDelegate> GetConversionDelegates()
         {
             // Add some language specific preprocessor options
-            var options = _project.ParseOptions as CSharpParseOptions;
+            var options = (CSharpParseOptions)_project.ParseOptions!;
             var preprocessorSymbols = options.PreprocessorSymbolNames;
             if (Options.PreprocessorDefinitionsRemoved != null)
                 preprocessorSymbols = preprocessorSymbols.Except(Options.PreprocessorDefinitionsRemoved).ToArray();
@@ -42,10 +42,10 @@ namespace CodeBinder
 
             var solutionFilePath = project.Solution.FilePath;
             var solutionDir = Path.GetDirectoryName(solutionFilePath);
-            var compilation = project.GetCompilationAsync().GetAwaiter().GetResult();
+            var compilation = project.GetCompilationAsync().Result!;
             if (!Options.IgnoreCompilationErrors)
             {
-                string errors = CompilationOuput.ErrorsForCompilation(compilation, "source");
+                string? errors = CompilationOuput.ErrorsForCompilation(compilation, "source");
                 if (!string.IsNullOrEmpty(errors))
                     throw new Exception("Compilation errors: " + errors);
             }
@@ -91,7 +91,7 @@ namespace CodeBinder
             {
                 foreach (var type in pair.Value.RootTypes)
                 {
-                    List<TypeContext> types;
+                    List<TypeContext>? types;
                     if (!ret.TryGetValue(pair.Key, out types))
                     {
                         types = new List<TypeContext>();

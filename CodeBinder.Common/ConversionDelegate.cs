@@ -18,12 +18,12 @@ namespace CodeBinder
     {
         IConversionBuilder _builder;
 
-        public string SourcePath { get; private set; }
+        public string? SourcePath { get; private set; }
 
         internal ConversionDelegate(IConversionBuilder builder)
             : this(null, builder) { }
 
-        internal ConversionDelegate(string sourcePath, IConversionBuilder builder)
+        internal ConversionDelegate(string? sourcePath, IConversionBuilder builder)
         {
             SourcePath = sourcePath;
             _builder = builder;
@@ -34,7 +34,7 @@ namespace CodeBinder
             get { return _builder.FileName; }
         }
 
-        public string TargetBasePath
+        public string? TargetBasePath
         {
             get { return _builder.BasePath; }
         }
@@ -55,7 +55,7 @@ namespace CodeBinder
         private void write(TextWriter writer)
         {
             var codeBuilder = new CodeBuilder(writer);
-            string preamble = _builder.GeneratedPreamble;
+            string? preamble = _builder.GeneratedPreamble;
             if (!string.IsNullOrEmpty(preamble))
                 codeBuilder.AppendLine(preamble);
 

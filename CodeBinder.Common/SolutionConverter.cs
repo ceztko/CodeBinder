@@ -14,15 +14,13 @@ namespace CodeBinder
     public class SolutionConverter<TConversion> : Converter<TConversion>
          where TConversion : LanguageConversion
     {
-        readonly string _solutionFilePath;
         readonly IReadOnlyCollection<Project> _projectsToConvert;
         readonly IProgress<string> _progress;
 
         internal SolutionConverter(Solution solution, IEnumerable<Project> projectsToConvert,
-            TConversion conversion, IProgress<string> showProgressMessage)
+            TConversion conversion, IProgress<string>? showProgressMessage)
             : base(conversion)
         {
-            _solutionFilePath = solution.FilePath;
             _projectsToConvert = projectsToConvert.ToList();
             _progress = showProgressMessage ?? new Progress<string>();
         }

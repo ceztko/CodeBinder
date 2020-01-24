@@ -1,19 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>CodeBinder.Common</AssemblyName>
-    <RootNamespace>CodeBinder</RootNamespace>
-    <Product>CodeBinder</Product>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-    <Version>1.0.0</Version>
-    <PackageId></PackageId>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <LangVersion>latest</LangVersion>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
-  <ItemGroup>
-    <None Remove="Shared\RoslynMethodExtensions.cs~RF83e08db8.TMP" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.4.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.4.0" />
@@ -23,11 +12,6 @@
     <ProjectReference Include="..\CodeBinder.Redist\CodeBinder.Redist.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="C89\Resources\CResources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>CResources.resx</DependentUpon>
-    </Compile>
     <Compile Update="CLang\Resources\CLangResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -35,13 +19,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="C89\Resources\CResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>CResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Update="CLang\Resources\CLangResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>CLangResources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>CodeBinder.CLang</CustomToolNamespace>
     </EmbeddedResource>
   </ItemGroup>
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>

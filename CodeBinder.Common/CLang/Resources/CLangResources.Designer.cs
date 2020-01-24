@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace CodeBinder.CLang.Resources {
+namespace CodeBinder.CLang {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace CodeBinder.CLang.Resources {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CodeBinder.CLang.Resources.CLangResources", typeof(CLangResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CodeBinder.Common.CLang.Resources.CLangResources", typeof(CLangResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -66,8 +66,6 @@ namespace CodeBinder.CLang.Resources {
         ///#ifdef __cplusplus
         ///#include &lt;cstdint&gt;
         ///#include &lt;cuchar&gt;
-        ///extern &quot;C&quot;
-        ///{
         ///#else // __cplusplus
         ///#include &lt;stdint.h&gt;
         ///#include &lt;uchar.h&gt;

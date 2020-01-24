@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace CodeBinder.CLang
@@ -16,7 +17,7 @@ namespace CodeBinder.CLang
         List<ClassDeclarationSyntax> _types;
         List<DelegateDeclarationSyntax> _callbacks;
 
-        public string LibraryName { get; private set; }
+        public string LibraryName { get; private set; } = string.Empty;
 
         public CLangCompilationContext(ConversionCSharpToCLang conversion)
             : base(conversion)
@@ -28,9 +29,16 @@ namespace CodeBinder.CLang
             CompilationSet += CLangCompilationContext_CompilationSet;
         }
 
-        private void CLangCompilationContext_CompilationSet(object sender, EventArgs e)
+        private void CLangCompilationContext_CompilationSet(object? sender, EventArgs e)
         {
-            LibraryName = Compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0);
+            try
+            {
+                LibraryName = Compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0);
+            }
+            catch
+            {
+                throw new Exception($"Missing {nameof(NativeLibraryAttribute)}");
+            }
         }
 
         public void AddModule(CompilationContext compilation, CLangModuleContextParent module)
@@ -44,7 +52,7 @@ namespace CodeBinder.CLang
             AddType(module, parent);
         }
 
-        public bool TryGetModule(string moduleName, out CLangModuleContextParent module)
+        public bool TryGetModule(string moduleName, [NotNullWhen(true)]out CLangModuleContextParent? module)
         {
             return _modules.TryGetValue(moduleName, out module);
         }

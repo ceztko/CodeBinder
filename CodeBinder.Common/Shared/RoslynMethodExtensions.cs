@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.FindSymbols;
 using System.Text;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.Shared
 {
@@ -72,14 +73,14 @@ namespace CodeBinder.Shared
         public static AttributeData GetAttribute<TAttribute>(this IEnumerable<AttributeData> attributes)
             where TAttribute : Attribute
         {
-            AttributeData ret;
+            AttributeData? ret;
             if (!TryGetAttribute<TAttribute>(attributes, out ret))
                 throw new Exception($"Missing attribute {typeof(TAttribute).Name}");
 
             return ret;
         }
 
-        public static bool TryGetAttribute<TAttribute>(this IEnumerable<AttributeData> attributes, out AttributeData attribute)
+        public static bool TryGetAttribute<TAttribute>(this IEnumerable<AttributeData> attributes, [NotNullWhen(true)]out AttributeData? attribute)
             where TAttribute : Attribute
         {
             foreach (var attrib in attributes)
@@ -112,7 +113,7 @@ namespace CodeBinder.Shared
             return symbol.GetAttributes().HasAttribute<TAttribute>();
         }
 
-        public static bool TryGetAttribute<TAttribute>(this ISymbol symbol, out AttributeData attribute)
+        public static bool TryGetAttribute<TAttribute>(this ISymbol symbol, [NotNullWhen(true)]out AttributeData? attribute)
             where TAttribute : Attribute
         {
             return symbol.GetAttributes().TryGetAttribute<TAttribute>(out attribute);
@@ -166,15 +167,15 @@ namespace CodeBinder.Shared
             return ret;
         }
 
-        public static bool TryGetConstructorArgument<T>(this AttributeData data, int index, out T value)
+        public static bool TryGetConstructorArgument<T>(this AttributeData data, int index, [MaybeNullWhen(false)]out T value)
         {
             if (index < 0 || index >= data.ConstructorArguments.Length)
             {
-                value = default(T);
+                value = default!;
                 return false;
             }
 
-            value = (T)data.ConstructorArguments[index].Value;
+            value = (T)data.ConstructorArguments[index].Value!;
             return true;
         }
 
@@ -183,12 +184,12 @@ namespace CodeBinder.Shared
             if (index < 0 || index >= data.ConstructorArguments.Length)
                 return def;
 
-            return (T)data.ConstructorArguments[index].Value;
+            return (T)data.ConstructorArguments[index].Value!;
         }
 
         public static T GetConstructorArgumentOrDefault<T>(this AttributeData data, int index)
         {
-            return GetConstructorArgumentOrDefault(data, index, default(T));
+            return GetConstructorArgumentOrDefault(data, index, default(T)!);
         }
 
         public static T GetNamedArgument<T>(this AttributeData data, string name)
@@ -200,24 +201,24 @@ namespace CodeBinder.Shared
             return ret;
         }
 
-        public static bool TryGetNamedArgument<T>(this AttributeData data, string name, out T value)
+        public static bool TryGetNamedArgument<T>(this AttributeData data, string name, [MaybeNull]out T value)
         {
             foreach (var pair in data.NamedArguments)
             {
                 if (pair.Key == name)
                 {
-                    value = (T)pair.Value.Value;
+                    value = (T)pair.Value.Value!;
                     return true;
                 }
             }
 
-            value = default(T);
+            value = default!;
             return false;
         }
 
         public static T GetNamedArgumentOrDefault<T>(this AttributeData data, string name)
         {
-            return GetNamedArgumentOrDefault(data, name, default(T));
+            return GetNamedArgumentOrDefault(data, name, default(T)!);
         }
 
         public static T GetNamedArgumentOrDefault<T>(this AttributeData data, string name, T def)
@@ -225,7 +226,7 @@ namespace CodeBinder.Shared
             foreach (var pair in data.NamedArguments)
             {
                 if (pair.Key == name)
-                    return (T)pair.Value.Value;
+                    return (T)pair.Value.Value!;
             }
 
             return def;
@@ -249,13 +250,13 @@ namespace CodeBinder.Shared
             return (TOperation)GetOperation(node, provider);
         }
 
-        public static TSymbol GetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
-            where TSymbol : ISymbol
+        public static TSymbol? GetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
+            where TSymbol : class,ISymbol
         {
-            return (TSymbol)GetSymbol(node, provider);
+            return (TSymbol?)GetSymbol(node, provider);
         }
 
-        public static ISymbol GetSymbol(this SyntaxNode node, ICompilationContextProvider provider)
+        public static ISymbol? GetSymbol(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = node.GetSemanticModel(provider);
             return model.GetSymbolInfo(node).Symbol;
@@ -273,7 +274,7 @@ namespace CodeBinder.Shared
             return model.GetDeclaredSymbol(node);
         }
 
-        public static ITypeSymbol GetTypeSymbol(this SyntaxNode node, ICompilationContextProvider provider)
+        public static ITypeSymbol? GetTypeSymbol(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var info = node.GetTypeInfo(provider);
             return info.ConvertedType;
@@ -341,15 +342,20 @@ namespace CodeBinder.Shared
             where TAttrib : Attribute
         {
             Type[] types = new Type[data.ConstructorArguments.Length];
-            object[] objects = new object[data.ConstructorArguments.Length];
+            object?[] objects = new object[data.ConstructorArguments.Length];
             for (int i = 0; i < data.ConstructorArguments.Length; i++)
             {
                 var arg = data.ConstructorArguments[i];
-                types[i] = Type.GetType(arg.Type.GetAssemblyQualifiedName());
+
+                var type = Type.GetType(arg.Type.GetAssemblyQualifiedName()) ??
+                    throw new NullReferenceException($"Unable to find CLR type for {arg.Type}");
+                types[i] = type;
                 objects[i] = arg.Value;
             }
 
-            var attrib = (TAttrib)typeof(TAttrib).GetConstructor(types).Invoke(objects);
+            var construcor = typeof(TAttrib).GetConstructor(types) ??
+                    throw new NullReferenceException($"Unable to attribute constructor for the types {data.ConstructorArguments}");
+            var attrib = (TAttrib)construcor.Invoke(objects);
             for (int i = 0; i < data.NamedArguments.Length; i++)
             {
                 var arg = data.NamedArguments[i];

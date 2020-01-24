@@ -8,6 +8,7 @@ using CodeBinder.Shared;
 using CodeBinder.Attributes;
 using Microsoft.CodeAnalysis;
 using System.Runtime.InteropServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.CLang
 {
@@ -35,11 +36,11 @@ namespace CodeBinder.CLang
 
         private void visitType(TypeDeclarationSyntax type)
         {
-            CLangModuleContextChild module = null;
-            string moduleName;
+            CLangModuleContextChild? module = null;
+            string? moduleName;
             if (TryGetModuleName(type, out moduleName))
             {
-                CLangModuleContextParent parent;
+                CLangModuleContextParent? parent;
                 if (!Compilation.TryGetModule(moduleName, out parent))
                 {
                     parent = new CLangModuleContextParent(moduleName, Compilation);
@@ -59,22 +60,22 @@ namespace CodeBinder.CLang
                         // TODO: Chehck for policies. Fix/extend ShouldDiscard
                         if (module != null && !member.HasAttribute<NativeIgnoreAttribute>(this))//!member.ShouldDiscard(this))
                         {
-                            var method = member as MethodDeclarationSyntax;
+                            var method = (MethodDeclarationSyntax)member;
                             if (method.IsNative(this))
-                                module.AddNativeMethod(member as MethodDeclarationSyntax);
+                                module.AddNativeMethod(method);
                         }
                         break;
                     case SyntaxKind.ClassDeclaration:
-                        visitType(member as ClassDeclarationSyntax);
+                        visitType((ClassDeclarationSyntax)member);
                         break;
                     case SyntaxKind.StructDeclaration:
-                        visitType(member as StructDeclarationSyntax);
+                        visitType((StructDeclarationSyntax)member);
                         break;
                     case SyntaxKind.EnumDeclaration:
-                        visitType(member as StructDeclarationSyntax);
+                        visitType((StructDeclarationSyntax)member);
                         break;
                     case SyntaxKind.DelegateDeclaration:
-                        visitType(member as DelegateDeclarationSyntax);
+                        visitType((DelegateDeclarationSyntax)member);
                         break;
                 }
             }
@@ -89,7 +90,7 @@ namespace CodeBinder.CLang
             Compilation.AddCallback(node);
         }
 
-        bool TryGetModuleName(TypeDeclarationSyntax type, out string moduleName)
+        bool TryGetModuleName(TypeDeclarationSyntax type, [NotNullWhen(true)]out string? moduleName)
         {
             var attributes = type.GetAttributes(this);
             foreach (var attribute in attributes)

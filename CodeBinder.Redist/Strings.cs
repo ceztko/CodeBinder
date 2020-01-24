@@ -39,7 +39,7 @@ namespace CodeBinder
     [StructLayout(LayoutKind.Sequential)]
     public struct RString
     {
-        public string TakeString()
+        public string? TakeString()
         {
             if (String == IntPtr.Zero)
                 return null;

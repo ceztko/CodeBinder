@@ -74,7 +74,7 @@ namespace CodeBinder.CLang
 
         protected override TypeConversion GetConversion()
         {
-            return null;
+            throw new NotImplementedException();
         }
 
         public override IEnumerable<MethodDeclarationSyntax> Methods
@@ -84,7 +84,7 @@ namespace CodeBinder.CLang
 
         public override string Name
         {
-            get { return Parent.Name; }
+            get { return Parent!.Name; }
         }
     }
 }

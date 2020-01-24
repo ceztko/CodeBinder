@@ -20,7 +20,7 @@ namespace CodeBinder.Shared.CSharp
             walker.Visit(tree.GetRoot());
         }
 
-        public new void AddType(CSharpBaseTypeContext type, CSharpBaseTypeContext parent)
+        public new void AddType(CSharpBaseTypeContext type, CSharpBaseTypeContext? parent)
         {
             base.AddType(type, parent);
         }

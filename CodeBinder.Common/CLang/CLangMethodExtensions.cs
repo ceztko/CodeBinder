@@ -27,11 +27,14 @@ namespace CodeBinder.CLang
         public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter, ICompilationContextProvider provider)
         {
             bool isByRef = parameter.IsRef() || parameter.IsOut();
-            var symbol = parameter.Type.GetTypeSymbol(provider);
-            string suffix;
+            var symbol = parameter.Type!.GetTypeSymbol(provider);
+            string? suffix;
             string type = getCLangType(symbol, parameter.GetDeclaredSymbol(provider).GetAttributes(),
                 isByRef ? ParameterType.ByRef : ParameterType.Regular, out suffix);
-            builder.Append(type).Space().Append(parameter.Identifier.Text).Append(suffix);
+            builder.Append(type).Space().Append(parameter.Identifier.Text);
+            if (suffix != null)
+                builder.Append(suffix);
+
             return builder;
         }
 
@@ -52,12 +55,13 @@ namespace CodeBinder.CLang
         public static string GetCLangReturnType(this DelegateDeclarationSyntax dlg, ICompilationContextProvider provider)
         {
             var symbol = dlg.GetDeclaredSymbol<INamedTypeSymbol>(provider);
+            Debug.Assert(symbol.DelegateInvokeMethod != null);
             return getCLangReturnType(symbol.DelegateInvokeMethod);
         }
 
         private static string getCLangReturnType(IMethodSymbol method)
         {
-            string suffix;
+            string? suffix;
             string type = getCLangType(method.ReturnType, method.GetReturnTypeAttributes(), ParameterType.Return, out suffix);
             if (suffix == null)
                 return type;
@@ -65,7 +69,7 @@ namespace CodeBinder.CLang
                 return $"{type} {suffix}";
         }
 
-        private static string getCLangType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes, ParameterType type, out string suffix)
+        private static string getCLangType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes, ParameterType type, out string? suffix)
         {
             switch(symbol.TypeKind)
             {
@@ -92,7 +96,7 @@ namespace CodeBinder.CLang
             bool constParameter = false;
             if (symbol.TypeKind == TypeKind.Array)
             {
-                var arrayType = symbol as IArrayTypeSymbol;
+                var arrayType = (IArrayTypeSymbol)symbol;
                 typeName = arrayType.ElementType.GetFullName();
 
                 if (type == ParameterType.Return)

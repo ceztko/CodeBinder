@@ -13,8 +13,8 @@ namespace CodeBinder.Util
     /// </summary>
     public class CodeBuilder : IDisposable
     {
-        CodeBuilder _parent;
-        private CodeBuilder Child { get; set; }
+        CodeBuilder? _parent;
+        private CodeBuilder? Child { get; set; }
         bool _closed;
         uint _instanceIndentedCount;
         TextWriter _writer;
@@ -30,7 +30,7 @@ namespace CodeBinder.Util
         public CodeBuilder(TextWriter writer)
             : this(null, writer, 0, true, 4, 0) { }
 
-        private CodeBuilder(CodeBuilder parent, TextWriter writer, uint instanceIndentedCount,
+        private CodeBuilder(CodeBuilder? parent, TextWriter writer, uint instanceIndentedCount,
             bool doIndent, uint indentSpaces, uint currentIndentLevel)
         {
             _parent = parent;
@@ -108,7 +108,7 @@ namespace CodeBinder.Util
         /// </summary>
         /// <param name="appendString">The string that will be appended when the context has been disposed</param>
         /// <param name="appendLine">True if a line should be appended on the disposing of this context</param>
-        public CodeBuilder Indent(string appendString = null, bool appendLine = false)
+        public CodeBuilder Indent(string? appendString = null, bool appendLine = false)
         {
             doChecks();
             return disposable(1, appendString, appendLine);
@@ -120,7 +120,7 @@ namespace CodeBinder.Util
         /// <param name="indentCount">The number of indentation levels</param>
         /// <param name="appendString">The string that will be appended when the context has been disposed</param>
         /// <param name="appendLine">True if a line should be appended on the disposing of this context</param>
-        public CodeBuilder Indent(uint indentCount, string appendString = null, bool appendLine = false)
+        public CodeBuilder Indent(uint indentCount, string? appendString = null, bool appendLine = false)
         {
             doChecks();
             if (indentCount == 0)
@@ -155,18 +155,19 @@ namespace CodeBinder.Util
         public CodeBuilder Close()
         {
             if (_closed)
-                return _parent;
+                return _parent ?? this;
 
             if (_parent != null)
                 _parent.Child = null;
+
             close();
-            return _parent;
+            return _parent ?? this;
         }
 
         public override string ToString()
         {
             closeChild();
-            return _writer.ToString();
+            return _writer.ToString() ?? string.Empty;
         }
 
         #endregion // Public methods
@@ -205,7 +206,7 @@ namespace CodeBinder.Util
             return Child;
         }
 
-        CodeBuilder disposable(uint indentCount, string appendString, bool appendLine)
+        CodeBuilder disposable(uint indentCount, string? appendString, bool appendLine)
         {
             _currentIndentLevel += indentCount;
             _disposeContexts.Add(new DisposeContext() { IndentCount = indentCount, AppendString = appendString, AppendLine = appendLine });
@@ -263,7 +264,7 @@ namespace CodeBinder.Util
             Debug.Assert(_currentIndentLevel >= context.IndentCount);
             _currentIndentLevel -= context.IndentCount;
             if (context.AppendLine)
-                AppendLine(context.AppendString);
+                AppendLine(context.AppendString ?? string.Empty);
             else if (context.AppendString != null)
                 Append(context.AppendString);
 
@@ -275,7 +276,7 @@ namespace CodeBinder.Util
         class DisposeContext
         {
             public uint IndentCount;
-            public string AppendString;
+            public string? AppendString;
             public bool AppendLine;
         }
 

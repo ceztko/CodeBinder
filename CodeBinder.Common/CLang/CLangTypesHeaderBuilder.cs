@@ -61,8 +61,8 @@ namespace CodeBinder.CLang
                 var attributes = enm.GetAttributes(Compilation);
                 string enumName = attributes.GetAttribute<NativeBindingAttribute>().GetConstructorArgument<string>(0);
                 string stem = attributes.GetAttribute<NativeStemAttribute>().GetConstructorArgument<string>(0);
-                Regex substitutionRegex = null;
-                string substitutionPattern = null;
+                Regex? substitutionRegex = null;
+                string? substitutionPattern = null;
                 if (attributes.TryGetAttribute<NativeSubstitutionAttribute>(out var substitutionAttr))
                 {
                     substitutionRegex = new Regex(substitutionAttr.GetConstructorArgument<string>(0));
@@ -81,7 +81,7 @@ namespace CodeBinder.CLang
 
                         long value = item.GetEnumValue(Compilation);
                         string bindedItemName;
-                        AttributeData attr;
+                        AttributeData? attr;
                         if (itemattribs.TryGetAttribute<NativeBindingAttribute>(out attr))
                         {
                             bindedItemName = attr.GetConstructorArgument<string>(0);
@@ -116,7 +116,7 @@ namespace CodeBinder.CLang
             foreach (var callback in Compilation.Callbacks)
             {
                 string name;
-                AttributeData bidingAttrib;
+                AttributeData? bidingAttrib;
                 if (callback.TryGetAttribute<NativeBindingAttribute>(Compilation, out bidingAttrib))
                     name = bidingAttrib.GetConstructorArgument<string>(0);
                 else
