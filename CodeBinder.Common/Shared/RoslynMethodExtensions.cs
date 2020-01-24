@@ -250,10 +250,17 @@ namespace CodeBinder.Shared
             return (TOperation)GetOperation(node, provider);
         }
 
-        public static TSymbol? GetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
+        public static bool TryGetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)]out TSymbol? symbol)
+            where TSymbol : class, ISymbol
+        {
+            symbol = GetSymbol(node, provider) as TSymbol;
+            return symbol != null;
+        }
+
+        public static TSymbol GetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
             where TSymbol : class,ISymbol
         {
-            return (TSymbol?)GetSymbol(node, provider);
+            return GetSymbol(node, provider) as TSymbol ?? throw new Exception($"Unable to get symbol {typeof(ISymbol).Name} in syntax: {node}");
         }
 
         public static ISymbol? GetSymbol(this SyntaxNode node, ICompilationContextProvider provider)

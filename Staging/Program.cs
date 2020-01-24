@@ -29,7 +29,7 @@ namespace ConsoleApp1
             Project project = await workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj");
             genargs.TargetRootPath = @"D:\Staging\Euronovate\CodeBinderInternal\Test\";
 
-            if (false)
+            if (true)
             {
                 // Java conversion
                 var conv = Converter.CreateFor<ConversionCSharpToJava>(project);
@@ -37,8 +37,7 @@ namespace ConsoleApp1
                 conv.Conversion.SkipBody = false;
                 conv.Conversion.NamespaceMapping.PushMapping("Euronovate.LibPdf", "com.euronovate.libpdf");
                 conv.Conversion.NamespaceMapping.PushMapping("Euronovate.LibPdf.Java", "com.euronovate.libpdf");
-                //genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdf\ENLibPdfJar\src\alt\java";
-                //genargs.SourceRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\main\java";
+                genargs.TargetRootPath = @"D:\Staging\Euronovate\ENLibPdfJar\src\main\java";
                 genargs.EagerStringConversion = true;
                 conv.ConvertAndWrite(genargs);
 

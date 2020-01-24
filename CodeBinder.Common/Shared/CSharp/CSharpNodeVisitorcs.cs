@@ -432,14 +432,6 @@ namespace CodeBinder.Shared.CSharp
             DefaultVisit(node);
         }
 
-        public override void VisitLiteralExpression(LiteralExpressionSyntax node)
-        {
-            if (node.Kind() == SyntaxKind.StringLiteralExpression && node.Token.Text.StartsWith("@"))
-                Unsupported(node, "Verbatim string literal");
-
-            DefaultVisit(node);
-        }
-
         public override void VisitUsingStatement(UsingStatementSyntax node)
         {
             if (node.Expression != null)

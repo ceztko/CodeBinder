@@ -81,8 +81,8 @@ namespace CodeBinder.Java
                 case SyntaxKind.EqualsExpression:
                 case SyntaxKind.NotEqualsExpression:
                 {
-                    var method = syntax.GetSymbol<IMethodSymbol>(context);
-                    if (method != null)
+                    IMethodSymbol? method;
+                    if (syntax.TryGetSymbol(context, out method))
                     {
                         SymbolReplacement replacement;
                         if (method.HasJavaReplacement(out replacement))
@@ -185,7 +185,10 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, JavaCodeConversionContext context)
         {
-            builder.Append(syntax.Token.Text);
+            if (syntax.Token.Kind() == SyntaxKind.StringLiteralToken && syntax.Token.Text.StartsWith("@"))
+                builder.Append(syntax.Token.Text.Replace("\"", "\"\"")); // Handle verbatim strings
+            else
+                builder.Append(syntax.Token.Text);
             return builder;
         }
 
