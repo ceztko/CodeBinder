@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace CodeBinder.Shared.Java
@@ -43,14 +44,14 @@ namespace CodeBinder.Shared.Java
     {
         public static string GetJavaBoxType(string typeName)
         {
-            string ret;
-            if (GetJavaBoxType(typeName, out ret))
+            string? ret;
+            if (TryGetJavaBoxType(typeName, out ret))
                 return ret;
             else
                 throw new Exception("Unsupported java box type for " + typeName);
         }
 
-        public static bool GetJavaBoxType(string typeName, out string boxTypeName)
+        public static bool TryGetJavaBoxType(string typeName, [NotNullWhen(true)]out string? boxTypeName)
         {
             switch (typeName)
             {
@@ -93,14 +94,14 @@ namespace CodeBinder.Shared.Java
 
         public static string GetJavaRefBoxType(string typeName)
         {
-            string ret;
-            if (GetJavaRefBoxType(typeName, out ret))
+            string? ret;
+            if (TryGetJavaRefBoxType(typeName, out ret))
                 return ret;
             else
                 throw new Exception("Unsupported java ref box type for " + typeName);
         }
 
-        public static bool GetJavaRefBoxType(string typeName, out string boxTypeName)
+        public static bool TryGetJavaRefBoxType(string typeName, [NotNullWhen(true)]out string? boxTypeName)
         {
             switch (typeName)
             {

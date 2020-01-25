@@ -2,6 +2,7 @@
 using CodeBinder.Util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace CodeBinder.JNI
@@ -27,7 +28,7 @@ namespace CodeBinder.JNI
             AddType(module, parent);
         }
 
-        public bool TryGetModule(string moduleName, out JNIModuleContextParent module)
+        public bool TryGetModule(string moduleName, [NotNullWhen(true)]out JNIModuleContextParent? module)
         {
             return _modules.TryGetValue(moduleName, out module);
         }

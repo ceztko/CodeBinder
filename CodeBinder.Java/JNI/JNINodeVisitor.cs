@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using CodeBinder.Shared;
 using CodeBinder.Attributes;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.JNI
 {
@@ -26,11 +27,11 @@ namespace CodeBinder.JNI
 
         private void visitType(TypeDeclarationSyntax type)
         {
-            JNIModuleContextChild module = null;
-            string moduleName;
+            JNIModuleContextChild? module = null;
+            string? moduleName;
             if (TryGetModuleName(type, out moduleName))
             {
-                JNIModuleContextParent parent;
+                JNIModuleContextParent? parent;
                 if (!Compilation.TryGetModule(moduleName, out parent))
                 {
                     parent = new JNIModuleContextParent(moduleName, Compilation);
@@ -49,22 +50,22 @@ namespace CodeBinder.JNI
                     case SyntaxKind.MethodDeclaration:
                         if (module != null && !member.ShouldDiscard(this))
                         {
-                            var method = member as MethodDeclarationSyntax;
+                            var method = (MethodDeclarationSyntax)member;
                             if (method.IsNative(this))
-                                module.AddNativeMethod(member as MethodDeclarationSyntax);
+                                module.AddNativeMethod(method);
                         }
                         break;
                     case SyntaxKind.ClassDeclaration:
-                        visitType(member as ClassDeclarationSyntax);
+                        visitType((ClassDeclarationSyntax)member);
                         break;
                     case SyntaxKind.StructKeyword:
-                        visitType(member as StructDeclarationSyntax);
+                        visitType((StructDeclarationSyntax)member);
                         break;
                 }
             }
         }
 
-        bool TryGetModuleName(TypeDeclarationSyntax type, out string moduleName)
+        bool TryGetModuleName(TypeDeclarationSyntax type, [NotNullWhen(true)]out string? moduleName)
         {
             var attributes = type.GetAttributes(this);
             foreach (var attribute in attributes)

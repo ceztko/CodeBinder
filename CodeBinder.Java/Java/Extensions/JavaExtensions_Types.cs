@@ -11,6 +11,7 @@ using CodeBinder.Shared;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics;
 using CodeBinder.Shared.Java;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.Java
 {
@@ -19,15 +20,15 @@ namespace CodeBinder.Java
         public static string GetJavaDefaultReturnStatement(this TypeSyntax type, JavaCodeConversionContext context)
         {
             var builder = new CodeBuilder();
-            string defaultLiteral = type.GetJavaDefaultLiteral(context);
+            string? defaultLiteral = type.GetJavaDefaultLiteral(context);
             builder.Append("return");
-            if (!string.IsNullOrEmpty(defaultLiteral))
+            if (defaultLiteral != null)
                 builder.Space().Append(defaultLiteral);
 
             return builder.ToString();
         }
 
-        public static string GetJavaDefaultLiteral(this TypeSyntax type, JavaCodeConversionContext context)
+        public static string? GetJavaDefaultLiteral(this TypeSyntax type, JavaCodeConversionContext context)
         {
             var fullName = type.GetFullName(context);
             switch(fullName)
@@ -169,7 +170,7 @@ namespace CodeBinder.Java
             {
                 case SymbolKind.Field:
                 {
-                    var field = symbol as IFieldSymbol;
+                    var field = (IFieldSymbol)symbol;
                     if (field.HasJavaReplacement(out var replacement))
                     {
                         builder.Append(replacement.Name);
@@ -195,7 +196,7 @@ namespace CodeBinder.Java
             if (syntax.Kind() == SyntaxKind.ArrayType)
                 symbol = syntax.GetTypeSymbol(context);
             else
-                symbol = syntax.GetSymbol(context);
+                symbol = syntax.GetSymbol(context)!;
 
             switch (symbol.Kind)
             {
@@ -204,23 +205,23 @@ namespace CodeBinder.Java
                 case SymbolKind.ArrayType:
                 {
                     bool isInterface;
-                    var typeSymbol = symbol as ITypeSymbol;
+                    var typeSymbol = (ITypeSymbol)symbol;
                     writeJavaType(builder, typeSymbol.GetFullName(), syntax, typeSymbol, null, false, context, out isInterface);
                     return builder;
                 }
                 case SymbolKind.Method:
                 {
-                    writeJavaMethodIdentifier(builder, syntax, symbol as IMethodSymbol, context);
+                    writeJavaMethodIdentifier(builder, syntax, (IMethodSymbol)symbol, context);
                     break;
                 }
                 case SymbolKind.Property:
                 {
-                    writeJavaPropertyIdentifier(builder, syntax, symbol as IPropertySymbol, context);
+                    writeJavaPropertyIdentifier(builder, syntax, (IPropertySymbol)symbol, context);
                     break;
                 }
                 case SymbolKind.Parameter:
                 {
-                    writeJavaParameterIdentifier(builder, syntax, symbol as IParameterSymbol, context);
+                    writeJavaParameterIdentifier(builder, syntax, (IParameterSymbol)symbol, context);
                     break;
                 }
                 case SymbolKind.Local:
@@ -247,7 +248,7 @@ namespace CodeBinder.Java
         static string getJavaType(string typeName, TypeSyntax syntax, ITypeSymbol symbol, JavaTypeFlags flags, JavaCodeConversionContext context)
         {
             bool isByRef = flags.HasFlag(JavaTypeFlags.IsByRef);
-            if (symbol != null && flags.HasFlag(JavaTypeFlags.NativeMethod))
+            if (flags.HasFlag(JavaTypeFlags.NativeMethod))
             {
                 switch (symbol.TypeKind)
                 {
@@ -271,7 +272,7 @@ namespace CodeBinder.Java
 
         static void writeJavaMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol method, JavaCodeConversionContext context)
         {
-            SymbolReplacement replacement;
+            SymbolReplacement? replacement;
             string javaMethodName;
             if (method.HasJavaReplacement(out replacement))
             {
@@ -299,7 +300,7 @@ namespace CodeBinder.Java
                 }
                 case SyntaxKind.GenericName:
                 {
-                    var genericName = syntax as GenericNameSyntax;
+                    var genericName = (GenericNameSyntax)syntax;
                     builder.Append(genericName.TypeArgumentList, genericName, context).Append(javaMethodName);
                     break;
                 }
@@ -315,11 +316,11 @@ namespace CodeBinder.Java
             var parent = syntax.Parent;
             while (parent != null)
             {
-                AssignmentExpressionSyntax assigment;
+                AssignmentExpressionSyntax? assigment;
                 if (parent.IsExpression(out assigment))
                 {
                     // Determine if the LHS of an assiment is the current property symbol
-                    if (assigment.Left == child && assigment.Left.GetSymbol(context) == property)
+                    if (assigment.Left == child && SymbolEqualityComparer.Default.Equals(assigment.Left.GetSymbol(context), property))
                     {
                         isSetter = true;
                         break;
@@ -333,7 +334,7 @@ namespace CodeBinder.Java
             }
 
             // TODO: Better handle symbol replacements need/not need of parameter list
-            SymbolReplacement propertyReplacement;
+            SymbolReplacement? propertyReplacement;
             if (property.HasJavaReplacement(out propertyReplacement))
             {
                 if (isSetter)
@@ -404,7 +405,7 @@ namespace CodeBinder.Java
             {
                 case SyntaxKind.IdentifierName:
                 {
-                    var identifierName = syntax as IdentifierNameSyntax;
+                    var identifierName = (IdentifierNameSyntax)syntax;
                     builder.Append(identifierName.GetName());
                     break;
                 }
@@ -423,12 +424,8 @@ namespace CodeBinder.Java
         }
 
         static void writeJavaType(CodeBuilder builder, string fullTypeName, TypeSyntax type, ITypeSymbol symbol,
-            TypeSyntax parent, bool isByRef, JavaCodeConversionContext context, out bool isInterface)
+            TypeSyntax? parent, bool isByRef, JavaCodeConversionContext context, out bool isInterface)
         {
-            Debug.Assert(fullTypeName != null);
-            Debug.Assert(type != null);
-            Debug.Assert(symbol != null);
-
             if (type.IsVar)
             {
                 // Type is inferred
@@ -441,7 +438,7 @@ namespace CodeBinder.Java
             {
                 case SymbolKind.NamedType:
                 {
-                    var namedType = symbol as INamedTypeSymbol;
+                    var namedType = (INamedTypeSymbol)symbol;
                     if (namedType.IsGenericType)
                         fullTypeName = namedType.ConstructedFrom.GetFullName();
 
@@ -449,7 +446,7 @@ namespace CodeBinder.Java
                 }
                 case SymbolKind.ArrayType:
                 {
-                    var arrayType = symbol as IArrayTypeSymbol;
+                    var arrayType = (IArrayTypeSymbol)symbol;
                     fullTypeName = arrayType.ElementType.GetFullName();
                     break;
                 }
@@ -461,28 +458,28 @@ namespace CodeBinder.Java
             }
 
             var typeKind = type.Kind();
-            string javaTypeName;
+            string? javaTypeName;
             if (IsKnownJavaType(fullTypeName, isByRef, parent?.GetTypeSymbol(context), out javaTypeName, out isInterface))
             {
                 switch (typeKind)
                 {
                     case SyntaxKind.GenericName:
                     {
-                        var genericType = type as GenericNameSyntax;
+                        var genericType = (GenericNameSyntax)type;
                         builder.Append(javaTypeName).Append(genericType.TypeArgumentList, type, context);
                         break;
                     }
                     case SyntaxKind.ArrayType:
                     {
-                        var arrayType = type as ArrayTypeSyntax;
+                        var arrayType = (ArrayTypeSyntax)type;
                         Debug.Assert(arrayType.RankSpecifiers.Count == 1);
                         builder.Append(javaTypeName).Append(arrayType.RankSpecifiers[0], context);
                         break;
                     }
                     case SyntaxKind.NullableType:
                     {
-                        string boxTypeName;
-                        if (JavaUtils.GetJavaBoxType(fullTypeName, out boxTypeName))
+                        string? boxTypeName;
+                        if (JavaUtils.TryGetJavaBoxType(fullTypeName, out boxTypeName))
                             builder.Append(boxTypeName);
                         else
                             throw new Exception();
@@ -513,26 +510,26 @@ namespace CodeBinder.Java
                 {
                     case SyntaxKind.IdentifierName:
                     {
-                        var identifierName = type as IdentifierNameSyntax;
+                        var identifierName = (IdentifierNameSyntax)type;
                         builder.Append(identifierName.GetName());
                         break;
                     }
                     case SyntaxKind.ArrayType:
                     {
-                        var arrayType = type as ArrayTypeSyntax;
+                        var arrayType = (ArrayTypeSyntax)type;
                         Debug.Assert(arrayType.RankSpecifiers.Count == 1);
                         builder.Append(arrayType.ElementType, type, context).Append(arrayType.RankSpecifiers[0], context);
                         break;
                     }
                     case SyntaxKind.GenericName:
                     {
-                        var genericType = type as GenericNameSyntax;
+                        var genericType = (GenericNameSyntax)type;
                         builder.Append(genericType.GetName()).Append(genericType.TypeArgumentList, type, context);
                         break;
                     }
                     case SyntaxKind.NullableType:
                     {
-                        var nullableType = type as NullableTypeSyntax;
+                        var nullableType = (NullableTypeSyntax)type;
                         switch (symbol.TypeKind)
                         {
                             case TypeKind.Struct:
@@ -548,7 +545,7 @@ namespace CodeBinder.Java
                     }
                     case SyntaxKind.QualifiedName:
                     {
-                        var qualifiedName = type as QualifiedNameSyntax;
+                        var qualifiedName = (QualifiedNameSyntax)type;
                         builder.Append(qualifiedName.Left, type, context).Dot().Append(qualifiedName.Right, type, context);
                         break;
                     }
@@ -569,17 +566,14 @@ namespace CodeBinder.Java
 
         /// <summary>This method is mainly used for inferred types</summary>
         static void writeTypeSymbol(CodeBuilder builder, string fullTypeName, ITypeSymbol symbol,
-            ITypeSymbol parentSymbol, bool isByRef, out bool isInterface)
+            ITypeSymbol? parentSymbol, bool isByRef, out bool isInterface)
         {
-            Debug.Assert(fullTypeName != null);
-            Debug.Assert(symbol != null);
-
             // Try to adjust the typename, looking for know types
             switch (symbol.Kind)
             {
                 case SymbolKind.NamedType:
                 {
-                    var namedType = symbol as INamedTypeSymbol;
+                    var namedType = (INamedTypeSymbol)symbol;
                     if (namedType.IsGenericType)
                     {
                         if (namedType.IsNullable())
@@ -604,7 +598,7 @@ namespace CodeBinder.Java
                 }
                 case SymbolKind.ArrayType:
                 {
-                    var arrayType = symbol as IArrayTypeSymbol;
+                    var arrayType = (IArrayTypeSymbol)symbol;
                     builder.Append(arrayType.ElementType, symbol).EmptyRankSpecifier();
                     isInterface = false;
                     return;
@@ -616,7 +610,7 @@ namespace CodeBinder.Java
                     throw new Exception();
             }
 
-            string javaTypeName;
+            string? javaTypeName;
             if (!IsKnownJavaType(fullTypeName, isByRef, parentSymbol, out javaTypeName, out isInterface))
             {
                 isInterface = symbol.TypeKind == TypeKind.Interface;
@@ -628,7 +622,7 @@ namespace CodeBinder.Java
                 case SymbolKind.NamedType:
                 {
                     builder.Append(javaTypeName);
-                    var namedType = symbol as INamedTypeSymbol;
+                    var namedType = (INamedTypeSymbol)symbol;
                     if (namedType.IsGenericType)
                     {
                         using (builder.TypeParameterList())
@@ -678,10 +672,9 @@ namespace CodeBinder.Java
             return builder;
         }
 
-        public static bool IsKnownJavaType(string fullTypeName, bool isByRef, ITypeSymbol parent,
-            out string knownJavaType, out bool isInterface)
+        public static bool IsKnownJavaType(string fullTypeName, bool isByRef, ITypeSymbol? parent,
+            [NotNullWhen(true)]out string? knownJavaType, out bool isInterface)
         {
-            Debug.Assert(fullTypeName != null);
             if (IsKnowSimpleJavaType(fullTypeName, isByRef, parent, out knownJavaType))
             {
                 isInterface = false;
@@ -741,12 +734,11 @@ namespace CodeBinder.Java
             }
         }
 
-        public static bool IsKnowSimpleJavaType(string fullTypeName, bool isByRef, ITypeSymbol parent, out string knownJavaType)
+        public static bool IsKnowSimpleJavaType(string fullTypeName, bool isByRef, ITypeSymbol? parent, [NotNullWhen(true)]out string? knownJavaType)
         {
-            Debug.Assert(fullTypeName != null);
             if (isByRef)
             {
-                if (JavaUtils.GetJavaRefBoxType(fullTypeName, out knownJavaType))
+                if (JavaUtils.TryGetJavaRefBoxType(fullTypeName, out knownJavaType))
                     return true;
                 else
                     return false;

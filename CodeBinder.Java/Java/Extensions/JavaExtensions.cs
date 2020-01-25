@@ -11,12 +11,13 @@ using CodeBinder.Shared;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics;
 using CodeBinder.Shared.Java;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.Java
 {
     static partial class JavaExtensions
     {
-        delegate bool ModifierGetter(SyntaxKind modifier, out string javaModifier);
+        delegate bool ModifierGetter(SyntaxKind modifier, [NotNullWhen(true)]out string? javaModifier);
 
         static Dictionary<string, Dictionary<string, SymbolReplacement>> _replacements;
 
@@ -58,10 +59,10 @@ namespace CodeBinder.Java
             };
         }
 
-        public static bool HasJavaReplacement(this IMethodSymbol methodSymbol, out SymbolReplacement javaReplacement)
+        public static bool HasJavaReplacement(this IMethodSymbol methodSymbol, [NotNullWhen(true)]out SymbolReplacement? javaReplacement)
         {
             var containingType = methodSymbol.ContainingType;
-            Dictionary<string, SymbolReplacement> replacements;
+            Dictionary<string, SymbolReplacement>? replacements;
             foreach (var iface in containingType.AllInterfaces)
             {
                 string ifaceName = iface.GetFullName();
@@ -74,7 +75,7 @@ namespace CodeBinder.Java
 
                         if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
                         {
-                            if (containingType.FindImplementationForInterfaceMember(member) == methodSymbol)
+                            if (SymbolEqualityComparer.Default.Equals(containingType.FindImplementationForInterfaceMember(member), methodSymbol))
                             {
                                 javaReplacement = replacement;
                                 return true;
@@ -103,7 +104,7 @@ namespace CodeBinder.Java
             return false;
         }
 
-        public static bool HasJavaReplacement(this IPropertySymbol propertySymbol, out SymbolReplacement javaReplacement)
+        public static bool HasJavaReplacement(this IPropertySymbol propertySymbol, [NotNullWhen(true)]out SymbolReplacement? javaReplacement)
         {
             // TODO: look for interface/overridden class
             if (_replacements.TryGetValue(propertySymbol.ContainingType.GetFullName(), out var replacements))
@@ -113,7 +114,7 @@ namespace CodeBinder.Java
             return false;
         }
 
-        public static bool HasJavaReplacement(this IFieldSymbol fieldSymbol, out SymbolReplacement replacement)
+        public static bool HasJavaReplacement(this IFieldSymbol fieldSymbol, [NotNullWhen(true)]out SymbolReplacement? replacement)
         {
             if (_replacements.TryGetValue(fieldSymbol.ContainingType.GetFullName(), out var replacements))
                 return replacements.TryGetValue(fieldSymbol.Name, out replacement);
@@ -287,22 +288,22 @@ namespace CodeBinder.Java
 
         public static string GetJavaFieldModifiersString(IEnumerable<SyntaxKind> modifiers)
         {
-            return getJavaModifiersString(modifiers, getJavaFieldModifier);
+            return getJavaModifiersString(modifiers, tryGetJavaFieldModifier);
         }
 
         public static string GetJavaTypeModifiersString(IEnumerable<SyntaxKind> modifiers)
         {
-            return getJavaModifiersString(modifiers, getJavaTypeModifier);
+            return getJavaModifiersString(modifiers, tryGetJavaTypeModifier);
         }
 
         public static string GetJavaMethodModifiersString(IEnumerable<SyntaxKind> modifiers)
         {
-            return getJavaModifiersString(modifiers, getJavaMethodModifier);
+            return getJavaModifiersString(modifiers, tryGetJavaMethodModifier);
         }
 
         public static string GetJavaPropertyModifiersString(IEnumerable<SyntaxKind> modifiers)
         {
-            return getJavaModifiersString(modifiers, getJavaMethodModifier);
+            return getJavaModifiersString(modifiers, tryGetJavaMethodModifier);
         }
 
         private static string getJavaModifiersString(IEnumerable<SyntaxKind> modifiers, ModifierGetter getJavaModifier)
@@ -311,7 +312,7 @@ namespace CodeBinder.Java
             bool first = true;
             foreach (var modifier in modifiers)
             {
-                string javaModifier;
+                string? javaModifier;
                 if (!getJavaModifier(modifier, out javaModifier))
                     continue;
 
@@ -321,7 +322,7 @@ namespace CodeBinder.Java
             return builder.ToString();
         }
 
-        private static bool getJavaFieldModifier(SyntaxKind modifier, out string javaModifier)
+        private static bool tryGetJavaFieldModifier(SyntaxKind modifier, [NotNullWhen(true)]out string? javaModifier)
         {
             switch (modifier)
             {
@@ -354,7 +355,7 @@ namespace CodeBinder.Java
             }
         }
 
-        private static bool getJavaTypeModifier(SyntaxKind modifier, out string javaModifier)
+        private static bool tryGetJavaTypeModifier(SyntaxKind modifier, [NotNullWhen(true)]out string? javaModifier)
         {
             switch (modifier)
             {
@@ -384,7 +385,7 @@ namespace CodeBinder.Java
             }
         }
 
-        private static bool getJavaMethodModifier(SyntaxKind modifier, out string javaModifier)
+        private static bool tryGetJavaMethodModifier(SyntaxKind modifier, [NotNullWhen(true)]out string? javaModifier)
         {
             switch (modifier)
             {
@@ -429,7 +430,7 @@ namespace CodeBinder.Java
             }
         }
 
-        private static bool getJavaPropertyModifier(SyntaxKind modifier, out string javaModifier)
+        private static bool tryGetJavaPropertyModifier(SyntaxKind modifier, [NotNullWhen(true)]out string? javaModifier)
         {
             switch (modifier)
             {

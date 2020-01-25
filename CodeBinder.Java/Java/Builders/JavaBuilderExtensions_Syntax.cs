@@ -71,7 +71,7 @@ namespace CodeBinder.Java
             {
                 case SyntaxKind.TypeConstraint:
                 {
-                    var typeContraints = syntax as TypeConstraintSyntax;
+                    var typeContraints = (TypeConstraintSyntax)syntax;
                     string javaTypeName = typeContraints.Type.GetJavaType(context, out var isInterface);
 
                     builder.Append(isInterface ? "implements" : "extends").Space().Append(javaTypeName);

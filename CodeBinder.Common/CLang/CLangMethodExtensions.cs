@@ -29,7 +29,7 @@ namespace CodeBinder.CLang
             bool isByRef = parameter.IsRef() || parameter.IsOut();
             var symbol = parameter.Type!.GetTypeSymbol(provider);
             string? suffix;
-            string type = getCLangType(symbol, parameter.GetDeclaredSymbol(provider).GetAttributes(),
+            string type = getCLangType(symbol, parameter.GetAttributes(provider),
                 isByRef ? ParameterType.ByRef : ParameterType.Regular, out suffix);
             builder.Append(type).Space().Append(parameter.Identifier.Text);
             if (suffix != null)
@@ -55,8 +55,7 @@ namespace CodeBinder.CLang
         public static string GetCLangReturnType(this DelegateDeclarationSyntax dlg, ICompilationContextProvider provider)
         {
             var symbol = dlg.GetDeclaredSymbol<INamedTypeSymbol>(provider);
-            Debug.Assert(symbol.DelegateInvokeMethod != null);
-            return getCLangReturnType(symbol.DelegateInvokeMethod);
+            return getCLangReturnType(symbol.DelegateInvokeMethod!);
         }
 
         private static string getCLangReturnType(IMethodSymbol method)

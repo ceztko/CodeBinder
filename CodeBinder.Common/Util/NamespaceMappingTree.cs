@@ -33,10 +33,13 @@ namespace CodeBinder.Util
             node.MappedNamespace = mappedns;
         }
 
-        public string? GetMappedNamespace(string refns,
+        public string GetMappedNamespace(string refns,
             NamespaceNormalization leftOverNorm = NamespaceNormalization.None)
         {
             string? ret = GetMappedNamespace(refns, out string? leftoverns);
+            if (ret == null)
+                throw new Exception($"Unable to map namespace {refns}");
+
             if (leftoverns == null)
                 return ret;
 
@@ -78,7 +81,7 @@ namespace CodeBinder.Util
                 return node.MappedNamespace;
             }
 
-            Exit:
+        Exit:
             leftoverns = refns;
             return null;
         }

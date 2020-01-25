@@ -33,12 +33,11 @@ namespace CodeBinder.Java
             }
         }
 
-        public override string BasePath
+        public override string? BasePath
         {
             get
             {
-                var ns = Namespace;
-                return ns == null ? null : ns.Replace('.', Path.DirectorySeparatorChar);
+                return Namespace.Replace('.', Path.DirectorySeparatorChar);
             }
         }
 
@@ -88,7 +87,10 @@ namespace CodeBinder.Java
 
         public sealed override void Write(CodeBuilder builder)
         {
-            builder.Append("package").Space().Append(Namespace).EndOfStatement();
+            string? ns = Namespace;
+            if (ns != null)
+                builder.Append("package").Space().Append(ns).EndOfStatement();
+
             builder.AppendLine();
             bool hasImports = false;
             foreach (var import in Imports)

@@ -29,15 +29,12 @@ namespace CodeBinder.Java
             else
             {
                 _isAutoProperty = true;
-                if (Item.AccessorList != null)
+                foreach (var accessor in Item.AccessorList!.Accessors)
                 {
-                    foreach (var accessor in Item.AccessorList.Accessors)
+                    if (accessor.Body != null)
                     {
-                        if (accessor.Body != null)
-                        {
-                            _isAutoProperty = false;
-                            break;
-                        }
+                        _isAutoProperty = false;
+                        break;
                     }
                 }
             }
@@ -48,7 +45,7 @@ namespace CodeBinder.Java
         protected override void Write()
         {
             WriteUnderlyingField();
-            WriteAccessors(Item.AccessorList);
+            WriteAccessors(Item.AccessorList!);
         }
 
         private void WriteUnderlyingField()
@@ -250,7 +247,7 @@ namespace CodeBinder.Java
             bool first = true;
             foreach (var parameter in Item.ParameterList.Parameters)
             {
-                Builder.CommaSeparator(ref first).Append(parameter.Type, Context)
+                Builder.CommaSeparator(ref first).Append(parameter.Type!, Context)
                     .Space().Append(parameter.Identifier.Text);
             }
 

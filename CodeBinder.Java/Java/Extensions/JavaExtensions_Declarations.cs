@@ -21,28 +21,28 @@ namespace CodeBinder.Java
             switch (kind)
             {
                 case SyntaxKind.ConstructorDeclaration:
-                    return new[] { new ConstructorWriter(member as ConstructorDeclarationSyntax, context) };
+                    return new[] { new ConstructorWriter((ConstructorDeclarationSyntax)member, context) };
                 case SyntaxKind.DestructorDeclaration:
-                    return new[] { new DestructorWriter(member as DestructorDeclarationSyntax, context) };
+                    return new[] { new DestructorWriter((DestructorDeclarationSyntax)member, context) };
                 case SyntaxKind.MethodDeclaration:
-                    return getMethodWriters(member as MethodDeclarationSyntax, context);
+                    return getMethodWriters((MethodDeclarationSyntax)member, context);
                 case SyntaxKind.PropertyDeclaration:
-                    return new[] { new PropertyWriter(member as PropertyDeclarationSyntax, context) };
+                    return new[] { new PropertyWriter((PropertyDeclarationSyntax)member, context) };
                 case SyntaxKind.IndexerDeclaration:
-                    return new[] { new IndexerWriter(member as IndexerDeclarationSyntax, context) };
+                    return new[] { new IndexerWriter((IndexerDeclarationSyntax)member, context) };
                 case SyntaxKind.FieldDeclaration:
-                    return new[] { new FieldWriter(member as FieldDeclarationSyntax, context) };
+                    return new[] { new FieldWriter((FieldDeclarationSyntax)member, context) };
                 case SyntaxKind.InterfaceDeclaration:
-                    var iface = member as InterfaceDeclarationSyntax;
+                    var iface = (InterfaceDeclarationSyntax)member;
                     return new[] { new InterfaceTypeWriter(iface, partialDeclarations.MemberPartialDeclarations[iface], context) };
                 case SyntaxKind.ClassDeclaration:
-                    var cls = member as ClassDeclarationSyntax;
+                    var cls = (ClassDeclarationSyntax)member;
                     return new[] { new ClassTypeWriter(cls, partialDeclarations.MemberPartialDeclarations[cls], context) };
                 case SyntaxKind.StructKeyword:
-                    var structure = member as StructDeclarationSyntax;
+                    var structure = (StructDeclarationSyntax)member;
                     return new[] { new StructTypeWriter(structure, partialDeclarations.MemberPartialDeclarations[structure], context) };
                 case SyntaxKind.EnumDeclaration:
-                    return new[] { new EnumTypeWriter(member as EnumDeclarationSyntax, context) };
+                    return new[] { new EnumTypeWriter((EnumDeclarationSyntax)member, context) };
                 default:
                     throw new Exception();
             }

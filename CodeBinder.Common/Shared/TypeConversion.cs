@@ -26,9 +26,9 @@ namespace CodeBinder.Shared
 
         public abstract string FileName { get; }
 
-        public virtual string BasePath
+        public virtual string? BasePath
         {
-            get { return string.Empty; }
+            get { return null; }
         }
 
         public TypeContext Context

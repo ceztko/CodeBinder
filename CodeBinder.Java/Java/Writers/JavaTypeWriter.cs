@@ -153,7 +153,7 @@ namespace CodeBinder.Java
                         case SyntaxKind.ClassDeclaration:
                         case SyntaxKind.StructDeclaration:
                         {
-                            if (_partialDeclarations.MemberPartialDeclarations.ContainsKey(member as TypeDeclarationSyntax))
+                            if (_partialDeclarations.MemberPartialDeclarations.ContainsKey((TypeDeclarationSyntax)member))
                                 yield return member;
                             break;
                         }
@@ -174,11 +174,11 @@ namespace CodeBinder.Java
                 return syntax;
 
             // Find the declaration with non null base list, or just return the first
-            TypeDeclarationSyntax ret = null;
-            foreach (var declaration in partialDeclarations.PartialDeclarations)
+            TypeDeclarationSyntax ret = partialDeclarations.PartialDeclarations[0];
+            for (int i = 1; i < partialDeclarations.PartialDeclarations.Count; i++)
             {
-                ret = declaration;
-                if (declaration.BaseList != null)
+                ret = partialDeclarations.PartialDeclarations[i];
+                if (ret.BaseList != null)
                     break;
             }
 

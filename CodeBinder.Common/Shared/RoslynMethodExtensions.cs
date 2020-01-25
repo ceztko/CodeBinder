@@ -235,6 +235,9 @@ namespace CodeBinder.Shared
         public static ImmutableArray<AttributeData> GetAttributes(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var symbol = node.GetDeclaredSymbol(provider);
+            if (symbol == null)
+                throw new Exception($"No attributes for syntax {node}");
+
             return symbol.GetAttributes();
         }
 
@@ -270,12 +273,12 @@ namespace CodeBinder.Shared
         }
 
         public static TSymbol GetDeclaredSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
-            where TSymbol : ISymbol
+            where TSymbol : class,ISymbol
         {
-            return (TSymbol)node.GetDeclaredSymbol(provider);
+            return GetDeclaredSymbol(node, provider) as TSymbol ?? throw new Exception($"Unable to get declared symbol {typeof(ISymbol).Name} in syntax: {node}");
         }
 
-        public static ISymbol GetDeclaredSymbol(this SyntaxNode node, ICompilationContextProvider provider)
+        public static ISymbol? GetDeclaredSymbol(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = node.GetSemanticModel(provider);
             return model.GetDeclaredSymbol(node);

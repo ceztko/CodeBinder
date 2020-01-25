@@ -19,8 +19,8 @@ namespace CodeBinder.CLang
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            var sym = node.GetDeclaredSymbol<ITypeSymbol>(this);
-            if (sym.Inherits<NativeTypeBinder>())
+            var symbol = node.GetDeclaredSymbol<ITypeSymbol>(this)!;
+            if (symbol.Inherits<NativeTypeBinder>())
             {
                 // These are the binders for types
                 Compilation.AddType(node);

@@ -20,7 +20,7 @@ namespace CodeBinder.JNI
 
         static string getJNIMethodName(string methodName, MethodDeclarationSyntax method, JNIModuleContext module)
         {
-            var parentType = method.Parent.GetDeclaredSymbol(module);
+            var parentType = method.Parent.GetDeclaredSymbol(module)!;
             StringBuilder builder = new StringBuilder();
             string mappedns = module.Compilation.Conversion.NamespaceMapping.GetMappedNamespace(method.GetContainingNamespace(module),
                 NamespaceNormalization.LowerCase);
@@ -31,7 +31,7 @@ namespace CodeBinder.JNI
 
         public static string GetJNIType(this ParameterSyntax parameter, ICompilationContextProvider provider)
         {
-            var symbol = parameter.Type.GetTypeSymbol(provider);
+            var symbol = parameter.Type!.GetTypeSymbol(provider);
             bool isByRef = parameter.IsRef() || parameter.IsOut();
             return getJNIType(symbol, isByRef);
         }
@@ -44,10 +44,7 @@ namespace CodeBinder.JNI
 
         private static string getJNIType(ITypeSymbol symbol, bool isByRef)
         {
-            return getJNIType(symbol.GetFullName(), symbol, isByRef);
-        }
-        private static string getJNIType(string typeName, ITypeSymbol symbol, bool isByRef)
-        {
+            string typeName = symbol.GetFullName();
             if (symbol.TypeKind == TypeKind.Enum)
             {
                 if (isByRef)
@@ -57,10 +54,9 @@ namespace CodeBinder.JNI
             }
 
             string jniTypeSuffix = string.Empty;
-            if (symbol?.TypeKind == TypeKind.Array)
+            if (symbol.TypeKind == TypeKind.Array)
             {
-                var arrayType = symbol as IArrayTypeSymbol;
-
+                var arrayType = (IArrayTypeSymbol)symbol;
                 typeName = arrayType.ElementType.GetFullName();
                 jniTypeSuffix = "Array";
             }
@@ -73,7 +69,6 @@ namespace CodeBinder.JNI
 
             return jniTypeName + jniTypeSuffix;
         }
-
 
         static string getJNIType(string typeName, ITypeSymbol symbol)
         {

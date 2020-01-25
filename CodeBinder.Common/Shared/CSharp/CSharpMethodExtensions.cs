@@ -21,13 +21,13 @@ namespace CodeBinder.Shared.CSharp
 
         public static string GetContainingNamespace(this BaseTypeDeclarationSyntax node, ICompilationContextProvider provider)
         {
-            var symbol = node.GetDeclaredSymbol(provider);
+            var symbol = node.GetDeclaredSymbol(provider)!;
             return symbol.ContainingNamespace.GetFullName();
         }
 
         public static string GetContainingNamespace(this MethodDeclarationSyntax node, ICompilationContextProvider provider)
         {
-            var symbol = node.GetDeclaredSymbol(provider);
+            var symbol = node.GetDeclaredSymbol(provider)!;
             return symbol.ContainingNamespace.GetFullName();
         }
 
@@ -91,7 +91,7 @@ namespace CodeBinder.Shared.CSharp
             throw new Exception("Unsupported expression kind");
         }
 
-        public static bool IsExpression<TExpression>(this SyntaxNode node, out TExpression? expression)
+        public static bool IsExpression<TExpression>(this SyntaxNode node, [NotNullWhen(true)]out TExpression? expression)
             where TExpression : ExpressionSyntax
         {
             ExpressionKind kind;
@@ -412,7 +412,7 @@ namespace CodeBinder.Shared.CSharp
             throw new Exception("Unsupported statement kind");
         }
 
-        public static bool IsStatement<TStatement>(this SyntaxNode node, out TStatement? statement)
+        public static bool IsStatement<TStatement>(this SyntaxNode node, [NotNullWhen(true)]out TStatement? statement)
             where TStatement : StatementSyntax
         {
             StatementKind kind;
@@ -576,14 +576,14 @@ namespace CodeBinder.Shared.CSharp
         // Note: Declations -> GetDeclaredSymbol()
         public static string GetFullName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
         {
-            var symbol = node.GetDeclaredSymbol(provider);
+            var symbol = node.GetDeclaredSymbol(provider)!;
             return symbol.GetFullName();
         }
 
         // Note: Declations -> GetDeclaredSymbol()
         public static string GetQualifiedName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
         {
-            var symbol = node.GetDeclaredSymbol(provider);
+            var symbol = node.GetDeclaredSymbol(provider)!;
             return symbol.GetQualifiedName();
         }
 
@@ -699,7 +699,7 @@ namespace CodeBinder.Shared.CSharp
             return ret!;
         }
 
-        private static ISymbol GetDefaultDeclarationSymbol(SyntaxNode node, ICompilationContextProvider provider)
+        private static ISymbol? GetDefaultDeclarationSymbol(SyntaxNode node, ICompilationContextProvider provider)
         {
             if (node.IsKind(SyntaxKind.FieldDeclaration))
             {
@@ -725,7 +725,7 @@ namespace CodeBinder.Shared.CSharp
 
         public static long GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider context)
         {
-            var symbol = (IFieldSymbol)node.GetDeclaredSymbol(context);
+            var symbol = (IFieldSymbol)node.GetDeclaredSymbol(context)!;
             return Convert.ToInt64(symbol.ConstantValue);
         }
 

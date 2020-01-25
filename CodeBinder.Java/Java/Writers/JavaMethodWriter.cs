@@ -105,7 +105,7 @@ namespace CodeBinder.Java
             if (isRef)
                 flags |= JavaTypeFlags.IsByRef;
 
-            WriteType(parameter.Type, flags);
+            WriteType(parameter.Type!, flags);
             Builder.Space().Append(parameter.Identifier.Text);
         }
 
@@ -184,14 +184,9 @@ namespace CodeBinder.Java
                             Builder.CommaSeparator();
 
                         if (i < _optionalIndex)
-                        {
                             Builder.Append(parameter.Identifier.Text);
-                        }
                         else
-                        {
-                            Debug.Assert(parameter.Default != null);
-                            Builder.Append(parameter.Default.Value, Context);
-                        }
+                            Builder.Append(parameter.Default!.Value, Context);
                     }
                 }
 
@@ -296,7 +291,7 @@ namespace CodeBinder.Java
                 if (_isStatic)
                     return "static";
                 else
-                    return (Item.Parent as BaseTypeDeclarationSyntax).GetName();
+                    return (Item.Parent as BaseTypeDeclarationSyntax)!.GetName();
             }
         }
 

@@ -39,7 +39,7 @@ namespace CodeBinder.Java
             bool first = true;
             foreach (var statement in staments)
             {
-                IEnumerable<CodeWriter> writers;
+                IEnumerable<CodeWriter>? writers;
                 if (statement.HasReplacementWriters(context, out writers))
                 {
                     foreach (var writer in writers)
@@ -97,9 +97,12 @@ namespace CodeBinder.Java
         {
             builder.Append("for").Space().Parenthesized(() =>
             {
-                builder.Append(syntax.Declaration, context).SemiColonSeparator()
-                    .Append(syntax.Condition, context).SemiColonSeparator()
-                    .Append(syntax.Incrementors, context);
+                if (syntax.Declaration != null)
+                    builder.Append(syntax.Declaration, context);
+                builder.SemiColonSeparator();
+                if (syntax.Condition != null)
+                    builder.Append(syntax.Condition, context);
+                builder.SemiColonSeparator().Append(syntax.Incrementors, context);
             }).AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
             return builder;
@@ -154,8 +157,11 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, ThrowStatementSyntax syntax, JavaCodeConversionContext context)
         {
-            builder.Append("throw").Space().Append(syntax.Expression, context).SemiColon();
-            return builder;
+            builder.Append("throw");
+            if (syntax.Expression != null)
+                builder.Space().Append(syntax.Expression, context);
+
+            return builder.SemiColon();
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, TryStatementSyntax syntax, JavaCodeConversionContext context)
@@ -173,7 +179,7 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, UsingStatementSyntax syntax, JavaCodeConversionContext context)
         {
-            builder.Append("try").Space().Parenthesized().Append(syntax.Declaration, context).Close().AppendLine();
+            builder.Append("try").Space().Parenthesized().Append(syntax.Declaration!, context).Close().AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
             return builder;
         }
@@ -192,39 +198,39 @@ namespace CodeBinder.Java
             switch (kind)
             {
                 case SyntaxKind.Block:
-                    return builder.Append(statement as BlockSyntax, context);
+                    return builder.Append((BlockSyntax)statement, context);
                 case SyntaxKind.BreakStatement:
-                    return builder.Append(statement as BreakStatementSyntax, context);
+                    return builder.Append((BreakStatementSyntax)statement, context);
                 case SyntaxKind.ForEachStatement:
-                    return builder.Append(statement as ForEachStatementSyntax, context);
+                    return builder.Append((ForEachStatementSyntax)statement, context);
                 case SyntaxKind.ContinueStatement:
-                    return builder.Append(statement as ContinueStatementSyntax, context);
+                    return builder.Append((ContinueStatementSyntax)statement, context);
                 case SyntaxKind.DoStatement:
-                    return builder.Append(statement as DoStatementSyntax, context);
+                    return builder.Append((DoStatementSyntax)statement, context);
                 case SyntaxKind.EmptyStatement:
-                    return builder.Append(statement as EmptyStatementSyntax, context);
+                    return builder.Append((EmptyStatementSyntax)statement, context);
                 case SyntaxKind.ExpressionStatement:
-                    return builder.Append(statement as ExpressionStatementSyntax, context);
+                    return builder.Append((ExpressionStatementSyntax)statement, context);
                 case SyntaxKind.ForStatement:
-                    return builder.Append(statement as ForStatementSyntax, context);
+                    return builder.Append((ForStatementSyntax)statement, context);
                 case SyntaxKind.IfStatement:
-                    return builder.Append(statement as IfStatementSyntax, context);
+                    return builder.Append((IfStatementSyntax)statement, context);
                 case SyntaxKind.LocalDeclarationStatement:
-                    return builder.Append(statement as LocalDeclarationStatementSyntax, context);
+                    return builder.Append((LocalDeclarationStatementSyntax)statement, context);
                 case SyntaxKind.LockStatement:
-                    return builder.Append(statement as LockStatementSyntax, context);
+                    return builder.Append((LockStatementSyntax)statement, context);
                 case SyntaxKind.ReturnStatement:
-                    return builder.Append(statement as ReturnStatementSyntax, context);
+                    return builder.Append((ReturnStatementSyntax)statement, context);
                 case SyntaxKind.SwitchStatement:
-                    return builder.Append(statement as SwitchStatementSyntax, context);
+                    return builder.Append((SwitchStatementSyntax)statement, context);
                 case SyntaxKind.ThrowStatement:
-                    return builder.Append(statement as ThrowStatementSyntax, context);
+                    return builder.Append((ThrowStatementSyntax)statement, context);
                 case SyntaxKind.TryStatement:
-                    return builder.Append(statement as TryStatementSyntax, context);
+                    return builder.Append((TryStatementSyntax)statement, context);
                 case SyntaxKind.UsingStatement:
-                    return builder.Append(statement as UsingStatementSyntax, context);
+                    return builder.Append((UsingStatementSyntax)statement, context);
                 case SyntaxKind.WhileStatement:
-                    return builder.Append(statement as WhileStatementSyntax, context);
+                    return builder.Append((WhileStatementSyntax)statement, context);
                 // Unsupported statements
                 case SyntaxKind.CheckedStatement:
                 case SyntaxKind.UnsafeStatement:
@@ -273,7 +279,12 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, CatchClauseSyntax syntax, JavaCodeConversionContext context)
         {
-            builder.Append("catch").Space().Parenthesized().Append(syntax.Declaration.Type, context).Space().Append(syntax.Declaration.Identifier.Text).Close().AppendLine();
+            builder.Append("catch").Space();
+            if (syntax.Declaration == null)
+                builder.Parenthesized().Append("Exception e").Close().AppendLine();
+            else
+                builder.Parenthesized().Append(syntax.Declaration.Type, context).Space().Append(syntax.Declaration.Identifier.Text).Close().AppendLine();
+
             builder.Append(syntax.Block, context);
             return builder;
         }
@@ -302,7 +313,7 @@ namespace CodeBinder.Java
                 case SyntaxKind.DefaultSwitchLabel:
                     break;
                 case SyntaxKind.CaseSwitchLabel:
-                    builder.Space().Append(syntax as CaseSwitchLabelSyntax, context);
+                    builder.Space().Append((CaseSwitchLabelSyntax)syntax, context);
                     break;
                 default:
                     throw new Exception();
@@ -313,7 +324,7 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, CaseSwitchLabelSyntax syntax, JavaCodeConversionContext context)
         {
-            var typeSymbol = syntax.Value.GetTypeSymbol(context);
+            var typeSymbol = syntax.Value.GetTypeSymbol(context)!;
             if (typeSymbol.TypeKind == TypeKind.Enum)
             {
                 // Shitty Java wants enum elements to be written unqualified

@@ -13,6 +13,9 @@ namespace CodeBinder.Attributes
         internal CodeBinderAttribute() { }
     }
 
+    /// <summary>
+    /// Describe a module useful for native code generation and others (eg. JNI)
+    /// </summary>
     [Conditional(ConditionString)]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class ModuleAttribute : CodeBinderAttribute
@@ -25,16 +28,19 @@ namespace CodeBinder.Attributes
         public string Name { get; private set; }
     }
 
+    /// <summary>
+    /// Describe an additional import for the target language
+    /// </summary>
     [Conditional(ConditionString)]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class ImportAttribute : CodeBinderAttribute
     {
-        public ImportAttribute(string import)
+        public ImportAttribute(string name)
         {
-            ImportName = import;
+            Name = name;
         }
 
-        public string ImportName { get; private set; }
+        public string Name { get; private set; }
     }
 
     [Conditional(ConditionString)]
@@ -50,14 +56,18 @@ namespace CodeBinder.Attributes
     }
 
     [Conditional(ConditionString)]
-    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Constructor
+        | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct
+        | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class IgnoreAttribute : CodeBinderAttribute
     {
 
     }
 
     [Conditional(ConditionString)]
-    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Constructor
+        | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct
+        | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class RequiresAttribute : CodeBinderAttribute
     {
         private string[] _policies;
@@ -78,7 +88,8 @@ namespace CodeBinder.Attributes
     }
 
     [Conditional(ConditionString)]
-    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Delegate)]
+    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Enum
+        | AttributeTargets.Field | AttributeTargets.Delegate)]
     public sealed class NativeBindingAttribute : CodeBinderAttribute
     {
         public NativeBindingAttribute(string name)

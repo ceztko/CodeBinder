@@ -10,27 +10,28 @@ using System.Text;
 using CodeBinder.Shared.Java;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.Java
 {
     static partial class JavaExtensions
     {
         public static bool HasReplacementWriters(this StatementSyntax statement,
-            JavaCodeConversionContext context, out IEnumerable<CodeWriter> writers)
+            JavaCodeConversionContext context, [NotNullWhen(true)]out IEnumerable<CodeWriter>? writers)
         {
             switch (statement.StatementKind())
             {
                 case StatementKind.Expression:
                 {
-                    return hasReplacementWriters(statement as ExpressionStatementSyntax, context, out writers);
+                    return hasReplacementWriters((ExpressionStatementSyntax)statement, context, out writers);
                 }
                 case StatementKind.LocalDeclaration:
                 {
-                    return hasReplacementWriters(statement as LocalDeclarationStatementSyntax, context, out writers);
+                    return hasReplacementWriters((LocalDeclarationStatementSyntax)statement, context, out writers);
                 }
                 case StatementKind.Return:
                 {
-                    return hasReplacementWriters(statement as ReturnStatementSyntax, context, out writers);
+                    return hasReplacementWriters((ReturnStatementSyntax)statement, context, out writers);
                 }
                 default:
                 {
@@ -41,13 +42,16 @@ namespace CodeBinder.Java
         }
 
         static bool hasReplacementWriters(ReturnStatementSyntax statement, JavaCodeConversionContext context,
-          out IEnumerable<CodeWriter> writers)
+            [NotNullWhen(true)]out IEnumerable<CodeWriter>? writers)
         {
+            if (statement.Expression == null)
+                goto NoReplacement;
+
             switch (statement.Expression.ExpressionKind())
             {
                 case ExpressionKind.Invocation:
                 {
-                    var invocation = statement.Expression as InvocationExpressionSyntax;
+                    var invocation = (InvocationExpressionSyntax)statement.Expression;
                     if (hasReplacementWriters(invocation, statement, context, out writers))
                         return true;
 
@@ -55,22 +59,23 @@ namespace CodeBinder.Java
                 }
             }
 
+        NoReplacement:
             writers = null;
             return false;
         }
 
         static bool hasReplacementWriters(ExpressionStatementSyntax statement, JavaCodeConversionContext context,
-          out IEnumerable<CodeWriter> writers)
+            [NotNullWhen(true)]out IEnumerable<CodeWriter>? writers)
         {
             switch (statement.Expression.ExpressionKind())
             {
                 case ExpressionKind.Assignment:
                 {
                     // Look for invocation expression in the assignment right hand 
-                    var assigment = statement.Expression as AssignmentExpressionSyntax;
+                    var assigment = (AssignmentExpressionSyntax)statement.Expression;
                     if (assigment.Right.ExpressionKind() == ExpressionKind.Invocation)
                     {
-                        var invocation = assigment.Right as InvocationExpressionSyntax;
+                        var invocation = (InvocationExpressionSyntax)assigment.Right;
                         if (hasReplacementWriters(invocation, statement, context, out writers))
                             return true;
                     }
@@ -79,7 +84,7 @@ namespace CodeBinder.Java
                 }
                 case ExpressionKind.Invocation:
                 {
-                    var invocation = statement.Expression as InvocationExpressionSyntax;
+                    var invocation = (InvocationExpressionSyntax)statement.Expression;
                     if (hasReplacementWriters(invocation, statement, context, out writers))
                         return true;
 
@@ -92,13 +97,13 @@ namespace CodeBinder.Java
         }
 
         static bool hasReplacementWriters(LocalDeclarationStatementSyntax statement, JavaCodeConversionContext context,
-          out IEnumerable<CodeWriter> writers)
+            [NotNullWhen(true)]out IEnumerable<CodeWriter>? writers)
         {
             Debug.Assert(statement.Declaration.Variables.Count == 1);
             var variable = statement.Declaration.Variables[0];
             if (variable.Initializer != null && variable.Initializer.Value.IsKind(SyntaxKind.InvocationExpression))
             {
-                return hasReplacementWriters(variable.Initializer.Value as InvocationExpressionSyntax,
+                return hasReplacementWriters((InvocationExpressionSyntax)variable.Initializer.Value,
                     statement, context, out writers);
             }
 
@@ -107,7 +112,7 @@ namespace CodeBinder.Java
         }
 
         static bool hasReplacementWriters(InvocationExpressionSyntax invocation, StatementSyntax statement,
-            JavaCodeConversionContext context, out IEnumerable<CodeWriter> writers)
+            JavaCodeConversionContext context, [NotNullWhen(true)]out IEnumerable<CodeWriter>? writers)
         {
             var refArguments = getRefArguments(invocation, context);
             foreach (var arg in refArguments)
@@ -146,7 +151,7 @@ namespace CodeBinder.Java
                 writers.Add(CodeWriter.Create((builder) =>
                 {
                     var method = invocation.GetSymbol<IMethodSymbol>(context);
-                    var declaration = method.GetDeclarationSyntax();
+                    var declaration = method.GetDeclarationSyntax()!;
                     builder.Append(declaration.ReturnType, context).Space().Append("__ret").Space()
                         .Append("=").Space().Append(invocation, context).SemiColon(); 
                 }));
@@ -188,18 +193,18 @@ namespace CodeBinder.Java
             {
                 if (!arg.RefKindKeyword.IsNone())
                 {
-                    var symbol = arg.Expression.GetSymbol(context);
+                    var symbol = arg.Expression.GetSymbol(context)!;
                     ITypeSymbol type;
                     switch (symbol.Kind)
                     {
                         case SymbolKind.Local:
                         {
-                            type = (symbol as ILocalSymbol).Type;
+                            type = (symbol as ILocalSymbol)!.Type;
                             break;
                         }
                         case SymbolKind.Parameter:
                         {
-                            type = (symbol as IParameterSymbol).Type;
+                            type = (symbol as IParameterSymbol)!.Type;
                             break;
                         }
                         default:

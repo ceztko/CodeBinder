@@ -45,11 +45,11 @@ namespace CodeBinder.Java
                         if (syntax.Left.Kind() == SyntaxKind.ElementAccessExpression)
                         {
                             // Determine if the LHS of the assignment is an indexer set operation
-                            var property = symbol as IPropertySymbol;
+                            var property = (IPropertySymbol)symbol;
                             if (!property.IsIndexer)
                                 break;
 
-                            var elementAccess = syntax.Left as ElementAccessExpressionSyntax;
+                            var elementAccess = (ElementAccessExpressionSyntax)syntax.Left;
                             builder.Append(elementAccess.Expression, context).Dot()
                                 .Append(elementAccess, property, context)
                                     .Parenthesized().Append(elementAccess.ArgumentList, false, context).CommaSeparator().Append(syntax.Right, context); ;
@@ -84,7 +84,7 @@ namespace CodeBinder.Java
                     IMethodSymbol? method;
                     if (syntax.TryGetSymbol(context, out method))
                     {
-                        SymbolReplacement replacement;
+                        SymbolReplacement? replacement;
                         if (method.HasJavaReplacement(out replacement))
                         {
                             switch(replacement.Kind)
@@ -135,7 +135,7 @@ namespace CodeBinder.Java
             var symbol = syntax.GetSymbol(context);
             if (symbol?.Kind == SymbolKind.Property)
             {
-                var property = symbol as IPropertySymbol;
+                var property = (IPropertySymbol)symbol;
                 Debug.Assert(property.IsIndexer);
                 builder.Append(syntax.Expression, context).Dot().Append(syntax, property, context).Parenthesized().Append(syntax.ArgumentList, false, context);
                 return builder;
@@ -167,7 +167,7 @@ namespace CodeBinder.Java
         {
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context);
             bool hasEmptyBody;
-            if (methodSymbol.IsPartialMethod(out hasEmptyBody) && (hasEmptyBody || methodSymbol.PartialImplementationPart.ShouldDiscard()))
+            if (methodSymbol.IsPartialMethod(out hasEmptyBody) && (hasEmptyBody || methodSymbol.PartialImplementationPart!.ShouldDiscard()))
                 return builder;
 
             if (methodSymbol.IsNative() && methodSymbol.ReturnType.TypeKind == TypeKind.Enum)
@@ -205,7 +205,7 @@ namespace CodeBinder.Java
                 return builder;
             }
 
-            var symbol = syntax.GetSymbol(context);
+            var symbol = syntax.GetSymbol(context)!;
             if (symbol.Kind == SymbolKind.Property
                 && symbol.OriginalDefinition.ContainingType.GetFullName() == "System.Nullable<T>"
                 && symbol.Name == "Value")
@@ -221,7 +221,7 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, JavaCodeConversionContext context)
         {
-            builder.Append("new").Space().Append(syntax.Type, context).Append(syntax.ArgumentList, context);
+            builder.Append("new").Space().Append(syntax.Type, context).Append(syntax.ArgumentList!, context);
             return builder;
         }
 
@@ -256,9 +256,9 @@ namespace CodeBinder.Java
             switch (kind)
             {
                 case SyntaxKind.ArrayCreationExpression:
-                    return builder.Append(expression as ArrayCreationExpressionSyntax, context);
+                    return builder.Append((ArrayCreationExpressionSyntax)expression, context);
                 case SyntaxKind.OmittedArraySizeExpression:
-                    return builder.Append(expression as OmittedArraySizeExpressionSyntax, context);
+                    return builder.Append((OmittedArraySizeExpressionSyntax)expression, context);
                 case SyntaxKind.AddAssignmentExpression:
                 case SyntaxKind.AndAssignmentExpression:
                 case SyntaxKind.DivideAssignmentExpression:
@@ -270,7 +270,7 @@ namespace CodeBinder.Java
                 case SyntaxKind.RightShiftAssignmentExpression:
                 case SyntaxKind.SimpleAssignmentExpression:
                 case SyntaxKind.SubtractAssignmentExpression:
-                    return builder.Append(expression as AssignmentExpressionSyntax, context);
+                    return builder.Append((AssignmentExpressionSyntax)expression, context);
                 case SyntaxKind.AddExpression:
                 case SyntaxKind.SubtractExpression:
                 case SyntaxKind.MultiplyExpression:
@@ -291,49 +291,49 @@ namespace CodeBinder.Java
                 case SyntaxKind.GreaterThanOrEqualExpression:
                 case SyntaxKind.IsExpression:
                 case SyntaxKind.AsExpression:
-                    return builder.Append(expression as BinaryExpressionSyntax, context);
+                    return builder.Append((BinaryExpressionSyntax)expression, context);
                 case SyntaxKind.CastExpression:
-                    return builder.Append(expression as CastExpressionSyntax, context);
+                    return builder.Append((CastExpressionSyntax)expression, context);
                 case SyntaxKind.ConditionalExpression:
-                    return builder.Append(expression as ConditionalExpressionSyntax, context);
+                    return builder.Append((ConditionalExpressionSyntax)expression, context);
                 case SyntaxKind.ElementAccessExpression:
-                    return builder.Append(expression as ElementAccessExpressionSyntax, context);
+                    return builder.Append((ElementAccessExpressionSyntax)expression, context);
                 case SyntaxKind.ObjectInitializerExpression:
                 case SyntaxKind.CollectionInitializerExpression:
                 case SyntaxKind.ArrayInitializerExpression:
                 case SyntaxKind.ComplexElementInitializerExpression:
-                    return builder.Append(expression as InitializerExpressionSyntax, context);
+                    return builder.Append((InitializerExpressionSyntax)expression, context);
                 case SyntaxKind.BaseExpression:
-                    return builder.Append(expression as BaseExpressionSyntax, context);
+                    return builder.Append((BaseExpressionSyntax)expression, context);
                 case SyntaxKind.ThisExpression:
-                    return builder.Append(expression as ThisExpressionSyntax, context);
+                    return builder.Append((ThisExpressionSyntax)expression, context);
                 case SyntaxKind.InvocationExpression:
-                    return builder.Append(expression as InvocationExpressionSyntax, context);
+                    return builder.Append((InvocationExpressionSyntax)expression, context);
                 case SyntaxKind.NumericLiteralExpression:
                 case SyntaxKind.StringLiteralExpression:
                 case SyntaxKind.CharacterLiteralExpression:
                 case SyntaxKind.TrueLiteralExpression:
                 case SyntaxKind.FalseLiteralExpression:
                 case SyntaxKind.NullLiteralExpression:
-                    return builder.Append(expression as LiteralExpressionSyntax, context);
+                    return builder.Append((LiteralExpressionSyntax)expression, context);
                 case SyntaxKind.SimpleMemberAccessExpression:
-                    return builder.Append(expression as MemberAccessExpressionSyntax, context);
+                    return builder.Append((MemberAccessExpressionSyntax)expression, context);
                 case SyntaxKind.ObjectCreationExpression:
-                    return builder.Append(expression as ObjectCreationExpressionSyntax, context);
+                    return builder.Append((ObjectCreationExpressionSyntax)expression, context);
                 case SyntaxKind.ParenthesizedExpression:
-                    return builder.Append(expression as ParenthesizedExpressionSyntax, context);
+                    return builder.Append((ParenthesizedExpressionSyntax)expression, context);
                 case SyntaxKind.PostIncrementExpression:
                 case SyntaxKind.PostDecrementExpression:
-                    return builder.Append(expression as PostfixUnaryExpressionSyntax, context);
+                    return builder.Append((PostfixUnaryExpressionSyntax)expression, context);
                 case SyntaxKind.UnaryPlusExpression:
                 case SyntaxKind.UnaryMinusExpression:
                 case SyntaxKind.BitwiseNotExpression:
                 case SyntaxKind.LogicalNotExpression:
                 case SyntaxKind.PreIncrementExpression:
                 case SyntaxKind.PreDecrementExpression:
-                    return builder.Append(expression as PrefixUnaryExpressionSyntax, context);
+                    return builder.Append((PrefixUnaryExpressionSyntax)expression, context);
                 case SyntaxKind.TypeOfExpression:
-                    return builder.Append(expression as TypeOfExpressionSyntax, context);
+                    return builder.Append((TypeOfExpressionSyntax)expression, context);
                 case SyntaxKind.QualifiedName:
                 case SyntaxKind.ArrayType:
                 case SyntaxKind.GenericName:
@@ -342,7 +342,7 @@ namespace CodeBinder.Java
                 case SyntaxKind.OmittedTypeArgument:
                 case SyntaxKind.PredefinedType:
                 case SyntaxKind.RefType:
-                    return builder.Append(expression as TypeSyntax, context);
+                    return builder.Append((TypeSyntax)expression, context);
                 // Unsupported expressions
                 case SyntaxKind.RefExpression:
                 case SyntaxKind.DeclarationExpression:
@@ -408,7 +408,7 @@ namespace CodeBinder.Java
         {
             var parentSymbol = syntax.Parent.GetSymbol(context);
             bool isNativeInvocation = false;
-            if (parentSymbol?.Kind == SymbolKind.Method && (parentSymbol as IMethodSymbol).IsNative())
+            if (parentSymbol?.Kind == SymbolKind.Method && (parentSymbol as IMethodSymbol)!.IsNative())
                 isNativeInvocation = true;
 
             builder.Parenthesized().Append(syntax.Arguments, isNativeInvocation, context);
@@ -440,7 +440,7 @@ namespace CodeBinder.Java
                 if (native && arg.RefKindKeyword.IsNone())
                 {
                     // In native invocations, append ".value" for enum arguments
-                    var typeSymbol = arg.Expression.GetTypeSymbol(context);
+                    var typeSymbol = arg.Expression.GetTypeSymbol(context)!;
                     if (typeSymbol.TypeKind == TypeKind.Enum)
                         builder.Dot().Append("value");
                 }
