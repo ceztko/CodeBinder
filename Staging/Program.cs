@@ -22,8 +22,6 @@ namespace ConsoleApp1
 
             GeneratorOptions genargs = new GeneratorOptions();
 
-            //Solution solution = workspace.OpenSolutionAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet.sln").Result;
-            //var conv = SolutionConverter.CreateFor<CSToJavaConversion>(solution);
             //Project project = await workspace.OpenProjectAsync(@"D:\Staging\Euronovate\CodeBinderInternal\Test\SimpleLibrary\SimpleLibrary.csproj");
             //Project project = await workspace.OpenProjectAsync(@"D:\Staging\Euronovate\CodeBinderInternal\Test\ENLibPdfNetLite.csproj");
             Project project = await workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj");
