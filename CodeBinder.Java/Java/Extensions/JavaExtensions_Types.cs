@@ -479,7 +479,7 @@ namespace CodeBinder.Java
                     case SyntaxKind.NullableType:
                     {
                         string? boxTypeName;
-                        if (JavaUtils.TryGetJavaBoxType(fullTypeName, out boxTypeName))
+                        if (JavaUtils.TryGetBoxType(fullTypeName, out boxTypeName))
                             builder.Append(boxTypeName);
                         else
                             throw new Exception();
@@ -738,7 +738,7 @@ namespace CodeBinder.Java
         {
             if (isByRef)
             {
-                if (JavaUtils.TryGetJavaRefBoxType(fullTypeName, out knownJavaType))
+                if (JavaUtils.TryGetRefBoxType(fullTypeName, out knownJavaType))
                     return true;
                 else
                     return false;

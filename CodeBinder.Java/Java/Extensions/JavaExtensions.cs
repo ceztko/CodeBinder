@@ -17,8 +17,6 @@ namespace CodeBinder.Java
 {
     static partial class JavaExtensions
     {
-        delegate bool ModifierGetter(SyntaxKind modifier, [NotNullWhen(true)]out string? javaModifier);
-
         static Dictionary<string, Dictionary<string, SymbolReplacement>> _replacements;
 
         static JavaExtensions()
@@ -265,210 +263,30 @@ namespace CodeBinder.Java
         public static string GetJavaModifiersString(this FieldDeclarationSyntax node)
         {
             var modifiers = node.GetCSharpModifiers();
-            return GetJavaFieldModifiersString(modifiers);
+            return JavaUtils.GetFieldModifiersString(modifiers);
         }
 
         public static string GetJavaModifiersString(this BaseTypeDeclarationSyntax node)
         {
             var modifiers = node.GetCSharpModifiers();
-            return GetJavaTypeModifiersString(modifiers);
+            return JavaUtils.GetTypeModifiersString(modifiers);
         }
 
         public static string GetJavaModifiersString(this BaseMethodDeclarationSyntax node)
         {
             var modifiers = node.GetCSharpModifiers();
-            return GetJavaMethodModifiersString(modifiers);
+            return JavaUtils.GetMethodModifiersString(modifiers);
         }
 
         public static string GetJavaModifiersString(this BasePropertyDeclarationSyntax node)
         {
             var modifiers = node.GetCSharpModifiers();
-            return GetJavaPropertyModifiersString(modifiers);
+            return JavaUtils.GetPropertyModifiersString(modifiers);
         }
 
-        public static string GetJavaFieldModifiersString(IEnumerable<SyntaxKind> modifiers)
-        {
-            return getJavaModifiersString(modifiers, tryGetJavaFieldModifier);
-        }
-
-        public static string GetJavaTypeModifiersString(IEnumerable<SyntaxKind> modifiers)
-        {
-            return getJavaModifiersString(modifiers, tryGetJavaTypeModifier);
-        }
-
-        public static string GetJavaMethodModifiersString(IEnumerable<SyntaxKind> modifiers)
-        {
-            return getJavaModifiersString(modifiers, tryGetJavaMethodModifier);
-        }
-
-        public static string GetJavaPropertyModifiersString(IEnumerable<SyntaxKind> modifiers)
-        {
-            return getJavaModifiersString(modifiers, tryGetJavaMethodModifier);
-        }
-
-        private static string getJavaModifiersString(IEnumerable<SyntaxKind> modifiers, ModifierGetter getJavaModifier)
-        {
-            var builder = new CodeBuilder();
-            bool first = true;
-            foreach (var modifier in modifiers)
-            {
-                string? javaModifier;
-                if (!getJavaModifier(modifier, out javaModifier))
-                    continue;
-
-                builder.Space(ref first).Append(javaModifier);
-            }
-
-            return builder.ToString();
-        }
-
-        private static bool tryGetJavaFieldModifier(SyntaxKind modifier, [NotNullWhen(true)]out string? javaModifier)
-        {
-            switch (modifier)
-            {
-                case SyntaxKind.PublicKeyword:
-                    javaModifier = "public";
-                    return true;
-                case SyntaxKind.ProtectedKeyword:
-                    javaModifier = "protected";
-                    return true;
-                case SyntaxKind.PrivateKeyword:
-                    javaModifier = "private";
-                    return true;
-                case SyntaxKind.StaticKeyword:
-                    javaModifier = "static";
-                    return true;
-                case SyntaxKind.ReadOnlyKeyword:
-                    javaModifier = "final";
-                    return true;
-                case SyntaxKind.ConstKeyword:
-                    javaModifier = "final";
-                    return true;
-                case SyntaxKind.NewKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.InternalKeyword:
-                    javaModifier = null;
-                    return false;
-                default:
-                    throw new Exception();
-            }
-        }
-
-        private static bool tryGetJavaTypeModifier(SyntaxKind modifier, [NotNullWhen(true)]out string? javaModifier)
-        {
-            switch (modifier)
-            {
-                case SyntaxKind.PublicKeyword:
-                    javaModifier = "public";
-                    return true;
-                case SyntaxKind.ProtectedKeyword:
-                    javaModifier = "protected";
-                    return true;
-                case SyntaxKind.PrivateKeyword:
-                    javaModifier = "private";
-                    return true;
-                case SyntaxKind.SealedKeyword:
-                    javaModifier = "final";
-                    return true;
-                case SyntaxKind.AbstractKeyword:
-                    javaModifier = "abstract";
-                    return true;
-                case SyntaxKind.InternalKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.StaticKeyword:
-                    javaModifier = null;
-                    return false;
-                default:
-                    throw new Exception();
-            }
-        }
-
-        private static bool tryGetJavaMethodModifier(SyntaxKind modifier, [NotNullWhen(true)]out string? javaModifier)
-        {
-            switch (modifier)
-            {
-                case SyntaxKind.PublicKeyword:
-                    javaModifier = "public";
-                    return true;
-                case SyntaxKind.ProtectedKeyword:
-                    javaModifier = "protected";
-                    return true;
-                case SyntaxKind.PrivateKeyword:
-                    javaModifier = "private";
-                    return true;
-                case SyntaxKind.StaticKeyword:
-                    javaModifier = "static";
-                    return true;
-                case SyntaxKind.SealedKeyword:
-                    javaModifier = "final";
-                    return true;
-                case SyntaxKind.ExternKeyword:
-                    javaModifier = "native";
-                    return true;
-                case SyntaxKind.AbstractKeyword:
-                    javaModifier = "abstract";
-                    return true;
-                case SyntaxKind.PartialKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.NewKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.InternalKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.VirtualKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.OverrideKeyword:
-                    javaModifier = null;
-                    return false;
-                default:
-                    throw new Exception();
-            }
-        }
-
-        private static bool tryGetJavaPropertyModifier(SyntaxKind modifier, [NotNullWhen(true)]out string? javaModifier)
-        {
-            switch (modifier)
-            {
-                case SyntaxKind.PublicKeyword:
-                    javaModifier = "public";
-                    return true;
-                case SyntaxKind.ProtectedKeyword:
-                    javaModifier = "protected";
-                    return true;
-                case SyntaxKind.PrivateKeyword:
-                    javaModifier = "private";
-                    return true;
-                case SyntaxKind.StaticKeyword:
-                    javaModifier = "static";
-                    return true;
-                case SyntaxKind.SealedKeyword:
-                    javaModifier = "final";
-                    return true;
-                case SyntaxKind.AbstractKeyword:
-                    javaModifier = "abstract";
-                    return true;
-                case SyntaxKind.NewKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.InternalKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.VirtualKeyword:
-                    javaModifier = null;
-                    return false;
-                case SyntaxKind.OverrideKeyword:
-                    javaModifier = null;
-                    return false;
-                default:
-                    throw new Exception();
-            }
-        }
-
+        /// <summary>
+        /// Lowercase the first character of the identifier
+        /// </summary>
         public static string ToJavaLowerCase(this string text)
         {
             if (string.IsNullOrEmpty(text) || char.IsLower(text, 0))

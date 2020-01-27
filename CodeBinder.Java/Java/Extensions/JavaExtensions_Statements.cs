@@ -138,7 +138,7 @@ namespace CodeBinder.Java
                 if (arg.Type.TypeKind == TypeKind.Enum)
                     boxType = "IntegerBox";
                 else
-                    boxType = JavaUtils.GetJavaRefBoxType(arg.Type.GetFullName());
+                    boxType = JavaUtils.GetRefBoxType(arg.Type.GetFullName());
 
                 writers.Add(CodeWriter.Create((builder) => {
                     builder.Append(boxType).Space().Append("__" + arg.Symbol.Name).Space().Append("=").Space()

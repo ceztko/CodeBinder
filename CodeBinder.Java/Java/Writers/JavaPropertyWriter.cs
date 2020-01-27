@@ -85,7 +85,7 @@ namespace CodeBinder.Java
             {
                 var modifiers = getSetterModifiers(accessor);
                 string javaModifiers;
-                if (modifiers.Count != 0 && (javaModifiers = JavaExtensions.GetJavaPropertyModifiersString(modifiers)).Length != 0)
+                if (modifiers.Count != 0 && (javaModifiers = JavaUtils.GetPropertyModifiersString(modifiers)).Length != 0)
                     Builder.Append(javaModifiers).Space();
             }
             Builder.Append("void").Space();
@@ -129,7 +129,7 @@ namespace CodeBinder.Java
         private void WriteGetter(AccessorDeclarationSyntax accessor)
         {
             if (!_isParentInterface)
-                Builder.Append(JavaExtensions.GetJavaPropertyModifiersString(_modifiers)).Space();
+                Builder.Append(JavaUtils.GetPropertyModifiersString(_modifiers)).Space();
 
             Builder.Append(JavaType).Space();
             using (Builder.Append(GetterName).ParameterList())
