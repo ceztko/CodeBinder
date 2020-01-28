@@ -173,10 +173,10 @@ namespace CodeBinder.Shared
         #endregion
     }
 
-    public abstract class CompilationContext<TSyntaxTreeContext, TNodeVisitor, TTypeContext, TLanguageConversion> : CompilationContext<TTypeContext>
+    public abstract class CompilationContext<TTypeContext, TSyntaxTreeContext, TNodeVisitor, TLanguageConversion> : CompilationContext<TTypeContext>
+        where TTypeContext : TypeContext<TTypeContext>
         where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
         where TNodeVisitor : class, INodeVisitor<TSyntaxTreeContext>, new()
-        where TTypeContext : TypeContext<TTypeContext>
         where TLanguageConversion : LanguageConversion
     {
         public TLanguageConversion Conversion { get; private set; }
