@@ -12,7 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.CLang
 {
-    public class CLangNodeVisitor : CSharpNodeVisitor<CLangCompilationContext, CLangSyntaxTreeContext, ConversionCSharpToCLang>
+    public class CLangNodeVisitor : CSharpNodeVisitor<CLangCompilationContext, CLangModuleContext, CLangSyntaxTreeContext, ConversionCSharpToCLang>
     {
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {

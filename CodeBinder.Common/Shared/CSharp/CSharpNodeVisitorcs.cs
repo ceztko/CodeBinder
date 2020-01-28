@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public class CSharpNodeVisitor : CSharpNodeVisitor<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpLanguageConversion>
+    public class CSharpNodeVisitor : CSharpNodeVisitor<CSharpCompilationContext, CSharpBaseTypeContext, CSharpSyntaxTreeContext, CSharpLanguageConversion>
     {
         private Stack<CSharpBaseTypeContext> _parents;
 
@@ -536,9 +536,10 @@ namespace CodeBinder.Shared.CSharp
         #endregion // Unsupported syntax
     }
 
-    public class CSharpNodeVisitor<TCompilation, TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor<TSyntaxTree>, ICompilationContextProvider
-        where TCompilation : CompilationContext
-        where TSyntaxTree : SyntaxTreeContext,ISyntaxTreeContext<TCompilation>
+    public class CSharpNodeVisitor<TCompilation, TTypeContext, TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor<TSyntaxTree>, ICompilationContextProvider
+        where TCompilation : CompilationContext<TTypeContext>
+        where TTypeContext : TypeContext<TTypeContext>
+        where TSyntaxTree : CompilationContext<TTypeContext>.SyntaxTree<TCompilation>
         where TLanguageConversion : LanguageConversion
     {
         TSyntaxTree? _TreeContext;
@@ -552,7 +553,7 @@ namespace CodeBinder.Shared.CSharp
 
         public TSyntaxTree TreeContext => _TreeContext!;
 
-        public TCompilation Compilation => (_TreeContext as ISyntaxTreeContext<TCompilation>)!.Compilation;
+        public TCompilation Compilation => _TreeContext!.Compilation;
 
         CompilationContext ICompilationContextProvider.Compilation
         {

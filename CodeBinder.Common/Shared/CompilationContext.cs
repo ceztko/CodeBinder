@@ -154,7 +154,7 @@ namespace CodeBinder.Shared
             }
         }
 
-        public abstract class SyntaxTree<TCompilationContext> : SyntaxTree, ISyntaxTreeContext<TCompilationContext>
+        public abstract class SyntaxTree<TCompilationContext> : SyntaxTree
             where TCompilationContext : CompilationContext<TTypeContext>
         {
             public new TCompilationContext Compilation { get; private set; }

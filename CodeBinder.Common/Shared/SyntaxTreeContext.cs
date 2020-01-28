@@ -42,13 +42,4 @@ namespace CodeBinder.Shared
 
         protected abstract IEnumerable<TypeContext> GetRootTypes();
     }
-
-    /// <summary>
-    /// This interface is needed for CSharpNodeVisitor.Compilation
-    /// TODO:  Evaluate remove it
-    /// </summary>
-    public interface ISyntaxTreeContext<TCompilationContext>
-    {
-        TCompilationContext Compilation { get; }
-    }
 }
