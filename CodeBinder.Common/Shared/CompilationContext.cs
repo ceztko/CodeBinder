@@ -1,12 +1,15 @@
 ﻿using CodeBinder.Util;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace CodeBinder.Shared
 {
-    // TODO: Make it language agnostic???
+    /// <summary>
+    /// Context built around a CodeAnalysis.Compilation
+    /// </summary>
     public abstract class CompilationContext : ICompilationContextProvider
     {
         private Dictionary<SyntaxTree, SemanticModel> _modelCache;
@@ -15,12 +18,6 @@ namespace CodeBinder.Shared
         internal CompilationContext()
         {
             _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
-        }
-
-        internal void SetCompilation(Compilation compilation)
-        {
-            _compilation = compilation;
-            CompilationSet?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler? CompilationSet;
@@ -40,9 +37,14 @@ namespace CodeBinder.Shared
         public Compilation Compilation
         {
             get { return _compilation; }
+            internal set
+            {
+                _compilation = value;
+                CompilationSet?.Invoke(this, EventArgs.Empty);
+            }
         }
 
-        internal abstract SyntaxTreeContext CreateSyntaxTreeContext();
+        internal abstract IEnumerable<SyntaxTreeContext> Visit(IEnumerable<SyntaxTree> syntaxTrees);
 
         protected abstract IEnumerable<TypeContext> GetRootTypes();
 
@@ -152,8 +154,8 @@ namespace CodeBinder.Shared
             }
         }
 
-        public abstract class SyntaxTree<TCompilationContext> : SyntaxTree
-            where TCompilationContext :CompilationContext<TTypeContext>
+        public abstract class SyntaxTree<TCompilationContext> : SyntaxTree, ISyntaxTreeContext<TCompilationContext>
+            where TCompilationContext : CompilationContext<TTypeContext>
         {
             public new TCompilationContext Compilation { get; private set; }
 
@@ -171,21 +173,30 @@ namespace CodeBinder.Shared
         #endregion
     }
 
-    public abstract class CompilationContext<TSyntaxTreeContext, TTypeContext, TLanguageConversion> : CompilationContext<TTypeContext>
+    public abstract class CompilationContext<TSyntaxTreeContext, TNodeVisitor, TTypeContext, TLanguageConversion> : CompilationContext<TTypeContext>
         where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
+        where TNodeVisitor : class, INodeVisitor<TSyntaxTreeContext>, new()
         where TTypeContext : TypeContext<TTypeContext>
         where TLanguageConversion : LanguageConversion
     {
         public TLanguageConversion Conversion { get; private set; }
 
+        internal override IEnumerable<SyntaxTreeContext> Visit(IEnumerable<Microsoft.CodeAnalysis.SyntaxTree> syntaxTrees)
+        {
+            // Visit trees and create contexts
+            var visitor = new TNodeVisitor();
+            foreach (var tree in syntaxTrees)
+            {
+                var context = createSyntaxTreeContext();
+                context.SyntaxTree = tree;
+                visitor.Visit(context);
+                yield return context;
+            }
+        }
+
         protected CompilationContext(TLanguageConversion conversion)
         {
             Conversion = conversion;
-        }
-
-        internal sealed override SyntaxTreeContext CreateSyntaxTreeContext()
-        {
-            return createSyntaxTreeContext();
         }
 
         protected abstract TSyntaxTreeContext createSyntaxTreeContext();

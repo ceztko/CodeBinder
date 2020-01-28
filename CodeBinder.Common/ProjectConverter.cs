@@ -50,7 +50,8 @@ namespace CodeBinder
                     throw new Exception("Compilation errors: " + errors);
             }
 
-            var syntaxTrees = solutionDir == null ? compilation.SyntaxTrees.ToArray() : compilation.SyntaxTrees.Where(t => t.FilePath.StartsWith(solutionDir)).ToArray();
+            // Select only syntax tress that belongs to solution dir, if not null
+            var syntaxTrees = solutionDir == null ? compilation.SyntaxTrees.ToArray() : compilation.SyntaxTrees.Where(tree => tree.FilePath.StartsWith(solutionDir)).ToArray();
             var compilationContext = Conversion.GetCompilationContext(compilation);
 
             var syntaxTreeContextTypes = getSyntaxTreeContextTypes(compilationContext, syntaxTrees);
@@ -78,12 +79,11 @@ namespace CodeBinder
         private Dictionary<string, List<TypeContext>> getSyntaxTreeContextTypes(CompilationContext compilation, IEnumerable<SyntaxTree> syntaxTrees)
         {
             var syntaxTreeContexts = new Dictionary<string, SyntaxTreeContext>();
-            foreach (var tree in syntaxTrees)
+
+            foreach (var context in compilation.Visit(syntaxTrees))
             {
-                var syntaxTree = compilation.CreateSyntaxTreeContext();
-                var treeFilePath = tree.FilePath ?? "";
-                syntaxTree.Visit(tree);
-                syntaxTreeContexts.Add(treeFilePath, syntaxTree);
+                var treeFilePath = context.SyntaxTree.FilePath ?? "";
+                syntaxTreeContexts.Add(treeFilePath, context);
             }
 
             var ret = new Dictionary<string, List<TypeContext>>();

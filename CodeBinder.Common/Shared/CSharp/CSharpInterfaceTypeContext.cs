@@ -8,11 +8,10 @@ namespace CodeBinder.Shared.CSharp
     public sealed class CSharpInterfaceTypeContext : CSharpTypeContext<InterfaceDeclarationSyntax, TypeConversion<CSharpInterfaceTypeContext>>
     {
         public CSharpInterfaceTypeContext(InterfaceDeclarationSyntax node,
-                CSharpCompilationContext compilation,
-                TypeConversion<CSharpInterfaceTypeContext> conversion)
-            : base(node, compilation, conversion)
+                CSharpCompilationContext compilation)
+            : base(node, compilation, compilation.Conversion.GetInterfaceTypeConversion())
         {
-            conversion.Context = this;
+            Conversion.Context = this;
         }
     }
 }

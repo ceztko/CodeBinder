@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace CodeBinder.Shared.CSharp
 {
-    class CSharpNodeVisitor : CSharpNodeVisitor<CSharpSyntaxTreeContext, CSharpCompilationContext, CSharpLanguageConversion>
+    public class CSharpNodeVisitor : CSharpNodeVisitor<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpLanguageConversion>
     {
         private Stack<CSharpBaseTypeContext> _parents;
 
@@ -45,8 +45,7 @@ namespace CodeBinder.Shared.CSharp
 
         #region Supported types
 
-        public CSharpNodeVisitor(CSharpSyntaxTreeContext context)
-            : base(context, context.Compilation, context.Compilation.Conversion)
+        public CSharpNodeVisitor()
         {
             _parents = new Stack<CSharpBaseTypeContext>();
         }
@@ -55,7 +54,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpInterfaceTypeContext(node, Compilation, Conversion.GetInterfaceTypeConversion());
+            var type = new CSharpInterfaceTypeContext(node, Compilation);
             addType(type, isPartial);
             DefaultVisit(node);
         }
@@ -64,7 +63,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpClassTypeContext(node, Compilation, Conversion.GetClassTypeConversion());
+            var type = new CSharpClassTypeContext(node, Compilation);
             addType(type, isPartial);
             _parents.Push(type);
             DefaultVisit(node);
@@ -75,7 +74,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpStructTypeContext(node, Compilation, Conversion.GetStructTypeConversion());
+            var type = new CSharpStructTypeContext(node, Compilation);
             addType(type, isPartial);
             _parents.Push(type);
             DefaultVisit(node);
@@ -84,7 +83,7 @@ namespace CodeBinder.Shared.CSharp
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
-            var type = new CSharpEnumTypeContext(node, Compilation, Conversion.GetEnumTypeConversion());
+            var type = new CSharpEnumTypeContext(node, Compilation);
             TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
         }
@@ -537,25 +536,27 @@ namespace CodeBinder.Shared.CSharp
         #endregion // Unsupported syntax
     }
 
-    public class CSharpNodeVisitor<TSyntaxTree, TCompilation, TLanguageConversion> : CSharpSyntaxWalker, ICompilationContextProvider
-        where TSyntaxTree : SyntaxTreeContext
+    public class CSharpNodeVisitor<TCompilation, TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor<TSyntaxTree>, ICompilationContextProvider
         where TCompilation : CompilationContext
+        where TSyntaxTree : SyntaxTreeContext,ISyntaxTreeContext<TCompilation>
         where TLanguageConversion : LanguageConversion
     {
-        public TSyntaxTree TreeContext { get; private set; }
-        public TCompilation Compilation { get; private set; }
-        public TLanguageConversion Conversion { get; private set; }
+        TSyntaxTree? _TreeContext;
 
-        public CSharpNodeVisitor(TSyntaxTree treeContext, TCompilation compilation, TLanguageConversion conversion)
+        public void Visit(TSyntaxTree context)
         {
-            TreeContext = treeContext;
-            Compilation = compilation;
-            Conversion = conversion;
+            _TreeContext = context;
+            Visit(context.SyntaxTree.GetRoot());
+            _TreeContext = null!;
         }
+
+        public TSyntaxTree TreeContext => _TreeContext!;
+
+        public TCompilation Compilation => (_TreeContext as ISyntaxTreeContext<TCompilation>)!.Compilation;
 
         CompilationContext ICompilationContextProvider.Compilation
         {
-            get { return Compilation; }
+            get { return TreeContext.Compilation; }
         }
     }
 }

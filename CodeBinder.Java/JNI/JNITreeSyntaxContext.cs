@@ -10,11 +10,5 @@ namespace CodeBinder.JNI
     {
         public JNISyntaxTreeContext(JNICompilationContext compilation)
             : base(compilation)  { }
-
-        public override void Visit(SyntaxTree tree)
-        {
-            var walker = new JNINodeVisitor(this);
-            walker.Visit(tree.GetRoot());
-        }
     }
 }

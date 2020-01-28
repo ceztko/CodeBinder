@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public class CSharpCompilationContext : CompilationContext<CSharpSyntaxTreeContext, CSharpBaseTypeContext, CSharpLanguageConversion>
+    public class CSharpCompilationContext : CompilationContext<CSharpSyntaxTreeContext, CSharpNodeVisitor, CSharpBaseTypeContext, CSharpLanguageConversion>
     {
         Dictionary<string, CSharpTypeContext> _partialTypes;
 

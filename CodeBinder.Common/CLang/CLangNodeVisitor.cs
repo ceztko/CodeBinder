@@ -12,11 +12,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.CLang
 {
-    class CLangNodeVisitor : CSharpNodeVisitor<CLangSyntaxTreeContext, CLangCompilationContext, ConversionCSharpToCLang>
+    public class CLangNodeVisitor : CSharpNodeVisitor<CLangCompilationContext, CLangSyntaxTreeContext, ConversionCSharpToCLang>
     {
-        public CLangNodeVisitor(CLangSyntaxTreeContext treeContext)
-            : base(treeContext, treeContext.Compilation, treeContext.Compilation.Conversion) { }
-
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             var symbol = node.GetDeclaredSymbol<ITypeSymbol>(this)!;

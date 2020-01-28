@@ -49,16 +49,17 @@ namespace CodeBinder.Shared
         internal CompilationContext GetCompilationContext(Compilation compilation)
         {
             var ret = CreateCompilationContext();
-            ret.SetCompilation(compilation);
+            ret.Compilation = compilation;
             return ret;
         }
 
         internal abstract CompilationContext CreateCompilationContext();
     }
 
-    public abstract class LanguageConversion<TCompilationContext, TSyntaxTreeContext, TTypeContext> : LanguageConversion
+    public abstract class LanguageConversion<TCompilationContext, TSyntaxTreeContext, TNodeVistitor, TTypeContext> : LanguageConversion
         where TCompilationContext : CompilationContext<TTypeContext>
         where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
+        where TNodeVistitor : INodeVisitor<TSyntaxTreeContext>
         where TTypeContext : TypeContext<TTypeContext, TCompilationContext>
     {
         public LanguageConversion() { }

@@ -2,6 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <RootNamespace>CodeBinder.Shared</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.4.0" />

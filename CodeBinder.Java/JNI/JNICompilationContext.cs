@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CodeBinder.JNI
 {
-    public class JNICompilationContext : CompilationContext<JNISyntaxTreeContext, JNIModuleContext, ConversionCSharpToJNI>
+    public class JNICompilationContext : CompilationContext<JNISyntaxTreeContext, JNINodeVisitor, JNIModuleContext, ConversionCSharpToJNI>
     {
         Dictionary<string, JNIModuleContextParent> _modules;
 

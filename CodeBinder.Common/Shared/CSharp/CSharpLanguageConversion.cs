@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 namespace CodeBinder.Shared.CSharp
 {
     public abstract class CSharpLanguageConversion
-        : LanguageConversion<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpBaseTypeContext>
+        : LanguageConversion<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpNodeVisitor, CSharpBaseTypeContext>
     {
         protected override CSharpCompilationContext createCompilationContext()
         {

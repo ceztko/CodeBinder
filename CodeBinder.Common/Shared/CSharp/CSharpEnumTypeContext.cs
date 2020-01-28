@@ -12,11 +12,10 @@ namespace CodeBinder.Shared.CSharp
     public sealed class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax, TypeConversion<CSharpEnumTypeContext>>
     {
         public CSharpEnumTypeContext(EnumDeclarationSyntax node,
-                CSharpCompilationContext compilation,
-                TypeConversion<CSharpEnumTypeContext> conversion)
-            : base(node, compilation, conversion)
+                CSharpCompilationContext compilation)
+            : base(node, compilation, compilation.Conversion.GetEnumTypeConversion())
         {
-            conversion.Context = this;
+            Conversion.Context = this;
         }
     }
 }

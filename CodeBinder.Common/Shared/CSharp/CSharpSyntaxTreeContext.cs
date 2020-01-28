@@ -14,12 +14,6 @@ namespace CodeBinder.Shared.CSharp
         public CSharpSyntaxTreeContext(CSharpCompilationContext compilation)
             : base(compilation) { }
 
-        public override void Visit(SyntaxTree tree)
-        {
-            var walker = new CSharpNodeVisitor(this);
-            walker.Visit(tree.GetRoot());
-        }
-
         public new void AddType(CSharpBaseTypeContext type, CSharpBaseTypeContext? parent)
         {
             base.AddType(type, parent);

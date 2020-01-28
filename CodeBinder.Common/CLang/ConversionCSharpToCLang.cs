@@ -10,7 +10,7 @@ using CodeBinder.Util;
 namespace CodeBinder.CLang
 {
     [ConversionLanguageName(LanguageName)]
-    public class ConversionCSharpToCLang : LanguageConversion<CLangCompilationContext, CLangSyntaxTreeContext, CLangModuleContext>
+    public class ConversionCSharpToCLang : LanguageConversion<CLangCompilationContext, CLangSyntaxTreeContext, CLangNodeVisitor, CLangModuleContext>
     {
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
         public const string LanguageName = "C";

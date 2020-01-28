@@ -78,6 +78,7 @@ namespace CodeBinder
 
             var conversions = GetConverterInfos();
 
+            // Registering MSBuild defaults is necessary otherwise projects will not compile
             MSBuildLocator.RegisterDefaults();
             MSBuildWorkspace workspace = MSBuildWorkspace.Create();
 
@@ -166,7 +167,7 @@ namespace CodeBinder
                 }
             }
 
-            // Add default 
+            // Add default CLang conversion
             types.Add(new ConversionInfo() { Type = typeof(ConversionCSharpToCLang), LanguageName = ConversionCSharpToCLang.LanguageName });
             return types;
         }

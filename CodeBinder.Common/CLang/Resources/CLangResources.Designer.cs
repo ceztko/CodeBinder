@@ -39,7 +39,7 @@ namespace CodeBinder.CLang {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CodeBinder.Common.CLang.Resources.CLangResources", typeof(CLangResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("CodeBinder.Shared.CLang.Resources.CLangResources", typeof(CLangResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

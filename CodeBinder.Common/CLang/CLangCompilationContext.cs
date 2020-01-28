@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    public class CLangCompilationContext : CompilationContext<CLangSyntaxTreeContext, CLangModuleContext, ConversionCSharpToCLang>
+    public class CLangCompilationContext : CompilationContext<CLangSyntaxTreeContext, CLangNodeVisitor, CLangModuleContext, ConversionCSharpToCLang>
     {
         Dictionary<string, CLangModuleContextParent> _modules;
         List<EnumDeclarationSyntax> _enums;

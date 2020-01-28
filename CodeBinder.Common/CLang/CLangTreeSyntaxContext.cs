@@ -10,11 +10,5 @@ namespace CodeBinder.CLang
     {
         public CLangSyntaxTreeContext(CLangCompilationContext compilation)
             : base(compilation)  { }
-
-        public override void Visit(SyntaxTree tree)
-        {
-            var walker = new CLangNodeVisitor(this);
-            walker.Visit(tree.GetRoot());
-        }
     }
 }
