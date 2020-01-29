@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public sealed class CSharpClassTypeContext : CSharpTypeContext<ClassDeclarationSyntax, CSharpClassTypeContext>
+    public sealed class CSharpClassTypeContext : CSharpTypeContext<ClassDeclarationSyntax, CSharpCompilationContext, CSharpClassTypeContext>
     {
         public CSharpClassTypeContext(ClassDeclarationSyntax node, CSharpCompilationContext compilation)
             : base(node, compilation)

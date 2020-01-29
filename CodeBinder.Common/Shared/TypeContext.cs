@@ -8,33 +8,31 @@ using System.Text;
 
 namespace CodeBinder.Shared
 {
-    public abstract class TypeContext : ICompilationContextProvider
+    /// <summary>
+    /// TypeContext coupled to specific CompilationContext
+    /// </summary>
+    /// <remarks>If needed a more specific CSharp conversion type context inherit
+    /// CSharpBaseTypeContext or CSharpTypeContext</remarks> 
+    public abstract class TypeContext<TTypeContext, TCompilationContext> : TypeContext<TTypeContext>, ITypeContext<TCompilationContext>
+        where TTypeContext : TypeContext
+        where TCompilationContext : CompilationContext
     {
-        internal TypeContext() { }
+        public new TCompilationContext Compilation { get; private set; }
 
-        public CompilationContext Compilation
+        protected TypeContext(TCompilationContext compilation)
         {
-            get { return GetCompilationContext(); }
+            Compilation = compilation;
         }
 
-        public IEnumerable<TypeContext> Children
+        protected sealed override CompilationContext GetCompilationContext()
         {
-            get { return GetChildren(); }
+            return Compilation;
         }
-
-        protected abstract CompilationContext GetCompilationContext();
-
-        /// <summary>
-        /// Create a conversion for this type.
-        /// Overrides this method to extend hiearchy. See CSharpTypeContext/CSharpBaseTypeContext
-        /// </summary>
-        internal protected abstract TypeConversion CreateConversion();
-
-        protected abstract IEnumerable<TypeContext> GetChildren();
     }
 
+    /// <remarks>Inherited by CSharpBaseTypeContext together with ITypeContext</remarks>
     public abstract class TypeContext<TTypeContext> : TypeContext
-        where TTypeContext : TypeContext
+    where TTypeContext : TypeContext
     {
         private List<TTypeContext> _Children;
 
@@ -68,20 +66,35 @@ namespace CodeBinder.Shared
         }
     }
 
-    public abstract class TypeContext<TTypeContext, TCompilationContext> : TypeContext<TTypeContext>
-        where TTypeContext : TypeContext
-        where TCompilationContext : CompilationContext
+    public abstract class TypeContext : ICompilationContextProvider
     {
-        public new TCompilationContext Compilation { get; private set; }
+        internal TypeContext() { }
 
-        protected TypeContext(TCompilationContext compilation)
+        public CompilationContext Compilation
         {
-            Compilation = compilation;
+            get { return GetCompilationContext(); }
         }
 
-        protected override CompilationContext GetCompilationContext()
+        public IEnumerable<TypeContext> Children
         {
-            return Compilation;
+            get { return GetChildren(); }
         }
+
+        protected abstract CompilationContext GetCompilationContext();
+
+        /// <summary>
+        /// Create a conversion for this type.
+        /// Overrides this method to extend hiearchy. See CSharpTypeContext/CSharpBaseTypeContext
+        /// </summary>
+        internal protected abstract TypeConversion CreateConversion();
+
+        protected abstract IEnumerable<TypeContext> GetChildren();
+    }
+
+    /// <remarks>Implemented just by CSharpBaseTypeContext to couple with
+    /// CSharpCompilationContext half in the hierarchy</remarks>
+    interface ITypeContext<TCompilationContext>
+    {
+        TCompilationContext Compilation { get; }
     }
 }

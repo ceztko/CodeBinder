@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public sealed class CSharpInterfaceTypeContext : CSharpTypeContext<InterfaceDeclarationSyntax, CSharpInterfaceTypeContext>
+    public sealed class CSharpInterfaceTypeContext : CSharpTypeContext<InterfaceDeclarationSyntax, CSharpCompilationContext, CSharpInterfaceTypeContext>
     {
         public CSharpInterfaceTypeContext(InterfaceDeclarationSyntax node,
                 CSharpCompilationContext compilation)

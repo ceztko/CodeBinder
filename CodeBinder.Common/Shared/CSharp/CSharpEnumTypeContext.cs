@@ -9,7 +9,7 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public sealed class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax, CSharpEnumTypeContext>
+    public sealed class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax, CSharpCompilationContext, CSharpEnumTypeContext>
     {
         public CSharpEnumTypeContext(EnumDeclarationSyntax node,
                 CSharpCompilationContext compilation)

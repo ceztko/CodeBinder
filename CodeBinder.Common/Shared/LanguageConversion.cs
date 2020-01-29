@@ -9,6 +9,22 @@ using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.Shared
 {
+    public abstract class LanguageConversion<TCompilationContext, TSyntaxTreeContext, TNodeVistitor, TTypeContext> : LanguageConversion
+        where TCompilationContext : CompilationContext<TTypeContext>
+        where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
+        where TNodeVistitor : INodeVisitor<TSyntaxTreeContext>
+        where TTypeContext : TypeContext<TTypeContext>
+    {
+        public LanguageConversion() { }
+
+        internal sealed override CompilationContext CreateCompilationContext()
+        {
+            return createCompilationContext();
+        }
+
+        protected abstract TCompilationContext createCompilationContext();
+    }
+
     public abstract class LanguageConversion
     {
         internal LanguageConversion()
@@ -54,21 +70,5 @@ namespace CodeBinder.Shared
         }
 
         internal abstract CompilationContext CreateCompilationContext();
-    }
-
-    public abstract class LanguageConversion<TCompilationContext, TSyntaxTreeContext, TNodeVistitor, TTypeContext> : LanguageConversion
-        where TCompilationContext : CompilationContext<TTypeContext>
-        where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
-        where TNodeVistitor : INodeVisitor<TSyntaxTreeContext>
-        where TTypeContext : TypeContext<TTypeContext, TCompilationContext>
-    {
-        public LanguageConversion() { }
-
-        internal sealed override CompilationContext CreateCompilationContext()
-        {
-            return createCompilationContext();
-        }
-
-        protected abstract TCompilationContext createCompilationContext();
     }
 }

@@ -11,10 +11,9 @@ using System.Text;
 namespace CodeBinder.Shared.CSharp
 {
     [DebuggerDisplay("TypeName = {TypeName}")]
-    public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext, CSharpCompilationContext>
+    public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext>, ITypeContext<CSharpCompilationContext>
     {
-        internal CSharpBaseTypeContext(CSharpCompilationContext compilation)
-            : base(compilation) { }
+        internal CSharpBaseTypeContext() { }
 
         public BaseTypeDeclarationSyntax Node
         {
@@ -25,6 +24,10 @@ namespace CodeBinder.Shared.CSharp
         {
             get { return Node.Identifier.Text; }
         }
+
+        public new CSharpCompilationContext Compilation => getCompilationContext();
+
+        protected abstract CSharpCompilationContext getCompilationContext();
 
         // We override TypeConversion GetConversion() in inherited class
         protected sealed override TypeConversion<CSharpBaseTypeContext> createConversion()
@@ -42,8 +45,7 @@ namespace CodeBinder.Shared.CSharp
     {
         List<CSharpTypeContext> _partialDeclarations;
 
-        internal CSharpTypeContext(CSharpCompilationContext compilation)
-            : base(compilation)
+        internal CSharpTypeContext()
         {
             _partialDeclarations = new List<CSharpTypeContext>();
         }
@@ -90,17 +92,24 @@ namespace CodeBinder.Shared.CSharp
         }
     }
 
-    public abstract class CSharpBaseTypeContext<TNode, TTypeContext> : CSharpBaseTypeContext
+    public abstract class CSharpBaseTypeContext<TNode, TCompilationContext, TTypeContext> : CSharpBaseTypeContext
         where TNode : BaseTypeDeclarationSyntax
+        where TCompilationContext : CSharpCompilationContext
         where TTypeContext : CSharpBaseTypeContext
     {
         public new TNode Node { get; private set; }
 
-        protected CSharpBaseTypeContext(TNode node, CSharpCompilationContext compilation)
-            : base(compilation)
+        public new TCompilationContext Compilation { get; private set; }
+
+        protected CSharpBaseTypeContext(TNode node, TCompilationContext compilation)
         {
             Node = node;
+            Compilation = compilation;
         }
+
+        protected sealed override CompilationContext GetCompilationContext() => Compilation;
+
+        protected sealed override CSharpCompilationContext getCompilationContext() => Compilation;
 
         protected internal override TypeConversion CreateConversion()
         {
@@ -115,17 +124,24 @@ namespace CodeBinder.Shared.CSharp
         }
     }
 
-    public abstract class CSharpTypeContext<TNode, TTypeContext> : CSharpTypeContext
+    public abstract class CSharpTypeContext<TNode, TCompilationContext, TTypeContext> : CSharpTypeContext
         where TNode : TypeDeclarationSyntax
+        where TCompilationContext : CSharpCompilationContext
         where TTypeContext : CSharpTypeContext
     {
         public new TNode Node { get; private set; }
 
-        protected CSharpTypeContext(TNode node, CSharpCompilationContext compilation)
-            : base(compilation)
+        public new TCompilationContext Compilation { get; private set; }
+
+        protected CSharpTypeContext(TNode node, TCompilationContext compilation)
         {
             Node = node;
+            Compilation = compilation;
         }
+
+        protected sealed override CompilationContext GetCompilationContext() => Compilation;
+
+        protected sealed override CSharpCompilationContext getCompilationContext() => Compilation;
 
         protected internal override TypeConversion CreateConversion()
         {

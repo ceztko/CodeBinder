@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public sealed class CSharpStructTypeContext : CSharpTypeContext<StructDeclarationSyntax, CSharpStructTypeContext>
+    public sealed class CSharpStructTypeContext : CSharpTypeContext<StructDeclarationSyntax, CSharpCompilationContext, CSharpStructTypeContext>
     {
         public CSharpStructTypeContext(StructDeclarationSyntax node,
                 CSharpCompilationContext compilation)

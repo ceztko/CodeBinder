@@ -536,9 +536,9 @@ namespace CodeBinder.Shared.CSharp
         #endregion // Unsupported syntax
     }
 
-    public class CSharpNodeVisitor<TCompilation, TSyntaxTree, TTypeContext, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor<TSyntaxTree>, ICompilationContextProvider
-        where TCompilation : CompilationContext<TTypeContext>
-        where TSyntaxTree : CompilationContext<TTypeContext>.SyntaxTree<TCompilation>
+    public class CSharpNodeVisitor<TCompilationContext, TSyntaxTree, TTypeContext, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor<TSyntaxTree>, ICompilationContextProvider
+        where TCompilationContext : CompilationContext<TTypeContext>
+        where TSyntaxTree : CompilationContext<TTypeContext>.SyntaxTree<TCompilationContext>
         where TTypeContext : TypeContext<TTypeContext>
         where TLanguageConversion : LanguageConversion
     {
@@ -553,7 +553,7 @@ namespace CodeBinder.Shared.CSharp
 
         public TSyntaxTree TreeContext => _TreeContext!;
 
-        public TCompilation Compilation => _TreeContext!.Compilation;
+        public TCompilationContext Compilation => _TreeContext!.Compilation;
 
         CompilationContext ICompilationContextProvider.Compilation
         {
