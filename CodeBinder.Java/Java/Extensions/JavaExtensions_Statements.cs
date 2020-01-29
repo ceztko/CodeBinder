@@ -7,7 +7,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
-using CodeBinder.Shared.Java;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;

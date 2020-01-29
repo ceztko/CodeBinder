@@ -1,5 +1,5 @@
 ﻿using CodeBinder.Shared;
-using CodeBinder.Shared.Java;
+using CodeBinder.Java.Shared;
 using CodeBinder.Util;
 using System;
 using System.Collections.Generic;

@@ -10,7 +10,7 @@ using CodeBinder.Util;
 using CodeBinder.Shared;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics;
-using CodeBinder.Shared.Java;
+using CodeBinder.Java.Shared;
 using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.Java

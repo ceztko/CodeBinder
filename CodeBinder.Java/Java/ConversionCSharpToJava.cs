@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Shared.Java;
+using CodeBinder.Java.Shared;
 using CodeBinder.Util;
 using Microsoft.CodeAnalysis;
 

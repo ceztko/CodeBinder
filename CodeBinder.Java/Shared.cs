@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Shared.Java
+namespace CodeBinder.Java.Shared
 {
     public enum ParenthesisDirection
     {

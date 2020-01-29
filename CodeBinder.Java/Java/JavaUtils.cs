@@ -1,4 +1,4 @@
-﻿using CodeBinder.Shared.Java;
+﻿using CodeBinder.Java.Shared;
 using CodeBinder.Util;
 using Microsoft.CodeAnalysis.CSharp;
 using System;

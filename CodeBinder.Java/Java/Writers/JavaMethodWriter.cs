@@ -6,7 +6,7 @@ using CodeBinder.Shared.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using CodeBinder.Shared.Java;
+using CodeBinder.Java.Shared;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 
