@@ -59,7 +59,8 @@ namespace CodeBinder
             {
                 foreach (var type in pair.Value)
                 {
-                    foreach (var builder in type.Conversion.Builders)
+                    var conversion = type.CreateConversion();
+                    foreach (var builder in conversion.Builders)
                         yield return new ConversionDelegate(pair.Key, builder);
                 }
             }
@@ -67,7 +68,8 @@ namespace CodeBinder
             // Convert also non-syntax tree types
             foreach (var type in compilationContext.RootTypes)
             {
-                foreach (var builder in type.Conversion.Builders)
+                var conversion = type.CreateConversion();
+                foreach (var builder in conversion.Builders)
                     yield return new ConversionDelegate(builder);
             }
 

@@ -15,12 +15,12 @@ namespace CodeBinder.Shared.CSharp
             return new CSharpCompilationContext(this);
         }
 
-        public abstract TypeConversion<CSharpClassTypeContext> GetClassTypeConversion();
+        public abstract TypeConversion<CSharpClassTypeContext> CreateConversion(CSharpClassTypeContext cls);
 
-        public abstract TypeConversion<CSharpInterfaceTypeContext> GetInterfaceTypeConversion();
+        public abstract TypeConversion<CSharpInterfaceTypeContext> CreateConversion(CSharpInterfaceTypeContext iface);
 
-        public abstract TypeConversion<CSharpStructTypeContext> GetStructTypeConversion();
+        public abstract TypeConversion<CSharpStructTypeContext> CreateConversion(CSharpStructTypeContext str);
 
-        public abstract TypeConversion<CSharpEnumTypeContext> GetEnumTypeConversion();
+        public abstract TypeConversion<CSharpEnumTypeContext> CreateConversion(CSharpEnumTypeContext enm);
     }
 }

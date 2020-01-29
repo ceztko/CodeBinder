@@ -5,13 +5,16 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public sealed class CSharpClassTypeContext : CSharpTypeContext<ClassDeclarationSyntax, TypeConversion<CSharpClassTypeContext>>
+    public sealed class CSharpClassTypeContext : CSharpTypeContext<ClassDeclarationSyntax, CSharpClassTypeContext>
     {
-        public CSharpClassTypeContext(ClassDeclarationSyntax node,
-                CSharpCompilationContext compilation)
-            : base(node, compilation, compilation.Conversion.GetClassTypeConversion())
+        public CSharpClassTypeContext(ClassDeclarationSyntax node, CSharpCompilationContext compilation)
+            : base(node, compilation)
         {
-            Conversion.Context = this;
+        }
+
+        protected override TypeConversion<CSharpClassTypeContext> createConversion()
+        {
+            return Compilation.Conversion.CreateConversion(this);
         }
     }
 }

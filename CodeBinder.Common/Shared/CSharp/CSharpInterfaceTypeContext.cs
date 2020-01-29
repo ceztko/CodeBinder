@@ -5,13 +5,15 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public sealed class CSharpInterfaceTypeContext : CSharpTypeContext<InterfaceDeclarationSyntax, TypeConversion<CSharpInterfaceTypeContext>>
+    public sealed class CSharpInterfaceTypeContext : CSharpTypeContext<InterfaceDeclarationSyntax, CSharpInterfaceTypeContext>
     {
         public CSharpInterfaceTypeContext(InterfaceDeclarationSyntax node,
                 CSharpCompilationContext compilation)
-            : base(node, compilation, compilation.Conversion.GetInterfaceTypeConversion())
+            : base(node, compilation) { }
+
+        protected override TypeConversion<CSharpInterfaceTypeContext> createConversion()
         {
-            Conversion.Context = this;
+            return Compilation.Conversion.CreateConversion(this);
         }
     }
 }

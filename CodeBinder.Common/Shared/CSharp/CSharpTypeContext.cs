@@ -26,6 +26,12 @@ namespace CodeBinder.Shared.CSharp
             get { return Node.Identifier.Text; }
         }
 
+        // We override TypeConversion GetConversion() in inherited class
+        protected sealed override TypeConversion<CSharpBaseTypeContext> createConversion()
+        {
+            throw new NotImplementedException();
+        }
+
         protected abstract BaseTypeDeclarationSyntax GetBaseType();
 
         protected internal virtual void FillMemberPartialDeclarations(
@@ -84,25 +90,24 @@ namespace CodeBinder.Shared.CSharp
         }
     }
 
-    public abstract class CSharpBaseTypeContext<TNode, TTypeConversion> : CSharpBaseTypeContext
+    public abstract class CSharpBaseTypeContext<TNode, TTypeContext> : CSharpBaseTypeContext
         where TNode : BaseTypeDeclarationSyntax
-        where TTypeConversion : TypeConversion
+        where TTypeContext : CSharpBaseTypeContext
     {
         public new TNode Node { get; private set; }
 
-        public new TTypeConversion Conversion { get; private set; }
-
-        protected CSharpBaseTypeContext(TNode node, CSharpCompilationContext compilation, TTypeConversion conversion)
+        protected CSharpBaseTypeContext(TNode node, CSharpCompilationContext compilation)
             : base(compilation)
         {
             Node = node;
-            Conversion = conversion;
         }
 
-        protected override TypeConversion GetConversion()
+        protected internal override TypeConversion CreateConversion()
         {
-            return Conversion;
+            return createConversion();
         }
+
+        protected new abstract TypeConversion<TTypeContext> createConversion();
 
         protected override BaseTypeDeclarationSyntax GetBaseType()
         {
@@ -110,25 +115,24 @@ namespace CodeBinder.Shared.CSharp
         }
     }
 
-    public abstract class CSharpTypeContext<TNode, TTypeConversion> : CSharpTypeContext
+    public abstract class CSharpTypeContext<TNode, TTypeContext> : CSharpTypeContext
         where TNode : TypeDeclarationSyntax
-        where TTypeConversion : TypeConversion
+        where TTypeContext : CSharpTypeContext
     {
         public new TNode Node { get; private set; }
 
-        public new TTypeConversion Conversion { get; private set; }
-
-        protected CSharpTypeContext(TNode node, CSharpCompilationContext compilation, TTypeConversion conversion)
+        protected CSharpTypeContext(TNode node, CSharpCompilationContext compilation)
             : base(compilation)
         {
             Node = node;
-            Conversion = conversion;
         }
 
-        protected override TypeConversion GetConversion()
+        protected internal override TypeConversion CreateConversion()
         {
-            return Conversion;
+            return createConversion();
         }
+
+        protected new abstract TypeConversion<TTypeContext> createConversion();
 
         protected override TypeDeclarationSyntax GetSyntaxType()
         {

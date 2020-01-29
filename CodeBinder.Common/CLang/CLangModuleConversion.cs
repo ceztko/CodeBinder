@@ -15,8 +15,8 @@ namespace CodeBinder.CLang
 {
     public class CLangModuleConversion : TypeConversion<CLangModuleContext, CLangCompilationContext, ConversionCSharpToCLang>
     {
-        public CLangModuleConversion(ConversionCSharpToCLang conversion)
-            : base(conversion) { }
+        public CLangModuleConversion(CLangModuleContext context, ConversionCSharpToCLang conversion)
+            : base(context, conversion) { }
 
         public override string FileName
         {

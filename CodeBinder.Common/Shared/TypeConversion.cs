@@ -47,10 +47,12 @@ namespace CodeBinder.Shared
     public abstract class TypeConversion<TTypeContext> : TypeConversion
         where TTypeContext : TypeContext
     {
-        internal TypeConversion() { }
+        public new TTypeContext Context { get; private set; }
 
-        // FIXME: Find a way to make it internal again, look JNI JNIModuleContextParent
-        public new TTypeContext Context { get; /* internal */ set; } = null!;
+        internal TypeConversion(TTypeContext context)
+        {
+            Context = context;
+        }
 
         protected override TypeContext GetContext()
         {
@@ -62,7 +64,8 @@ namespace CodeBinder.Shared
         where TCompilationContext : CompilationContext
         where TTypeContext : TypeContext
     {
-        internal TypeConversion() { }
+        internal TypeConversion(TTypeContext context)
+            : base(context) { }
 
         public abstract new TCompilationContext Compilation { get; }
     }
@@ -74,7 +77,8 @@ namespace CodeBinder.Shared
     {
         public TLanguageConversion Conversion { get; private set; }
 
-        protected TypeConversion(TLanguageConversion conversion)
+        protected TypeConversion(TTypeContext context, TLanguageConversion conversion)
+            : base(context)
         {
             Conversion = conversion;
         }

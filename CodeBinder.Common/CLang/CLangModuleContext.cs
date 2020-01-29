@@ -32,11 +32,9 @@ namespace CodeBinder.CLang
             _Name = name;
         }
 
-        protected override TypeConversion GetConversion()
+        protected override TypeConversion<CLangModuleContext> createConversion()
         {
-            var ret = new CLangModuleConversion(Compilation.Conversion);
-            ret.Context = this;
-            return ret;
+            return new CLangModuleConversion(this, Compilation.Conversion);
         }
 
         public override IEnumerable<MethodDeclarationSyntax> Methods
@@ -72,7 +70,7 @@ namespace CodeBinder.CLang
             _methods.Add(method);
         }
 
-        protected override TypeConversion GetConversion()
+        protected override TypeConversion<CLangModuleContext> createConversion()
         {
             throw new NotImplementedException();
         }

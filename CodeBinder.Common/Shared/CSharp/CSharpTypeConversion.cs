@@ -9,16 +9,16 @@ namespace CodeBinder.Shared.CSharp
         where TCompilationContext : CSharpCompilationContext
         where TLanguageConversion: CSharpLanguageConversion
     {
-        protected CSharpTypeConversion(TLanguageConversion conversion)
-            : base(conversion) { }
+        protected CSharpTypeConversion(TTypeContext context, TLanguageConversion conversion)
+            : base(context, conversion) { }
     }
 
     public abstract class CSharpTypeConversion<TTypeContext, TLanguageConversion> : CSharpTypeConversion<TTypeContext, CSharpCompilationContext, TLanguageConversion>
         where TTypeContext : CSharpBaseTypeContext
         where TLanguageConversion : CSharpLanguageConversion
     {
-        protected CSharpTypeConversion(TLanguageConversion conversion)
-            : base(conversion) { }
+        protected CSharpTypeConversion(TTypeContext context, TLanguageConversion conversion)
+            : base(context, conversion) { }
 
         public override CSharpCompilationContext Compilation
         {

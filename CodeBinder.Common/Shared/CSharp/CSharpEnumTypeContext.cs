@@ -9,13 +9,15 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public sealed class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax, TypeConversion<CSharpEnumTypeContext>>
+    public sealed class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax, CSharpEnumTypeContext>
     {
         public CSharpEnumTypeContext(EnumDeclarationSyntax node,
                 CSharpCompilationContext compilation)
-            : base(node, compilation, compilation.Conversion.GetEnumTypeConversion())
+            : base(node, compilation) { }
+
+        protected override TypeConversion<CSharpEnumTypeContext> createConversion()
         {
-            Conversion.Context = this;
+            return Compilation.Conversion.CreateConversion(this);
         }
     }
 }

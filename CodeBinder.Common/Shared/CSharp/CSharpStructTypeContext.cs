@@ -5,13 +5,15 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public sealed class CSharpStructTypeContext : CSharpTypeContext<StructDeclarationSyntax, TypeConversion<CSharpStructTypeContext>>
+    public sealed class CSharpStructTypeContext : CSharpTypeContext<StructDeclarationSyntax, CSharpStructTypeContext>
     {
         public CSharpStructTypeContext(StructDeclarationSyntax node,
                 CSharpCompilationContext compilation)
-            : base(node, compilation, compilation.Conversion.GetStructTypeConversion())
+            : base(node, compilation) { }
+
+        protected override TypeConversion<CSharpStructTypeContext> createConversion()
         {
-            Conversion.Context = this;
+            return Compilation.Conversion.CreateConversion(this);
         }
     }
 }

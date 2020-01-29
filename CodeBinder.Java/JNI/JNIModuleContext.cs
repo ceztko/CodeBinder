@@ -32,11 +32,9 @@ namespace CodeBinder.JNI
             _Name = name;
         }
 
-        protected override TypeConversion GetConversion()
+        protected override TypeConversion<JNIModuleContext> createConversion()
         {
-            var ret = new JNIModuleConversion(Compilation.Conversion);
-            ret.Context = this;
-            return ret;
+            return new JNIModuleConversion(this, Compilation.Conversion);
         }
 
         public override IEnumerable<MethodDeclarationSyntax> Methods
@@ -72,7 +70,7 @@ namespace CodeBinder.JNI
             _methods.Add(method);
         }
 
-        protected override TypeConversion GetConversion()
+        protected override TypeConversion<JNIModuleContext> createConversion()
         {
             throw new NotImplementedException();
         }

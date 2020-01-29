@@ -15,8 +15,8 @@ namespace CodeBinder.JNI
 {
     public class JNIModuleConversion : TypeConversion<JNIModuleContext, JNICompilationContext, ConversionCSharpToJNI>
     {
-        public JNIModuleConversion(ConversionCSharpToJNI conversion)
-            : base(conversion)
+        public JNIModuleConversion(JNIModuleContext module, ConversionCSharpToJNI conversion)
+            : base(module, conversion)
         {
         }
 

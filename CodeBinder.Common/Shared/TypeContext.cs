@@ -17,11 +17,6 @@ namespace CodeBinder.Shared
             get { return GetCompilationContext(); }
         }
 
-        public TypeConversion Conversion
-        {
-            get { return GetConversion(); }
-        }
-
         public IEnumerable<TypeContext> Children
         {
             get { return GetChildren(); }
@@ -29,7 +24,11 @@ namespace CodeBinder.Shared
 
         protected abstract CompilationContext GetCompilationContext();
 
-        protected abstract TypeConversion GetConversion();
+        /// <summary>
+        /// Create a conversion for this type.
+        /// Overrides this method to extend hiearchy. See CSharpTypeContext/CSharpBaseTypeContext
+        /// </summary>
+        internal protected abstract TypeConversion CreateConversion();
 
         protected abstract IEnumerable<TypeContext> GetChildren();
     }
@@ -50,6 +49,13 @@ namespace CodeBinder.Shared
         {
             _Children.Add(child);
         }
+
+        internal protected override TypeConversion CreateConversion()
+        {
+            return createConversion();
+        }
+
+        protected abstract TypeConversion<TTypeContext> createConversion();
 
         public new IReadOnlyList<TTypeContext> Children
         {
