@@ -10,7 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.JNI
 {
-    public class JNINodeVisitor : CSharpNodeVisitor<JNICompilationContext, JNIModuleContext, JNISyntaxTreeContext, ConversionCSharpToJNI>
+    public class JNINodeVisitor : CSharpNodeVisitor<JNICompilationContext, JNISyntaxTreeContext, JNIModuleContext, ConversionCSharpToJNI>
     {
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {

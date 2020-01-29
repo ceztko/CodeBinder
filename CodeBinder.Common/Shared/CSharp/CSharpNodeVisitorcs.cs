@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public class CSharpNodeVisitor : CSharpNodeVisitor<CSharpCompilationContext, CSharpBaseTypeContext, CSharpSyntaxTreeContext, CSharpLanguageConversion>
+    public class CSharpNodeVisitor : CSharpNodeVisitor<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpBaseTypeContext, CSharpLanguageConversion>
     {
         private Stack<CSharpBaseTypeContext> _parents;
 
@@ -536,10 +536,10 @@ namespace CodeBinder.Shared.CSharp
         #endregion // Unsupported syntax
     }
 
-    public class CSharpNodeVisitor<TCompilation, TTypeContext, TSyntaxTree, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor<TSyntaxTree>, ICompilationContextProvider
+    public class CSharpNodeVisitor<TCompilation, TSyntaxTree, TTypeContext, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor<TSyntaxTree>, ICompilationContextProvider
         where TCompilation : CompilationContext<TTypeContext>
-        where TTypeContext : TypeContext<TTypeContext>
         where TSyntaxTree : CompilationContext<TTypeContext>.SyntaxTree<TCompilation>
+        where TTypeContext : TypeContext<TTypeContext>
         where TLanguageConversion : LanguageConversion
     {
         TSyntaxTree? _TreeContext;
