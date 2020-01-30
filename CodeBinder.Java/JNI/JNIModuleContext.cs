@@ -8,8 +8,12 @@ namespace CodeBinder.JNI
 {
     public abstract class JNIModuleContext : TypeContext<JNIModuleContext, JNICompilationContext>
     {
+        public JNICompilationContext Context { get; private set; }
+
         protected JNIModuleContext(JNICompilationContext context)
-            : base(context) { }
+        {
+            Context = context;
+        }
 
         public abstract string Name
         {
@@ -20,6 +24,8 @@ namespace CodeBinder.JNI
         {
             get;
         }
+
+        protected override JNICompilationContext getCompilationContext() => Context;
     }
 
     public class JNIModuleContextParent : JNIModuleContext

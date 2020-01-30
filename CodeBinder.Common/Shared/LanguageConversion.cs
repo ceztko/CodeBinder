@@ -9,10 +9,9 @@ using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.Shared
 {
-    public abstract class LanguageConversion<TCompilationContext, TSyntaxTreeContext, TNodeVistitor, TTypeContext> : LanguageConversion
+    public abstract class LanguageConversion<TCompilationContext, TSyntaxTreeContext, TTypeContext> : LanguageConversion
         where TCompilationContext : CompilationContext<TTypeContext>
         where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
-        where TNodeVistitor : INodeVisitor<TSyntaxTreeContext>
         where TTypeContext : TypeContext<TTypeContext>
     {
         public LanguageConversion() { }

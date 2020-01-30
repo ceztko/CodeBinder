@@ -82,9 +82,14 @@ namespace CodeBinder
         {
             var syntaxTreeContexts = new Dictionary<string, SyntaxTreeContext>();
 
-            foreach (var context in compilation.Visit(syntaxTrees))
+            // Visit trees and create contexts
+            foreach (var tree in syntaxTrees)
             {
-                var treeFilePath = context.SyntaxTree.FilePath ?? "";
+                var context = compilation.CreateSyntaxTreeContext();
+                var visitor = context.CreateVisitor();
+                context.SyntaxTree = tree;
+                visitor.Visit(tree);
+                var treeFilePath = tree.FilePath ?? "";
                 syntaxTreeContexts.Add(treeFilePath, context);
             }
 

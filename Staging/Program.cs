@@ -27,7 +27,7 @@ namespace ConsoleApp1
             Project project = await workspace.OpenProjectAsync(@"D:\Staging\Euronovate\ENLibPdf\ENLibPdfNet\ENLibPdfNet.csproj");
             genargs.TargetRootPath = @"D:\Staging\Euronovate\CodeBinderInternal\Test\";
 
-            if (true)
+            if (false)
             {
                 // Java conversion
                 var conv = Converter.CreateFor<ConversionCSharpToJava>(project);

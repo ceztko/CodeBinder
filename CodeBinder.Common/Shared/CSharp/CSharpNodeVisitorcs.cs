@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public class CSharpNodeVisitor : CSharpNodeVisitor<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpBaseTypeContext, CSharpLanguageConversion>
+    public abstract class CSharpNodeVisitor : CSharpNodeVisitor<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpBaseTypeContext, CSharpLanguageConversion>
     {
         private Stack<CSharpBaseTypeContext> _parents;
 
@@ -54,7 +54,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpInterfaceTypeContext(node, Compilation);
+            var type = new CSharpInterfaceTypeContextImpl(node, Compilation);
             addType(type, isPartial);
             DefaultVisit(node);
         }
@@ -63,7 +63,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpClassTypeContext(node, Compilation);
+            var type = new CSharpClassTypeContextImpl(node, Compilation);
             addType(type, isPartial);
             _parents.Push(type);
             DefaultVisit(node);
@@ -74,7 +74,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpStructTypeContext(node, Compilation);
+            var type = new CSharpStructTypeContextImpl(node, Compilation);
             addType(type, isPartial);
             _parents.Push(type);
             DefaultVisit(node);
@@ -83,7 +83,7 @@ namespace CodeBinder.Shared.CSharp
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
-            var type = new CSharpEnumTypeContext(node, Compilation);
+            var type = new CSharpEnumTypeContextImpl(node, Compilation);
             TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
         }
@@ -536,28 +536,38 @@ namespace CodeBinder.Shared.CSharp
         #endregion // Unsupported syntax
     }
 
-    public class CSharpNodeVisitor<TCompilationContext, TSyntaxTree, TTypeContext, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor<TSyntaxTree>, ICompilationContextProvider
+    public abstract class CSharpNodeVisitor<TCompilationContext, TSyntaxTreeContext, TTypeContext, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor, ICompilationContextProvider
         where TCompilationContext : CompilationContext<TTypeContext>
-        where TSyntaxTree : CompilationContext<TTypeContext>.SyntaxTree<TCompilationContext>
+        where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree<TCompilationContext>
         where TTypeContext : TypeContext<TTypeContext>
         where TLanguageConversion : LanguageConversion
     {
-        TSyntaxTree? _TreeContext;
-
-        public void Visit(TSyntaxTree context)
+        public void Visit(SyntaxTree context)
         {
-            _TreeContext = context;
-            Visit(context.SyntaxTree.GetRoot());
-            _TreeContext = null!;
+            Visit(context.GetRoot());
         }
 
-        public TSyntaxTree TreeContext => _TreeContext!;
+        public TSyntaxTreeContext TreeContext => GetSyntaxTreeContext();
 
-        public TCompilationContext Compilation => _TreeContext!.Compilation;
+        public TCompilationContext Compilation => TreeContext.Compilation;
+
+        protected abstract TSyntaxTreeContext GetSyntaxTreeContext();
 
         CompilationContext ICompilationContextProvider.Compilation
         {
             get { return TreeContext.Compilation; }
         }
+    }
+
+    sealed class CSharpNodeVisitorImpl : CSharpNodeVisitor
+    {
+        public new CSharpSyntaxTreeContext TreeContext { get; private set; }
+
+        public CSharpNodeVisitorImpl(CSharpSyntaxTreeContext treeContext)
+        {
+            TreeContext = treeContext;
+        }
+
+        protected override CSharpSyntaxTreeContext GetSyntaxTreeContext() => TreeContext;
     }
 }

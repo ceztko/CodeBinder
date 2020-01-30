@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    public class CLangCompilationContext : CompilationContext<CLangModuleContext, CLangSyntaxTreeContext, CLangNodeVisitor, ConversionCSharpToCLang>
+    public abstract class CLangCompilationContext : CompilationContext<CLangModuleContext, CLangSyntaxTreeContext, ConversionCSharpToCLang>
     {
         Dictionary<string, CLangModuleContextParent> _modules;
         List<EnumDeclarationSyntax> _enums;
@@ -19,8 +19,7 @@ namespace CodeBinder.CLang
 
         public string LibraryName { get; private set; } = string.Empty;
 
-        public CLangCompilationContext(ConversionCSharpToCLang conversion)
-            : base(conversion)
+        protected CLangCompilationContext()
         {
             _modules = new Dictionary<string, CLangModuleContextParent>();
             _enums = new List<EnumDeclarationSyntax>();
@@ -107,6 +106,18 @@ namespace CodeBinder.CLang
                 yield return new CLangMethodInitBuilder(this);
             }
         }
+    }
+
+    class CLangCompilationContextImpl : CLangCompilationContext
+    {
+        public new ConversionCSharpToCLang Conversion { get; private set; }
+
+        public CLangCompilationContextImpl(ConversionCSharpToCLang conversion)
+        {
+            Conversion = conversion;
+        }
+
+        protected override ConversionCSharpToCLang GetLanguageConversion() => Conversion;
     }
 
     abstract class CLangCompilationContextBuilder : ConversionBuilder

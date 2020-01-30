@@ -5,19 +5,22 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public class CSharpCompilationContext : CompilationContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext, CSharpNodeVisitor, CSharpLanguageConversion>
+    /// <summary>
+    /// Basic CSharp compilation context
+    /// </summary>
+    public abstract class CSharpCompilationContext :
+        CompilationContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext, CSharpLanguageConversion>
     {
         Dictionary<string, CSharpTypeContext> _partialTypes;
 
-        public CSharpCompilationContext(CSharpLanguageConversion conversion)
-            : base(conversion)
+        protected CSharpCompilationContext()
         {
             _partialTypes = new Dictionary<string, CSharpTypeContext>();
         }
 
         protected override CSharpSyntaxTreeContext createSyntaxTreeContext()
         {
-            return new CSharpSyntaxTreeContext(this);
+            return new CSharpSyntaxTreeContextImpl(this);
         }
 
         public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpTypeContext type, CSharpBaseTypeContext? parent)
@@ -38,5 +41,17 @@ namespace CodeBinder.Shared.CSharp
         {
             return _partialTypes.TryGetValue(qualifiedName, out partialType);
         }
+    }
+
+    sealed class CSharpCompilationContextImpl : CSharpCompilationContext
+    {
+        public new CSharpLanguageConversion Conversion { get; private set; }
+
+        public CSharpCompilationContextImpl(CSharpLanguageConversion conversion)
+        {
+            Conversion = conversion;
+        }
+
+        protected override CSharpLanguageConversion GetLanguageConversion() => Conversion;
     }
 }

@@ -33,6 +33,8 @@ namespace CodeBinder.Shared
             }
         }
 
+        internal abstract INodeVisitor CreateVisitor();
+
         public IEnumerable<TypeContext> RootTypes
         {
             get { return GetRootTypes(); }

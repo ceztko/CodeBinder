@@ -11,7 +11,7 @@ using System.Text;
 namespace CodeBinder.Shared.CSharp
 {
     [DebuggerDisplay("TypeName = {TypeName}")]
-    public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext>, ITypeContext<CSharpCompilationContext>
+    public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext, CSharpCompilationContext>
     {
         internal CSharpBaseTypeContext() { }
 
@@ -24,10 +24,6 @@ namespace CodeBinder.Shared.CSharp
         {
             get { return Node.Identifier.Text; }
         }
-
-        public new CSharpCompilationContext Compilation => getCompilationContext();
-
-        protected abstract CSharpCompilationContext getCompilationContext();
 
         // We override TypeConversion GetConversion() in inherited class
         protected sealed override TypeConversion<CSharpBaseTypeContext> createConversion()
@@ -92,24 +88,16 @@ namespace CodeBinder.Shared.CSharp
         }
     }
 
-    public abstract class CSharpBaseTypeContext<TNode, TCompilationContext, TTypeContext> : CSharpBaseTypeContext
+    public abstract class CSharpBaseTypeContext<TNode, TTypeContext> : CSharpBaseTypeContext
         where TNode : BaseTypeDeclarationSyntax
-        where TCompilationContext : CSharpCompilationContext
         where TTypeContext : CSharpBaseTypeContext
     {
         public new TNode Node { get; private set; }
 
-        public new TCompilationContext Compilation { get; private set; }
-
-        protected CSharpBaseTypeContext(TNode node, TCompilationContext compilation)
+        protected CSharpBaseTypeContext(TNode node)
         {
             Node = node;
-            Compilation = compilation;
         }
-
-        protected sealed override CompilationContext GetCompilationContext() => Compilation;
-
-        protected sealed override CSharpCompilationContext getCompilationContext() => Compilation;
 
         protected internal override TypeConversion CreateConversion()
         {
@@ -124,24 +112,16 @@ namespace CodeBinder.Shared.CSharp
         }
     }
 
-    public abstract class CSharpTypeContext<TNode, TCompilationContext, TTypeContext> : CSharpTypeContext
+    public abstract class CSharpTypeContext<TNode, TTypeContext> : CSharpTypeContext
         where TNode : TypeDeclarationSyntax
-        where TCompilationContext : CSharpCompilationContext
         where TTypeContext : CSharpTypeContext
     {
         public new TNode Node { get; private set; }
 
-        public new TCompilationContext Compilation { get; private set; }
-
-        protected CSharpTypeContext(TNode node, TCompilationContext compilation)
+        protected CSharpTypeContext(TNode node)
         {
             Node = node;
-            Compilation = compilation;
         }
-
-        protected sealed override CompilationContext GetCompilationContext() => Compilation;
-
-        protected sealed override CSharpCompilationContext getCompilationContext() => Compilation;
 
         protected internal override TypeConversion CreateConversion()
         {

@@ -13,20 +13,19 @@ namespace CodeBinder.Shared
     /// </summary>
     /// <remarks>If needed a more specific CSharp conversion type context inherit
     /// CSharpBaseTypeContext or CSharpTypeContext</remarks> 
-    public abstract class TypeContext<TTypeContext, TCompilationContext> : TypeContext<TTypeContext>, ITypeContext<TCompilationContext>
+    public abstract class TypeContext<TTypeContext, TCompilationContext> : TypeContext<TTypeContext>
         where TTypeContext : TypeContext
         where TCompilationContext : CompilationContext
     {
-        public new TCompilationContext Compilation { get; private set; }
+        public new TCompilationContext Compilation => getCompilationContext();
 
-        protected TypeContext(TCompilationContext compilation)
-        {
-            Compilation = compilation;
-        }
+        protected TypeContext() { }
+
+        protected abstract TCompilationContext getCompilationContext();
 
         protected sealed override CompilationContext GetCompilationContext()
         {
-            return Compilation;
+            return getCompilationContext();
         }
     }
 
@@ -89,12 +88,5 @@ namespace CodeBinder.Shared
         internal protected abstract TypeConversion CreateConversion();
 
         protected abstract IEnumerable<TypeContext> GetChildren();
-    }
-
-    /// <remarks>Implemented just by CSharpBaseTypeContext to couple with
-    /// CSharpCompilationContext half in the hierarchy</remarks>
-    interface ITypeContext<TCompilationContext>
-    {
-        TCompilationContext Compilation { get; }
     }
 }

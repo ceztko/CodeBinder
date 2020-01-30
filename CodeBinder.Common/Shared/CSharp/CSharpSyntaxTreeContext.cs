@@ -6,14 +6,25 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public class CSharpSyntaxTreeContext : CSharpCompilationContext.SyntaxTree<CSharpCompilationContext>
+    public abstract class CSharpSyntaxTreeContext : CSharpCompilationContext.SyntaxTree<CSharpCompilationContext, CSharpNodeVisitor>
     {
-        public CSharpSyntaxTreeContext(CSharpCompilationContext compilation)
-            : base(compilation) { }
+        protected CSharpSyntaxTreeContext() { }
+    }
 
-        public new void AddType(CSharpBaseTypeContext type, CSharpBaseTypeContext? parent)
+    sealed class CSharpSyntaxTreeContextImpl : CSharpSyntaxTreeContext
+    {
+        public new CSharpCompilationContext Compilation { get; private set; }
+
+        public CSharpSyntaxTreeContextImpl(CSharpCompilationContext compilation)
         {
-            base.AddType(type, parent);
+            Compilation = compilation;
         }
+
+        protected override CSharpNodeVisitor createVisitor()
+        {
+            return new CSharpNodeVisitorImpl(this);
+        }
+
+        protected override CSharpCompilationContext getCompilationContext() => Compilation;
     }
 }

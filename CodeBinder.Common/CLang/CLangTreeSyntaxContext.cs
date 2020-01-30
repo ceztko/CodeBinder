@@ -6,9 +6,20 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    public class CLangSyntaxTreeContext : CLangCompilationContext.SyntaxTree<CLangCompilationContext>
+    public class CLangSyntaxTreeContext : CLangCompilationContext.SyntaxTree<CLangCompilationContext, CLangNodeVisitor>
     {
+        public new CLangCompilationContext Compilation { get; private set; }
+
         public CLangSyntaxTreeContext(CLangCompilationContext compilation)
-            : base(compilation)  { }
+        {
+            Compilation = compilation;
+        }
+
+        protected override CLangCompilationContext getCompilationContext() => Compilation;
+
+        protected override CLangNodeVisitor createVisitor()
+        {
+            return new CLangNodeVisitor(this);
+        }
     }
 }

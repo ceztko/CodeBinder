@@ -12,6 +12,13 @@ namespace CodeBinder.JNI
 {
     public class JNINodeVisitor : CSharpNodeVisitor<JNICompilationContext, JNISyntaxTreeContext, JNIModuleContext, ConversionCSharpToJNI>
     {
+        public new JNISyntaxTreeContext TreeContext { get; private set; }
+
+        public JNINodeVisitor(JNISyntaxTreeContext treeContext)
+        {
+            TreeContext = treeContext;
+        }
+
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             visitType(node);
@@ -77,5 +84,7 @@ namespace CodeBinder.JNI
             moduleName = null;
             return false;
         }
+
+        protected override JNISyntaxTreeContext GetSyntaxTreeContext() => TreeContext;
     }
 }

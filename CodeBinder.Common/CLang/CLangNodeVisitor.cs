@@ -14,6 +14,13 @@ namespace CodeBinder.CLang
 {
     public class CLangNodeVisitor : CSharpNodeVisitor<CLangCompilationContext, CLangSyntaxTreeContext, CLangModuleContext, ConversionCSharpToCLang>
     {
+        public new CLangSyntaxTreeContext TreeContext { get; private set; }
+
+        public CLangNodeVisitor(CLangSyntaxTreeContext treeContext)
+        {
+            TreeContext = treeContext;
+        }
+
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             var symbol = node.GetDeclaredSymbol<ITypeSymbol>(this)!;
@@ -110,5 +117,7 @@ namespace CodeBinder.CLang
 
             Compilation.AddEnum(node);
         }
+
+        protected override CLangSyntaxTreeContext GetSyntaxTreeContext() => TreeContext;
     }
 }

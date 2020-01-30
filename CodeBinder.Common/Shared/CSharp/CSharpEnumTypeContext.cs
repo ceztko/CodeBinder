@@ -9,15 +9,27 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public sealed class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax, CSharpCompilationContext, CSharpEnumTypeContext>
+    public abstract class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax, CSharpEnumTypeContext>
     {
-        public CSharpEnumTypeContext(EnumDeclarationSyntax node,
-                CSharpCompilationContext compilation)
-            : base(node, compilation) { }
+        protected CSharpEnumTypeContext(EnumDeclarationSyntax node)
+            : base(node) { }
 
         protected override TypeConversion<CSharpEnumTypeContext> createConversion()
         {
             return Compilation.Conversion.CreateConversion(this);
         }
+    }
+
+    sealed class CSharpEnumTypeContextImpl : CSharpEnumTypeContext
+    {
+        public new CSharpCompilationContext Compilation { get; private set; }
+
+        public CSharpEnumTypeContextImpl(EnumDeclarationSyntax node,  CSharpCompilationContext compilation)
+            : base(node)
+        {
+            Compilation = compilation;
+        }
+
+        protected override CSharpCompilationContext getCompilationContext() => Compilation;
     }
 }

@@ -7,12 +7,17 @@ using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.Shared.CSharp
 {
+
+    /// <summary>
+    /// CSharp specific language conversion
+    /// </summary>
+    /// <remarks>Inherit this class if you don't need custom contexts/visitor</remarks>
     public abstract class CSharpLanguageConversion
-        : LanguageConversion<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpNodeVisitor, CSharpBaseTypeContext>
+        : LanguageConversion<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpBaseTypeContext>
     {
         protected override CSharpCompilationContext createCompilationContext()
         {
-            return new CSharpCompilationContext(this);
+            return new CSharpCompilationContextImpl(this);
         }
 
         public abstract TypeConversion<CSharpClassTypeContext> CreateConversion(CSharpClassTypeContext cls);

@@ -10,68 +10,21 @@ namespace CodeBinder.Shared
     /// <summary>
     /// Context built around a CodeAnalysis.Compilation
     /// </summary>
-    public abstract class CompilationContext : ICompilationContextProvider
+    /// <remarks>Inherit this class to add contextualized info to CompilationContext</remarks>
+    public abstract class CompilationContext<TTypeContext, TSyntaxTreeContext, TLanguageConversion> : CompilationContext<TTypeContext>
+        where TTypeContext : TypeContext<TTypeContext>
+        where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
+        where TLanguageConversion : LanguageConversion
     {
-        private Dictionary<SyntaxTree, SemanticModel> _modelCache;
-        private Compilation _compilation = null!;
+        protected CompilationContext() { }
 
-        internal CompilationContext()
-        {
-            _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
-        }
+        public TLanguageConversion Conversion => GetLanguageConversion();
 
-        public event EventHandler? CompilationSet;
+        protected abstract TLanguageConversion GetLanguageConversion();
 
-        public SemanticModel GetSemanticModel(SyntaxTree tree)
-        {
-            SemanticModel? model;
-            if (!_modelCache.TryGetValue(tree, out model))
-            {
-                model = Compilation.GetSemanticModel(tree, true);
-                _modelCache.Add(tree, model);
-            }
+        internal sealed override SyntaxTreeContext CreateSyntaxTreeContext() => createSyntaxTreeContext();
 
-            return model;
-        }
-
-        public Compilation Compilation
-        {
-            get { return _compilation; }
-            internal set
-            {
-                _compilation = value;
-                CompilationSet?.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        internal abstract IEnumerable<SyntaxTreeContext> Visit(IEnumerable<SyntaxTree> syntaxTrees);
-
-        protected abstract IEnumerable<TypeContext> GetRootTypes();
-
-        internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
-        {
-            get
-            {
-                foreach (var conversion in DefaultConversions)
-                    yield return new ConversionDelegate(conversion);
-            }
-        }
-
-        // Compilation wide default converions, see CLangCompilationContext for some examples
-        public virtual IEnumerable<ConversionBuilder> DefaultConversions
-        {
-            get { yield break; }
-        }
-
-        public IEnumerable<TypeContext> RootTypes
-        {
-            get { return GetRootTypes(); }
-        }
-
-        CompilationContext ICompilationContextProvider.Compilation
-        {
-            get { return this; }
-        }
+        protected abstract TSyntaxTreeContext createSyntaxTreeContext();
     }
 
     public abstract class CompilationContext<TTypeContext> : CompilationContext
@@ -115,6 +68,37 @@ namespace CodeBinder.Shared
 
         #region SyntaxTreeContext
 
+        /// <summary>
+        /// CSharp syntax context built around a CodeAnalysis.SyntaxTree
+        /// </summary>
+        /// <remarks>Inherit this class to add contextualized info to SyntaxTree</remarks>
+        public abstract class SyntaxTree<TCompilationContext, TNodeVisitor> : SyntaxTree<TCompilationContext>
+            where TCompilationContext : CompilationContext<TTypeContext>
+            where TNodeVisitor : INodeVisitor
+        {
+            protected SyntaxTree() { }
+
+            internal override INodeVisitor CreateVisitor() => createVisitor();
+
+            protected abstract TNodeVisitor createVisitor();
+        }
+
+
+        public abstract class SyntaxTree<TCompilationContext> : SyntaxTree
+            where TCompilationContext : CompilationContext<TTypeContext>
+        {
+            internal SyntaxTree() { }
+
+            public new TCompilationContext Compilation => getCompilationContext();
+
+            protected abstract TCompilationContext getCompilationContext();
+
+            protected sealed override CompilationContext GetCompilationContext()
+            {
+                return getCompilationContext();
+            }
+        }
+
         public abstract class SyntaxTree : SyntaxTreeContext
         {
             List<TTypeContext> _rootTypes;
@@ -124,7 +108,7 @@ namespace CodeBinder.Shared
                 _rootTypes = new List<TTypeContext>();
             }
 
-            protected void AddType(TTypeContext type, TTypeContext? parent)
+            public void AddType(TTypeContext type, TTypeContext? parent)
             {
                 if (type.Parent != null)
                     throw new Exception("Can't re-add root type");
@@ -154,51 +138,70 @@ namespace CodeBinder.Shared
             }
         }
 
-        public abstract class SyntaxTree<TCompilationContext> : SyntaxTree
-            where TCompilationContext : CompilationContext<TTypeContext>
-        {
-            public new TCompilationContext Compilation { get; private set; }
-
-            protected SyntaxTree(TCompilationContext compilation)
-            {
-                Compilation = compilation;
-            }
-
-            protected sealed override CompilationContext GetCompilationContext()
-            {
-                return Compilation;
-            }
-        }
-
         #endregion
     }
 
-    public abstract class CompilationContext<TTypeContext, TSyntaxTreeContext, TNodeVisitor, TLanguageConversion> : CompilationContext<TTypeContext>
-        where TTypeContext : TypeContext<TTypeContext>
-        where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
-        where TNodeVisitor : class, INodeVisitor<TSyntaxTreeContext>, new()
-        where TLanguageConversion : LanguageConversion
+    public abstract class CompilationContext : ICompilationContextProvider
     {
-        public TLanguageConversion Conversion { get; private set; }
+        private Dictionary<SyntaxTree, SemanticModel> _modelCache;
+        private Compilation _compilation = null!;
 
-        internal override IEnumerable<SyntaxTreeContext> Visit(IEnumerable<Microsoft.CodeAnalysis.SyntaxTree> syntaxTrees)
+        internal CompilationContext()
         {
-            // Visit trees and create contexts
-            var visitor = new TNodeVisitor();
-            foreach (var tree in syntaxTrees)
+            _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
+        }
+
+        public event EventHandler? CompilationSet;
+
+        public SemanticModel GetSemanticModel(SyntaxTree tree)
+        {
+            SemanticModel? model;
+            if (!_modelCache.TryGetValue(tree, out model))
             {
-                var context = createSyntaxTreeContext();
-                context.SyntaxTree = tree;
-                visitor.Visit(context);
-                yield return context;
+                model = Compilation.GetSemanticModel(tree, true);
+                _modelCache.Add(tree, model);
+            }
+
+            return model;
+        }
+
+        public Compilation Compilation
+        {
+            get { return _compilation; }
+            internal set
+            {
+                _compilation = value;
+                CompilationSet?.Invoke(this, EventArgs.Empty);
             }
         }
 
-        protected CompilationContext(TLanguageConversion conversion)
+        internal abstract SyntaxTreeContext CreateSyntaxTreeContext();
+
+        protected abstract IEnumerable<TypeContext> GetRootTypes();
+
+        internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
         {
-            Conversion = conversion;
+            get
+            {
+                foreach (var conversion in DefaultConversions)
+                    yield return new ConversionDelegate(conversion);
+            }
         }
 
-        protected abstract TSyntaxTreeContext createSyntaxTreeContext();
+        // Compilation wide default converions, see CLangCompilationContext for some examples
+        public virtual IEnumerable<ConversionBuilder> DefaultConversions
+        {
+            get { yield break; }
+        }
+
+        public IEnumerable<TypeContext> RootTypes
+        {
+            get { return GetRootTypes(); }
+        }
+
+        CompilationContext ICompilationContextProvider.Compilation
+        {
+            get { return this; }
+        }
     }
 }

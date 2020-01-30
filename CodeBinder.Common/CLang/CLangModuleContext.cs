@@ -8,8 +8,12 @@ namespace CodeBinder.CLang
 {
     public abstract class CLangModuleContext : TypeContext<CLangModuleContext, CLangCompilationContext>
     {
+        public new CLangCompilationContext Compilation { get; private set; }
+
         protected CLangModuleContext(CLangCompilationContext context)
-            : base(context) { }
+        {
+            Compilation = context;
+        }
 
         public abstract string Name
         {
@@ -20,6 +24,8 @@ namespace CodeBinder.CLang
         {
             get;
         }
+
+        protected sealed override CLangCompilationContext getCompilationContext() => Compilation;
     }
 
     public class CLangModuleContextParent : CLangModuleContext
