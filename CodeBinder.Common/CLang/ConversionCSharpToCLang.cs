@@ -9,6 +9,10 @@ using CodeBinder.Util;
 
 namespace CodeBinder.CLang
 {
+    /// <summary>
+    /// Basic CSharp language conversion
+    /// </summary>
+    /// <remarks>Inherit this class to provide custom contexts</remarks>
     [ConversionLanguageName(LanguageName)]
     public class ConversionCSharpToCLang : LanguageConversion<CLangCompilationContext, CLangSyntaxTreeContext, CLangModuleContext>
     {

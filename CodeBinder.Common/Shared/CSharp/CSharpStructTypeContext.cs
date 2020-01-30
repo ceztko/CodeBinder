@@ -5,6 +5,10 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
+    /// <summary>
+    /// Struct syntax context
+    /// </summary>
+    /// <remarks>Inherit this class if needed to extend a struct context</remarks>
     public abstract class CSharpStructTypeContext : CSharpTypeContext<StructDeclarationSyntax, CSharpStructTypeContext>
     {
         protected CSharpStructTypeContext(StructDeclarationSyntax node)

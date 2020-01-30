@@ -9,6 +9,10 @@ using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.Shared
 {
+    /// <summary>
+    /// Basic language conversion
+    /// </summary>
+    /// <remarks>Inherit this class to provide custom contexts</remarks>
     public abstract class LanguageConversion<TCompilationContext, TSyntaxTreeContext, TTypeContext> : LanguageConversion
         where TCompilationContext : CompilationContext<TTypeContext>
         where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree

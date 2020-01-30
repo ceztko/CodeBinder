@@ -15,6 +15,8 @@ namespace CodeBinder.Shared.CSharp
     {
         protected CSharpTypeConversion(TTypeContext context, TLanguageConversion conversion)
             : base(context, conversion) { }
+
+        public override TCompilationContext Compilation => (TCompilationContext)Context.Compilation;
     }
 
     /// <summary>
@@ -28,9 +30,6 @@ namespace CodeBinder.Shared.CSharp
         protected CSharpTypeConversion(TTypeContext context, TLanguageConversion conversion)
             : base(context, conversion) { }
 
-        public override CSharpCompilationContext Compilation
-        {
-            get { return Context.Compilation; }
-        }
+        public override CSharpCompilationContext Compilation => Context.Compilation;
     }
 }

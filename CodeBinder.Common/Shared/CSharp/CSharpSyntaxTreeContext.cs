@@ -6,6 +6,12 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
+
+    /// <summary>
+    /// SyntaxTree context
+    /// </summary>
+    /// <remarks>Inherit this class to extend the context, implementing both
+    /// createVisitor() and getCompilationContext()</remarks> 
     public abstract class CSharpSyntaxTreeContext : CSharpCompilationContext.SyntaxTree<CSharpCompilationContext, CSharpNodeVisitor>
     {
         protected CSharpSyntaxTreeContext() { }

@@ -5,6 +5,10 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
+    /// <summary>
+    /// Interface syntax context
+    /// </summary>
+    /// <remarks>Inherit this class if needed to extend an interface context</remarks>
     public abstract class CSharpInterfaceTypeContext : CSharpTypeContext<InterfaceDeclarationSyntax, CSharpInterfaceTypeContext>
     {
         public CSharpInterfaceTypeContext(InterfaceDeclarationSyntax node)

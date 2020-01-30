@@ -6,8 +6,9 @@ using System.Text;
 namespace CodeBinder.Shared.CSharp
 {
     /// <summary>
-    /// Basic CSharp compilation context
+    /// Basic csharp compilation context
     /// </summary>
+    /// <remarks>Inherit this class to extend the context</remarks>
     public abstract class CSharpCompilationContext :
         CompilationContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext, CSharpLanguageConversion>
     {

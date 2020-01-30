@@ -12,8 +12,7 @@ namespace CodeBinder.Shared.CSharp
     /// CSharp specific language conversion
     /// </summary>
     /// <remarks>Inherit this class if you don't need custom contexts/visitor</remarks>
-    public abstract class CSharpLanguageConversion
-        : LanguageConversion<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpBaseTypeContext>
+    public abstract class CSharpLanguageConversion : LanguageConversion<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpBaseTypeContext>
     {
         protected override CSharpCompilationContext createCompilationContext()
         {

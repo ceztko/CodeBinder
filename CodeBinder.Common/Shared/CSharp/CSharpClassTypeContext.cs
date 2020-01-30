@@ -5,6 +5,10 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
+    /// <summary>
+    /// Class syntax context
+    /// </summary>
+    /// <remarks>Inherit this class if needed to extend a class context</remarks>
     public abstract class CSharpClassTypeContext : CSharpTypeContext<ClassDeclarationSyntax, CSharpClassTypeContext>
     {
         protected CSharpClassTypeContext(ClassDeclarationSyntax node)

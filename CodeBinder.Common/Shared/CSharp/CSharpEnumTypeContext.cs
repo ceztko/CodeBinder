@@ -9,6 +9,10 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
+    /// <summary>
+    /// Enum syntax context
+    /// </summary>
+    /// <remarks>Inherit this class if needed to extend an enum context</remarks>
     public abstract class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax, CSharpEnumTypeContext>
     {
         protected CSharpEnumTypeContext(EnumDeclarationSyntax node)
