@@ -47,7 +47,7 @@ namespace CodeBinder.JNI
             get { return _modules.Values; }
         }
 
-        public override IEnumerable<ConversionBuilder> DefaultConversions
+        public override IEnumerable<IConversionBuilder> Conversions
         {
             get
             {

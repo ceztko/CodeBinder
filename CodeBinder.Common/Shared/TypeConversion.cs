@@ -19,6 +19,11 @@ namespace CodeBinder.Shared
             get { return string.Empty; }
         }
 
+        /// <summary>
+        /// Conversion builders
+        /// </summary>
+        /// <remarks>Override this to implement multiple builders per conversion.
+        /// NOTE: TypeConversion itself implements IConversionBuilder</remarks>
         public virtual IEnumerable<IConversionBuilder> Builders
         {
             get { yield return this; }

@@ -74,7 +74,7 @@ namespace CodeBinder
             }
 
             // Emit also out of context items
-            foreach (var defaultConversion in compilationContext.DefaultConversionDelegates)
+            foreach (var defaultConversion in compilationContext.ConversionDelegates)
                 yield return defaultConversion;
         }
 

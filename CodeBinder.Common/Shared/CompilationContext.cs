@@ -1,4 +1,5 @@
-﻿using CodeBinder.Util;
+﻿using CodeBinder.Attributes;
+using CodeBinder.Util;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -146,6 +147,8 @@ namespace CodeBinder.Shared
         private Dictionary<SyntaxTree, SemanticModel> _modelCache;
         private Compilation _compilation = null!;
 
+        public string LibraryName { get; private set; } = string.Empty;
+
         internal CompilationContext()
         {
             _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
@@ -171,6 +174,15 @@ namespace CodeBinder.Shared
             internal set
             {
                 _compilation = value;
+                try
+                {
+                    LibraryName = _compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0);
+                }
+                catch
+                {
+                    throw new Exception($"Missing {nameof(NativeLibraryAttribute)}");
+                }
+
                 CompilationSet?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -179,17 +191,17 @@ namespace CodeBinder.Shared
 
         protected abstract IEnumerable<TypeContext> GetRootTypes();
 
-        internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
+        internal IEnumerable<ConversionDelegate> ConversionDelegates
         {
             get
             {
-                foreach (var conversion in DefaultConversions)
+                foreach (var conversion in Conversions)
                     yield return new ConversionDelegate(conversion);
             }
         }
 
         // Compilation wide default converions, see CLangCompilationContext for some examples
-        public virtual IEnumerable<ConversionBuilder> DefaultConversions
+        public virtual IEnumerable<IConversionBuilder> Conversions
         {
             get { yield break; }
         }

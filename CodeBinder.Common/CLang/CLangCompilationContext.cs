@@ -17,27 +17,12 @@ namespace CodeBinder.CLang
         List<ClassDeclarationSyntax> _types;
         List<DelegateDeclarationSyntax> _callbacks;
 
-        public string LibraryName { get; private set; } = string.Empty;
-
         protected CLangCompilationContext()
         {
             _modules = new Dictionary<string, CLangModuleContextParent>();
             _enums = new List<EnumDeclarationSyntax>();
             _types = new List<ClassDeclarationSyntax>();
             _callbacks = new List<DelegateDeclarationSyntax>();
-            CompilationSet += CLangCompilationContext_CompilationSet;
-        }
-
-        private void CLangCompilationContext_CompilationSet(object? sender, EventArgs e)
-        {
-            try
-            {
-                LibraryName = Compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0);
-            }
-            catch
-            {
-                throw new Exception($"Missing {nameof(NativeLibraryAttribute)}");
-            }
         }
 
         public void AddModule(CompilationContext compilation, CLangModuleContextParent module)
@@ -96,12 +81,12 @@ namespace CodeBinder.CLang
             get { return _callbacks; }
         }
 
-        public override IEnumerable<ConversionBuilder> DefaultConversions
+        public override IEnumerable<IConversionBuilder> Conversions
         {
             get
             {
                 yield return new CLangLibraryHeaderBuilder(this);
-                yield return new CLangLibsDefsHeaderBuilder(this);
+                yield return new CLangLibDefsHeaderBuilder(this);
                 yield return new CLangTypesHeaderBuilder(this);
                 yield return new CLangMethodInitBuilder(this);
             }
@@ -118,15 +103,5 @@ namespace CodeBinder.CLang
         }
 
         protected override ConversionCSharpToCLang GetLanguageConversion() => Conversion;
-    }
-
-    abstract class CLangCompilationContextBuilder : ConversionBuilder
-    {
-        public CLangCompilationContext Compilation { get; private set; }
-
-        public CLangCompilationContextBuilder(CLangCompilationContext compilation)
-        {
-            Compilation = compilation;
-        }
     }
 }

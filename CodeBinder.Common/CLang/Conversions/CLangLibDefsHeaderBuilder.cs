@@ -7,9 +7,9 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    class CLangLibsDefsHeaderBuilder : CLangCompilationContextBuilder
+    class CLangLibDefsHeaderBuilder : CLangCompilationContextBuilder
     {
-        public CLangLibsDefsHeaderBuilder(CLangCompilationContext compilation)
+        public CLangLibDefsHeaderBuilder(CLangCompilationContext compilation)
             : base(compilation)
         {
         }
