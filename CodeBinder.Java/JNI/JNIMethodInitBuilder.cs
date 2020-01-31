@@ -15,7 +15,7 @@ namespace CodeBinder.JNI
             _compilation = compilation;
         }
 
-        public override void Write(CodeBuilder builder)
+        public override void write(CodeBuilder builder)
         {
             foreach (var module in _compilation.Modules)
                 builder.Append("#include \"JNI").Append(module.Name).AppendLine(".h\"");
@@ -34,10 +34,7 @@ namespace CodeBinder.JNI
             builder.Append("}").EndOfLine();
         }
 
-        public override string GeneratedPreamble
-        {
-            get { return ConversionCSharpToJNI.SourcePreamble; }
-        }
+        protected override string GetGeneratedPreamble() => ConversionCSharpToJNI.SourcePreamble;
 
         public override string FileName
         {

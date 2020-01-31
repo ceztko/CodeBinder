@@ -30,16 +30,16 @@ namespace CodeBinder.JNI
         {
             get
             {
-                yield return new StringConversionBuilder("JNIShared.h", () => JNIResources.JNIShared_h) { BasePath = "Internal" };
-                yield return new StringConversionBuilder("JNIShared.cpp", () => JNIResources.JNIShared_cpp) { BasePath = "Internal" };
-                yield return new StringConversionBuilder("JNITypes.cpp", () => JNIResources.JNITypes_cpp) { BasePath = "Internal" };
-                yield return new StringConversionBuilder("JNITypesPrivate.h", () => JNIResources.JNITypesPrivate_h) { BasePath = "Internal" };
-                yield return new StringConversionBuilder("JNITypesPrivate.cpp", () => JNIResources.JNITypesPrivate_cpp) { BasePath = "Internal" };
-                yield return new StringConversionBuilder("JNITypes.h", () => JNIResources.JNITypes_h) { BasePath = "Internal" };
-                yield return new StringConversionBuilder("JNIBoxes.cpp", () => JNIResources.JNIBoxes_cpp) { BasePath = "Internal" };
-                yield return new StringConversionBuilder("JNIBoxes.h", () => JNIResources.JNIBoxes_h) { BasePath = "Internal" };
-                yield return new StringConversionBuilder("JNIBoxesTemplate.h", () => JNIResources.JNIBoxesTemplate_h) { BasePath = "Internal" };
-                yield return new StringConversionBuilder("JNIBinderUtils.cpp", () => JNIResources.JNIBinderUtils_cpp) { BasePath = "Internal" };
+                yield return new StringConversionBuilder("JNIShared.h", () => JNIResources.JNIShared_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionBuilder("JNIShared.cpp", () => JNIResources.JNIShared_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionBuilder("JNITypes.cpp", () => JNIResources.JNITypes_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionBuilder("JNITypesPrivate.h", () => JNIResources.JNITypesPrivate_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionBuilder("JNITypesPrivate.cpp", () => JNIResources.JNITypesPrivate_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionBuilder("JNITypes.h", () => JNIResources.JNITypes_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionBuilder("JNIBoxes.cpp", () => JNIResources.JNIBoxes_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionBuilder("JNIBoxes.h", () => JNIResources.JNIBoxes_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionBuilder("JNIBoxesTemplate.h", () => JNIResources.JNIBoxesTemplate_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionBuilder("JNIBinderUtils.cpp", () => JNIResources.JNIBinderUtils_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
             }
         }
     }

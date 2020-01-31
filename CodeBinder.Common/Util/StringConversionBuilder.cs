@@ -9,6 +9,8 @@ namespace CodeBinder.Util
         string m_filename;
         Func<string> m_resourceString;
 
+        public string? GeneratedPreamble { get; set; }
+
         public StringConversionBuilder(string filename, Func<string> resourceString)
         {
             m_filename = filename;
@@ -20,7 +22,9 @@ namespace CodeBinder.Util
             get { return m_filename; }
         }
 
-        public override void Write(CodeBuilder builder)
+        protected sealed override string? GetGeneratedPreamble() => GeneratedPreamble;
+
+        public override void write(CodeBuilder builder)
         {
             builder.Append(m_resourceString());
         }

@@ -28,7 +28,7 @@ namespace CodeBinder.Java
             return ConversionCSharpToJava.CodeBinderNamespace;
         }
 
-        public override void Write(CodeBuilder builder)
+        public override void write(CodeBuilder builder)
         {
             builder.Append("package").Space().Append(ConversionCSharpToJava.CodeBinderNamespace).EndOfStatement();
             builder.AppendLine();
@@ -63,9 +63,6 @@ namespace CodeBinder.Java
             get { return _primitiveType + "Box"; }
         }
 
-        public override string GeneratedPreamble
-        {
-            get { return ConversionCSharpToJava.SourcePreamble; }
-        }
+        protected override string GetGeneratedPreamble() => ConversionCSharpToJava.SourcePreamble;
     }
 }

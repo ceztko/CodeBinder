@@ -11,7 +11,7 @@ namespace CodeBinder.CLang
         public CLangMethodInitBuilder(CLangCompilationContext compilation)
             : base(compilation) { }
 
-        public override void Write(CodeBuilder builder)
+        public override void write(CodeBuilder builder)
         {
             foreach (var module in Compilation.Modules)
                 builder.Append("#include \"").Append(module.Name).AppendLine(".h\"");
@@ -36,10 +36,7 @@ namespace CodeBinder.CLang
             builder.Append("}").EndOfLine();
         }
 
-        public override string GeneratedPreamble
-        {
-            get { return ConversionCSharpToCLang.SourcePreamble; }
-        }
+        protected override string GetGeneratedPreamble() => ConversionCSharpToCLang.SourcePreamble;
 
         public override string FileName
         {

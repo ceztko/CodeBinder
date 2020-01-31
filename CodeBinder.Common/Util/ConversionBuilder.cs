@@ -7,11 +7,6 @@ namespace CodeBinder.Util
 {
     public abstract class ConversionBuilderBase : IConversionBuilder
     {
-        public virtual string? GeneratedPreamble
-        {
-            get { return null; }
-        }
-
         protected virtual string? GetBasePath()
         {
             return null;
@@ -22,9 +17,20 @@ namespace CodeBinder.Util
             get { return GetBasePath(); }
         }
 
-        public abstract string FileName { get; }
+        public void Write(CodeBuilder builder)
+        {
+            string? preamble = GetGeneratedPreamble();
+            if (!string.IsNullOrEmpty(preamble))
+                builder.AppendLine(preamble);
 
-        public abstract void Write(CodeBuilder builder);
+            write(builder);
+        }
+
+        public abstract void write(CodeBuilder builder);
+
+        protected virtual string? GetGeneratedPreamble() => null;
+
+        public abstract string FileName { get; }
 
         string? IConversionBuilder.BasePath
         {
@@ -34,19 +40,14 @@ namespace CodeBinder.Util
 
     public abstract class ConversionBuilder : ConversionBuilderBase
     {
-        protected override string? GetBasePath()
-        {
-            return BasePath;
-        }
-
         public new string? BasePath { get; set; }
+
+        protected override string? GetBasePath() => BasePath;
     }
 
     public interface IConversionBuilder
     {
         void Write(CodeBuilder builder);
-
-        string? GeneratedPreamble { get; }
 
         string FileName { get; }
 

@@ -55,12 +55,7 @@ namespace CodeBinder
         private void write(TextWriter writer)
         {
             var codeBuilder = new CodeBuilder(writer);
-            string? preamble = _builder.GeneratedPreamble;
-            if (!string.IsNullOrEmpty(preamble))
-                codeBuilder.AppendLine(preamble);
-
             _builder.Write(codeBuilder);
-
             // NOTE: Flush the writer: needed when writing to filestream
             writer.Flush();
         }

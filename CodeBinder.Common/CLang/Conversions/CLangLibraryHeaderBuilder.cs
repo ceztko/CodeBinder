@@ -11,7 +11,7 @@ namespace CodeBinder.CLang
         public CLangLibraryHeaderBuilder(CLangCompilationContext compilation)
             : base(compilation) { }
 
-        public override void Write(CodeBuilder builder)
+        public override void write(CodeBuilder builder)
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
@@ -19,10 +19,7 @@ namespace CodeBinder.CLang
                 builder.Append("#include \"").Append(module.Name).AppendLine(".h\"");
         }
 
-        public override string GeneratedPreamble
-        {
-            get { return ConversionCSharpToCLang.SourcePreamble; }
-        }
+        protected override string GetGeneratedPreamble() => ConversionCSharpToCLang.SourcePreamble;
 
         public override string FileName
         {

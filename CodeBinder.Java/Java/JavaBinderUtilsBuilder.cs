@@ -17,7 +17,7 @@ namespace CodeBinder.Java
             ClassCode = classCode;
         }
 
-        public override void Write(CodeBuilder builder)
+        public override void write(CodeBuilder builder)
         {
             builder.Append("package").Space().Append(ConversionCSharpToJava.CodeBinderNamespace).EndOfStatement();
             builder.AppendLine();

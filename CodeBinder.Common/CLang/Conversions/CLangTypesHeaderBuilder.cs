@@ -18,7 +18,7 @@ namespace CodeBinder.CLang
 
         public override string FileName => "Types.h";
 
-        public override void Write(CodeBuilder builder)
+        public override void write(CodeBuilder builder)
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();

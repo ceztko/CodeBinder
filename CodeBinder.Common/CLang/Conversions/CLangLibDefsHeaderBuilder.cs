@@ -16,7 +16,7 @@ namespace CodeBinder.CLang
 
         public override string FileName => "libdefs.h";
 
-        public override void Write(CodeBuilder builder)
+        public override void write(CodeBuilder builder)
         {
             string libnameUpper = Compilation.LibraryName.ToUpper();
             string LIBRARY_STATIC = $"{libnameUpper}_STATIC";
