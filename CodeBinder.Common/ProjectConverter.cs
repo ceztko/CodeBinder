@@ -59,18 +59,16 @@ namespace CodeBinder
             {
                 foreach (var type in pair.Value)
                 {
-                    var conversion = type.CreateConversion();
-                    foreach (var builder in conversion.Builders)
-                        yield return new ConversionDelegate(pair.Key, builder);
+                    foreach (var conversion in type.Conversions)
+                        yield return new ConversionDelegate(pair.Key, conversion);
                 }
             }
 
             // Convert also non-syntax tree types
             foreach (var type in compilationContext.RootTypes)
             {
-                var conversion = type.CreateConversion();
-                foreach (var builder in conversion.Builders)
-                    yield return new ConversionDelegate(builder);
+                foreach (var conversion in type.Conversions)
+                    yield return new ConversionDelegate(conversion);
             }
 
             // Emit also out of context items

@@ -10,9 +10,29 @@ using System.Diagnostics;
 
 namespace CodeBinder.Shared.CSharp
 {
+
+    /// <summary>
+    /// CSharp node visitor
+    /// </summary>
+    /// <remarks>Inherit this class to extend the visitor behavior</remarks>
+    public abstract class CSharpNodeVisitor<TSyntaxTreeContext> : CSharpNodeVisitor
+        where TSyntaxTreeContext: CSharpSyntaxTreeContext
+    {
+        protected CSharpNodeVisitor() { }
+
+        protected abstract TSyntaxTreeContext GetCSharpSyntaxTreeContext();
+
+        protected sealed override CSharpSyntaxTreeContext GetSyntaxTreeContext() => GetCSharpSyntaxTreeContext();
+    }
+
     public abstract class CSharpNodeVisitor : CSharpNodeVisitor<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpBaseTypeContext, CSharpLanguageConversion>
     {
         private Stack<CSharpBaseTypeContext> _parents;
+
+        internal CSharpNodeVisitor()
+        {
+            _parents = new Stack<CSharpBaseTypeContext>();
+        }
 
         public CSharpBaseTypeContext? CurrentParent
         {
@@ -45,16 +65,11 @@ namespace CodeBinder.Shared.CSharp
 
         #region Supported types
 
-        public CSharpNodeVisitor()
-        {
-            _parents = new Stack<CSharpBaseTypeContext>();
-        }
-
         public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpInterfaceTypeContextImpl(node, Compilation);
+            var type = Compilation.CreateContext(node);
             addType(type, isPartial);
             DefaultVisit(node);
         }
@@ -63,7 +78,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpClassTypeContextImpl(node, Compilation);
+            var type = Compilation.CreateContext(node);
             addType(type, isPartial);
             _parents.Push(type);
             DefaultVisit(node);
@@ -74,7 +89,7 @@ namespace CodeBinder.Shared.CSharp
         {
             bool isPartial;
             checkTypeDeclaration(node, out isPartial);
-            var type = new CSharpStructTypeContextImpl(node, Compilation);
+            var type = Compilation.CreateContext(node);
             addType(type, isPartial);
             _parents.Push(type);
             DefaultVisit(node);
@@ -83,7 +98,7 @@ namespace CodeBinder.Shared.CSharp
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
-            var type = new CSharpEnumTypeContextImpl(node, Compilation);
+            var type = Compilation.CreateContext(node);
             TreeContext.AddType(type, CurrentParent);
             DefaultVisit(node);
         }

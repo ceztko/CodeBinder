@@ -26,22 +26,22 @@ namespace CodeBinder.Java
             MethodsLowerCase = true;
         }
 
-        public override TypeConversion<CSharpClassTypeContext> CreateConversion(CSharpClassTypeContext cls)
+        public override TypeConversion<CSharpClassTypeContext>? CreateConversion(CSharpClassTypeContext cls)
         {
             return new JavaClassConversion(cls, this);
         }
 
-        public override TypeConversion<CSharpInterfaceTypeContext> CreateConversion(CSharpInterfaceTypeContext iface)
+        public override TypeConversion<CSharpInterfaceTypeContext>? CreateConversion(CSharpInterfaceTypeContext iface)
         {
             return new JavaInterfaceConversion(iface, this);
         }
 
-        public override TypeConversion<CSharpStructTypeContext> CreateConversion(CSharpStructTypeContext str)
+        public override TypeConversion<CSharpStructTypeContext>? CreateConversion(CSharpStructTypeContext str)
         {
             return new JavaStructConversion(str, this);
         }
 
-        public override TypeConversion<CSharpEnumTypeContext> CreateConversion(CSharpEnumTypeContext enm)
+        public override TypeConversion<CSharpEnumTypeContext>? CreateConversion(CSharpEnumTypeContext enm)
         {
             return new JavaEnumConversion(enm, this);
         }

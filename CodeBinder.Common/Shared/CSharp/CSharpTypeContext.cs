@@ -11,7 +11,7 @@ using System.Text;
 namespace CodeBinder.Shared.CSharp
 {
     [DebuggerDisplay("TypeName = {TypeName}")]
-    public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext, CSharpCompilationContext>
+    public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext>, ITypeContext<CSharpCompilationContext>
     {
         internal CSharpBaseTypeContext() { }
 
@@ -25,16 +25,16 @@ namespace CodeBinder.Shared.CSharp
             get { return Node.Identifier.Text; }
         }
 
-        // We override TypeConversion GetConversion() in inherited class
-        protected sealed override TypeConversion<CSharpBaseTypeContext> createConversion()
-        {
-            throw new NotImplementedException();
-        }
+        public new CSharpCompilationContext Compilation => GetCSharpCompilationContext();
+
+        protected abstract CSharpCompilationContext GetCSharpCompilationContext();
 
         protected abstract BaseTypeDeclarationSyntax GetBaseType();
 
         protected internal virtual void FillMemberPartialDeclarations(
             Dictionary<TypeDeclarationSyntax, PartialDeclarationsTree> memberPartialDeclarations) { }
+
+        protected sealed override CompilationContext GetCompilationContext() => GetCSharpCompilationContext();
     }
 
     public abstract class CSharpTypeContext : CSharpBaseTypeContext
@@ -69,15 +69,9 @@ namespace CodeBinder.Shared.CSharp
             get { return _partialDeclarations; }
         }
 
-        public new TypeDeclarationSyntax Node
-        {
-            get { return GetSyntaxType(); }
-        }
+        public new TypeDeclarationSyntax Node => GetSyntaxType();
 
-        protected override BaseTypeDeclarationSyntax GetBaseType()
-        {
-            return GetSyntaxType();
-        }
+        protected override BaseTypeDeclarationSyntax GetBaseType() => GetSyntaxType();
 
         protected abstract TypeDeclarationSyntax GetSyntaxType();
 
@@ -90,49 +84,27 @@ namespace CodeBinder.Shared.CSharp
 
     public abstract class CSharpBaseTypeContext<TNode, TTypeContext> : CSharpBaseTypeContext
         where TNode : BaseTypeDeclarationSyntax
-        where TTypeContext : CSharpBaseTypeContext
     {
         public new TNode Node { get; private set; }
 
-        protected CSharpBaseTypeContext(TNode node)
+        internal CSharpBaseTypeContext(TNode node)
         {
             Node = node;
         }
 
-        protected internal override TypeConversion CreateConversion()
-        {
-            return createConversion();
-        }
-
-        protected new abstract TypeConversion<TTypeContext> createConversion();
-
-        protected override BaseTypeDeclarationSyntax GetBaseType()
-        {
-            return Node;
-        }
+        protected override BaseTypeDeclarationSyntax GetBaseType() => Node;
     }
 
-    public abstract class CSharpTypeContext<TNode, TTypeContext> : CSharpTypeContext
+    public abstract class CSharpTypeContext<TNode> : CSharpTypeContext
         where TNode : TypeDeclarationSyntax
-        where TTypeContext : CSharpTypeContext
     {
         public new TNode Node { get; private set; }
 
-        protected CSharpTypeContext(TNode node)
+        internal CSharpTypeContext(TNode node)
         {
             Node = node;
         }
 
-        protected internal override TypeConversion CreateConversion()
-        {
-            return createConversion();
-        }
-
-        protected new abstract TypeConversion<TTypeContext> createConversion();
-
-        protected override TypeDeclarationSyntax GetSyntaxType()
-        {
-            return Node;
-        }
+        protected override TypeDeclarationSyntax GetSyntaxType() => Node;
     }
 }

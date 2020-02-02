@@ -8,33 +8,9 @@ using System.Text;
 
 namespace CodeBinder.Shared
 {
-    public abstract class TypeConversion : IConversionBuilder, ICompilationContextProvider
+    public abstract class TypeConversion : ConversionBuilder, ICompilationContextProvider
     {
         internal TypeConversion() { }
-
-        public abstract void Write(CodeBuilder builder);
-
-        public virtual string GeneratedPreamble
-        {
-            get { return string.Empty; }
-        }
-
-        /// <summary>
-        /// Conversion builders
-        /// </summary>
-        /// <remarks>Override this to implement multiple builders per conversion.
-        /// NOTE: TypeConversion itself implements IConversionBuilder</remarks>
-        public virtual IEnumerable<IConversionBuilder> Builders
-        {
-            get { yield return this; }
-        }
-
-        public abstract string FileName { get; }
-
-        public virtual string? BasePath
-        {
-            get { return null; }
-        }
 
         public TypeContext Context
         {

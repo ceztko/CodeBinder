@@ -16,9 +16,9 @@ namespace CodeBinder.CLang
         public CLangTypesHeaderBuilder(CLangCompilationContext compilation)
             : base(compilation) { }
 
-        public override string FileName => "Types.h";
+        protected override string GetFileName() => "Types.h";
 
-        public override void write(CodeBuilder builder)
+        protected override void write(CodeBuilder builder)
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();

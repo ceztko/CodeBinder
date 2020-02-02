@@ -18,17 +18,11 @@ namespace CodeBinder.Java
             _primitiveType = primitiveType;
         }
 
-        public override string FileName
-        {
-            get { return BoxTypeName + ".java"; }
-        }
+        protected override string GetFileName() => $"{BoxTypeName}.java";
 
-        protected override string GetBasePath()
-        {
-            return ConversionCSharpToJava.CodeBinderNamespace;
-        }
+        protected override string GetBasePath() => ConversionCSharpToJava.CodeBinderNamespace;
 
-        public override void write(CodeBuilder builder)
+        protected override void write(CodeBuilder builder)
         {
             builder.Append("package").Space().Append(ConversionCSharpToJava.CodeBinderNamespace).EndOfStatement();
             builder.AppendLine();

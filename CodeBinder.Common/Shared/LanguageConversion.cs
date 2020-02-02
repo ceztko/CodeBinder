@@ -21,9 +21,7 @@ namespace CodeBinder.Shared
         public LanguageConversion() { }
 
         internal sealed override CompilationContext CreateCompilationContext()
-        {
-            return createCompilationContext();
-        }
+            => createCompilationContext();
 
         protected abstract TCompilationContext createCompilationContext();
     }

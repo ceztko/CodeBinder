@@ -6,7 +6,7 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    abstract class JavaConversionBuilder : ConversionBuilderBase
+    abstract class JavaConversionBuilder : ConversionBuilder
     {
         public ConversionCSharpToJava Conversion { get; private set; }
 

@@ -13,7 +13,7 @@ namespace CodeBinder.Shared
     /// </summary>
     /// <remarks>If needed a more specific CSharp conversion type context inherit
     /// CSharpBaseTypeContext or CSharpTypeContext</remarks> 
-    public abstract class TypeContext<TTypeContext, TCompilationContext> : TypeContext<TTypeContext>
+    public abstract class TypeContext<TTypeContext, TCompilationContext> : TypeContext<TTypeContext>, ITypeContext<TCompilationContext>
         where TTypeContext : TypeContext
         where TCompilationContext : CompilationContext
     {
@@ -27,6 +27,13 @@ namespace CodeBinder.Shared
         {
             return getCompilationContext();
         }
+
+        protected override IEnumerable<TypeConversion> GetConversions()
+        {
+            return getConversions();
+        }
+
+        protected abstract IEnumerable<TypeConversion<TTypeContext>> getConversions();
     }
 
     /// <remarks>Inherited by CSharpBaseTypeContext together with ITypeContext</remarks>
@@ -47,13 +54,6 @@ namespace CodeBinder.Shared
             _Children.Add(child);
         }
 
-        internal protected override TypeConversion CreateConversion()
-        {
-            return createConversion();
-        }
-
-        protected abstract TypeConversion<TTypeContext> createConversion();
-
         public new IReadOnlyList<TTypeContext> Children
         {
             get { return _Children; }
@@ -69,15 +69,9 @@ namespace CodeBinder.Shared
     {
         internal TypeContext() { }
 
-        public CompilationContext Compilation
-        {
-            get { return GetCompilationContext(); }
-        }
+        public CompilationContext Compilation => GetCompilationContext();
 
-        public IEnumerable<TypeContext> Children
-        {
-            get { return GetChildren(); }
-        }
+        public IEnumerable<TypeContext> Children => GetChildren();
 
         protected abstract CompilationContext GetCompilationContext();
 
@@ -85,8 +79,16 @@ namespace CodeBinder.Shared
         /// Create a conversion for this type.
         /// Overrides this method to extend hiearchy. See CSharpTypeContext/CSharpBaseTypeContext
         /// </summary>
-        internal protected abstract TypeConversion CreateConversion();
+        protected abstract IEnumerable<TypeConversion> GetConversions();
+
+        internal IEnumerable<TypeConversion> Conversions => GetConversions();
 
         protected abstract IEnumerable<TypeContext> GetChildren();
+    }
+
+    public interface ITypeContext<TCompilationContext>
+        where TCompilationContext : CompilationContext
+    {
+        TCompilationContext Compilation { get; }
     }
 }

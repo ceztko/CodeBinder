@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -9,12 +10,21 @@ namespace CodeBinder.Shared.CSharp
     /// Basic csharp compilation context
     /// </summary>
     /// <remarks>Inherit this class to extend the context</remarks>
-    public abstract class CSharpCompilationContext :
-        CompilationContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext, CSharpLanguageConversion>
+    public abstract class CSharpCompilationContext<TSyntaxTreeContext> : CSharpCompilationContext
+        where TSyntaxTreeContext : CSharpSyntaxTreeContext
+    {
+        protected CSharpCompilationContext() { }
+
+        protected abstract TSyntaxTreeContext CreateCSharpSyntaxTreeContext();
+
+        protected sealed override CSharpSyntaxTreeContext createSyntaxTreeContext() => CreateCSharpSyntaxTreeContext();
+    }
+
+    public abstract class CSharpCompilationContext : CompilationContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext, CSharpLanguageConversion>
     {
         Dictionary<string, CSharpTypeContext> _partialTypes;
 
-        protected CSharpCompilationContext()
+        internal CSharpCompilationContext()
         {
             _partialTypes = new Dictionary<string, CSharpTypeContext>();
         }
@@ -22,6 +32,26 @@ namespace CodeBinder.Shared.CSharp
         protected override CSharpSyntaxTreeContext createSyntaxTreeContext()
         {
             return new CSharpSyntaxTreeContextImpl(this);
+        }
+
+        public virtual CSharpClassTypeContext CreateContext(ClassDeclarationSyntax cls)
+        {
+            return new CSharpClassTypeContextImpl(cls, this);
+        }
+
+        public virtual CSharpEnumTypeContext CreateContext(EnumDeclarationSyntax enm)
+        {
+            return new CSharpEnumTypeContextImpl(enm, this);
+        }
+
+        public virtual CSharpInterfaceTypeContext CreateContext(InterfaceDeclarationSyntax iface)
+        {
+            return new CSharpInterfaceTypeContextImpl(iface, this);
+        }
+
+        public virtual CSharpStructTypeContext CreateContext(StructDeclarationSyntax str)
+        {
+            return new CSharpStructTypeContextImpl(str, this);
         }
 
         public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpTypeContext type, CSharpBaseTypeContext? parent)

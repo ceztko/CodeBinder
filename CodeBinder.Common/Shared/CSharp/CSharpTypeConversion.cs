@@ -9,14 +9,14 @@ namespace CodeBinder.Shared.CSharp
     /// </summary>
     /// <remarks>Inherit this if needed to specialize the compilation context</remarks>
     public abstract class CSharpTypeConversion<TTypeContext, TCompilationContext, TLanguageConversion> : TypeConversion<TTypeContext, TCompilationContext, TLanguageConversion>
-        where TTypeContext : CSharpBaseTypeContext
+        where TTypeContext : CSharpBaseTypeContext,ITypeContext<TCompilationContext>
         where TCompilationContext : CSharpCompilationContext
         where TLanguageConversion: CSharpLanguageConversion
     {
         protected CSharpTypeConversion(TTypeContext context, TLanguageConversion conversion)
             : base(context, conversion) { }
 
-        public override TCompilationContext Compilation => (TCompilationContext)Context.Compilation;
+        public override TCompilationContext Compilation => (Context as ITypeContext<TCompilationContext>).Compilation;
     }
 
     /// <summary>

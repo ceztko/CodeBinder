@@ -5,18 +5,12 @@ using System.Text;
 
 namespace CodeBinder.Util
 {
-    public abstract class ConversionBuilderBase : IConversionBuilder
+    /// <summary>
+    /// Partially contextualized class to write a conversion on a builder
+    /// </summary>
+    /// <seealso cref="ConversionDelegate"/>
+    public abstract class ConversionBuilder : IConversionBuilder
     {
-        protected virtual string? GetBasePath()
-        {
-            return null;
-        }
-
-        public string? BasePath
-        {
-            get { return GetBasePath(); }
-        }
-
         public void Write(CodeBuilder builder)
         {
             string? preamble = GetGeneratedPreamble();
@@ -26,25 +20,25 @@ namespace CodeBinder.Util
             write(builder);
         }
 
-        public abstract void write(CodeBuilder builder);
+        protected abstract void write(CodeBuilder builder);
+
+        protected abstract string GetFileName();
+
+        protected virtual string? GetBasePath() => null;
 
         protected virtual string? GetGeneratedPreamble() => null;
 
-        public abstract string FileName { get; }
+        public string FileName => GetFileName();
 
-        string? IConversionBuilder.BasePath
-        {
-            get { return GetBasePath(); }
-        }
+        public string? BasePath => GetBasePath();
+
+        public string? GeneratedPreamble => GetGeneratedPreamble();
     }
 
-    public abstract class ConversionBuilder : ConversionBuilderBase
-    {
-        public new string? BasePath { get; set; }
-
-        protected override string? GetBasePath() => BasePath;
-    }
-
+    /// <summary>
+    /// Partially contextualized interface to write a conversion on a builder
+    /// </summary>
+    /// <seealso cref="ConversionDelegate"/>
     public interface IConversionBuilder
     {
         void Write(CodeBuilder builder);

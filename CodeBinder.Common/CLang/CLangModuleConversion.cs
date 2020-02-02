@@ -18,17 +18,14 @@ namespace CodeBinder.CLang
         public CLangModuleConversion(CLangModuleContext context, ConversionCSharpToCLang conversion)
             : base(context, conversion) { }
 
-        public override string FileName
-        {
-            get { return ModuleName + ".h"; }
-        }
+        protected override string GetFileName() => ModuleName + ".h";
 
         public string ModuleName
         {
             get { return Context.Name; }
         }
 
-        public sealed override void Write(CodeBuilder builder)
+        protected sealed override void write(CodeBuilder builder)
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
@@ -61,10 +58,7 @@ namespace CodeBinder.CLang
             writeMethods(false);
         }
 
-        public override string GeneratedPreamble
-        {
-            get { return ConversionCSharpToCLang.SourcePreamble; }
-        }
+        protected override string GetGeneratedPreamble() => ConversionCSharpToCLang.SourcePreamble;
 
         public override CLangCompilationContext Compilation
         {

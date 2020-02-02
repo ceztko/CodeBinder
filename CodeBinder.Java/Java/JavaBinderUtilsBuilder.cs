@@ -17,7 +17,7 @@ namespace CodeBinder.Java
             ClassCode = classCode;
         }
 
-        public override void write(CodeBuilder builder)
+        protected override void write(CodeBuilder builder)
         {
             builder.Append("package").Space().Append(ConversionCSharpToJava.CodeBinderNamespace).EndOfStatement();
             builder.AppendLine();
@@ -29,9 +29,6 @@ namespace CodeBinder.Java
             return ConversionCSharpToJava.CodeBinderNamespace;
         }
 
-        public override string FileName
-        {
-            get { return ClassName + ".java"; }
-        }
+        protected override string GetFileName() => $"{ClassName}.java";
     }
 }

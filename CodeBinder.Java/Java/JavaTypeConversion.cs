@@ -33,23 +33,11 @@ namespace CodeBinder.Java
             }
         }
 
-        public override string? BasePath
-        {
-            get
-            {
-                return Namespace.Replace('.', Path.DirectorySeparatorChar);
-            }
-        }
+        protected override string? GetBasePath() => Namespace.Replace('.', Path.DirectorySeparatorChar);
 
-        public override string FileName
-        {
-            get { return Context.Node.GetName() + ".java"; }
-        }
+        protected override string GetFileName() => $"{Context.Node.GetName()}.java";
 
-        public override string GeneratedPreamble
-        {
-            get { return ConversionCSharpToJava.SourcePreamble; }
-        }
+        protected override string GetGeneratedPreamble() => ConversionCSharpToJava.SourcePreamble;
 
         public IEnumerable<string> Imports
         {
@@ -85,7 +73,7 @@ namespace CodeBinder.Java
             get { return GetImports(Context.Node); }
         }
 
-        public sealed override void Write(CodeBuilder builder)
+        protected sealed override void write(CodeBuilder builder)
         {
             string? ns = Namespace;
             if (ns != null)

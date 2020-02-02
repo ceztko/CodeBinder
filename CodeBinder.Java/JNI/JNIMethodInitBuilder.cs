@@ -15,7 +15,7 @@ namespace CodeBinder.JNI
             _compilation = compilation;
         }
 
-        public override void write(CodeBuilder builder)
+        protected override void write(CodeBuilder builder)
         {
             foreach (var module in _compilation.Modules)
                 builder.Append("#include \"JNI").Append(module.Name).AppendLine(".h\"");
@@ -36,9 +36,6 @@ namespace CodeBinder.JNI
 
         protected override string GetGeneratedPreamble() => ConversionCSharpToJNI.SourcePreamble;
 
-        public override string FileName
-        {
-            get { return "MethodInit.cpp"; }
-        }
+        protected override string GetFileName() => "MethodInit.cpp";
     }
 }

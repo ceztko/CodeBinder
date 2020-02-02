@@ -11,7 +11,7 @@ namespace CodeBinder.Util
     /// <summary>
     /// Low level util class to append code on a TextWriter, with facilities to ease creation of blocks or parenthesized statements
     /// </summary>
-    public class CodeBuilder : IDisposable
+    public sealed class CodeBuilder : IDisposable
     {
         CodeBuilder? _parent;
         private CodeBuilder? Child { get; set; }
@@ -54,7 +54,7 @@ namespace CodeBinder.Util
 
         public CodeBuilder Append(string str)
         {
-            doChecks(ref str);
+            doChecks();
             _instanceIndentedCount = 0;
             if (str == string.Empty)
                 return this;
@@ -65,7 +65,7 @@ namespace CodeBinder.Util
 
         public CodeBuilder AppendLine(string str = "")
         {
-            doChecks(ref str);
+            doChecks();
             _instanceIndentedCount = 0;
             appendIndent(str, true);
             _writer.WriteLine(str);
@@ -211,14 +211,6 @@ namespace CodeBinder.Util
             _currentIndentLevel += indentCount;
             _disposeContexts.Add(new DisposeContext() { IndentCount = indentCount, AppendString = appendString, AppendLine = appendLine });
             return this;
-        }
-
-        void doChecks(ref string str)
-        {
-            if (str == null)
-                str = string.Empty;
-
-            doChecks();
         }
 
         void doChecks()

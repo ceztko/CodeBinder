@@ -20,17 +20,13 @@ namespace CodeBinder.JNI
         {
         }
 
-        public override string FileName
-        {
-            get { return JNIModuleName + ".h"; }
-        }
+        public string JNIModuleName => $"JNI{Context.Name}";
 
-        public string JNIModuleName
-        {
-            get { return "JNI" + Context.Name; }
-        }
+        protected override string GetFileName() => $"{JNIModuleName}.h";
 
-        public sealed override void Write(CodeBuilder builder)
+        protected override string GetGeneratedPreamble() => ConversionCSharpToJNI.SourcePreamble;
+
+        protected sealed override void write(CodeBuilder builder)
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
@@ -54,11 +50,6 @@ namespace CodeBinder.JNI
                 builder.Append(MethodWriter.Create(method, this));
                 builder.AppendLine();
             }
-        }
-
-        public override string GeneratedPreamble
-        {
-            get { return ConversionCSharpToJNI.SourcePreamble; }
         }
 
         public override JNICompilationContext Compilation

@@ -11,7 +11,7 @@ namespace CodeBinder.CLang
         public CLangMethodInitBuilder(CLangCompilationContext compilation)
             : base(compilation) { }
 
-        public override void write(CodeBuilder builder)
+        protected override void write(CodeBuilder builder)
         {
             foreach (var module in Compilation.Modules)
                 builder.Append("#include \"").Append(module.Name).AppendLine(".h\"");
@@ -38,9 +38,6 @@ namespace CodeBinder.CLang
 
         protected override string GetGeneratedPreamble() => ConversionCSharpToCLang.SourcePreamble;
 
-        public override string FileName
-        {
-            get { return "MethodInit.cpp"; }
-        }
+        protected override string GetFileName() => "MethodInit.cpp";
     }
 }

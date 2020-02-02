@@ -6,15 +6,24 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-
     /// <summary>
     /// SyntaxTree context
     /// </summary>
     /// <remarks>Inherit this class to extend the context, implementing both
     /// createVisitor() and getCompilationContext()</remarks> 
-    public abstract class CSharpSyntaxTreeContext : CSharpCompilationContext.SyntaxTree<CSharpCompilationContext, CSharpNodeVisitor>
+    public abstract class CSharpSyntaxTreeContext<TCompilationContext> : CSharpSyntaxTreeContext
+        where TCompilationContext : CSharpCompilationContext
     {
         protected CSharpSyntaxTreeContext() { }
+
+        protected abstract TCompilationContext GetCSharpCompilationContext();
+
+        protected sealed override CSharpCompilationContext getCompilationContext() => GetCSharpCompilationContext();
+    }
+
+    public abstract class CSharpSyntaxTreeContext : CSharpCompilationContext.SyntaxTree<CSharpCompilationContext, CSharpNodeVisitor>
+    {
+        internal CSharpSyntaxTreeContext() { }
     }
 
     sealed class CSharpSyntaxTreeContextImpl : CSharpSyntaxTreeContext
