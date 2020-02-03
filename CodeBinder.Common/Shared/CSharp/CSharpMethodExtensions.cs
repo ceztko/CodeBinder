@@ -663,10 +663,13 @@ namespace CodeBinder.Shared.CSharp
             return node.HasAttribute<FlagsAttribute>(provider);
         }
 
-        public static bool ShouldDiscard(this SyntaxNode node, ICompilationContextProvider provider)
+        public static bool ShouldDiscard(this SyntaxNode node, ICompilationContextProvider provider, LanguageConversion conversion)
         {
-            // TODO: More support for RequiresAttribute
-            return node.HasAttribute<IgnoreAttribute>(provider) || node.HasAttribute<RequiresAttribute>(provider);
+            var symbol = GetDefaultDeclarationSymbol(node, provider);
+            if (symbol == null)
+                return false;
+
+            return symbol.ShouldDiscard(conversion);
         }
 
         public static bool HasAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider)

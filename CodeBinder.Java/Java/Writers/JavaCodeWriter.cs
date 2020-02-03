@@ -9,7 +9,7 @@ namespace CodeBinder.Java
     abstract class JavaCodeWriter<TItem> : CodeWriter<TItem, JavaCodeConversionContext>
     {
         protected JavaCodeWriter(TItem item, JavaCodeConversionContext context)
-            : base(item, context, context.Provider) { }
+            : base(item, context) { }
     }
 
     public class JavaCodeConversionContext : ICompilationContextProvider

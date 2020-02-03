@@ -38,6 +38,14 @@ namespace CodeBinder.Shared
         /// </summary>
         public NamespaceMappingTree NamespaceMapping { get; private set; }
 
+        /// <summary>
+        /// Add here policies supported by this language conversion
+        /// </summary>
+        public virtual IReadOnlyCollection<string> Policies
+        {
+            get { return new string[] { }; }
+        }
+
         public virtual IEnumerable<IConversionBuilder> DefaultConversions
         {
             get { yield break; }

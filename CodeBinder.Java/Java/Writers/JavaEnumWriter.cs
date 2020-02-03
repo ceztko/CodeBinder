@@ -18,13 +18,13 @@ namespace CodeBinder.Java
         public EnumTypeWriter(EnumDeclarationSyntax syntax, JavaCodeConversionContext context)
             : base(syntax, context)
         {
-            _isOrdinalEnum = !Item.IsFlag(this);
+            _isOrdinalEnum = !Item.IsFlag(Context);
             if (_isOrdinalEnum)
             {
                 for (int i = 0; i < syntax.Members.Count; i++)
                 {
                     var member = syntax.Members[i];
-                    long value = member.GetEnumValue(this);
+                    long value = member.GetEnumValue(Context);
                     if (value != i)
                         _isOrdinalEnum = false;
                 }
@@ -60,7 +60,7 @@ namespace CodeBinder.Java
             if (!_isOrdinalEnum)
             {
                 Builder.Append("(");
-                Builder.Append(member.GetEnumValue(this).ToString());
+                Builder.Append(member.GetEnumValue(Context).ToString());
                 Builder.Append(")");
             }
         }

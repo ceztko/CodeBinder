@@ -11,13 +11,13 @@ namespace CodeBinder.CLang
 {
     abstract class CLangMethodWriter : CodeWriter<MethodDeclarationSyntax, CLangModuleConversion>
     {
-        protected CLangMethodWriter(MethodDeclarationSyntax method, CLangModuleConversion module)
-            : base(method, module, module) { }
+        protected CLangMethodWriter(MethodDeclarationSyntax method, CLangModuleConversion context)
+            : base(method, context) { }
 
         public static CLangMethodWriter Create(MethodDeclarationSyntax method, bool widechar,
-            CLangModuleConversion module)
+            CLangModuleConversion context)
         {
-            return new SyntaxSignatureMethodWriter(method, widechar, module);
+            return new SyntaxSignatureMethodWriter(method, widechar, context);
         }
 
         protected override void Write()
@@ -48,8 +48,8 @@ namespace CodeBinder.CLang
         {
             public bool WideChar { get; private set; }
 
-            public SyntaxSignatureMethodWriter(MethodDeclarationSyntax method, bool widechar, CLangModuleConversion module)
-                : base(method, module)
+            public SyntaxSignatureMethodWriter(MethodDeclarationSyntax method, bool widechar, CLangModuleConversion context)
+                : base(method, context)
             {
                 WideChar = widechar;
             }
@@ -61,12 +61,12 @@ namespace CodeBinder.CLang
 
             public override string ReturnType
             {
-                get { return Item.GetCLangReturnType(this); }
+                get { return Item.GetCLangReturnType(Context); }
             }
 
             public override string MethodName
             {
-                get { return Item.GetCLangMethodName(WideChar, Context.Context); }
+                get { return Item.GetCLangMethodName(WideChar); }
             }
         }
     }
@@ -74,7 +74,7 @@ namespace CodeBinder.CLang
     class CLangParameterListWriter : CodeWriter<ParameterListSyntax, ICompilationContextProvider>
     {
         public CLangParameterListWriter(ParameterListSyntax list, ICompilationContextProvider module)
-            : base(list, module, module) { }
+            : base(list, module) { }
 
         protected override void Write()
         {
@@ -86,7 +86,7 @@ namespace CodeBinder.CLang
                 else
                     Builder.CommaSeparator();
 
-                Builder.Append(parameter, this);
+                Builder.Append(parameter, Context);
             }
         }
     }

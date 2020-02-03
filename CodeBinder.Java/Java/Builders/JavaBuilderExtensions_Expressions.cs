@@ -166,7 +166,7 @@ namespace CodeBinder.Java
         {
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context);
             bool hasEmptyBody;
-            if (methodSymbol.IsPartialMethod(out hasEmptyBody) && (hasEmptyBody || methodSymbol.PartialImplementationPart!.ShouldDiscard()))
+            if (methodSymbol.IsPartialMethod(out hasEmptyBody) && (hasEmptyBody || methodSymbol.PartialImplementationPart!.ShouldDiscard(context.Conversion)))
                 return builder;
 
             if (methodSymbol.IsNative() && methodSymbol.ReturnType.TypeKind == TypeKind.Enum)

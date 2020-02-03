@@ -1,13 +1,23 @@
 ﻿using CodeBinder.Shared;
-using CodeBinder.Util;
-using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 namespace CodeBinder.Util
 {
+    /// <typeparam name="TItem">Type of the item to write</typeparam>
+    /// <typeparam name="TContext">Type of the contenxt</typeparam>
+    public abstract class CodeWriter<TItem, TContext> : CodeWriter
+    {
+        public TItem Item { get; private set; }
+
+        public TContext Context { get; private set; }
+
+        protected CodeWriter(TItem item, TContext context)
+        {
+            Item = item;
+            Context = context;
+        }
+    }
+
     /// <summary>
     /// Util class to generate code of a generic item and append to a CodeBuilder, optionally with a context
     /// </summary>
@@ -63,32 +73,5 @@ namespace CodeBinder.Util
         }
 
         #endregion // Support
-    }
-
-    /// <typeparam name="TItem">Type of the item to write</typeparam>
-    public abstract class CodeWriter<TItem> : CodeWriter, ICompilationContextProvider
-    {
-        public CompilationContext Compilation { get; private set; }
-        public TItem Item { get; private set; }
-
-        protected CodeWriter(TItem item, ICompilationContextProvider context)
-        {
-            Item = item;
-            Compilation = context.Compilation;
-        }
-    }
-
-    /// <typeparam name="TItem">Type of the item to write</typeparam>
-    /// <typeparam name="TContext">Type of the context</typeparam>
-    public abstract class CodeWriter<TItem, TContext> : CodeWriter<TItem>
-        where TContext : ICompilationContextProvider
-    {
-        public TContext Context { get; private set; }
-
-        protected CodeWriter(TItem item, TContext context, ICompilationContextProvider provider)
-            : base(item, provider)
-        {
-            Context = context;
-        }
     }
 }

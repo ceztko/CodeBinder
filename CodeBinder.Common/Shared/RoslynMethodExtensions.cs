@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis.FindSymbols;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace CodeBinder.Shared
 {
@@ -52,10 +53,23 @@ namespace CodeBinder.Shared
             return named?.IsGenericType == true;
         }
 
-        public static bool ShouldDiscard(this IMethodSymbol method)
+        public static bool ShouldDiscard(this ISymbol method, LanguageConversion conversion)
         {
-            // TODO: More support for RequiresAttribute
-            return method.HasAttribute<IgnoreAttribute>() || method.HasAttribute<RequiresAttribute>();
+            if(method.HasAttribute<IgnoreAttribute>())
+                return true;
+
+            AttributeData? data;
+            if (method.TryGetAttribute<RequiresAttribute>(out data))
+            {
+                var policies = data.GetConstructorArgumentArray<string>(0);
+                foreach (string policy in policies)
+                {
+                    if (!conversion.Policies.Contains(policy))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         public static bool IsAttribute<TAttribute>(this AttributeData attribute)
@@ -167,6 +181,34 @@ namespace CodeBinder.Shared
             return ret;
         }
 
+        public static T[] GetConstructorArgumentArray<T>(this AttributeData data, int index)
+        {
+            T[]? ret;
+            if (!TryGetConstructorArgument(data, index, out ret))
+                throw new IndexOutOfRangeException();
+
+            return ret;
+        }
+
+        public static bool TryGetConstructorArgument<T>(this AttributeData data, int index, [NotNullWhen(true)]out T[]? array)
+        {
+            if (index < 0 || index >= data.ConstructorArguments.Length)
+            {
+                array = null;
+                return false;
+            }
+
+            var values = data.ConstructorArguments[index].Values!;
+            array = new T[values.Length];
+            for (int i= 0; i < values.Length; i++)
+            {
+                var value = values[i];
+                array[i] = (T)value.Value!;
+            }
+
+            return true;
+        }
+
         public static bool TryGetConstructorArgument<T>(this AttributeData data, int index, [MaybeNullWhen(false)]out T value)
         {
             if (index < 0 || index >= data.ConstructorArguments.Length)
@@ -179,22 +221,32 @@ namespace CodeBinder.Shared
             return true;
         }
 
-        public static T GetConstructorArgumentOrDefault<T>(this AttributeData data, int index, T def)
-        {
-            if (index < 0 || index >= data.ConstructorArguments.Length)
-                return def;
-
-            return (T)data.ConstructorArguments[index].Value!;
-        }
-
         public static T GetConstructorArgumentOrDefault<T>(this AttributeData data, int index)
         {
             return GetConstructorArgumentOrDefault(data, index, default(T)!);
         }
 
+        public static T GetConstructorArgumentOrDefault<T>(this AttributeData data, int index, T def)
+        {
+            T ret;
+            if (TryGetConstructorArgument(data, index, out ret))
+                return ret;
+
+            return def;
+        }
+
         public static T GetNamedArgument<T>(this AttributeData data, string name)
         {
             T ret;
+            if (!TryGetNamedArgument(data, name, out ret))
+                throw new KeyNotFoundException();
+
+            return ret;
+        }
+
+        public static T[]? GetNamedArgumentArray<T>(this AttributeData data, string name)
+        {
+            T[]? ret;
             if (!TryGetNamedArgument(data, name, out ret))
                 throw new KeyNotFoundException();
 
@@ -216,6 +268,27 @@ namespace CodeBinder.Shared
             return false;
         }
 
+        public static bool TryGetNamedArgument<T>(this AttributeData data, string name, [MaybeNull]out T[]? array)
+        {
+            foreach (var pair in data.NamedArguments)
+            {
+                if (pair.Key == name)
+                {
+                    var values = pair.Value.Values!;
+                    array = new T[values.Length];
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        var value = values[i];
+                        array[i] = (T)value.Value!;
+                    }
+                    return true;
+                }
+            }
+
+            array = null;
+            return false;
+        }
+
         public static T GetNamedArgumentOrDefault<T>(this AttributeData data, string name)
         {
             return GetNamedArgumentOrDefault(data, name, default(T)!);
@@ -223,11 +296,9 @@ namespace CodeBinder.Shared
 
         public static T GetNamedArgumentOrDefault<T>(this AttributeData data, string name, T def)
         {
-            foreach (var pair in data.NamedArguments)
-            {
-                if (pair.Key == name)
-                    return (T)pair.Value.Value!;
-            }
+            T ret;
+            if (TryGetNamedArgument(data, name, out ret))
+                return ret;
 
             return def;
         }

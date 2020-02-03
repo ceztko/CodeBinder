@@ -25,7 +25,7 @@ namespace CodeBinder.CLang
                     foreach (var module in Compilation.Modules)
                     {
                         foreach (var method in module.Methods)
-                            builder.Append("(void *)").Append(method.GetCLangMethodName(widechar, module)).AppendLine(",");
+                            builder.Append("(void *)").Append(method.GetCLangMethodName(widechar)).AppendLine(",");
                     }
                 }
 

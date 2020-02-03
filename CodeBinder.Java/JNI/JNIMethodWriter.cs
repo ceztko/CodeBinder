@@ -12,7 +12,7 @@ namespace CodeBinder.JNI
     abstract class MethodWriter : CodeWriter<MethodDeclarationSyntax, JNIModuleConversion>
     {
         protected MethodWriter(MethodDeclarationSyntax method, JNIModuleConversion module)
-            : base(method, module, module) { }
+            : base(method, module) { }
 
         public static MethodWriter Create(MethodDeclarationSyntax method,
             JNIModuleConversion module)
@@ -60,13 +60,13 @@ namespace CodeBinder.JNI
             private void WriteParameter(ParameterSyntax parameter)
             {
                 Builder.CommaSeparator();
-                Builder.Append(parameter.GetJNIType(this)).Space();
+                Builder.Append(parameter.GetJNIType(Context)).Space();
                 Builder.Append(parameter.Identifier.Text);
             }
 
             public override string ReturnType
             {
-                get { return Item.GetJNIReturnType(this); }
+                get { return Item.GetJNIReturnType(Context); }
             }
 
             public override string MethodName

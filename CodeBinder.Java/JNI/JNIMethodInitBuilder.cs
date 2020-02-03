@@ -1,4 +1,5 @@
-﻿using CodeBinder.Shared.CSharp;
+﻿using CodeBinder.Shared;
+using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
 using System;
 using System.Collections.Generic;

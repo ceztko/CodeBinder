@@ -38,7 +38,7 @@ namespace CodeBinder.CLang
             return builder;
         }
 
-        public static string GetCLangMethodName(this MethodDeclarationSyntax method, bool widechar, CLangModuleContext module)
+        public static string GetCLangMethodName(this MethodDeclarationSyntax method, bool widechar)
         {
             if (widechar)
                 return $"{method.GetName()}W";

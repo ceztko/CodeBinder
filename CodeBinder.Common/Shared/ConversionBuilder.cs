@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Util
+namespace CodeBinder.Shared
 {
     /// <summary>
     /// Partially contextualized class to write a conversion on a builder

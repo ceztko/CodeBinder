@@ -158,7 +158,7 @@ namespace CodeBinder.Java
 
         protected override void WriteTypeParameters()
         {
-            Builder.Append(Item.GetTypeParameters(this), Context).Space();
+            Builder.Append(Item.GetTypeParameters(Context), Context).Space();
         }
 
         protected override void WriteReturnType()
@@ -209,7 +209,7 @@ namespace CodeBinder.Java
             get
             {
                 // Try first look for replacements
-                var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(this);
+                var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
                 if (methodSymbol.HasJavaReplacement(out var replacement))
                     return replacement.Name;
 
@@ -236,7 +236,7 @@ namespace CodeBinder.Java
 
         public override bool IsNative
         {
-            get { return Item.IsNative(this); }
+            get { return Item.IsNative(Context); }
         }
 
         public override int Arity
