@@ -26,24 +26,24 @@ namespace CodeBinder.Java
             MethodsLowerCase = true;
         }
 
-        public override TypeConversion<CSharpClassTypeContext>? CreateConversion(CSharpClassTypeContext cls)
+        public override IEnumerable<TypeConversion<CSharpClassTypeContext>> GetConversions(CSharpClassTypeContext cls)
         {
-            return new JavaClassConversion(cls, this);
+            yield return new JavaClassConversion(cls, this);
         }
 
-        public override TypeConversion<CSharpInterfaceTypeContext>? CreateConversion(CSharpInterfaceTypeContext iface)
+        public override IEnumerable<TypeConversion<CSharpInterfaceTypeContext>> GetConversions(CSharpInterfaceTypeContext iface)
         {
-            return new JavaInterfaceConversion(iface, this);
+            yield return new JavaInterfaceConversion(iface, this);
         }
 
-        public override TypeConversion<CSharpStructTypeContext>? CreateConversion(CSharpStructTypeContext str)
+        public override IEnumerable<TypeConversion<CSharpStructTypeContext>> GetConversions(CSharpStructTypeContext str)
         {
-            return new JavaStructConversion(str, this);
+            yield return new JavaStructConversion(str, this);
         }
 
-        public override TypeConversion<CSharpEnumTypeContext>? CreateConversion(CSharpEnumTypeContext enm)
+        public override IEnumerable<TypeConversion<CSharpEnumTypeContext>> GetConversions(CSharpEnumTypeContext enm)
         {
-            return new JavaEnumConversion(enm, this);
+            yield return new JavaEnumConversion(enm, this);
         }
 
         public override IReadOnlyList<string> PreprocessorDefinitions
