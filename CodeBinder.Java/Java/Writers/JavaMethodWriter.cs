@@ -256,11 +256,11 @@ namespace CodeBinder.Java
         }
     }
 
-    class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
+    class JavaConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
     {
         bool _isStatic;
 
-        public ConstructorWriter(ConstructorDeclarationSyntax method, JavaCodeConversionContext context)
+        public JavaConstructorWriter(ConstructorDeclarationSyntax method, JavaCodeConversionContext context)
             : base(method, context)
         {
             _isStatic = Item.Modifiers.Any(SyntaxKind.StaticKeyword);
@@ -301,9 +301,9 @@ namespace CodeBinder.Java
         }
     }
 
-    class DestructorWriter : MethodWriter<DestructorDeclarationSyntax>
+    class JavaDestructorWriter : MethodWriter<DestructorDeclarationSyntax>
     {
-        public DestructorWriter(DestructorDeclarationSyntax method, JavaCodeConversionContext context)
+        public JavaDestructorWriter(DestructorDeclarationSyntax method, JavaCodeConversionContext context)
             : base(method, context) { }
 
         protected override void WriteThrows()

@@ -13,10 +13,10 @@ using System.Text;
 namespace CodeBinder.Java
 {
     [DebuggerDisplay("TypeName = {TypeName}")]
-    abstract class BaseTypeWriter<TTypeDeclaration> : JavaCodeWriter<TTypeDeclaration>
+    abstract class JavaBaseTypeWriter<TTypeDeclaration> : JavaCodeWriter<TTypeDeclaration>
         where TTypeDeclaration : BaseTypeDeclarationSyntax
     {
-        protected BaseTypeWriter(TTypeDeclaration syntax, JavaCodeConversionContext context)
+        protected JavaBaseTypeWriter(TTypeDeclaration syntax, JavaCodeConversionContext context)
             : base(syntax, context) { }
 
         protected override void Write()
@@ -122,12 +122,12 @@ namespace CodeBinder.Java
         }
     }
 
-    abstract class TypeWriter<TTypeDeclaration> : BaseTypeWriter<TTypeDeclaration>
+    abstract class JavaTypeWriter<TTypeDeclaration> : JavaBaseTypeWriter<TTypeDeclaration>
         where TTypeDeclaration : TypeDeclarationSyntax
     {
         PartialDeclarationsTree _partialDeclarations;
 
-        protected TypeWriter(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations, JavaCodeConversionContext context)
+        protected JavaTypeWriter(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations, JavaCodeConversionContext context)
             : base(findMainDeclaration(syntax, partialDeclarations), context)
         {
             _partialDeclarations = partialDeclarations;

@@ -8,9 +8,9 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    class ClassTypeWriter : TypeWriter<ClassDeclarationSyntax>
+    class JavaClassWriter : JavaTypeWriter<ClassDeclarationSyntax>
     {
-        public ClassTypeWriter(ClassDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
+        public JavaClassWriter(ClassDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
                 JavaCodeConversionContext context) : base(declaration, partialDeclarations, context) { }
 
         protected override void WriteTypeParameters()

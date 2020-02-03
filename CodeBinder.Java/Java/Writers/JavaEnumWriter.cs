@@ -11,11 +11,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeBinder.Java
 {
-    class EnumTypeWriter : BaseTypeWriter<EnumDeclarationSyntax>
+    class JavaEnumWriter : JavaBaseTypeWriter<EnumDeclarationSyntax>
     {
         bool _isOrdinalEnum;
 
-        public EnumTypeWriter(EnumDeclarationSyntax syntax, JavaCodeConversionContext context)
+        public JavaEnumWriter(EnumDeclarationSyntax syntax, JavaCodeConversionContext context)
             : base(syntax, context)
         {
             _isOrdinalEnum = !Item.IsFlag(Context);

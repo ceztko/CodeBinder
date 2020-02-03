@@ -20,28 +20,28 @@ namespace CodeBinder.Java
             switch (kind)
             {
                 case SyntaxKind.ConstructorDeclaration:
-                    return new[] { new ConstructorWriter((ConstructorDeclarationSyntax)member, context) };
+                    return new[] { new JavaConstructorWriter((ConstructorDeclarationSyntax)member, context) };
                 case SyntaxKind.DestructorDeclaration:
-                    return new[] { new DestructorWriter((DestructorDeclarationSyntax)member, context) };
+                    return new[] { new JavaDestructorWriter((DestructorDeclarationSyntax)member, context) };
                 case SyntaxKind.MethodDeclaration:
                     return getMethodWriters((MethodDeclarationSyntax)member, context);
                 case SyntaxKind.PropertyDeclaration:
-                    return new[] { new PropertyWriter((PropertyDeclarationSyntax)member, context) };
+                    return new[] { new JavaPropertyWriter((PropertyDeclarationSyntax)member, context) };
                 case SyntaxKind.IndexerDeclaration:
-                    return new[] { new IndexerWriter((IndexerDeclarationSyntax)member, context) };
+                    return new[] { new JavaIndexerWriter((IndexerDeclarationSyntax)member, context) };
                 case SyntaxKind.FieldDeclaration:
-                    return new[] { new FieldWriter((FieldDeclarationSyntax)member, context) };
+                    return new[] { new JavaFieldWriter((FieldDeclarationSyntax)member, context) };
                 case SyntaxKind.InterfaceDeclaration:
                     var iface = (InterfaceDeclarationSyntax)member;
-                    return new[] { new InterfaceTypeWriter(iface, partialDeclarations.MemberPartialDeclarations[iface], context) };
+                    return new[] { new JavaInterfaceWriter(iface, partialDeclarations.MemberPartialDeclarations[iface], context) };
                 case SyntaxKind.ClassDeclaration:
                     var cls = (ClassDeclarationSyntax)member;
-                    return new[] { new ClassTypeWriter(cls, partialDeclarations.MemberPartialDeclarations[cls], context) };
+                    return new[] { new JavaClassWriter(cls, partialDeclarations.MemberPartialDeclarations[cls], context) };
                 case SyntaxKind.StructKeyword:
                     var structure = (StructDeclarationSyntax)member;
-                    return new[] { new StructTypeWriter(structure, partialDeclarations.MemberPartialDeclarations[structure], context) };
+                    return new[] { new JavaStructWriter(structure, partialDeclarations.MemberPartialDeclarations[structure], context) };
                 case SyntaxKind.EnumDeclaration:
-                    return new[] { new EnumTypeWriter((EnumDeclarationSyntax)member, context) };
+                    return new[] { new JavaEnumWriter((EnumDeclarationSyntax)member, context) };
                 default:
                     throw new Exception();
             }

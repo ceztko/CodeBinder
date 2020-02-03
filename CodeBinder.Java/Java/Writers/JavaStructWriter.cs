@@ -8,9 +8,9 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    class StructTypeWriter : TypeWriter<StructDeclarationSyntax>
+    class JavaStructWriter : JavaTypeWriter<StructDeclarationSyntax>
     {
-        public StructTypeWriter(StructDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
+        public JavaStructWriter(StructDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
                 JavaCodeConversionContext context) : base(declaration, partialDeclarations, context) { }
 
         protected override void WriteTypeMembers()

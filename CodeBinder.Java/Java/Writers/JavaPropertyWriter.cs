@@ -211,9 +211,9 @@ namespace CodeBinder.Java
         public abstract string PropertyName { get; }
     }
 
-    class PropertyWriter : PropertyWriter<PropertyDeclarationSyntax>
+    class JavaPropertyWriter : PropertyWriter<PropertyDeclarationSyntax>
     {
-        public PropertyWriter(PropertyDeclarationSyntax syntax, JavaCodeConversionContext context)
+        public JavaPropertyWriter(PropertyDeclarationSyntax syntax, JavaCodeConversionContext context)
             : base(syntax, context) { }
 
         public override string PropertyName
@@ -222,9 +222,9 @@ namespace CodeBinder.Java
         }
     }
 
-    class IndexerWriter : PropertyWriter<IndexerDeclarationSyntax>
+    class JavaIndexerWriter : PropertyWriter<IndexerDeclarationSyntax>
     {
-        public IndexerWriter(IndexerDeclarationSyntax syntax, JavaCodeConversionContext context)
+        public JavaIndexerWriter(IndexerDeclarationSyntax syntax, JavaCodeConversionContext context)
             : base(syntax, context) { }
 
         public override string PropertyName

@@ -8,9 +8,9 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    class FieldWriter : JavaCodeWriter<FieldDeclarationSyntax>
+    class JavaFieldWriter : JavaCodeWriter<FieldDeclarationSyntax>
     {
-        public FieldWriter(FieldDeclarationSyntax syntax, JavaCodeConversionContext context)
+        public JavaFieldWriter(FieldDeclarationSyntax syntax, JavaCodeConversionContext context)
             : base(syntax, context) { }
 
         protected override void Write()

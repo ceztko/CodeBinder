@@ -8,9 +8,9 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    class InterfaceTypeWriter : TypeWriter<InterfaceDeclarationSyntax>
+    class JavaInterfaceWriter : JavaTypeWriter<InterfaceDeclarationSyntax>
     {
-        public InterfaceTypeWriter(InterfaceDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
+        public JavaInterfaceWriter(InterfaceDeclarationSyntax declaration, PartialDeclarationsTree partialDeclarations,
                 JavaCodeConversionContext context) : base(declaration, partialDeclarations, context) { }
 
         protected override void WriteTypeParameters()
