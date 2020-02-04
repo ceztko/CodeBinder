@@ -40,9 +40,9 @@ namespace CodeBinder.Util
             return new ActionCodeWriter(action);
         }
 
-        public static CodeWriter NullWriter()
+        public static CodeWriter NullWriter(string? nullstr = null)
         {
-            return new NullCodeWriter();
+            return new NullCodeWriter(nullstr);
         }
 
         protected abstract void Write();
@@ -51,9 +51,19 @@ namespace CodeBinder.Util
 
         class NullCodeWriter : CodeWriter
         {
+            public string NullStr { get; private set; }
+
+            public NullCodeWriter(string? nullstr)
+            {
+                if (string.IsNullOrEmpty(nullstr))
+                    nullstr = "NULL";
+
+                NullStr = nullstr;
+            }
+
             protected override void Write()
             {
-                Builder.Append("NULL");
+                Builder.Append(NullStr);
             }
         }
 
