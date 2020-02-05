@@ -75,7 +75,7 @@ namespace CodeBinder.CLang
                 {
                     foreach (var item in enm.Members)
                     {
-                        if (item.ShouldDiscard(Compilation, Compilation.Conversion))
+                        if (item.ShouldDiscard(Compilation))
                             continue;
 
                         long value = item.GetEnumValue(Compilation);

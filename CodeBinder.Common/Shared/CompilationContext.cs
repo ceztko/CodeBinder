@@ -19,9 +19,11 @@ namespace CodeBinder.Shared
     {
         protected CompilationContext() { }
 
-        public TLanguageConversion Conversion => GetLanguageConversion();
+        public new TLanguageConversion Conversion => getLanguageConversion();
 
-        protected abstract TLanguageConversion GetLanguageConversion();
+        protected sealed override LanguageConversion GetLanguageConversion() => getLanguageConversion();
+
+        protected abstract TLanguageConversion getLanguageConversion();
 
         internal sealed override SyntaxTreeContext CreateSyntaxTreeContext() => createSyntaxTreeContext();
 
@@ -168,6 +170,8 @@ namespace CodeBinder.Shared
             return model;
         }
 
+        public LanguageConversion Conversion => GetLanguageConversion();
+
         public Compilation Compilation
         {
             get { return _compilation; }
@@ -187,6 +191,8 @@ namespace CodeBinder.Shared
             }
         }
 
+        protected abstract LanguageConversion GetLanguageConversion();
+
         internal abstract SyntaxTreeContext CreateSyntaxTreeContext();
 
         protected abstract IEnumerable<TypeContext> GetRootTypes();
@@ -195,13 +201,13 @@ namespace CodeBinder.Shared
         {
             get
             {
-                foreach (var conversion in Conversions)
+                foreach (var conversion in DefaultConversions)
                     yield return new ConversionDelegate(conversion);
             }
         }
 
         // Compilation wide default converions, see CLangCompilationContext for some examples
-        public virtual IEnumerable<IConversionBuilder> Conversions
+        public virtual IEnumerable<IConversionBuilder> DefaultConversions
         {
             get { yield break; }
         }

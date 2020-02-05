@@ -98,7 +98,7 @@ namespace CodeBinder.Java
             bool first = true;
             foreach (var member in members)
             {
-                if (member.ShouldDiscard(Context, Context.Conversion))
+                if (member.ShouldDiscard(Context.Compilation))
                     continue;
 
                 foreach (var writer in member.GetWriters(partialDeclarations, Context))

@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.FindSymbols;
 using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace CodeBinder.Shared
 {
@@ -82,11 +83,25 @@ namespace CodeBinder.Shared
                 }
             }
 
-            switch (symbol.Kind)
+            if (conversion.DiscardNative)
             {
-                case SymbolKind.Method:
-                    IMethodSymbol method = (IMethodSymbol)symbol;
-                    break;
+                switch (symbol.Kind)
+                {
+                    case SymbolKind.Method:
+                    {
+                        if (attributes.HasAttribute<DllImportAttribute>())
+                            return true;
+
+                        break;
+                    }
+                    case SymbolKind.NamedType:
+                    {
+                        INamedTypeSymbol type = (INamedTypeSymbol)symbol;
+                        if (type.TypeKind == TypeKind.Delegate && attributes.HasAttribute<UnmanagedFunctionPointerAttribute>())
+                            return true;
+                        break;
+                    }
+                }
             }
 
             return false;

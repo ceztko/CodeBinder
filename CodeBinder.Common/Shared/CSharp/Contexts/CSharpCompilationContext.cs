@@ -83,6 +83,6 @@ namespace CodeBinder.Shared.CSharp
             Conversion = conversion;
         }
 
-        protected override CSharpLanguageConversion GetLanguageConversion() => Conversion;
+        protected override CSharpLanguageConversion getLanguageConversion() => Conversion;
     }
 }

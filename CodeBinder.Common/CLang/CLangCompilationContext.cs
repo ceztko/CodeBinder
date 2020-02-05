@@ -81,7 +81,7 @@ namespace CodeBinder.CLang
             get { return _callbacks; }
         }
 
-        public override IEnumerable<IConversionBuilder> Conversions
+        public override IEnumerable<IConversionBuilder> DefaultConversions
         {
             get
             {
@@ -102,6 +102,6 @@ namespace CodeBinder.CLang
             Conversion = conversion;
         }
 
-        protected override ConversionCSharpToCLang GetLanguageConversion() => Conversion;
+        protected override ConversionCSharpToCLang getLanguageConversion() => Conversion;
     }
 }

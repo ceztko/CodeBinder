@@ -663,6 +663,11 @@ namespace CodeBinder.Shared.CSharp
             return node.HasAttribute<FlagsAttribute>(provider);
         }
 
+        public static bool ShouldDiscard(this SyntaxNode node, CompilationContext context)
+        {
+            return ShouldDiscard(node, context, context.Conversion);
+        }
+
         public static bool ShouldDiscard(this SyntaxNode node, ICompilationContextProvider provider, LanguageConversion conversion)
         {
             var symbol = GetDefaultDeclarationSymbol(node, provider);
@@ -732,6 +737,9 @@ namespace CodeBinder.Shared.CSharp
             return Convert.ToInt64(symbol.ConstantValue);
         }
 
+        /// <summary>
+        /// Return all explicit and implicit modifiers
+        /// </summary>
         public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this BaseFieldDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
@@ -765,6 +773,9 @@ namespace CodeBinder.Shared.CSharp
             return ret;
         }
 
+        /// <summary>
+        /// Return all explicit and implicit modifiers
+        /// </summary>
         public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this BaseTypeDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
@@ -804,6 +815,9 @@ namespace CodeBinder.Shared.CSharp
             return ret;
         }
 
+        /// <summary>
+        /// Return all explicit and implicit modifiers
+        /// </summary>
         public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this BaseMethodDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
@@ -842,6 +856,9 @@ namespace CodeBinder.Shared.CSharp
             return ret;
         }
 
+        /// <summary>
+        /// Return all explicit and implicit modifiers
+        /// </summary>
         public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this BasePropertyDeclarationSyntax node)
         {
             bool explicitAccessibility = false;
@@ -878,6 +895,9 @@ namespace CodeBinder.Shared.CSharp
             return ret;
         }
 
+        /// <summary>
+        /// Return all explicit and implicit modifiers
+        /// </summary>
         public static IReadOnlyList<SyntaxKind> GetCSharpModifiers(this AccessorDeclarationSyntax node)
         {
             var ret = new List<SyntaxKind>();

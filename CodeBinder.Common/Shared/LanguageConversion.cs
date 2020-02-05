@@ -51,6 +51,11 @@ namespace CodeBinder.Shared
         /// </summary>
         public virtual bool IsNative => false;
 
+        /// <summary>
+        /// Default discard native syntax (eg. [DllImport] methods or [UnmanagedFunctionPointer] delegates)
+        /// </summary>
+        public virtual bool DiscardNative => false;
+
         public virtual IEnumerable<IConversionBuilder> DefaultConversions
         {
             get { yield break; }

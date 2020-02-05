@@ -62,7 +62,7 @@ namespace CodeBinder.CLang
                 {
                     case SyntaxKind.MethodDeclaration:
                         // TODO: Chehck for policies. Fix/extend ShouldDiscard
-                        if (module != null && !member.ShouldDiscard(this, Compilation.Conversion))
+                        if (module != null && !member.ShouldDiscard(Compilation))
                         {
                             var method = (MethodDeclarationSyntax)member;
                             if (method.IsNative(this))
@@ -87,7 +87,7 @@ namespace CodeBinder.CLang
 
         public void visitType(DelegateDeclarationSyntax node)
         {
-            if (node.ShouldDiscard(Compilation, Compilation.Conversion))
+            if (node.ShouldDiscard(Compilation))
                 return;
 
             Compilation.AddCallback(node);

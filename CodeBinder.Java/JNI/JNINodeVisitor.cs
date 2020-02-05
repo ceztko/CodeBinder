@@ -52,7 +52,7 @@ namespace CodeBinder.JNI
                 switch (kind)
                 {
                     case SyntaxKind.MethodDeclaration:
-                        if (module != null && !member.ShouldDiscard(this, Compilation.Conversion))
+                        if (module != null && !member.ShouldDiscard(Compilation))
                         {
                             var method = (MethodDeclarationSyntax)member;
                             if (method.IsNative(this))

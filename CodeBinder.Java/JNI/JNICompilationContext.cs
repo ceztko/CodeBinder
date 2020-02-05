@@ -40,14 +40,14 @@ namespace CodeBinder.JNI
             return new JNISyntaxTreeContext(this);
         }
 
-        protected override ConversionCSharpToJNI GetLanguageConversion() => Conversion;
+        protected override ConversionCSharpToJNI getLanguageConversion() => Conversion;
 
         public IEnumerable<JNIModuleContextParent> Modules
         {
             get { return _modules.Values; }
         }
 
-        public override IEnumerable<IConversionBuilder> Conversions
+        public override IEnumerable<IConversionBuilder> DefaultConversions
         {
             get
             {

@@ -118,7 +118,7 @@ namespace CodeBinder.Shared.CSharp
 
         public override void Visit(SyntaxNode node)
         {
-            if (node.ShouldDiscard(this, Compilation.Conversion))
+            if (node.ShouldDiscard(Compilation))
                 return;
 
             var kind = node.Kind();
