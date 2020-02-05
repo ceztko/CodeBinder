@@ -37,7 +37,7 @@ namespace CodeBinder.Java
                 case SyntaxKind.ClassDeclaration:
                     var cls = (ClassDeclarationSyntax)member;
                     return new[] { new JavaClassWriter(cls, partialDeclarations.MemberPartialDeclarations[cls], context) };
-                case SyntaxKind.StructKeyword:
+                case SyntaxKind.StructDeclaration:
                     var structure = (StructDeclarationSyntax)member;
                     return new[] { new JavaStructWriter(structure, partialDeclarations.MemberPartialDeclarations[structure], context) };
                 case SyntaxKind.EnumDeclaration:

@@ -160,7 +160,7 @@ namespace CodeBinder.CLang
                 case "System.Void":
                     return "void";
                 case "System.String":
-                    if (!returnType && !attributes.HasAttribute<NonConstAttribute>())
+                    if (!returnType && !attributes.HasAttribute<MutableAttribute>())
                         constParameter |= true;
 
                     return "char16_t *";

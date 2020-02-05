@@ -3,8 +3,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CodeBinder.Attributes;
 using CodeBinder.Shared;
-
 using CodeBinder.Util;
 
 namespace CodeBinder.CLang
@@ -20,6 +20,10 @@ namespace CodeBinder.CLang
         public const string LanguageName = "C";
 
         public ConversionCSharpToCLang() { }
+
+        public override bool IsNative => true;
+
+        public override IReadOnlyCollection<string> SupportedPolicies => new[] { Policies.Delegates };
 
         protected override CLangCompilationContext createCompilationContext()
         {

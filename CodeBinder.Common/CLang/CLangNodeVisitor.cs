@@ -62,7 +62,7 @@ namespace CodeBinder.CLang
                 {
                     case SyntaxKind.MethodDeclaration:
                         // TODO: Chehck for policies. Fix/extend ShouldDiscard
-                        if (module != null && !member.HasAttribute<NativeIgnoreAttribute>(this))//!member.ShouldDiscard(this))
+                        if (module != null && !member.ShouldDiscard(this, Compilation.Conversion))
                         {
                             var method = (MethodDeclarationSyntax)member;
                             if (method.IsNative(this))
@@ -87,8 +87,7 @@ namespace CodeBinder.CLang
 
         public void visitType(DelegateDeclarationSyntax node)
         {
-            var attributes = node.GetAttributes(this);
-            if (!attributes.HasAttribute<UnmanagedFunctionPointerAttribute>() || attributes.HasAttribute<NativeIgnoreAttribute>())
+            if (node.ShouldDiscard(Compilation, Compilation.Conversion))
                 return;
 
             Compilation.AddCallback(node);

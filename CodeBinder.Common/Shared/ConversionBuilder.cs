@@ -6,9 +6,25 @@ using System.Text;
 namespace CodeBinder.Shared
 {
     /// <summary>
-    /// Partially contextualized class to write a conversion on a builder
+    /// Class to write a conversion with a context
     /// </summary>
     /// <seealso cref="ConversionDelegate"/>
+    /// <remarks>Not coupled to CodeBuilder</remarks>
+    public abstract class ConversionBuilder<TContext> : ConversionBuilder
+    {
+        public TContext Context { get; private set; }
+
+        public ConversionBuilder(TContext context)
+        {
+            Context = context;
+        }
+    }
+
+    /// <summary>
+    /// Class to write a conversion 
+    /// </summary>
+    /// <seealso cref="ConversionDelegate"/>
+    /// <remarks>Not coupled to CodeBuilder</remarks>
     public abstract class ConversionBuilder : IConversionBuilder
     {
         public void Write(CodeBuilder builder)
@@ -36,9 +52,10 @@ namespace CodeBinder.Shared
     }
 
     /// <summary>
-    /// Partially contextualized interface to write a conversion on a builder
+    /// Interface to write a conversion
     /// </summary>
     /// <seealso cref="ConversionDelegate"/>
+    /// <remarks>Not coupled to CodeBuilder</remarks>
     public interface IConversionBuilder
     {
         void Write(CodeBuilder builder);

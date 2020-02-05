@@ -12,7 +12,7 @@ using System.Text;
 namespace CodeBinder
 {
     /// <summary>
-    /// Fully contextualized class to write a conversion item to a stream
+    /// Fully contextualized class to write a conversion item to a stream, coupled to IConversionBuilder
     /// </summary>
     /// <seealso cref="IConversionBuilder"/>
     public class ConversionDelegate

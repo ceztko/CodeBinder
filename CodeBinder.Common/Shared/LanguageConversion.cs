@@ -41,20 +41,24 @@ namespace CodeBinder.Shared
         /// <summary>
         /// Add here policies supported by this language conversion
         /// </summary>
-        public virtual IReadOnlyCollection<string> Policies
+        public virtual IReadOnlyCollection<string> SupportedPolicies
         {
             get { return new string[] { }; }
         }
+
+        /// <summary>
+        /// True for native conversions (eg. CLang)
+        /// </summary>
+        public virtual bool IsNative => false;
+
+        public virtual bool NativeDiscard => false;
 
         public virtual IEnumerable<IConversionBuilder> DefaultConversions
         {
             get { yield break; }
         }
 
-        public virtual bool UseUTF8Bom
-        {
-            get { return true; }
-        }
+        public virtual bool UseUTF8Bom => true;
 
         /// <summary>Conditional compilation symbols</summary>
         public virtual IReadOnlyList<string> PreprocessorDefinitions

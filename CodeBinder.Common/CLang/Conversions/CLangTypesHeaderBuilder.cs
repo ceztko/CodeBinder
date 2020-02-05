@@ -75,14 +75,13 @@ namespace CodeBinder.CLang
                 {
                     foreach (var item in enm.Members)
                     {
-                        var itemattribs = item.GetAttributes(Compilation);
-                        if (itemattribs.HasAttribute<NativeIgnoreAttribute>())
+                        if (item.ShouldDiscard(Compilation, Compilation.Conversion))
                             continue;
 
                         long value = item.GetEnumValue(Compilation);
                         string bindedItemName;
                         AttributeData? attr;
-                        if (itemattribs.TryGetAttribute<NativeBindingAttribute>(out attr))
+                        if (item.TryGetAttribute<NativeBindingAttribute>(Compilation, out attr))
                         {
                             bindedItemName = attr.GetConstructorArgument<string>(0);
                         }

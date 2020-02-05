@@ -53,20 +53,40 @@ namespace CodeBinder.Shared
             return named?.IsGenericType == true;
         }
 
-        public static bool ShouldDiscard(this ISymbol method, LanguageConversion conversion)
+        public static bool ShouldDiscard(this ISymbol symbol, LanguageConversion conversion)
         {
-            if(method.HasAttribute<IgnoreAttribute>())
-                return true;
-
             AttributeData? data;
-            if (method.TryGetAttribute<RequiresAttribute>(out data))
+            var attributes = symbol.GetAttributes();
+            if (symbol.TryGetAttribute<IgnoreAttribute>(out data))
+            {
+                var conversionsToIgnore = data.GetConstructorArgumentOrDefault(0, Conversions.All);
+                if (conversion.IsNative)
+                {
+                    if (conversionsToIgnore.HasFlag(Conversions.Native))
+                        return true;
+                }
+                else
+                {
+                    if (conversionsToIgnore.HasFlag(Conversions.Regular))
+                        return true;
+                }
+            }
+
+            if (attributes.TryGetAttribute<RequiresAttribute>(out data))
             {
                 var policies = data.GetConstructorArgumentArray<string>(0);
                 foreach (string policy in policies)
                 {
-                    if (!conversion.Policies.Contains(policy))
+                    if (!conversion.SupportedPolicies.Contains(policy))
                         return true;
                 }
+            }
+
+            switch (symbol.Kind)
+            {
+                case SymbolKind.Method:
+                    IMethodSymbol method = (IMethodSymbol)symbol;
+                    break;
             }
 
             return false;

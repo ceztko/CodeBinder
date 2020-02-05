@@ -8,6 +8,11 @@ namespace CodeBinder.Attributes
 {
     public class CodeBinderAttribute : Attribute
     {
+        public const Conversions None = Conversions.None;
+        public const Conversions Regular = Conversions.Regular;
+        public const Conversions Native = Conversions.Native;
+        public const Conversions All = Conversions.All;
+
         public const string ConditionString = "CODE_BINDER";
 
         internal CodeBinderAttribute() { }
@@ -62,6 +67,15 @@ namespace CodeBinder.Attributes
     public sealed class IgnoreAttribute : CodeBinderAttribute
     {
 
+        public const Conversions test = Conversions.Native;
+
+
+        public Conversions Conversion { get; private set; }
+
+        public IgnoreAttribute(Conversions conversion = Conversions.All)
+        {
+            Conversion = conversion;
+        }
     }
 
     [Conditional(ConditionString)]
@@ -119,7 +133,7 @@ namespace CodeBinder.Attributes
     /// Set the return value const
     /// </summary>
     [Conditional(ConditionString)]
-    [AttributeUsage(AttributeTargets.ReturnValue)]
+    [AttributeUsage(AttributeTargets.ReturnValue| AttributeTargets.Parameter)]
     public sealed class ConstAttribute : CodeBinderAttribute
     {
     }
@@ -129,14 +143,7 @@ namespace CodeBinder.Attributes
     /// </summary>
     [Conditional(ConditionString)]
     [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class NonConstAttribute : CodeBinderAttribute
-    {
-    }
-
-    /// <summary>Ignore native code generation for this element</summary>
-    [Conditional(ConditionString)]
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Delegate | AttributeTargets.Field)]
-    public sealed class NativeIgnoreAttribute : CodeBinderAttribute
+    public sealed class MutableAttribute : CodeBinderAttribute
     {
     }
 
@@ -191,5 +198,17 @@ namespace CodeBinder.Attributes
         public const string ValueTypes = "{5DD7ECEA-0F59-4781-BCA2-1DC916EB3CFC}";
         public const string PassByRef = "{5B8D618C-93E8-46F2-85FE-DE28FEE86196}";
         public const string ExplicitInterfaceImplementation = "E0B93847-8DF4-4DE8-B7C8-7F002410EC76";
+    }
+
+    /// <summary>
+    /// Conversion types
+    /// </summary>
+    [Flags]
+    public enum Conversions
+    {
+        None = 0,
+        Native = 1,
+        Regular = 2,
+        All = Native | Regular,
     }
 }
