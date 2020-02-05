@@ -106,7 +106,7 @@ namespace CodeBinder.CLang
                 }
                 else
                 {
-                    if (attributes.HasAttribute<InAttribute>())
+                    if (!attributes.HasAttribute<OutAttribute>())
                         constParameter = true;
 
                     int fixedSizeArray;
