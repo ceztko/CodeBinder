@@ -731,6 +731,12 @@ namespace CodeBinder.Shared.CSharp
             return parameter.Modifiers.Any(SyntaxKind.OutKeyword);
         }
 
+        public static bool HasAccessibility(this MemberDeclarationSyntax member, Accessibility accessibility, ICompilationContextProvider context)
+        {
+            var symbol = member.GetDeclaredSymbol<ISymbol>(context);
+            return symbol.HasAccessibility(accessibility);
+        }
+
         public static long GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider context)
         {
             var symbol = (IFieldSymbol)node.GetDeclaredSymbol(context)!;

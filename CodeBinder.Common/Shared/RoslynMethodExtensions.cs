@@ -413,7 +413,29 @@ namespace CodeBinder.Shared
             return (T)model.GetConstantValue(node).Value;
         }
 
-
+        public static bool HasAccessibility(this ISymbol symbol, Accessibility accessibility)
+        {
+            if (symbol.DeclaredAccessibility == accessibility)
+            {
+                return true;
+            }
+            else if (accessibility == Accessibility.ProtectedOrInternal)
+            {
+                switch (symbol.DeclaredAccessibility)
+                {
+                    case Accessibility.Protected:
+                    case Accessibility.Internal:
+                    case Accessibility.ProtectedAndInternal:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
         public static SemanticModel GetSemanticModel(this ICompilationContextProvider provider, SyntaxTree tree)
         {
             return provider.Compilation.GetSemanticModel(tree);
