@@ -6,11 +6,11 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    abstract class CLangCompilationContextBuilder : ConversionBuilder
+    abstract class CLangConversionWriter : ConversionWriter
     {
         public CLangCompilationContext Compilation { get; private set; }
 
-        public CLangCompilationContextBuilder(CLangCompilationContext compilation)
+        public CLangConversionWriter(CLangCompilationContext compilation)
         {
             Compilation = compilation;
         }

@@ -9,12 +9,12 @@ namespace CodeBinder.Shared
     /// Class to write a conversion with a context
     /// </summary>
     /// <seealso cref="ConversionDelegate"/>
-    /// <remarks>Not coupled to CodeBuilder</remarks>
-    public abstract class ConversionBuilder<TContext> : ConversionBuilder
+    /// <remarks>Not coupled to CodeBuilder like <see cref="CodeWriter"/></remarks>
+    public abstract class ConversionWriter<TContext> : ConversionWriter
     {
         public TContext Context { get; private set; }
 
-        public ConversionBuilder(TContext context)
+        public ConversionWriter(TContext context)
         {
             Context = context;
         }
@@ -24,8 +24,8 @@ namespace CodeBinder.Shared
     /// Class to write a conversion 
     /// </summary>
     /// <seealso cref="ConversionDelegate"/>
-    /// <remarks>Not coupled to CodeBuilder</remarks>
-    public abstract class ConversionBuilder : IConversionBuilder
+    /// <remarks>Not coupled to CodeBuilder like <see cref="CodeWriter"/></remarks>
+    public abstract class ConversionWriter : IConversionWriter
     {
         public void Write(CodeBuilder builder)
         {
@@ -55,8 +55,7 @@ namespace CodeBinder.Shared
     /// Interface to write a conversion
     /// </summary>
     /// <seealso cref="ConversionDelegate"/>
-    /// <remarks>Not coupled to CodeBuilder</remarks>
-    public interface IConversionBuilder
+    public interface IConversionWriter
     {
         void Write(CodeBuilder builder);
 

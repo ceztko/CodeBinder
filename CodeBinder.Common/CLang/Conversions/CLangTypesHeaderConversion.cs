@@ -11,9 +11,9 @@ using System.Text.RegularExpressions;
 
 namespace CodeBinder.CLang
 {
-    class CLangTypesHeaderBuilder : CLangCompilationContextBuilder
+    class CLangTypesHeaderConversion : CLangConversionWriter
     {
-        public CLangTypesHeaderBuilder(CLangCompilationContext compilation)
+        public CLangTypesHeaderConversion(CLangCompilationContext compilation)
             : base(compilation) { }
 
         protected override string GetFileName() => "Types.h";

@@ -73,7 +73,7 @@ namespace CodeBinder.Util
             return this;
         }
 
-        public CodeBuilder Append(CodeWriter writer)
+        public CodeBuilder Append(ICodeWriter writer)
         {
             doChecks();
             writer.Write(this);

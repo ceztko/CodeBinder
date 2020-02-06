@@ -207,7 +207,7 @@ namespace CodeBinder.Shared
         }
 
         // Compilation wide default converions, see CLangCompilationContext for some examples
-        public virtual IEnumerable<IConversionBuilder> DefaultConversions
+        public virtual IEnumerable<IConversionWriter> DefaultConversions
         {
             get { yield break; }
         }

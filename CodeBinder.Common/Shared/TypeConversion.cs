@@ -8,21 +8,28 @@ using System.Text;
 
 namespace CodeBinder.Shared
 {
-    public abstract class TypeConversion : ConversionBuilder, ICompilationContextProvider
+    public abstract class TypeConversion<TTypeContext, TCompilationContext, TLanguageConversion> : TypeConversion<TTypeContext, TCompilationContext>
+        where TCompilationContext : CompilationContext
+        where TTypeContext : TypeContext
+        where TLanguageConversion : LanguageConversion
     {
-        internal TypeConversion() { }
+        public TLanguageConversion Conversion { get; private set; }
 
-        public TypeContext Context
+        protected TypeConversion(TTypeContext context, TLanguageConversion conversion)
+            : base(context)
         {
-            get { return GetContext(); }
+            Conversion = conversion;
         }
+    }
 
-        public CompilationContext Compilation
-        {
-            get { return Context.Compilation; }
-        }
+    public abstract class TypeConversion<TTypeContext, TCompilationContext> : TypeConversion<TTypeContext>
+        where TCompilationContext : CompilationContext
+        where TTypeContext : TypeContext
+    {
+        internal TypeConversion(TTypeContext context)
+            : base(context) { }
 
-        protected abstract TypeContext GetContext();
+        public abstract new TCompilationContext Compilation { get; }
     }
 
     public abstract class TypeConversion<TTypeContext> : TypeConversion
@@ -41,27 +48,20 @@ namespace CodeBinder.Shared
         }
     }
 
-    public abstract class TypeConversion<TTypeContext, TCompilationContext> : TypeConversion<TTypeContext>
-        where TCompilationContext : CompilationContext
-        where TTypeContext : TypeContext
+    public abstract class TypeConversion : ConversionWriter, ICompilationContextProvider
     {
-        internal TypeConversion(TTypeContext context)
-            : base(context) { }
+        internal TypeConversion() { }
 
-        public abstract new TCompilationContext Compilation { get; }
-    }
-
-    public abstract class TypeConversion<TTypeContext, TCompilationContext, TLanguageConversion> : TypeConversion<TTypeContext, TCompilationContext>
-        where TCompilationContext : CompilationContext
-        where TTypeContext : TypeContext
-        where TLanguageConversion : LanguageConversion
-    {
-        public TLanguageConversion Conversion { get; private set; }
-
-        protected TypeConversion(TTypeContext context, TLanguageConversion conversion)
-            : base(context)
+        public TypeContext Context
         {
-            Conversion = conversion;
+            get { return GetContext(); }
         }
+
+        public CompilationContext Compilation
+        {
+            get { return Context.Compilation; }
+        }
+
+        protected abstract TypeContext GetContext();
     }
 }

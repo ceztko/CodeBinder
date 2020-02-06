@@ -26,7 +26,7 @@ namespace CodeBinder.JNI
             get { return new string[] { "JAVA", "JNI" }; }
         }
 
-        public override IEnumerable<IConversionBuilder> DefaultConversions
+        public override IEnumerable<IConversionWriter> DefaultConversions
         {
             get
             {

@@ -3,6 +3,9 @@ using System;
 
 namespace CodeBinder.Util
 {
+    /// <summary>
+    /// Util class to generate code of a generic item and append to a CodeBuilder with a context
+    /// </summary>
     /// <typeparam name="TItem">Type of the item to write</typeparam>
     /// <typeparam name="TContext">Type of the contenxt</typeparam>
     public abstract class CodeWriter<TItem, TContext> : CodeWriter
@@ -19,16 +22,16 @@ namespace CodeBinder.Util
     }
 
     /// <summary>
-    /// Util class to generate code of a generic item and append to a CodeBuilder, optionally with a context
+    /// Util class to generate code of a generic item and append to a CodeBuilder
     /// </summary>
-    public abstract class CodeWriter
+    public abstract class CodeWriter : ICodeWriter
     {
         CodeBuilder? _builder;
 
         protected CodeBuilder Builder => _builder ?? throw new Exception($"Can't use {nameof(Builder)} right now");
 
         // Append an ISyntaxWriter with CodeBuilder
-        internal void Write(CodeBuilder builder)
+        void ICodeWriter.Write(CodeBuilder builder)
         {
             _builder = builder;
             Write();
@@ -83,5 +86,14 @@ namespace CodeBinder.Util
         }
 
         #endregion // Support
+    }
+
+    /// <summary>
+    ///  Util interface to generate code of a generic item and append to a CodeBuilder
+    /// </summary>
+    /// <remarks>Use the inplementation <see cref="CodeWriter"/></remarks>
+    public interface ICodeWriter
+    {
+        void Write(CodeBuilder builder);
     }
 }

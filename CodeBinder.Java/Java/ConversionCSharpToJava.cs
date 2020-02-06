@@ -56,21 +56,25 @@ namespace CodeBinder.Java
             get { return false; }
         }
 
-        public override IEnumerable<IConversionBuilder> DefaultConversions
+        public override IEnumerable<IConversionWriter> DefaultConversions
         {
             get
             {
-                yield return new JavaClassBuilder(this, nameof(JavaClasses.BinderUtils), JavaClasses.BinderUtils);
-                yield return new JavaClassBuilder(this, nameof(JavaClasses.HandleRef), JavaClasses.HandleRef);
-                yield return new InteropBoxBuilder(JavaInteropType.Boolean, this);
-                yield return new InteropBoxBuilder(JavaInteropType.Character, this);
-                yield return new InteropBoxBuilder(JavaInteropType.Byte, this);
-                yield return new InteropBoxBuilder(JavaInteropType.Short, this);
-                yield return new InteropBoxBuilder(JavaInteropType.Integer, this);
-                yield return new InteropBoxBuilder(JavaInteropType.Long, this);
-                yield return new InteropBoxBuilder(JavaInteropType.Float, this);
-                yield return new InteropBoxBuilder(JavaInteropType.Double, this);
-                yield return new InteropBoxBuilder(JavaInteropType.String, this);
+                yield return new StringConversionBuilder(
+                    $"{nameof(JavaClasses.BinderUtils)}.java", () => JavaClasses.BinderUtils) {
+                        BasePath = CodeBinderNamespace, GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionBuilder(
+                    $"{nameof(JavaClasses.HandleRef)}.java", () => JavaClasses.HandleRef) {
+                        BasePath = CodeBinderNamespace, GeneratedPreamble = SourcePreamble };
+                yield return new JavaInteropBoxWriter(JavaInteropType.Boolean, this);
+                yield return new JavaInteropBoxWriter(JavaInteropType.Character, this);
+                yield return new JavaInteropBoxWriter(JavaInteropType.Byte, this);
+                yield return new JavaInteropBoxWriter(JavaInteropType.Short, this);
+                yield return new JavaInteropBoxWriter(JavaInteropType.Integer, this);
+                yield return new JavaInteropBoxWriter(JavaInteropType.Long, this);
+                yield return new JavaInteropBoxWriter(JavaInteropType.Float, this);
+                yield return new JavaInteropBoxWriter(JavaInteropType.Double, this);
+                yield return new JavaInteropBoxWriter(JavaInteropType.String, this);
             }
         }
     }

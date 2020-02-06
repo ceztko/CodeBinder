@@ -14,17 +14,17 @@ namespace CodeBinder
     /// <summary>
     /// Fully contextualized class to write a conversion item to a stream, coupled to IConversionBuilder
     /// </summary>
-    /// <seealso cref="IConversionBuilder"/>
+    /// <seealso cref="IConversionWriter"/>
     public class ConversionDelegate
     {
-        IConversionBuilder _builder;
+        IConversionWriter _builder;
 
         public string? SourcePath { get; private set; }
 
-        internal ConversionDelegate(IConversionBuilder builder)
+        internal ConversionDelegate(IConversionWriter builder)
             : this(null, builder) { }
 
-        internal ConversionDelegate(string? sourcePath, IConversionBuilder builder)
+        internal ConversionDelegate(string? sourcePath, IConversionWriter builder)
         {
             SourcePath = sourcePath;
             _builder = builder;

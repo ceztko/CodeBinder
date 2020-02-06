@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CodeBinder.Util
 {
-    public class StringConversionBuilder : ConversionBuilder
+    public class StringConversionBuilder : ConversionWriter
     {
         Func<string> m_resourceString;
 

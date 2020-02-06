@@ -6,9 +6,9 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    class CLangMethodInitBuilder : CLangCompilationContextBuilder
+    class CLangMethodInitConversion : CLangConversionWriter
     {
-        public CLangMethodInitBuilder(CLangCompilationContext compilation)
+        public CLangMethodInitConversion(CLangCompilationContext compilation)
             : base(compilation) { }
 
         protected override void write(CodeBuilder builder)

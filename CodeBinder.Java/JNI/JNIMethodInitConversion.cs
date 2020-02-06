@@ -7,11 +7,11 @@ using System.Text;
 
 namespace CodeBinder.JNI
 {
-    class JNIMethodInitBuilder : ConversionBuilder
+    class JNIMethodInitConversion : ConversionWriter
     {
         JNICompilationContext _compilation;
 
-        public JNIMethodInitBuilder(JNICompilationContext compilation)
+        public JNIMethodInitConversion(JNICompilationContext compilation)
         {
             _compilation = compilation;
         }

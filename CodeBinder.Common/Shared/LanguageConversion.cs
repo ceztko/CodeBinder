@@ -56,7 +56,7 @@ namespace CodeBinder.Shared
         /// </summary>
         public virtual bool DiscardNative => false;
 
-        public virtual IEnumerable<IConversionBuilder> DefaultConversions
+        public virtual IEnumerable<IConversionWriter> DefaultConversions
         {
             get { yield break; }
         }

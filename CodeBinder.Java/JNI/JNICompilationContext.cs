@@ -47,11 +47,11 @@ namespace CodeBinder.JNI
             get { return _modules.Values; }
         }
 
-        public override IEnumerable<IConversionBuilder> DefaultConversions
+        public override IEnumerable<IConversionWriter> DefaultConversions
         {
             get
             {
-                yield return new JNIMethodInitBuilder(this);
+                yield return new JNIMethodInitConversion(this);
             }
         }
     }

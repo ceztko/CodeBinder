@@ -8,11 +8,11 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    class InteropBoxBuilder : JavaConversionBuilder
+    class JavaInteropBoxWriter : JavaConversionWriter
     {
         JavaInteropType _primitiveType;
 
-        public InteropBoxBuilder(JavaInteropType primitiveType, ConversionCSharpToJava conversion)
+        public JavaInteropBoxWriter(JavaInteropType primitiveType, ConversionCSharpToJava conversion)
             : base(conversion)
         {
             _primitiveType = primitiveType;

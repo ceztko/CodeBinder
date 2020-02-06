@@ -7,11 +7,11 @@ using System.Text;
 
 namespace CodeBinder.Java
 {
-    abstract class JavaConversionBuilder : ConversionBuilder
+    abstract class JavaConversionWriter : ConversionWriter
     {
         public ConversionCSharpToJava Conversion { get; private set; }
 
-        public JavaConversionBuilder(ConversionCSharpToJava conversion)
+        public JavaConversionWriter(ConversionCSharpToJava conversion)
         {
             Conversion = conversion;
         }

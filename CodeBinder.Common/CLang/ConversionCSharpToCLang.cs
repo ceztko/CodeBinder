@@ -35,7 +35,7 @@ namespace CodeBinder.CLang
             get { return new string[] { "CLang" }; }
         }
 
-        public override IEnumerable<IConversionBuilder> DefaultConversions
+        public override IEnumerable<IConversionWriter> DefaultConversions
         {
             get
             {

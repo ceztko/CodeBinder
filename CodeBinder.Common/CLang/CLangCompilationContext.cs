@@ -81,14 +81,14 @@ namespace CodeBinder.CLang
             get { return _callbacks; }
         }
 
-        public override IEnumerable<IConversionBuilder> DefaultConversions
+        public override IEnumerable<IConversionWriter> DefaultConversions
         {
             get
             {
-                yield return new CLangLibraryHeaderBuilder(this);
-                yield return new CLangLibDefsHeaderBuilder(this);
-                yield return new CLangTypesHeaderBuilder(this);
-                yield return new CLangMethodInitBuilder(this);
+                yield return new CLangLibraryHeaderConversion(this);
+                yield return new CLangLibDefsHeaderConversion(this);
+                yield return new CLangTypesHeaderConversion(this);
+                yield return new CLangMethodInitConversion(this);
             }
         }
     }
