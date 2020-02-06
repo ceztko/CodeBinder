@@ -56,7 +56,5 @@ namespace CodeBinder.Java
         {
             get { return _primitiveType + "Box"; }
         }
-
-        protected override string GetGeneratedPreamble() => ConversionCSharpToJava.SourcePreamble;
     }
 }

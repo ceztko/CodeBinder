@@ -60,12 +60,8 @@ namespace CodeBinder.Java
         {
             get
             {
-                yield return new StringConversionBuilder(
-                    $"{nameof(JavaClasses.BinderUtils)}.java", () => JavaClasses.BinderUtils) {
-                        BasePath = CodeBinderNamespace, GeneratedPreamble = SourcePreamble };
-                yield return new StringConversionBuilder(
-                    $"{nameof(JavaClasses.HandleRef)}.java", () => JavaClasses.HandleRef) {
-                        BasePath = CodeBinderNamespace, GeneratedPreamble = SourcePreamble };
+                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.BinderUtils), JavaClasses.BinderUtils);
+                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandleRef), JavaClasses.HandleRef);
                 yield return new JavaInteropBoxWriter(JavaInteropType.Boolean, this);
                 yield return new JavaInteropBoxWriter(JavaInteropType.Character, this);
                 yield return new JavaInteropBoxWriter(JavaInteropType.Byte, this);

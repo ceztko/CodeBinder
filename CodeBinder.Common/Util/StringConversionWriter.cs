@@ -5,7 +5,7 @@ using System.Text;
 
 namespace CodeBinder.Util
 {
-    public class StringConversionBuilder : ConversionWriter
+    public sealed class StringConversionWriter : ConversionWriter
     {
         Func<string> m_resourceString;
 
@@ -15,7 +15,7 @@ namespace CodeBinder.Util
 
         public new string? BasePath { get; set; }
 
-        public StringConversionBuilder(string filename, Func<string> resourceString)
+        public StringConversionWriter(string filename, Func<string> resourceString)
         {
             FileName = filename;
             m_resourceString = resourceString;

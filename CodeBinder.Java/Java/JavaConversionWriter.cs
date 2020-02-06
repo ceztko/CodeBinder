@@ -16,4 +16,9 @@ namespace CodeBinder.Java
             Conversion = conversion;
         }
     }
+
+    abstract class JavaConversionWriterBase : ConversionWriter
+    {
+        protected override string? GetGeneratedPreamble() => ConversionCSharpToJava.SourcePreamble;
+    }
 }

@@ -39,8 +39,8 @@ namespace CodeBinder.CLang
         {
             get
             {
-                yield return new StringConversionBuilder("BaseTypes.h", () => CLangResources.BaseTypes_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
-                yield return new StringConversionBuilder("cstrings.h", () => CLangResources.cstrings_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter("BaseTypes.h", () => CLangResources.BaseTypes_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter("cstrings.h", () => CLangResources.cstrings_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
             }
         }
     }
