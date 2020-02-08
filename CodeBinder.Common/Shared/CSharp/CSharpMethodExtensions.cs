@@ -721,6 +721,30 @@ namespace CodeBinder.Shared.CSharp
             }
         }
 
+        public static bool IsReadOnly(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
+        {
+            return property.GetDeclaredSymbol<IPropertySymbol>(provider).IsReadOnly;
+        }
+
+
+        public static bool IsAutomatic(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
+        {
+            if (property.GetDeclaredSymbol<IPropertySymbol>(provider).IsAbstract)
+            {
+                return false;
+            }
+            else
+            {
+                foreach (var accessor in property.AccessorList!.Accessors)
+                {
+                    if (accessor.Body != null)
+                        return false;
+                }
+
+                return true;
+            }
+        }
+
         public static bool IsRef(this ParameterSyntax parameter)
         {
             return parameter.Modifiers.Any(SyntaxKind.RefKeyword);
@@ -735,6 +759,22 @@ namespace CodeBinder.Shared.CSharp
         {
             var symbol = member.GetDeclaredSymbol<ISymbol>(context);
             return symbol.HasAccessibility(accessibility);
+        }
+
+        public static bool HasAccessibility(this AccessorDeclarationSyntax accessor, Accessibility accessibility, ICompilationContextProvider context)
+        {
+            var symbol = accessor.GetDeclaredSymbol<ISymbol>(context);
+            return symbol.HasAccessibility(accessibility);
+        }
+
+        public static Accessibility GetAccessibility(this MemberDeclarationSyntax member, ICompilationContextProvider context)
+        {
+            return member.GetDeclaredSymbol<ISymbol>(context).DeclaredAccessibility;
+        }
+
+        public static Accessibility GetAccessibility(this AccessorDeclarationSyntax accessor, ICompilationContextProvider context)
+        {
+            return accessor.GetDeclaredSymbol<ISymbol>(context).DeclaredAccessibility;
         }
 
         public static long GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider context)
