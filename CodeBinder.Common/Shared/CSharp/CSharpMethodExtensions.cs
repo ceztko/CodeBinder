@@ -769,7 +769,7 @@ namespace CodeBinder.Shared.CSharp
 
         public static Accessibility GetAccessibility(this MemberDeclarationSyntax member, ICompilationContextProvider context)
         {
-            return member.GetDeclaredSymbol<ISymbol>(context).DeclaredAccessibility;
+            return GetDefaultDeclarationSymbol(member, context)!.DeclaredAccessibility;
         }
 
         public static Accessibility GetAccessibility(this AccessorDeclarationSyntax accessor, ICompilationContextProvider context)
