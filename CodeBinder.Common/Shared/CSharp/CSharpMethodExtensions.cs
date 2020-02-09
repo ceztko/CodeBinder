@@ -721,11 +721,61 @@ namespace CodeBinder.Shared.CSharp
             }
         }
 
+        /// <summary>
+        /// Return base declarations
+        /// </summary>
+        /// <remarks>Try to identify principal (aka with a base types list) declaration in case of partial types</remarks>
+        public static IReadOnlyList<BaseTypeDeclarationSyntax> GetBaseDeclarations(this BaseTypeDeclarationSyntax type, ICompilationContextProvider provider)
+        {
+            var ret = new List<BaseTypeDeclarationSyntax>();
+            if (type.BaseList != null)
+            {
+                foreach (var baseType in type.BaseList.Types)
+                {
+                    var symbol = baseType.Type.GetTypeSymbol(provider)!;
+                    BaseTypeDeclarationSyntax? foundDeclaration = null;
+                    foreach (var reference in symbol.DeclaringSyntaxReferences)
+                    {
+                        var declaration = (BaseTypeDeclarationSyntax)reference.GetSyntax();
+                        if (declaration.BaseList != null)
+                        {
+                            foundDeclaration = declaration;
+                            break;
+                        }
+
+                        // Any other declaration is fine if we can't decide if it's principal
+                        foundDeclaration = declaration;
+                        break;
+                    }
+
+                    if (foundDeclaration != null)
+                        ret.Add(foundDeclaration);
+                }
+            }
+
+            return ret;
+
+        }
+
+        public static bool IsAbstract(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
+        {
+            return property.GetDeclaredSymbol<IPropertySymbol>(provider).IsAbstract;
+        }
+
+        public static bool IsStatic(this BaseMethodDeclarationSyntax method, ICompilationContextProvider provider)
+        {
+            return method.GetDeclaredSymbol(provider)!.IsStatic;
+        }
+
+        public static bool IsAbstract(this BaseMethodDeclarationSyntax property, ICompilationContextProvider provider)
+        {
+            return property.GetDeclaredSymbol(provider)!.IsAbstract;
+        }
+
         public static bool IsReadOnly(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
         {
             return property.GetDeclaredSymbol<IPropertySymbol>(provider).IsReadOnly;
         }
-
 
         public static bool IsAutomatic(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
         {
