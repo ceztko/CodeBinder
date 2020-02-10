@@ -80,9 +80,10 @@ namespace CodeBinder.Java
             {
                 using (Builder.AppendLine().Block())
                 {
-                    WriteMethodBodyInternal();
+                    WriteMethodBodyPrefixInternal();
                     if (WriteMethodBody && !Context.Conversion.SkipBody)
                         Builder.Append(Item.Body, Context, true).AppendLine();
+                    WriteMethodBodyPostfixInternal();
                 }
             }
         }
@@ -114,7 +115,9 @@ namespace CodeBinder.Java
 
         protected virtual void WriteTypeParameters() { /* Do nothing */ }
 
-        protected virtual void WriteMethodBodyInternal() { /* Do nothing */ }
+        protected virtual void WriteMethodBodyPrefixInternal() { /* Do nothing */ }
+
+        protected virtual void WriteMethodBodyPostfixInternal() { /* Do nothing */ }
 
         protected virtual void WriteReturnType() { /* Do nothing */ }
 
@@ -167,7 +170,7 @@ namespace CodeBinder.Java
             Builder.Space();
         }
 
-        protected override void WriteMethodBodyInternal()
+        protected override void WriteMethodBodyPrefixInternal()
         {
             if (_optionalIndex >= 0)
             {
@@ -278,7 +281,7 @@ namespace CodeBinder.Java
                 base.WriteParameters();
         }
 
-        protected override void WriteMethodBodyInternal()
+        protected override void WriteMethodBodyPrefixInternal()
         {
             if (Item.Initializer != null)
                 Builder.Append(Item.Initializer, Context).EndOfStatement();
@@ -311,7 +314,7 @@ namespace CodeBinder.Java
             Builder.Space().Append("throws Throwable");
         }
 
-        protected override void WriteMethodBodyInternal()
+        protected override void WriteMethodBodyPostfixInternal()
         {
             Builder.Append("super.finalize()").EndOfStatement();
         }
