@@ -58,9 +58,9 @@ namespace CodeBinder.Shared.CSharp
         private void Unsupported(SyntaxNode node, string? message = null)
         {
             if (message == null)
-                throw new Exception("Unsupported node: " + node);
+                AddError("Unsupported node: " + node);
             else
-                throw new Exception("Unsupported node: " + node + ", " + message);
+                AddError("Unsupported node: " + node + ", " + message);
         }
 
         #region Supported types
@@ -557,9 +557,21 @@ namespace CodeBinder.Shared.CSharp
         where TTypeContext : TypeContext<TTypeContext>
         where TLanguageConversion : LanguageConversion
     {
+        List<string> _errors;
+
+        public CSharpNodeVisitor()
+        {
+            _errors = new List<string>();
+        }
+
         public void Visit(SyntaxTree context)
         {
             Visit(context.GetRoot());
+        }
+
+        protected void AddError(string error)
+        {
+            _errors.Add(error);
         }
 
         public TSyntaxTreeContext TreeContext => GetSyntaxTreeContext();
@@ -572,6 +584,8 @@ namespace CodeBinder.Shared.CSharp
         {
             get { return TreeContext.Compilation; }
         }
+
+        public IReadOnlyList<string> Errors => _errors;
     }
 
     sealed class CSharpNodeVisitorImpl : CSharpNodeVisitor

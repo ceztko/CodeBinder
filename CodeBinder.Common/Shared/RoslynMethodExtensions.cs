@@ -401,6 +401,37 @@ namespace CodeBinder.Shared
             return provider.GetSemanticModel(node.SyntaxTree);
         }
 
+        public static int GetOptionalParameterCount(this IMethodSymbol symbol)
+        {
+            int count = 0;
+            for (int i = symbol.Parameters.Length - 1; i >= 0; i--)
+            {
+                var param = symbol.Parameters[i];
+                if (param.IsOptional)
+                    count++;
+            }
+
+            return count;
+        }
+
+        public static bool DoParameterCountOverlap(this IMethodSymbol lhs, IMethodSymbol rhs)
+        {
+            int minParamCountLhs = lhs.Parameters.Length - lhs.GetOptionalParameterCount();
+            int minParamCountRhs = rhs.Parameters.Length - rhs.GetOptionalParameterCount();
+            if (minParamCountLhs < minParamCountRhs)
+            {
+                if (lhs.Parameters.Length >= minParamCountRhs)
+                    return true;
+            }
+            else
+            {
+                if (rhs.Parameters.Length >= minParamCountLhs)
+                    return true;
+            }
+
+            return false;
+        }
+
         public static object GetValue(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = provider.GetSemanticModel(node.SyntaxTree);
@@ -436,6 +467,7 @@ namespace CodeBinder.Shared
                 return false;
             }
         }
+
         public static SemanticModel GetSemanticModel(this ICompilationContextProvider provider, SyntaxTree tree)
         {
             return provider.Compilation.GetSemanticModel(tree);
@@ -459,6 +491,12 @@ namespace CodeBinder.Shared
         public static string GetQualifiedName(this ISymbol symbol)
         {
             return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.QualifiedFormat);
+        }
+
+
+        public static string GetDebugName(this ISymbol symbol)
+        {
+            return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.DebugFormat);
         }
 
         // From https://stackoverflow.com/a/23308759/213871

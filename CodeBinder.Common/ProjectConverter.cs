@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using CodeBinder.Shared;
 using CodeBinder.Util;
@@ -80,6 +81,7 @@ namespace CodeBinder
         {
             var syntaxTreeContexts = new Dictionary<string, SyntaxTreeContext>();
 
+            var builder = new StringBuilder();
             // Visit trees and create contexts
             foreach (var tree in syntaxTrees)
             {
@@ -87,9 +89,15 @@ namespace CodeBinder
                 var visitor = context.CreateVisitor();
                 context.SyntaxTree = tree;
                 visitor.Visit(tree);
+                foreach (var error in visitor.Errors)
+                    builder.AppendLine(error);
+
                 var treeFilePath = tree.FilePath ?? "";
                 syntaxTreeContexts.Add(treeFilePath, context);
             }
+
+            if (builder.Length != 0)
+                throw new Exception(builder.ToString());
 
             var ret = new Dictionary<string, List<TypeContext>>();
             foreach (var pair in syntaxTreeContexts)

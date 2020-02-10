@@ -32,7 +32,7 @@ namespace CodeBinder
             }
             catch (Exception ex)
             {
-                System.Console.Error.WriteLine(ex.Message);
+                Console.Error.WriteLine(ex.Message);
                 return -1;
             }
 

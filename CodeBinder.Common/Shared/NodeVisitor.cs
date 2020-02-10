@@ -10,5 +10,10 @@ namespace CodeBinder.Shared
     public interface INodeVisitor
     {
         void Visit(SyntaxTree context);
+
+        IReadOnlyList<string> Errors
+        {
+            get;
+        }
     }
 }

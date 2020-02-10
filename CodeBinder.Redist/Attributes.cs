@@ -61,6 +61,18 @@ namespace CodeBinder.Attributes
     }
 
     [Conditional(ConditionString)]
+    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    public sealed class OverloadSuffixAttribute : CodeBinderAttribute
+    {
+        public string Name { get; private set; }
+
+        public OverloadSuffixAttribute(string name)
+        {
+            Name = name;
+        }
+    }
+
+    [Conditional(ConditionString)]
     [AttributeUsage(AttributeTargets.Delegate | AttributeTargets.Method | AttributeTargets.Constructor
         | AttributeTargets.Interface | AttributeTargets.Class | AttributeTargets.Struct
         | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property)]

@@ -43,6 +43,18 @@ namespace CodeBinder.Shared.CSharp
             return null;
         }
 
+        public static bool IsPartialMethod(this BaseMethodDeclarationSyntax method, out bool hasEmptyBody)
+        {
+            if (method.Modifiers.Any(SyntaxKind.PartialKeyword))
+            {
+                hasEmptyBody = method.Body == null;
+                return true;
+            }
+
+            hasEmptyBody = false;
+            return false;
+        }
+
         // https://github.com/dotnet/roslyn/issues/48#issuecomment-75641847
         public static bool IsPartialMethod(this IMethodSymbol method, out bool hasEmptyBody)
         {
