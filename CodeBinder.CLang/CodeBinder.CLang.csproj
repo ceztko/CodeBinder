@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>CodeBinder.CLang</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.4.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.4.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CodeBinder.Common\CodeBinder.Common.csproj" />
+    <ProjectReference Include="..\CodeBinder.Redist\CodeBinder.Redist.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources\CLangResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CLangResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\CLangResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>CLangResources.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>CodeBinder.CLang</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+</Project>

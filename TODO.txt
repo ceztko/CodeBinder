@@ -1,3 +1,7 @@
+- Support optional parameters constructors
+- ObjC: support include dependencies for type parameters
+=============================================
+
 - Wrap SyntaxTree, SemanticModel, Compilation to agnostic classes???
 - Better Support RequiresAttribute;
 - Better symbol replacement framework. Support to replace method generic calls, property/indexer usages. Better Support If the calls are "ABI" compatible

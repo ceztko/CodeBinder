@@ -12,19 +12,5 @@
   <ItemGroup>
     <ProjectReference Include="..\CodeBinder.Redist\CodeBinder.Redist.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Update="CLang\Resources\CLangResources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>CLangResources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="CLang\Resources\CLangResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>CLangResources.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>CodeBinder.CLang</CustomToolNamespace>
-    </EmbeddedResource>
-  </ItemGroup>
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 </Project>

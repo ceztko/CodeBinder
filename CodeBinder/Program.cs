@@ -167,8 +167,6 @@ namespace CodeBinder
                 }
             }
 
-            // Add default CLang conversion
-            types.Add(new ConversionInfo() { Type = typeof(ConversionCSharpToCLang), LanguageName = ConversionCSharpToCLang.LanguageName });
             return types;
         }
 
