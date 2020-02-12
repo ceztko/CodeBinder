@@ -4,6 +4,7 @@ using CodeBinder.Util;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace CodeBinder.Shared
@@ -65,6 +66,7 @@ namespace CodeBinder.Shared
         }
     }
 
+    [DebuggerDisplay("Name = {Name}")]
     public abstract class TypeContext : ICompilationContextProvider
     {
         internal TypeContext() { }
@@ -84,6 +86,8 @@ namespace CodeBinder.Shared
         internal IEnumerable<TypeConversion> Conversions => GetConversions();
 
         protected abstract IEnumerable<TypeContext> GetChildren();
+
+        public abstract string Name { get; }
     }
 
     public interface ITypeContext<TCompilationContext>

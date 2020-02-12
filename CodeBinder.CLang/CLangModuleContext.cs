@@ -15,11 +15,6 @@ namespace CodeBinder.CLang
             Compilation = context;
         }
 
-        public abstract string Name
-        {
-            get;
-        }
-
         public abstract IEnumerable<MethodDeclarationSyntax> Methods
         {
             get;

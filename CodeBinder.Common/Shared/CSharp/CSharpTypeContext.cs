@@ -10,7 +10,6 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
-    [DebuggerDisplay("TypeName = {TypeName}")]
     public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext>, ITypeContext<CSharpCompilationContext>
     {
         internal CSharpBaseTypeContext() { }
@@ -20,10 +19,7 @@ namespace CodeBinder.Shared.CSharp
             get { return GetBaseType(); }
         }
 
-        public string TypeName
-        {
-            get { return Node.Identifier.Text; }
-        }
+        public override string Name => Node.Identifier.Text;
 
         public new CSharpCompilationContext Compilation => GetCSharpCompilationContext();
 
