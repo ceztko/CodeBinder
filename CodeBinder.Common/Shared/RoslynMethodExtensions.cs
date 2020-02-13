@@ -486,11 +486,23 @@ namespace CodeBinder.Shared
         }
 
         /// <summary>
+        ///  Return containing namespace. Empty string if default namespace
+        /// </summary>
+        public static string GetContainingNamespace(this ISymbol symbol)
+        {
+            if (symbol.ContainingNamespace == null)
+                return "";
+
+            return SymbolDisplay.ToDisplayString(symbol.ContainingNamespace, DisplayFormats.FullnameFormat);
+        }
+
+        /// <summary>
         /// Get no namespace qualified name
         /// </summary>
-        public static string GetQualifiedName(this ISymbol symbol)
+        public static string GetQualifiedName(this ISymbol symbol, bool includeTypeParameters = true)
         {
-            return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.QualifiedFormat);
+            return SymbolDisplay.ToDisplayString(symbol, includeTypeParameters
+                ? DisplayFormats.QualifiedFormat : DisplayFormats.QualifiedFormatNoTypeParameters);
         }
 
 

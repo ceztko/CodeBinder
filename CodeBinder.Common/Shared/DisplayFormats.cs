@@ -35,6 +35,19 @@ namespace CodeBinder.Shared
                 SymbolDisplayMiscellaneousOptions.ExpandNullable
         );
 
+        /// <summary>No namespace</summary>
+        public static readonly SymbolDisplayFormat QualifiedFormatNoTypeParameters = new SymbolDisplayFormat(
+            globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+            localOptions: SymbolDisplayLocalOptions.IncludeType,
+            memberOptions:
+                SymbolDisplayMemberOptions.IncludeContainingType |
+                SymbolDisplayMemberOptions.IncludeExplicitInterface,
+            miscellaneousOptions:
+                SymbolDisplayMiscellaneousOptions.UseErrorTypeSymbolName |
+                SymbolDisplayMiscellaneousOptions.ExpandNullable
+        );
+
         internal static readonly SymbolDisplayFormat NamespaceQualifiedFormat =
             new SymbolDisplayFormat(
                 globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,

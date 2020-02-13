@@ -24,10 +24,12 @@ namespace CodeBinder.Shared.CSharp
     public abstract class CSharpCompilationContext : CompilationContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext, CSharpLanguageConversion>
     {
         Dictionary<string, List<CSharpTypeContext>> _types;
+        HashSet<string> _Namespaces;
 
         internal CSharpCompilationContext()
         {
             _types = new Dictionary<string, List<CSharpTypeContext>>();
+            _Namespaces = new HashSet<string>();
         }
 
         protected override CSharpSyntaxTreeContext createSyntaxTreeContext()
@@ -80,6 +82,7 @@ namespace CodeBinder.Shared.CSharp
             {
                 var main = types[0];
                 var symbol = main.Node.GetDeclaredSymbol<ITypeSymbol>(this);
+                _Namespaces.Add(symbol.GetContainingNamespace());
                 for (int i = 0; i < types.Count; i++)
                     main.AddPartialDeclaration(types[i]);
 
@@ -96,6 +99,8 @@ namespace CodeBinder.Shared.CSharp
                     AddType(type, mainTypesMap[symbol.ContainingType]);
             }
         }
+
+        public IReadOnlyCollection<string> Namespaces => _Namespaces;
     }
 
     sealed class CSharpCompilationContextImpl : CSharpCompilationContext

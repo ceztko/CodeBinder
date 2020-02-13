@@ -585,32 +585,40 @@ namespace CodeBinder.Shared.CSharp
             }
         }
 
-        // Note: Declations -> GetDeclaredSymbol()
         public static string GetFullName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
         {
             var symbol = node.GetDeclaredSymbol(provider)!;
             return symbol.GetFullName();
         }
 
-        // Note: Declations -> GetDeclaredSymbol()
         public static string GetQualifiedName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
         {
             var symbol = node.GetDeclaredSymbol(provider)!;
             return symbol.GetQualifiedName();
         }
 
-        // Note: Types -> GetTypeSymbol()
+        public static string GetQualifiedName(this MemberDeclarationSyntax node, bool includeTypeParameters, ICompilationContextProvider provider)
+        {
+            var symbol = node.GetDeclaredSymbol(provider)!;
+            return symbol.GetQualifiedName(includeTypeParameters);
+        }
+
         public static string GetFullName(this TypeSyntax node, ICompilationContextProvider provider)
         {
             var symbol = node.GetTypeSymbol(provider);
             return symbol.GetFullName();
         }
 
-        // Note: Types -> GetTypeSymbol()
         public static string GetQualifiedName(this TypeSyntax node, ICompilationContextProvider provider)
         {
             var symbol = node.GetTypeSymbol(provider);
             return symbol.GetQualifiedName();
+        }
+
+        public static string GetQualifiedName(this TypeSyntax node, bool includeTypeParameters, ICompilationContextProvider provider)
+        {
+            var symbol = node.GetTypeSymbol(provider);
+            return symbol.GetQualifiedName(includeTypeParameters);
         }
 
         public static ITypeSymbol GetTypeSymbol(this TypeSyntax node, ICompilationContextProvider provider)

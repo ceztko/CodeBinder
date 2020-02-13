@@ -1,5 +1,6 @@
 - Support optional parameters constructors
 - ObjC: support include dependencies for type parameters
+- Add better support for detecting main partial declarations in some way
 =============================================
 
 - Wrap SyntaxTree, SemanticModel, Compilation to agnostic classes???
