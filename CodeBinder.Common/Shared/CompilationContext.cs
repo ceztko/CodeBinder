@@ -33,11 +33,11 @@ namespace CodeBinder.Shared
     public abstract class CompilationContext<TTypeContext> : CompilationContext
         where TTypeContext : TypeContext<TTypeContext>
     {
-        List<TTypeContext> _rootTypes;
+        HashSet<TTypeContext> _types;
 
         internal CompilationContext()
         {
-            _rootTypes = new List<TTypeContext>();
+            _types = new HashSet<TTypeContext>();
         }
 
         protected void AddType(TTypeContext type, TTypeContext? parent)
@@ -48,11 +48,10 @@ namespace CodeBinder.Shared
             if (type == parent)
                 throw new Exception("The parent can't be same reference as the given type");
 
-            if (parent == null)
-            {
-                _rootTypes.Add(type);
-            }
-            else
+            if (!_types.Add(type))
+                throw new Exception("Can't reinsert the same type");
+
+            if (parent != null)
             {
                 type.Parent = parent;
                 parent.AddChild(type);
@@ -61,12 +60,19 @@ namespace CodeBinder.Shared
 
         protected override IEnumerable<TypeContext> GetRootTypes()
         {
-            return _rootTypes;
+            return RootTypes;
         }
 
         public new IEnumerable<TTypeContext> RootTypes
         {
-            get { return _rootTypes; }
+            get
+            {
+                foreach (var type in _types)
+                {
+                    if (type.Parent == null)
+                        yield return type;
+                }
+            }
         }
 
         #region SyntaxTreeContext
@@ -104,11 +110,11 @@ namespace CodeBinder.Shared
 
         public abstract class SyntaxTree : SyntaxTreeContext
         {
-            List<TTypeContext> _rootTypes;
+            HashSet<TTypeContext> _types;
 
             internal SyntaxTree()
             {
-                _rootTypes = new List<TTypeContext>();
+                _types = new HashSet<TTypeContext>();
             }
 
             public void AddType(TTypeContext type, TTypeContext? parent)
@@ -119,11 +125,10 @@ namespace CodeBinder.Shared
                 if (type == parent)
                     throw new Exception("The parent can't be same reference as the given type");
 
-                if (parent == null)
-                {
-                    _rootTypes.Add(type);
-                }
-                else
+                if (!_types.Add(type))
+                    throw new Exception("Can't reinsert the same type");
+
+                if (parent != null)
                 {
                     type.Parent = parent;
                     parent.AddChild(type);
@@ -132,13 +137,17 @@ namespace CodeBinder.Shared
 
             public new IEnumerable<TypeContext> RootTypes
             {
-                get { return _rootTypes; }
+                get
+                {
+                    foreach (var type in _types)
+                    {
+                        if (type.Parent == null)
+                            yield return type;
+                    }
+                }
             }
 
-            protected override IEnumerable<TypeContext> GetRootTypes()
-            {
-                return RootTypes;
-            }
+            protected override IEnumerable<TypeContext> GetRootTypes() => RootTypes;
         }
 
         #endregion
@@ -190,6 +199,9 @@ namespace CodeBinder.Shared
                 CompilationSet?.Invoke(this, EventArgs.Empty);
             }
         }
+
+        // REMOVE-ME: Remove SyntaxTreeContext
+        protected internal virtual void AfterVisit() { } 
 
         protected abstract LanguageConversion GetLanguageConversion();
 

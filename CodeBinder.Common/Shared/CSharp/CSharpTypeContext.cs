@@ -44,18 +44,18 @@ namespace CodeBinder.Shared.CSharp
 
         public PartialDeclarationsTree ComputePartialDeclarationsTree()
         {
-            var partialDeclarations = new List<TypeDeclarationSyntax>();
+            var rootPartialDeclarations = new List<TypeDeclarationSyntax>();
             foreach (var partialDeclaration in _partialDeclarations)
-                partialDeclarations.Add(partialDeclaration.Node);
+                rootPartialDeclarations.Add(partialDeclaration.Node);
 
-            var memberPartialDelarations = new Dictionary<TypeDeclarationSyntax, PartialDeclarationsTree>();
+            var childrenPartialDeclarations = new Dictionary<TypeDeclarationSyntax, PartialDeclarationsTree>();
             foreach (var child in Children)
-                child.FillMemberPartialDeclarations(memberPartialDelarations);
+                child.FillMemberPartialDeclarations(childrenPartialDeclarations);
 
-            return new PartialDeclarationsTree(partialDeclarations, memberPartialDelarations);
+            return new PartialDeclarationsTree(rootPartialDeclarations, childrenPartialDeclarations);
         }
 
-        public void AddPartialDeclaration(CSharpTypeContext partialDeclaration)
+        internal void AddPartialDeclaration(CSharpTypeContext partialDeclaration)
         {
             _partialDeclarations.Add(partialDeclaration);
         }

@@ -734,6 +734,55 @@ namespace CodeBinder.Shared.CSharp
         }
 
         /// <summary>
+        /// Return the main declaration (any delcaration with non null baselist if present, or just the first found)
+        /// </summary>
+        public static TTypeDeclaration GetMainDeclaration<TTypeDeclaration>(this ITypeSymbol symbol)
+            where TTypeDeclaration : BaseTypeDeclarationSyntax
+        {
+            TTypeDeclaration? declaration = null;
+            foreach (var reference in symbol.DeclaringSyntaxReferences)
+            {
+                declaration = (TTypeDeclaration)reference.GetSyntax();
+                if (declaration.BaseList != null)
+                    return declaration;
+            }
+
+            if (declaration == null)
+                throw new Exception($"Can't find declaration for symbol {symbol}");
+
+            return declaration;
+        }
+
+        /// <summary>
+        /// Say if type is partial and if so return the main delclaration (delclaration with non null baselist if present)
+        /// </summary>
+        public static bool IsPartial(this TypeDeclarationSyntax declaration, ICompilationContextProvider provider, out TypeDeclarationSyntax mainDeclaration)
+        {
+            bool isPartial = declaration.IsPartial();
+            if (isPartial && declaration.BaseList == null)
+            {
+                var symbol = declaration.GetDeclaredSymbol<ITypeSymbol>(provider);
+                foreach (var reference in symbol.DeclaringSyntaxReferences)
+                {
+                    declaration = (TypeDeclarationSyntax)reference.GetSyntax();
+                    if (declaration.BaseList != null)
+                        break;
+                }
+
+                mainDeclaration = declaration;
+                return true;
+            }
+
+            mainDeclaration = declaration;
+            return isPartial;
+        }
+
+        public static bool IsPartial(this TypeDeclarationSyntax declaration)
+        {
+            return declaration.Modifiers.Any(SyntaxKind.PartialKeyword);
+        }
+
+        /// <summary>
         /// Return base declarations
         /// </summary>
         /// <remarks>Try to identify principal (aka with a base types list) declaration in case of partial types</remarks>

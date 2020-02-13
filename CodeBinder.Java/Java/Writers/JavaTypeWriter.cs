@@ -128,14 +128,14 @@ namespace CodeBinder.Java
         PartialDeclarationsTree _partialDeclarations;
 
         protected JavaTypeWriter(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations, JavaCodeConversionContext context)
-            : base(findMainDeclaration(syntax, partialDeclarations), context)
+            : base(syntax, context)
         {
             _partialDeclarations = partialDeclarations;
         }
 
         protected override void WriteTypeMembers()
         {
-            if (_partialDeclarations.PartialDeclarations.Count == 0)
+            if (_partialDeclarations.RootPartialDeclarations.Count == 0)
                 WriteTypeMembers(Item.Members, _partialDeclarations);
             else
                 WriteTypeMembers(getPartialDeclarationMembers(), _partialDeclarations);
@@ -143,7 +143,7 @@ namespace CodeBinder.Java
 
         IEnumerable<MemberDeclarationSyntax> getPartialDeclarationMembers()
         {
-            foreach (var declaration in _partialDeclarations.PartialDeclarations)
+            foreach (var declaration in _partialDeclarations.RootPartialDeclarations)
             {
                 foreach (var member in declaration.Members)
                 {
@@ -153,7 +153,7 @@ namespace CodeBinder.Java
                         case SyntaxKind.ClassDeclaration:
                         case SyntaxKind.StructDeclaration:
                         {
-                            if (_partialDeclarations.MemberPartialDeclarations.ContainsKey((TypeDeclarationSyntax)member))
+                            if (_partialDeclarations.ChildrenPartialDeclarations.ContainsKey((TypeDeclarationSyntax)member))
                                 yield return member;
                             break;
                         }
@@ -165,24 +165,6 @@ namespace CodeBinder.Java
                     }
                 }
             }
-        }
-
-        static TTypeDeclaration findMainDeclaration(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations)
-        {
-            // If there are no partial declarations, just return the given syntax
-            if (partialDeclarations.PartialDeclarations.Count == 0)
-                return syntax;
-
-            // Find the declaration with non null base list, or just return the first
-            TypeDeclarationSyntax ret = partialDeclarations.PartialDeclarations[0];
-            for (int i = 1; i < partialDeclarations.PartialDeclarations.Count; i++)
-            {
-                ret = partialDeclarations.PartialDeclarations[i];
-                if (ret.BaseList != null)
-                    break;
-            }
-
-            return (TTypeDeclaration)ret;
         }
     }
 }

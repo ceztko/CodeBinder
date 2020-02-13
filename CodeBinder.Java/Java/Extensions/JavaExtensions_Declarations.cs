@@ -33,13 +33,13 @@ namespace CodeBinder.Java
                     return new[] { new JavaFieldWriter((FieldDeclarationSyntax)member, context) };
                 case SyntaxKind.InterfaceDeclaration:
                     var iface = (InterfaceDeclarationSyntax)member;
-                    return new[] { new JavaInterfaceWriter(iface, partialDeclarations.MemberPartialDeclarations[iface], context) };
+                    return new[] { new JavaInterfaceWriter(iface, partialDeclarations.ChildrenPartialDeclarations[iface], context) };
                 case SyntaxKind.ClassDeclaration:
                     var cls = (ClassDeclarationSyntax)member;
-                    return new[] { new JavaClassWriter(cls, partialDeclarations.MemberPartialDeclarations[cls], context) };
+                    return new[] { new JavaClassWriter(cls, partialDeclarations.ChildrenPartialDeclarations[cls], context) };
                 case SyntaxKind.StructDeclaration:
                     var structure = (StructDeclarationSyntax)member;
-                    return new[] { new JavaStructWriter(structure, partialDeclarations.MemberPartialDeclarations[structure], context) };
+                    return new[] { new JavaStructWriter(structure, partialDeclarations.ChildrenPartialDeclarations[structure], context) };
                 case SyntaxKind.EnumDeclaration:
                     return new[] { new JavaEnumWriter((EnumDeclarationSyntax)member, context) };
                 default:

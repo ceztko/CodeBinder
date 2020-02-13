@@ -8,20 +8,20 @@ namespace CodeBinder.Shared.CSharp
     public class PartialDeclarationsTree
     {
         /// <summary>
-        /// List of partial type declarations
+        /// Root partial type declarations
         /// </summary>
-        public IReadOnlyList<TypeDeclarationSyntax> PartialDeclarations { get; private set; }
+        public IReadOnlyList<TypeDeclarationSyntax> RootPartialDeclarations { get; private set; }
 
         /// <summary>
         /// Children partial declaration trees
         /// </summary>
-        public IReadOnlyDictionary<TypeDeclarationSyntax, PartialDeclarationsTree> MemberPartialDeclarations { get; private set; }
+        public IReadOnlyDictionary<TypeDeclarationSyntax, PartialDeclarationsTree> ChildrenPartialDeclarations { get; private set; }
 
-        public PartialDeclarationsTree(IReadOnlyList<TypeDeclarationSyntax> partialDeclarations,
-            IReadOnlyDictionary<TypeDeclarationSyntax, PartialDeclarationsTree> memberPartialDeclarations)
+        public PartialDeclarationsTree(IReadOnlyList<TypeDeclarationSyntax> rootPartialDeclarations,
+            IReadOnlyDictionary<TypeDeclarationSyntax, PartialDeclarationsTree> childrenPartialDeclarations)
         {
-            PartialDeclarations = partialDeclarations;
-            MemberPartialDeclarations = memberPartialDeclarations;
+            RootPartialDeclarations = rootPartialDeclarations;
+            ChildrenPartialDeclarations = childrenPartialDeclarations;
         }
     }
 }

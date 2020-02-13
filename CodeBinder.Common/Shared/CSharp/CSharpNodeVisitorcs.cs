@@ -41,17 +41,7 @@ namespace CodeBinder.Shared.CSharp
                 if (_parents.Count == 0)
                     return null;
 
-                var ret = _parents.Peek();
-                if (ret != null)
-                {
-                    // Verify if the current parent is actually a partial type and, if so,
-                    // use that istead
-                    string parentQualifiedName = ret.Node.GetQualifiedName(this);
-                    if (Compilation.TryGetPartialType(parentQualifiedName, out var parentPartialType))
-                        ret = parentPartialType;
-                }
-
-                return ret;
+                return _parents.Peek();
             }
         }
 
@@ -105,11 +95,10 @@ namespace CodeBinder.Shared.CSharp
 
         void addType(CSharpTypeContext type, bool isPartial)
         {
+            Compilation.AddType(type);
+            return;
             if (isPartial)
-            {
-                string qualifiedName = type.Node.GetQualifiedName(this);
-                Compilation.AddPartialType(qualifiedName, Compilation, type, CurrentParent);
-            }
+                Compilation.AddType(type);
             else
             {
                 TreeContext.AddType(type, CurrentParent);
@@ -530,7 +519,7 @@ namespace CodeBinder.Shared.CSharp
 
         private void checkTypeDeclaration(TypeDeclarationSyntax type, out bool isPartial)
         {
-            isPartial = type.Modifiers.Any(SyntaxKind.PartialKeyword);
+            isPartial = type.IsPartial();
             if (isPartial)
             {
                 var parentKind = type.Parent.Kind();
@@ -539,11 +528,13 @@ namespace CodeBinder.Shared.CSharp
                     case SyntaxKind.ClassDeclaration:
                     case SyntaxKind.InterfaceDeclaration:
                     case SyntaxKind.StructDeclaration:
+                    {
                         var parentType = (TypeDeclarationSyntax)type.Parent;
                         if (!parentType.Modifiers.Any(SyntaxKind.PartialKeyword))
                             Unsupported(type, "Nested partial types must have partial parent");
 
                         break;
+                    }
                 }
             }
         }

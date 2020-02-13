@@ -81,7 +81,7 @@ namespace CodeBinder
         {
             var syntaxTreeContexts = new Dictionary<string, SyntaxTreeContext>();
 
-            var builder = new StringBuilder();
+            var errorBuilder = new StringBuilder();
             // Visit trees and create contexts
             foreach (var tree in syntaxTrees)
             {
@@ -90,14 +90,17 @@ namespace CodeBinder
                 context.SyntaxTree = tree;
                 visitor.Visit(tree);
                 foreach (var error in visitor.Errors)
-                    builder.AppendLine(error);
+                    errorBuilder.AppendLine(error);
 
                 var treeFilePath = tree.FilePath ?? "";
                 syntaxTreeContexts.Add(treeFilePath, context);
             }
 
-            if (builder.Length != 0)
-                throw new Exception(builder.ToString());
+            if (errorBuilder.Length != 0)
+                throw new Exception(errorBuilder.ToString());
+
+            // FIX-ME: Remove me, adn move to the visitor a similar mechanism
+            compilation.AfterVisit();
 
             var ret = new Dictionary<string, List<TypeContext>>();
             foreach (var pair in syntaxTreeContexts)

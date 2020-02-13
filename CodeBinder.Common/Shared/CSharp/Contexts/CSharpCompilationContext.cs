@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -22,11 +23,11 @@ namespace CodeBinder.Shared.CSharp
 
     public abstract class CSharpCompilationContext : CompilationContext<CSharpBaseTypeContext, CSharpSyntaxTreeContext, CSharpLanguageConversion>
     {
-        Dictionary<string, CSharpTypeContext> _partialTypes;
+        Dictionary<string, List<CSharpTypeContext>> _types;
 
         internal CSharpCompilationContext()
         {
-            _partialTypes = new Dictionary<string, CSharpTypeContext>();
+            _types = new Dictionary<string, List<CSharpTypeContext>>();
         }
 
         protected override CSharpSyntaxTreeContext createSyntaxTreeContext()
@@ -54,23 +55,46 @@ namespace CodeBinder.Shared.CSharp
             return new CSharpStructTypeContextImpl(str, this);
         }
 
-        public void AddPartialType(string qualifiedName, CompilationContext compilation, CSharpTypeContext type, CSharpBaseTypeContext? parent)
+        // FIXME: Remove me and do this in a compilation context scoped visitor
+        public void AddType(CSharpTypeContext type)
         {
-            if (_partialTypes.TryGetValue(qualifiedName, out var partialType))
+            string fullName = type.Node.GetFullName(this);
+            if (!_types.TryGetValue(fullName, out var types))
             {
-                partialType.AddPartialDeclaration(type);
+                types = new List<CSharpTypeContext>();
+                _types.Add(fullName, types);
             }
+
+            // If the type is the main declaration, put it first, otherwise just put back
+            if (type.Node.BaseList == null)
+                types.Add(type);
             else
-            {
-                type.AddPartialDeclaration(type);
-                _partialTypes.Add(qualifiedName, type);
-                AddType(type, parent);
-            }
+                types.Insert(0, type);
         }
 
-        public bool TryGetPartialType(string qualifiedName, [NotNullWhen(true)]out CSharpTypeContext? partialType)
+        // FIXME: Remove me and do this in a compilation context scoped visitor
+        protected internal override void AfterVisit()
         {
-            return _partialTypes.TryGetValue(qualifiedName, out partialType);
+            var mainTypesMap = new Dictionary<ITypeSymbol, CSharpTypeContext>();
+            foreach (var types in _types.Values)
+            {
+                var main = types[0];
+                var symbol = main.Node.GetDeclaredSymbol<ITypeSymbol>(this);
+                for (int i = 0; i < types.Count; i++)
+                    main.AddPartialDeclaration(types[i]);
+
+                mainTypesMap[symbol] = main;
+            }
+
+            foreach (var type in mainTypesMap.Values)
+            {
+                var symbol = type.Node.GetDeclaredSymbol<ITypeSymbol>(this);
+                if (symbol.ContainingType == null)
+                    AddType(type, null);
+                else
+                    // We assume partial types are contained in partial types, see visitor
+                    AddType(type, mainTypesMap[symbol.ContainingType]);
+            }
         }
     }
 
