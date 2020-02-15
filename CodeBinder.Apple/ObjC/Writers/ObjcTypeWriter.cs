@@ -1,0 +1,392 @@
+﻿using CodeBinder.Shared;
+using CodeBinder.Shared.CSharp;
+using CodeBinder.Util;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+
+namespace CodeBinder.Apple
+{
+    /// <remarks>The type code writer should not be bound to type context</remarks>
+    /// <typeparam name="TTypeDeclaration"></typeparam>
+    [DebuggerDisplay("TypeName = " + nameof(TypeName))]
+    abstract class ObjCBaseTypeWriter<TTypeDeclaration>
+            : ObjCCodeWriter<TTypeDeclaration>
+        where TTypeDeclaration : BaseTypeDeclarationSyntax
+    {
+        protected ObjCBaseTypeWriter(TTypeDeclaration syntax, ObjCCompilationContext context, ObjCFileType fileType)
+            : base(syntax, context, fileType) { }
+
+        protected override void Write()
+        {
+            Builder.Append(Item.GetObjcTypeDeclaration(FileType.IsHeader())).Space();
+            Builder.Append(ObjCTypeName);
+            WriteTypeSpecifiers();
+            Builder.AppendLine();
+            WriteTypeMembers();
+            Builder.AppendLine("@end");
+        }
+
+        protected virtual void WriteTypeSpecifiers()
+        {
+            if (FileType.IsImplementation())
+                return;
+
+            if (FileType == ObjCFileType.PublicHeader || FileType == ObjCFileType.InternalOnlyHeader)
+            {
+                // Write type parameters and base types
+                if (Arity > 0)
+                {
+                    Builder.Space();
+                    // generics declaration
+                    WriteTypeParameters();
+                }
+            }
+
+            WriteBaseTypes();
+        }
+
+        protected virtual void WriteBaseTypes()
+        {
+            Builder.Space();
+            // inheritance declaration
+            WriteBaseTypes(Item.BaseList);
+        }
+
+        private void WriteBaseTypes(BaseListSyntax? baseList)
+        {
+            string? classType = null;
+            var interfaces = new List<string>();
+            if (baseList != null)
+            {
+                foreach (var type in baseList.Types)
+                {
+                    var typeInfo = type.Type.GetObjCTypeInfo(Context);
+                    if (typeInfo.Kind == ObjCTypeKind.Protocol)
+                    {
+                        if (!ShouldWriteBaseProtocol(typeInfo.Reachability, FileType))
+                            continue;
+
+                        interfaces.Add(typeInfo.TypeName);
+                    }
+                    else if (typeInfo.Kind == ObjCTypeKind.Class && classType == null)
+                    {
+                        classType = typeInfo.TypeName;
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
+            }
+
+            if (classType == null)
+                classType = "NSObject";
+
+            if (FileType == ObjCFileType.InternalHeader)
+                Builder.Append("()");
+            else
+                Builder.Colon().Space().Append(classType);
+
+            if (interfaces.Count != 0)
+            {
+                Builder.Append("<");
+                bool first = true;
+
+                foreach (var iface in interfaces)
+                {
+                    if (first)
+                        first = false;
+                    else
+                        Builder.CommaSeparator();
+
+                    Builder.Append(iface);
+                }
+
+                Builder.Append(">");
+            }
+        }
+
+        protected void WriteTypeMembers(IEnumerable<MemberDeclarationSyntax> members, PartialDeclarationsTree partialDeclarations)
+        {
+            var fieldWriters = new List<IObjCCodeWriter>();
+            var otherTypeWriters = new List<IObjCCodeWriter>();
+            bool first = true;
+            foreach (var member in members)
+            {
+                if (member.ShouldDiscard(Context))
+                    continue;
+
+                // On the public header we show only public members
+                if (!ShouldEmit(member))
+                    continue;
+
+                foreach (var writer in GetWriters(member, partialDeclarations, Context, FileType))
+                {
+                    if (writer.Type == ObjWriterType.Field)
+                        fieldWriters.Add(writer);
+                    else
+                        otherTypeWriters.Add(writer);
+                }
+            }
+
+            if (fieldWriters.Count != 0)
+            {
+                // Write fields block
+                using (Builder.Block())
+                {
+                    foreach (var writer in fieldWriters)
+                    {
+                        Builder.AppendLine(ref first).Append(writer);
+                    }
+                }
+
+                Builder.AppendLine();
+            }
+
+            using (Builder.Indent())
+            {
+                // Write the other members
+                foreach (var writer in otherTypeWriters)
+                {
+                    Builder.AppendLine(ref first).Append(writer);
+                }
+            }
+        }
+
+        static IEnumerable<IObjCCodeWriter> GetWriters(MemberDeclarationSyntax member,
+            PartialDeclarationsTree partialDeclarations, ObjCCompilationContext context, ObjCFileType fileType)
+        {
+            var kind = member.Kind();
+            switch (kind)
+            {
+                case SyntaxKind.ConstructorDeclaration:
+                    return new[] { new ObjCConstructorWriter((ConstructorDeclarationSyntax)member, context, fileType) };
+                case SyntaxKind.DestructorDeclaration:
+                    return Enumerable.Empty<IObjCCodeWriter>();
+                    // TODO
+                    ////return new[] { new ObjCDestructorWriter((DestructorDeclarationSyntax)member, context, fileType) };
+                case SyntaxKind.MethodDeclaration:
+                    return GetWriters((MethodDeclarationSyntax)member, context, fileType);
+                case SyntaxKind.PropertyDeclaration:
+                    return GetWriters((PropertyDeclarationSyntax)member, context, fileType);
+                case SyntaxKind.IndexerDeclaration:
+                    return new[] { new ObjCIndexerWriter((IndexerDeclarationSyntax)member, context, fileType) };
+                case SyntaxKind.FieldDeclaration:
+                    if (fileType == ObjCFileType.Implementation)
+                        return Enumerable.Empty<IObjCCodeWriter>();
+
+                    return Enumerable.Empty<IObjCCodeWriter>();
+                    // TODO
+                    ////return new[] { new ObjCFieldWriter((FieldDeclarationSyntax)member, context) };
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        static IEnumerable<IObjCCodeWriter> GetWriters(PropertyDeclarationSyntax property, ObjCCompilationContext context, ObjCFileType fileType)
+        {
+            var list = new List<IObjCCodeWriter>();
+            list.Add(new ObjCPropertyWriter(property, context, fileType));
+            if (property.IsAutomatic(context) && fileType.IsInternalKindHeader())
+                list.Add(new ObjCUnderlyingFieldWriter(property, context));
+
+            return list;
+        }
+
+        static IEnumerable<IObjCCodeWriter> GetWriters(MethodDeclarationSyntax method, ObjCCompilationContext context, ObjCFileType fileType)
+        {
+            if (method.IsNative(context))
+                yield break;
+
+            if (method.GetCSharpModifiers().Contains(SyntaxKind.PartialKeyword) && method.Body == null)
+                yield break;
+
+            for (int i = method.ParameterList.Parameters.Count - 1; i >= 0; i--)
+            {
+                var parameter = method.ParameterList.Parameters[i];
+                if (parameter.Default == null)
+                    break;
+
+                yield return new MethodWriter(method, i, context, fileType);
+            }
+
+            yield return new MethodWriter(method, -1, context, fileType);
+        }
+
+        bool ShouldEmit(MemberDeclarationSyntax member)
+        {
+            return ShouldEmitSyntax(member.Kind(), member.GetAccessibility(Context), FileType);
+        }
+
+        // Valid for all type members, excpet property accessors
+        static bool ShouldEmitSyntax(SyntaxKind kind, Accessibility accessibility, ObjCFileType filetype)
+        {
+            switch (accessibility)
+            {
+                case Accessibility.Public:
+                    return ShouldEmitPublicSyntax(kind, filetype);
+                case Accessibility.Protected:
+                case Accessibility.Private:
+                case Accessibility.ProtectedAndInternal:
+                case Accessibility.Internal:
+                    return ShouldEmitInternalSyntax(kind, filetype);
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        static bool ShouldEmitPublicSyntax(SyntaxKind kind, ObjCFileType filetype)
+        {
+            switch (kind)
+            {
+                case SyntaxKind.ConstructorDeclaration:
+                case SyntaxKind.DestructorDeclaration:
+                case SyntaxKind.MethodDeclaration:
+                case SyntaxKind.PropertyDeclaration:
+                case SyntaxKind.IndexerDeclaration:
+                {
+                    // Public method like syntax is not emited in the internal header
+                    if (filetype == ObjCFileType.InternalHeader)
+                        return false;
+                    else
+                        return true;
+                }
+                case SyntaxKind.FieldDeclaration:
+                {
+                    switch (filetype)
+                    {
+                        // Public fields are emited only in public or internal only headers
+                        case ObjCFileType.PublicHeader:
+                        case ObjCFileType.InternalOnlyHeader:
+                            return true;
+                        case ObjCFileType.InternalHeader:
+                        case ObjCFileType.Implementation:
+                            return false;
+                        default:
+                            throw new NotSupportedException();
+                    }
+                }
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        static bool ShouldEmitInternalSyntax(SyntaxKind kind, ObjCFileType filetype)
+        {
+            switch (kind)
+            {
+                case SyntaxKind.ConstructorDeclaration:
+                case SyntaxKind.DestructorDeclaration:
+                case SyntaxKind.MethodDeclaration:
+                case SyntaxKind.PropertyDeclaration:
+                case SyntaxKind.IndexerDeclaration:
+                {
+                    // Internal method like syntax is not emited in the public header
+                    if (filetype == ObjCFileType.PublicHeader)
+                        return false;
+                    else
+                        return true;
+                }
+                case SyntaxKind.FieldDeclaration:
+                {
+                    switch (filetype)
+                    {
+                        // Internal fields are emited only in the internal or internal only header
+                        case ObjCFileType.InternalHeader:
+                        case ObjCFileType.InternalOnlyHeader:
+                            return true;
+                        case ObjCFileType.PublicHeader:
+                        case ObjCFileType.Implementation:
+                            return false;
+                        default:
+                            throw new NotSupportedException();
+                    }
+                }
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        bool ShouldWriteBaseProtocol(ObjCTypeReachability reachability, ObjCFileType filetype)
+        {
+            switch (reachability)
+            {
+                case ObjCTypeReachability.Public:
+                case ObjCTypeReachability.External:
+                    return filetype == ObjCFileType.PublicHeader || filetype == ObjCFileType.InternalOnlyHeader;
+                case ObjCTypeReachability.Internal:
+                    return filetype == ObjCFileType.InternalHeader || filetype == ObjCFileType.InternalOnlyHeader;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        protected virtual void WriteTypeParameters() { /* Do nothing */ }
+
+        protected abstract void WriteTypeMembers();
+
+        public override ObjWriterType Type => ObjWriterType.Type;
+
+        public virtual int Arity => 0;
+
+        public string TypeName => Item.GetName();
+
+        public string ObjCTypeName => Item.GetObjCName(Context);
+
+        public ICompilationContextProvider Provider => Context;
+
+        public ConversionCSharpToObjC Conversion => Context.Conversion;
+    }
+
+    abstract class ObjCTypeWriter<TTypeDeclaration> : ObjCBaseTypeWriter<TTypeDeclaration>
+        where TTypeDeclaration : TypeDeclarationSyntax
+    {
+        PartialDeclarationsTree _partialDeclarations;
+
+        protected ObjCTypeWriter(TTypeDeclaration syntax, PartialDeclarationsTree partialDeclarations,
+                ObjCCompilationContext context, ObjCFileType fileType)
+            : base(syntax, context, fileType)
+        {
+            _partialDeclarations = partialDeclarations;
+        }
+
+        protected override void WriteTypeMembers()
+        {
+            if (_partialDeclarations.RootPartialDeclarations.Count == 0)
+                WriteTypeMembers(Item.Members, _partialDeclarations);
+            else
+                WriteTypeMembers(GetPartialDeclarationMembers(), _partialDeclarations);
+        }
+
+        IEnumerable<MemberDeclarationSyntax> GetPartialDeclarationMembers()
+        {
+            foreach (var declaration in _partialDeclarations.RootPartialDeclarations)
+            {
+                foreach (var member in declaration.Members)
+                {
+                    switch (member.Kind())
+                    {
+                        case SyntaxKind.InterfaceDeclaration:
+                        case SyntaxKind.ClassDeclaration:
+                        case SyntaxKind.StructDeclaration:
+                        {
+                            if (_partialDeclarations.ChildrenPartialDeclarations.ContainsKey((TypeDeclarationSyntax)member))
+                                yield return member;
+                            break;
+                        }
+                        default:
+                        {
+                            yield return member;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

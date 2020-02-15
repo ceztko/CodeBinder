@@ -22,6 +22,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder", "CodeBinder\Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.CLang", "CodeBinder.CLang\CodeBinder.CLang.csproj", "{3E8AF926-DC80-47A2-9783-A7374E1B8542}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.Apple", "CodeBinder.Apple\CodeBinder.Apple.csproj", "{B67CDFD4-0078-4F67-92FA-9372AC7511DF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,6 +50,10 @@ Global
 		{3E8AF926-DC80-47A2-9783-A7374E1B8542}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E8AF926-DC80-47A2-9783-A7374E1B8542}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E8AF926-DC80-47A2-9783-A7374E1B8542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B67CDFD4-0078-4F67-92FA-9372AC7511DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B67CDFD4-0078-4F67-92FA-9372AC7511DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B67CDFD4-0078-4F67-92FA-9372AC7511DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B67CDFD4-0078-4F67-92FA-9372AC7511DF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
