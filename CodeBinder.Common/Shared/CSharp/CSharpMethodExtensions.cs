@@ -831,6 +831,11 @@ namespace CodeBinder.Shared.CSharp
             return property.GetDeclaredSymbol<IPropertySymbol>(provider).IsAbstract;
         }
 
+        public static bool IsStatic(this BasePropertyDeclarationSyntax method, ICompilationContextProvider provider)
+        {
+            return method.GetDeclaredSymbol(provider)!.IsStatic;
+        }
+
         public static bool IsStatic(this BaseMethodDeclarationSyntax method, ICompilationContextProvider provider)
         {
             return method.GetDeclaredSymbol(provider)!.IsStatic;
