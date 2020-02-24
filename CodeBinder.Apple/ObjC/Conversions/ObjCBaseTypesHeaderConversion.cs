@@ -29,10 +29,16 @@ namespace CodeBinder.Apple
             builder.AppendLine("// Foundation headers");
             builder.AppendLine("#import <Foundation/Foundation.h>");
             builder.AppendLine();
-            builder.AppendLine("// C++ headers");
+            builder.AppendLine("// C Std headers");
+            builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("#include <cstdint>");
             builder.AppendLine("#include <cuchar>");
             builder.AppendLine("#include <cinttypes>");
+            builder.AppendLine("#else // __cplusplus");
+            builder.AppendLine("#include <stdint.h>");
+            builder.AppendLine("#include <uchar.h>");
+            builder.AppendLine("#include <inttypes.h>");
+            builder.AppendLine("#endif // __cplusplus");
             builder.AppendLine();
             builder.AppendLine("// Interop array box types");
             foreach (var type in ObjCUtils.GetInteropTypes())

@@ -17,7 +17,7 @@ namespace CodeBinder.Apple
         internal const string ImplementationExtension = "mm";
         internal const string ConversionPrefix = "OC";
         internal const string TypesHeader = "OCTypes.h";
-        internal const string BaseTypesHeader = "OCBaseTypes.h";
+        internal const string BaseTypesHeader = "CBBaseTypes.h";
         internal const string InternalBasePath = "Internal";
 
         List<string> _policies;
