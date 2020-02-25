@@ -43,9 +43,23 @@ namespace CodeBinder.Shared
             }
         }
 
-        public static bool IsNullable(this ITypeSymbol symbol)
+        public static bool IsNullable(this INamedTypeSymbol symbol)
         {
-            return symbol.SpecialType == SpecialType.System_Nullable_T;
+            return symbol.IsNullable(out var underlyingType);
+        }
+
+        public static bool IsNullable(this INamedTypeSymbol symbol,[NotNullWhen(true)]out ITypeSymbol? underlyingType)
+        {
+            if (symbol.ConstructedFrom.GetFullName() == "System.Nullable<T>")
+            {
+                underlyingType = symbol.TypeArguments[0];
+                return true;
+            }
+            else
+            {
+                underlyingType = null;
+                return false;
+            }
         }
 
         public static bool IsGeneric(this ITypeSymbol symbol)

@@ -291,27 +291,7 @@ namespace CodeBinder.Apple
 
         public static string GetObjCName(this BaseTypeDeclarationSyntax node, ObjCCompilationContext context)
         {
-            return getObjCName(node.Identifier.Text);
-        }
-
-        public static string GetObjCName(this IdentifierNameSyntax node, ICompilationContextProvider context)
-        {
-            var symbol = node.GetTypeSymbol(context);
-            // We assume ignored types are external types and doesn't need prefix
-            if (symbol.HasAttribute<IgnoreAttribute>())
-                return node.Identifier.Text;
-            else
-                return getObjCName(node.Identifier.Text);
-        }
-
-        public static string GetObjCName(this GenericNameSyntax node, ICompilationContextProvider context)
-        {
-            var symbol = node.GetTypeSymbol(context);
-            // We assume ignored types are external types and doesn't need prefix
-            if (symbol.HasAttribute<IgnoreAttribute>())
-                return node.Identifier.Text;
-            else
-                return getObjCName(node.Identifier.Text);
+            return getObjCName(node.GetDeclaredSymbol<ITypeSymbol>(context), context);
         }
 
         public static string GetObjCName(this IMethodSymbol method, ObjCCompilationContext context)
@@ -319,20 +299,37 @@ namespace CodeBinder.Apple
             return context.GetBindedName(method);
         }
 
-        public static string GetObjCName(this ITypeParameterSymbol typeparam, ObjCCompilationContext context)
+        public static string GetObjCName(this ITypeSymbol type, ObjCCompilationContext context)
         {
-            if (typeparam.DeclaringMethod?.IsGenericMethod == false || typeparam.ConstraintTypes.Length == 0)
-                return typeparam.Name;
+            switch (type.Kind)
+            {
+                case SymbolKind.NamedType:
+                {
+                    var namedType = (INamedTypeSymbol)type;
+                    return getObjCName(namedType.ConstructedFrom, context);
+                }
+                case SymbolKind.TypeParameter:
+                {
+                    var typeparam = (ITypeParameterSymbol)type;
+                    if (typeparam.DeclaringMethod?.IsGenericMethod == false || typeparam.ConstraintTypes.Length == 0)
+                        return typeparam.Name;
 
-            Debug.Assert(typeparam.ConstraintTypes.Length == 1);
-            // Objective C doesn't support generic methods, just return first constraint
-            // TODO: this is very limited, there should be check in CompilationContext wide types 
-            return getObjCName(typeparam.ConstraintTypes[0].Name);
+                    Debug.Assert(typeparam.ConstraintTypes.Length == 1);
+                    // Objective C doesn't support generic methods, just return first constraint
+                    // TODO: this is very limited, there should be check in CompilationContext wide types 
+                    return getObjCName(typeparam.ConstraintTypes[0], context);
+                }
+                default:
+                    return getObjCName(type, context);
+            }
         }
 
-        static string getObjCName(string name)
+        static string getObjCName(ITypeSymbol symbol, ObjCCompilationContext context)
         {
-            return $"{ConversionCSharpToObjC.ConversionPrefix}{name}";
+            if (context.IsCompilationDefinedType(symbol) && !symbol.HasAttribute<IgnoreAttribute>())
+                return $"{ConversionCSharpToObjC.ConversionPrefix}{symbol.Name}";
+            else
+                return symbol.Name;
         }
 
         public static string GetObjCModifiersString(this FieldDeclarationSyntax node)

@@ -11,7 +11,7 @@ namespace CodeBinder.Apple
 {
     public class ObjCCompilationContext : CSharpCompilationContext<ObjCSyntaxTreeContext>
     {
-        List<EnumDeclarationSyntax> _enums;
+        Dictionary<string, EnumDeclarationSyntax> _enums;
         Dictionary<string, BaseTypeDeclarationSyntax> _classes;
         Dictionary<string, InterfaceDeclarationSyntax> _interfaces;
         List<DelegateDeclarationSyntax> _callbacks;
@@ -28,7 +28,7 @@ namespace CodeBinder.Apple
         public ObjCCompilationContext(ConversionCSharpToObjC conversion)
         {
             Conversion = conversion;
-            _enums = new List<EnumDeclarationSyntax>();
+            _enums = new Dictionary<string, EnumDeclarationSyntax>();
             _classes = new Dictionary<string, BaseTypeDeclarationSyntax>();
             _interfaces = new Dictionary<string, InterfaceDeclarationSyntax>();
             _callbacks = new List<DelegateDeclarationSyntax>();
@@ -62,7 +62,22 @@ namespace CodeBinder.Apple
 
         public void AddEnum(EnumDeclarationSyntax enm)
         {
-            _enums.Add(enm);
+            _enums.TryAdd(enm.GetFullName(this), enm);
+        }
+
+        public bool IsCompilationDefinedType(ITypeSymbol symbol)
+        {
+            string fullName = symbol.GetFullName();
+            if (_classes.ContainsKey(fullName))
+                return true;
+
+            if (_interfaces.ContainsKey(fullName))
+                return true;
+
+            if (_enums.ContainsKey(fullName))
+                return true;
+
+            return false;
         }
 
         public void AddCallback(DelegateDeclarationSyntax callback)
@@ -82,7 +97,7 @@ namespace CodeBinder.Apple
 
         public IEnumerable<EnumDeclarationSyntax> Enums
         {
-            get { return _enums; }
+            get { return _enums.Values; }
         }
 
         public IEnumerable<BaseTypeDeclarationSyntax> Classes

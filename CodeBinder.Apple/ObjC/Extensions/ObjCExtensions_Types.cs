@@ -163,7 +163,7 @@ namespace CodeBinder.Apple
             var builder = new CodeBuilder();
             var typeSymbol = type.GetTypeSymbol(context);
             ObjCTypeKind objcTypeKind;
-            writeObjCType(builder, typeSymbol.GetFullName(), type, typeSymbol, ObjCTypeUsageKind.Normal, context, out objcTypeKind);
+            writeTypeSymbol(builder, typeSymbol.GetFullName(), typeSymbol, ObjCTypeUsageKind.Normal, context, out objcTypeKind);
             return builder.ToString();
         }
 
@@ -173,7 +173,7 @@ namespace CodeBinder.Apple
             var typeSymbol = type.GetTypeSymbol(context);
             string fullName = typeSymbol.GetFullName();
             var ret = new ObjCTypeInfo();
-            writeObjCType(builder, typeSymbol.GetFullName(), type, typeSymbol, ObjCTypeUsageKind.Normal, context, out ret.Kind);
+            writeTypeSymbol(builder, typeSymbol.GetFullName(), typeSymbol, ObjCTypeUsageKind.Normal, context, out ret.Kind);
             ret.Reachability = GetReachability(typeSymbol, context);
             ret.TypeName = builder.ToString();
             return ret;
@@ -184,7 +184,7 @@ namespace CodeBinder.Apple
             var builder = new CodeBuilder();
             ObjCTypeKind objcTypeKind;
             var typeSymbol = type.GetTypeSymbol(context);
-            writeObjCType(builder, typeSymbol.GetFullName(), type, typeSymbol, displayKind, context, out objcTypeKind);
+            writeTypeSymbol(builder, typeSymbol.GetFullName(), typeSymbol, displayKind, context, out objcTypeKind);
             return builder.ToString();
         }
 
@@ -210,7 +210,7 @@ namespace CodeBinder.Apple
                 {
                     ObjCTypeKind objcTypeKind;
                     var typeSymbol = (ITypeSymbol)symbol;
-                    writeObjCType(builder, typeSymbol.GetFullName(), syntax, typeSymbol, usageKind, context, out objcTypeKind);
+                    writeTypeSymbol(builder, typeSymbol.GetFullName(), typeSymbol, usageKind, context, out objcTypeKind);
                     return builder;
                 }
                 case SymbolKind.Method:
@@ -247,14 +247,6 @@ namespace CodeBinder.Apple
             }
 
             return builder;
-        }
-
-        static string getObjCType(string typeName, TypeSyntax syntax, ITypeSymbol symbol, ObjCTypeUsageKind kind, ObjCCompilationContext context)
-        {
-            var builder = new CodeBuilder();
-            ObjCTypeKind objcTypeKind;
-            writeObjCType(builder, typeName, syntax, symbol, kind, context, out objcTypeKind);
-            return builder.ToString();
         }
 
         static void writeObjCMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol method,
@@ -405,16 +397,9 @@ namespace CodeBinder.Apple
             }
         }
 
-        static void writeObjCType(CodeBuilder builder, string fullTypeName, TypeSyntax type, ITypeSymbol symbol,
+        static void writeTypeSymbol(CodeBuilder builder, string fullTypeName, ITypeSymbol symbol,
             ObjCTypeUsageKind usage, ObjCCompilationContext context, out ObjCTypeKind objcTypeKind)
         {
-            if (type.IsVar)
-            {
-                // Type is inferred
-                writeTypeSymbol(builder, fullTypeName, symbol, null, usage, out objcTypeKind);
-                return;
-            }
-
             // Try to adjust the typename, looking for know types
             switch (symbol.Kind)
             {
@@ -422,7 +407,12 @@ namespace CodeBinder.Apple
                 {
                     var namedType = (INamedTypeSymbol)symbol;
                     if (namedType.IsGenericType)
-                        fullTypeName = namedType.ConstructedFrom.GetFullName();
+                    {
+                        if (namedType.IsNullable(out var underlyingType))
+                            fullTypeName = underlyingType.GetFullName();
+                        else
+                            fullTypeName = namedType.ConstructedFrom.GetFullName();
+                    }
 
                     if (namedType.IsValueType && usage == ObjCTypeUsageKind.DeclarationByRef)
                     {
@@ -439,173 +429,6 @@ namespace CodeBinder.Apple
                     break;
                 }
                 case SymbolKind.TypeParameter:
-                    break;
-                default:
-                    throw new Exception();
-            }
-
-            var typeKind = type.Kind();
-            string? objCTypeName;
-            ObjCTypeKind? tempTypeKind;
-            if (IsKnownObjCType(fullTypeName, symbol.Kind, usage, out objCTypeName, out tempTypeKind))
-            {
-                objcTypeKind = tempTypeKind.Value;
-                switch (typeKind)
-                {
-                    case SyntaxKind.GenericName:
-                    {
-                        builder.Append(objCTypeName);
-                        // NOTE: Don't append generic parameters here: ObjectiveC has only the so
-                        // called "lightweight generics", that are useful only for swift interop
-                        break;
-                    }
-                    case SyntaxKind.ArrayType:
-                    {
-                        var arrayType = (ArrayTypeSyntax)type;
-                        Debug.Assert(arrayType.RankSpecifiers.Count == 1);
-                        builder.Append(objCTypeName);
-                        break;
-                    }
-                    case SyntaxKind.NullableType:
-                    {
-                        string? boxTypeName;
-                        if (ObjCUtils.TryGetBoxType(fullTypeName, out boxTypeName))
-                            builder.Append(boxTypeName);
-                        else
-                            throw new Exception();
-                        break;
-                    }
-                    case SyntaxKind.PredefinedType:
-                    {
-                        builder.Append(objCTypeName);
-                        break;
-                    }
-                    case SyntaxKind.IdentifierName:
-                    {
-                        builder.Append(objCTypeName);
-                        break;
-                    }
-                    case SyntaxKind.QualifiedName:
-                    {
-                        throw new NotSupportedException();
-                    }
-                    default:
-                        throw new NotSupportedException();
-                }
-            }
-            else
-            {
-                objcTypeKind = GetTypeKind(symbol);
-                switch (typeKind)
-                {
-                    case SyntaxKind.IdentifierName:
-                    {
-                        var identifierName = (IdentifierNameSyntax)type;
-                        string typeIdenfitier;
-                        if (symbol.TypeKind == TypeKind.TypeParameter)
-                        {
-                            var typeparam = (ITypeParameterSymbol)symbol;
-                            typeIdenfitier = typeparam.GetObjCName(context);
-                        }
-                        else
-                        {
-                            typeIdenfitier = identifierName.GetObjCName(context);
-                        }
-
-                        AdaptRefType(ref typeIdenfitier, usage, objcTypeKind);
-                        builder.Append(typeIdenfitier);
-                        break;
-                    }
-                    case SyntaxKind.ArrayType:
-                    {
-                        var arrayType = (ArrayTypeSyntax)type;
-                        Debug.Assert(arrayType.RankSpecifiers.Count == 1);
-                        ////builder.Append(arrayType.ElementType, context).Append(arrayType.RankSpecifiers[0], context);
-                        throw new Exception();
-                        ////break;
-                    }
-                    case SyntaxKind.GenericName:
-                    {
-                        var genericType = (GenericNameSyntax)type;
-                        builder.Append(genericType.GetObjCName(context));
-                        // NOTE: Don't append generic parameters here: ObjectiveC has only the so
-                        // called "lightweight generics", that are useful only for swift interop
-                        break;
-                    }
-                    case SyntaxKind.NullableType:
-                    {
-                        var nullableType = (NullableTypeSyntax)type;
-                        switch (symbol.TypeKind)
-                        {
-                            case TypeKind.Struct:
-                                // NOTE: At the present time we convert value types to class types
-                                builder.Append(nullableType.ElementType, context).Space().Append("*");
-                                break;
-                            case TypeKind.Enum:
-                                throw new Exception("TODO");
-                            default:
-                                throw new Exception();
-                        }
-
-                        break;
-                    }
-                    case SyntaxKind.QualifiedName:
-                    {
-                        throw new NotSupportedException();
-
-                        /* CHECK-ME Check if needed to support or not
-                        var qualifiedName = (QualifiedNameSyntax)type;
-                        builder.Append(qualifiedName.Left, type, context).Dot().Append(qualifiedName.Right, type, context);
-                        break;
-                        */
-                    }
-                    default:
-                        throw new NotSupportedException();
-                }
-            }
-        }
-
-        /// <summary>This method is mainly used for inferred types</summary>
-        static void writeTypeSymbol(CodeBuilder builder, string fullTypeName, ITypeSymbol symbol,
-            ITypeSymbol? parentSymbol, ObjCTypeUsageKind usage, out ObjCTypeKind objcTypeKind)
-        {
-            // Try to adjust the typename, looking for know types
-            switch (symbol.Kind)
-            {
-                case SymbolKind.NamedType:
-                {
-                    var namedType = (INamedTypeSymbol)symbol;
-                    if (namedType.IsGenericType)
-                    {
-                        if (namedType.IsNullable())
-                        {
-                            switch (symbol.TypeKind)
-                            {
-                                case TypeKind.Struct:
-                                    var nullableType = namedType.TypeArguments[0];
-                                    writeTypeSymbol(builder, nullableType.GetFullName(), nullableType, symbol, usage, out objcTypeKind);
-                                    return;
-                                case TypeKind.Enum:
-                                    throw new Exception("TODO");
-                                default:
-                                    throw new Exception();
-                            }
-                        }
-
-                        fullTypeName = namedType.ConstructedFrom.GetFullName();
-                    }
-
-                    break;
-                }
-                case SymbolKind.ArrayType:
-                {
-                    var arrayType = (IArrayTypeSymbol)symbol;
-                    builder.Append(arrayType.ElementType, symbol).EmptyRankSpecifier();
-                    //// TODO
-                    throw new Exception();
-                    ////return;
-                }
-                case SymbolKind.TypeParameter:
                     // Nothing to do
                     break;
                 default:
@@ -617,35 +440,76 @@ namespace CodeBinder.Apple
             if (IsKnownObjCType(fullTypeName, symbol.Kind, usage, out objCTypeName, out tempTypeKind))
             {
                 objcTypeKind = tempTypeKind.Value;
+                switch (symbol.Kind)
+                {
+                    case SymbolKind.NamedType:
+                    {
+                        var namedType = (INamedTypeSymbol)symbol;
+                        if (namedType.IsNullable())
+                        {
+                            string? boxTypeName;
+                            if (!ObjCUtils.TryGetBoxType(fullTypeName, out boxTypeName))
+                                throw new NotSupportedException("Unsupported underlying nullable types");
+
+                            builder.Append(boxTypeName);
+                            return;
+                        }
+
+                        // NOTE: We don't append generic parameters here: ObjectiveC has only the so
+                        // called "lightweight generics", that are useful only for swift interop
+                        builder.Append(objCTypeName);
+                        break;
+                    }
+                    case SymbolKind.TypeParameter:
+                    case SymbolKind.ArrayType:
+                    {
+                        builder.Append(objCTypeName);
+                        break;
+                    }
+                    default:
+                        throw new Exception();
+                }
             }
             else
             {
-                objCTypeName = symbol.GetQualifiedName();
                 objcTypeKind = GetTypeKind(symbol);
-            }
+                switch (symbol.Kind)
+                {
+                    case SymbolKind.NamedType:
+                    {
+                        var namedType = (INamedTypeSymbol)symbol;
+                        if (namedType.IsNullable(out var underlyingType))
+                            objCTypeName = underlyingType.GetObjCName(context);
+                        else
+                            objCTypeName = symbol.GetObjCName(context);
 
-            switch (symbol.Kind)
-            {
-                case SymbolKind.NamedType:
-                {
-                    builder.Append(objCTypeName);
-                    // NOTE: Don't append generic parameters here: ObjectiveC has only the so
-                    // called "lightweight generics", that are useful only for swift interop
-                    break;
+                        // NOTE: in case of named types, we don't append generic parameters here:
+                        // ObjectiveC has only the so called "lightweight generics", that are useful
+                        // only for swift interop
+                        AdaptRefType(ref objCTypeName, usage, objcTypeKind);
+                        builder.Append(objCTypeName);
+                        break;
+                    }
+                    case SymbolKind.TypeParameter:
+                    {
+                        objCTypeName = symbol.GetObjCName(context);
+                        AdaptRefType(ref objCTypeName, usage, objcTypeKind);
+                        builder.Append(objCTypeName);
+                        break;
+                    }
+                    case SymbolKind.ArrayType:
+                    {
+                        throw new NotSupportedException("Array type with non primitive types are not supported");
+                    }
+                    default:
+                        throw new Exception();
                 }
-                case SymbolKind.TypeParameter:
-                {
-                    builder.Append(objCTypeName);
-                    break;
-                }
-                default:
-                    throw new Exception();
             }
         }
 
-        static CodeBuilder Append(this CodeBuilder builder, ITypeSymbol symbol, ITypeSymbol parent)
+        static CodeBuilder Append(this CodeBuilder builder, ITypeSymbol symbol, ObjCCompilationContext context)
         {
-            writeTypeSymbol(builder, symbol.GetFullName(), symbol, parent, ObjCTypeUsageKind.Normal, out var objcTypeKind);
+            writeTypeSymbol(builder, symbol.GetFullName(), symbol, ObjCTypeUsageKind.Normal, context, out var objcTypeKind);
             return builder;
         }
 
