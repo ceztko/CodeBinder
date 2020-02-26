@@ -2,7 +2,6 @@
 
 #ifdef __cplusplus
 #include <cstdint>
-#include <cuchar>
 #else // __cplusplus
 #include <stdint.h>
 #include <uchar.h>

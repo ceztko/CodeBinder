@@ -32,7 +32,6 @@ namespace CodeBinder.Apple
             builder.AppendLine("// C Std headers");
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("#include <cstdint>");
-            builder.AppendLine("#include <cuchar>");
             builder.AppendLine("#include <cinttypes>");
             builder.AppendLine("#else // __cplusplus");
             builder.AppendLine("#include <stdint.h>");
