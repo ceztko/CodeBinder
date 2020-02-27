@@ -184,11 +184,33 @@ namespace CodeBinder.Apple
 
         public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            if (syntax.Token.Kind() == SyntaxKind.StringLiteralToken && syntax.Token.Text.StartsWith("@"))
-                builder.Append(syntax.Token.Text.Replace("\"", "\"\"")); // Handle verbatim strings
-            else
-                builder.Append(syntax.Token.Text);
-            return builder;
+            var kind = syntax.Kind();
+            switch (kind)
+            {
+                case SyntaxKind.NullLiteralExpression:
+                {
+                    return builder.Append("nil");
+                }
+                case SyntaxKind.StringLiteralExpression:
+                {
+                    if (syntax.Token.Kind() == SyntaxKind.StringLiteralToken && syntax.Token.Text.StartsWith("@"))
+                        return builder.Append($"@{syntax.Token.Text.Replace("\"", "\"\"")}"); // Handle verbatim strings
+                    else
+                        return builder.Append($"@{syntax.Token.Text}");
+                }
+                case SyntaxKind.TrueLiteralExpression:
+                {
+                    return builder.Append("YES");
+                }
+                case SyntaxKind.FalseLiteralExpression:
+                {
+                    return builder.Append("NO");
+                }
+                default:
+                {
+                    return builder.Append(syntax.Token.Text);
+                }
+            }
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, ObjCCompilationContext context)
