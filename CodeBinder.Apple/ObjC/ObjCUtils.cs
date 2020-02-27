@@ -68,11 +68,11 @@ namespace CodeBinder.Apple
                     typeName = "void";
                     return true;
                 case "System.UIntPtr":
-                    typeName = "NSUInteger";
+                    typeName = "void *";
                     AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.IntPtr":
-                    typeName = "NSInteger";
+                    typeName = "void *";
                     AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.Boolean":

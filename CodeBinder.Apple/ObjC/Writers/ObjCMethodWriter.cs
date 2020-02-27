@@ -166,12 +166,12 @@ namespace CodeBinder.Apple
 
                 using (Builder.MethodCall())
                 {
-                    Builder.Append("self").Space().Append(MethodName).Colon().Space();
+                    Builder.Append("self").Space().Append(MethodName).Colon();
                     for (int i = 0; i < Item.ParameterList.Parameters.Count; i++)
                     {
                         var parameter = Item.ParameterList.Parameters[i];
                         if (i > 0)
-                            Builder.CommaSeparator();
+                            Builder.Space().Colon();
 
                         if (i < _optionalIndex)
                             Builder.Append(parameter.Identifier.Text);
@@ -271,7 +271,7 @@ namespace CodeBinder.Apple
                             throw new Exception();
                     }
 
-                    Builder.Append(selfIdentifier).Space().Append("init").Colon().Space().Append(Item.Initializer.ArgumentList, Context);
+                    Builder.Append(selfIdentifier).Space().Append("init").Append(Item.Initializer.ArgumentList, Context);
                 }
                 Builder.EndOfStatement();
             }

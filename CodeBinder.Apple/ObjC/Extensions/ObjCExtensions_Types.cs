@@ -31,15 +31,23 @@ namespace CodeBinder.Apple
         public static string? GetObjCDefaultLiteral(this TypeSyntax type,
             ObjCCompilationContext context)
         {
-            var fullName = type.GetFullName(context);
+            var symbol = type.GetTypeSymbol(context);
+            if (symbol.TypeKind == TypeKind.Enum)
+            {
+                // Return a default 0 value for the enum
+                return $"({symbol.GetObjCName(context)})0";
+            }
+
+            var fullName = symbol.GetFullName();
             switch (fullName)
             {
                 case "System.Void":
                     return null;
+                case "System.UIntPtr":
                 case "System.IntPtr":
-                    return "0";
+                    return "nil";
                 case "System.Boolean":
-                    return "false";
+                    return "NO";
                 case "System.Char":
                     return "unichar()";
                 case "System.Byte":
@@ -439,7 +447,6 @@ namespace CodeBinder.Apple
             ObjCTypeKind? tempTypeKind;
             if (IsKnownObjCType(fullTypeName, symbol.Kind, usage, out objCTypeName, out tempTypeKind))
             {
-                objcTypeKind = tempTypeKind.Value;
                 switch (symbol.Kind)
                 {
                     case SymbolKind.NamedType:
@@ -451,9 +458,14 @@ namespace CodeBinder.Apple
                             if (!ObjCUtils.TryGetBoxType(fullTypeName, out boxTypeName))
                                 throw new NotSupportedException("Unsupported underlying nullable types");
 
-                            AdaptRefType(ref boxTypeName, usage, objcTypeKind);
+                            objcTypeKind = ObjCTypeKind.Class;
+                            TryAdaptRefType(ref boxTypeName, usage, objcTypeKind);
                             builder.Append(boxTypeName);
                             return;
+                        }
+                        else
+                        {
+                            objcTypeKind = tempTypeKind.Value;
                         }
 
                         // NOTE: We don't append generic parameters here: ObjectiveC has only the so
@@ -464,6 +476,7 @@ namespace CodeBinder.Apple
                     case SymbolKind.TypeParameter:
                     case SymbolKind.ArrayType:
                     {
+                        objcTypeKind = tempTypeKind.Value;
                         builder.Append(objCTypeName);
                         break;
                     }
@@ -487,14 +500,14 @@ namespace CodeBinder.Apple
                         // NOTE: in case of named types, we don't append generic parameters here:
                         // ObjectiveC has only the so called "lightweight generics", that are useful
                         // only for swift interop
-                        AdaptRefType(ref objCTypeName, usage, objcTypeKind);
+                        TryAdaptRefType(ref objCTypeName, usage, objcTypeKind);
                         builder.Append(objCTypeName);
                         break;
                     }
                     case SymbolKind.TypeParameter:
                     {
                         objCTypeName = symbol.GetObjCName(context);
-                        AdaptRefType(ref objCTypeName, usage, objcTypeKind);
+                        TryAdaptRefType(ref objCTypeName, usage, objcTypeKind);
                         builder.Append(objCTypeName);
                         break;
                     }
@@ -531,77 +544,77 @@ namespace CodeBinder.Apple
                 {
                     knownObjCType = "CBHandleRef";
                     objcTypeKind = ObjCTypeKind.Class;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Object":
                 {
                     knownObjCType = "NSObject";
                     objcTypeKind = ObjCTypeKind.Class;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.String":
                 {
                     knownObjCType = "NSString";
                     objcTypeKind = ObjCTypeKind.Class;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Exception":
                 {
                     knownObjCType = "NSException";
                     objcTypeKind = ObjCTypeKind.Class;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.NotImplementedException":
                 {
                     knownObjCType = "NSException";
                     objcTypeKind = ObjCTypeKind.Class;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.IDisposable":
                 {
                     knownObjCType = "CBIDisposable";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.IReadOnlyList<out T>":
                 {
                     knownObjCType = "CBIReadOnlyList";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.IEqualityComparer<in T>":
                 {
                     knownObjCType = "CBIEqualityCompararer";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.IEnumerable<out T>":
                 {
                     knownObjCType = "NSFastEnumeration";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.List<T>":
                 {
                     knownObjCType = "NSMutableArray";
                     objcTypeKind = ObjCTypeKind.Class;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.KeyValuePair<TKey, TValue>":
                 {
                     knownObjCType = "CBKeyValuePair";
                     objcTypeKind = ObjCTypeKind.Class;
-                    AdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 default:
@@ -625,7 +638,7 @@ namespace CodeBinder.Apple
                 {
                     if (ObjCUtils.TryGeArrayBoxType(fullTypeName, out knownObjCType))
                     {
-                        AdaptRefType(ref knownObjCType, usage, ObjCTypeKind.Class);
+                        TryAdaptRefType(ref knownObjCType, usage, ObjCTypeKind.Class);
                         return true;
                     }
                     else
@@ -660,6 +673,12 @@ namespace CodeBinder.Apple
                         return ObjCTypeKind.Other;
                     else
                         return ObjCTypeKind.Class;
+                }
+                case TypeKind.TypeParameter:
+                {
+                    var typeparam = (ITypeParameterSymbol)symbol;
+                    Debug.Assert(typeparam.ConstraintTypes.Length == 1);
+                    return GetTypeKind(typeparam.ConstraintTypes[0]);
                 }
                 default:
                     return ObjCTypeKind.Other;
@@ -718,8 +737,11 @@ namespace CodeBinder.Apple
         /// <summary>
         /// Try fix the ref type based on the usage
         /// </summary>
-        static void AdaptRefType(ref string type, ObjCTypeUsageKind usage, ObjCTypeKind typeKind)
+        static void TryAdaptRefType(ref string type, ObjCTypeUsageKind usage, ObjCTypeKind typeKind)
         {
+            if (typeKind == ObjCTypeKind.Other)
+                return;
+
             switch (usage)
             {
                 case ObjCTypeUsageKind.Declaration:

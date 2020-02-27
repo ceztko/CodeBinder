@@ -101,16 +101,16 @@ namespace CodeBinder.Apple
 {
     @private
     NSObject * _wrapper;
-    NSInteger _handle;
+    void * _handle;
 }
 
 @property (nonatomic,readonly) NSObject * wrapper;
-@property (nonatomic,readonly) NSInteger handle;
+@property (nonatomic,readonly) void * handle;
 
 - (id)init;
-- (id)init:(NSObject *)wrapper :(NSInteger)handle;
+- (id)init:(NSObject *)wrapper :(void *)handle;
 - (NSObject *)wrapper;
-- (NSInteger)handle;
+- (void *)handle;
 @end
 
 #endif // CB_HANDLEREF
@@ -132,7 +132,7 @@ namespace CodeBinder.Apple
     return self;
 }
 
-- (id)init:(NSObject *)wrapper :(NSInteger)handle;
+- (id)init:(NSObject *)wrapper :(void *)handle;
 {
     self = [super init];
     if (self == nil)
@@ -148,7 +148,7 @@ namespace CodeBinder.Apple
     return _wrapper;
 }
 
-- (NSInteger)handle
+- (void *)handle
 {
     return _handle;
 }

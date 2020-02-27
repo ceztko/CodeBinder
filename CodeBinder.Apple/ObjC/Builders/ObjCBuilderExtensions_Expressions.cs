@@ -167,7 +167,10 @@ namespace CodeBinder.Apple
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context)!;
             bool hasEmptyBody;
             if (methodSymbol.IsPartialMethod(out hasEmptyBody) && (hasEmptyBody || methodSymbol.PartialImplementationPart!.ShouldDiscard(context.Conversion)))
+            {
+                // Partial method has no implementation
                 return builder;
+            }
 
             if (methodSymbol.IsNative() && methodSymbol.ReturnType.TypeKind == TypeKind.Enum)
                 builder.Append(methodSymbol.ReturnType.Name).Dot().Append("fromValue").Parenthesized(() => append(builder, syntax, context));
@@ -215,6 +218,10 @@ namespace CodeBinder.Apple
 
         public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, ObjCCompilationContext context)
         {
+            return builder;
+
+            /*
+
             if (builder.TryToReplace(syntax, context))
                 return builder;
 
@@ -238,6 +245,7 @@ namespace CodeBinder.Apple
 
             builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
             return builder;
+            */
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, ObjCCompilationContext context)
@@ -405,7 +413,7 @@ namespace CodeBinder.Apple
                 case SyntaxKind.TupleType:
                 case SyntaxKind.PointerType:
                 default:
-                    throw new Exception();
+                    throw new NotSupportedException("Unsupported syntax");
             }
         }
 
@@ -432,7 +440,11 @@ namespace CodeBinder.Apple
             if (parentSymbol?.Kind == SymbolKind.Method && (parentSymbol as IMethodSymbol)!.IsNative())
                 isNativeInvocation = true;
 
-            builder.Append(syntax.Arguments, isNativeInvocation, context);
+            if (isNativeInvocation)
+                builder.Parenthesized().Append(syntax.Arguments, isNativeInvocation, context);
+            else
+                builder.Append(syntax.Arguments, isNativeInvocation, context);
+
             return builder;
         }
 
@@ -442,29 +454,20 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, bool native, ObjCCompilationContext context)
+        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, bool nativeInvoke, ObjCCompilationContext context)
         {
-            bool first = true;
-            foreach (var arg in arguments)
+            if (nativeInvoke)
             {
-                builder.ColonSeparator(ref first);
-
-                if (native)
+                bool first = true;
+                foreach (var arg in arguments)
                 {
-                    // In native invocations, prepend "__" for ref/out arguments
-                    if (!arg.RefKindKeyword.IsNone())
-                        builder.Append("__");
+                    builder.ColonSeparator(ref first);
                 }
-
-                builder.Append(arg.Expression, context);
-
-                if (native && arg.RefKindKeyword.IsNone())
-                {
-                    // In native invocations, append ".value" for enum arguments
-                    var typeSymbol = arg.Expression.GetTypeSymbol(context)!;
-                    if (typeSymbol.TypeKind == TypeKind.Enum)
-                        builder.Dot().Append("value");
-                }
+            }
+            else
+            {
+                foreach (var arg in arguments)
+                    builder.Colon().Append(arg.Expression, context);
             }
 
             return builder;

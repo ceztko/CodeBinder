@@ -187,6 +187,21 @@ namespace CodeBinder.Apple
             return builder.Using("]");
         }
 
+        // Used for CLang invocations
+        public static CodeBuilder ParameterList(this CodeBuilder builder, bool multiLine = false)
+        {
+            if (multiLine)
+            {
+                builder.AppendLine("(");
+                return builder.Indent(")");
+            }
+            else
+            {
+                builder.Append("(");
+                return builder.Using(")");
+            }
+        }
+
         public static CodeBuilder TypeParameterList(this CodeBuilder builder, bool multiLine = false)
         {
             if (multiLine)
