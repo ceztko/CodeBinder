@@ -22,7 +22,7 @@ namespace CodeBinder.CLang
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
-            builder.AppendLine("#include \"Internal/BaseTypes.h\"");
+            builder.AppendLine($"#include \"{ConversionCSharpToCLang.BaseTypesHeader}\"");
             builder.AppendLine();
             writeOpaqueTypes(builder);
             builder.AppendLine("#ifdef __cplusplus");
@@ -69,9 +69,9 @@ namespace CodeBinder.CLang
                     substitutionPattern = substitutionAttr.GetConstructorArgument<string>(1);
                 }
 
-                builder.Append("enum").Space().AppendLine(enumName);
+                builder.Append("typedef").Space().Append("enum").AppendLine();
                 var splitted = enm.GetName().SplitCamelCase();
-                using (builder.TypeBlock())
+                using (builder.TypeBlock(false))
                 {
                     foreach (var item in enm.Members)
                     {
@@ -103,6 +103,7 @@ namespace CodeBinder.CLang
                     builder.AppendLine($"__{stem}__ = 0xFFFFFFFF,");
                 }
 
+                builder.Space().Append(enumName).EndOfLine();
                 builder.AppendLine();
             }
         }

@@ -24,22 +24,22 @@ namespace CodeBinder.Apple
             BeginHeaderGuard(builder);
             builder.AppendLine();
             builder.AppendLine("// Protocols");
-            foreach (var iface in Context.Interfaces)
+            foreach (var iface in Compilation.Interfaces)
             {
                 string? basepath;
                 if (ShouldIgnore(iface, out basepath))
                     continue;
 
-                builder.Append("#include").Space().AppendLine($"{basepath}{iface.GetObjCName(Context)}".ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst));
+                builder.Append("#include").Space().AppendLine($"{basepath}{iface.GetObjCName(Compilation)}".ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst));
             }
 
             builder.AppendLine("// Classes");
-            foreach (var cls in Context.Classes)
+            foreach (var cls in Compilation.Classes)
             {
                 if (ShouldIgnore(cls))
                     continue;
 
-                builder.Append("#include").Space().AppendLine(cls.GetObjCName(Context).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst));
+                builder.Append("#include").Space().AppendLine(cls.GetObjCName(Compilation).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst));
             }
             builder.AppendLine();
             EndHeaderGuard(builder);
@@ -53,7 +53,7 @@ namespace CodeBinder.Apple
 
         bool ShouldIgnore(BaseTypeDeclarationSyntax syntax, out string? basepath)
         {
-            var accessibility = syntax.GetAccessibility(Context);
+            var accessibility = syntax.GetAccessibility(Compilation);
             if (IsInternalHeader)
             {
                 if (accessibility == Accessibility.Public)
@@ -92,7 +92,7 @@ namespace CodeBinder.Apple
 
         protected override string GetGeneratedPreamble() => ConversionCSharpToObjC.SourcePreamble;
 
-        protected override string GetFileName() => Context.ObjCLibraryHeaderName;
+        protected override string GetFileName() => Compilation.ObjCLibraryHeaderName;
 
         protected override string? GetBasePath() => IsInternalHeader ? ConversionCSharpToObjC.InternalBasePath : null;
     }

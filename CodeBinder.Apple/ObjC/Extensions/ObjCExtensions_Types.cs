@@ -451,6 +451,7 @@ namespace CodeBinder.Apple
                             if (!ObjCUtils.TryGetBoxType(fullTypeName, out boxTypeName))
                                 throw new NotSupportedException("Unsupported underlying nullable types");
 
+                            AdaptRefType(ref boxTypeName, usage, objcTypeKind);
                             builder.Append(boxTypeName);
                             return;
                         }

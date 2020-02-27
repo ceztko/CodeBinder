@@ -7,13 +7,20 @@ using System.Text;
 
 namespace CodeBinder.Apple
 {
-    abstract class ObjCHeaderConversionWriter : ConversionWriter<ObjCCompilationContext>
+    abstract class ObjCHeaderConversionWriter : ObjCBaseHeaderConversionWriter
     {
+        public ObjCCompilationContext Compilation { get; private set; }
+
         public ObjCHeaderConversionWriter(ObjCCompilationContext compilation)
-            : base(compilation)
         {
+            Compilation = compilation;
         }
 
+        protected override string HeaderGuardPrefix => $"CODE_BINDER_OBJC_{Compilation.ObjCLibraryName.ToUpper()}";
+    }
+
+    abstract class ObjCBaseHeaderConversionWriter : ConversionWriter
+    {
         protected void BeginHeaderGuard(CodeBuilder builder)
         {
             builder.AppendLine($"#ifndef {HeaderGuard}");
@@ -33,10 +40,12 @@ namespace CodeBinder.Apple
                 if (stem.Length == 0)
                     throw new Exception("Stem is empty");
 
-                return $"{Context.ObjCLibraryName.ToUpper()}_{HeaderGuardStem}_HEADER";
+                return $"{HeaderGuardPrefix}_{HeaderGuardStem}_HEADER";
             }
         }
 
-        protected virtual string HeaderGuardStem => throw new NotImplementedException();
+        protected virtual string HeaderGuardPrefix => "CODE_BINDER_OBJC";
+
+        protected abstract string HeaderGuardStem { get; }
     }
 }

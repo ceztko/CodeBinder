@@ -269,7 +269,7 @@ namespace CodeBinder.CLang
         public static CodeBuilder TypeBlock(this CodeBuilder builder, bool appendLine = true)
         {
             builder.AppendLine("{");
-            return builder.Indent("};", appendLine);
+            return builder.Indent("}", appendLine);
         }
     }
 }

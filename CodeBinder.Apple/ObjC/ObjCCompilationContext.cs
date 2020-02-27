@@ -119,7 +119,6 @@ namespace CodeBinder.Apple
         {
             get
             {
-                yield return new ObjCBaseTypesHeaderConversion(this);
                 yield return new ObjCTypesHeaderConversion(this, true);
                 yield return new ObjCTypesHeaderConversion(this, false);
                 yield return new ObjCLibraryHeaderConversion(this, true);

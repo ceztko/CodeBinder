@@ -11,11 +11,8 @@ using System.Text.RegularExpressions;
 
 namespace CodeBinder.Apple
 {
-    class ObjCBaseTypesHeaderConversion : ObjCHeaderConversionWriter
+    class ObjCBaseTypesHeaderConversion : ObjCBaseHeaderConversionWriter
     {
-        public ObjCBaseTypesHeaderConversion(ObjCCompilationContext compilation)
-            : base(compilation) { }
-
         protected override string GetFileName() => ConversionCSharpToObjC.BaseTypesHeader;
 
         protected override string? GetBasePath() => ConversionCSharpToObjC.InternalBasePath;

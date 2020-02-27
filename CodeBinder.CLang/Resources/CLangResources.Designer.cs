@@ -61,22 +61,28 @@ namespace CodeBinder.CLang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #pragma once
+        ///   Looks up a localized string similar to #ifndef CODE_BINDER_BASE_TYPES
+        ///#define CODE_BINDER_BASE_TYPES
         ///
         ///#ifdef __cplusplus
         ///#include &lt;cstdint&gt;
-        ///#include &lt;cuchar&gt;
         ///#else // __cplusplus
         ///#include &lt;stdint.h&gt;
+        ///#ifdef __APPLE__
+        ///#include &lt;Foundation/NSString.h&gt;
+        ///typedef unichar char16_t;
+        ///#else // __APPLE__
         ///#include &lt;uchar.h&gt;
+        ///#endif // __APPLE__
         ///#endif // __cplusplus
         ///
         ///#define BBool signed char
-        ///.
+        ///
+        ///#endif // CODE_BINDER_BASE_TYPES.
         /// </summary>
-        internal static string BaseTypes_h {
+        internal static string CBBaseTypes_h {
             get {
-                return ResourceManager.GetString("BaseTypes_h", resourceCulture);
+                return ResourceManager.GetString("CBBaseTypes_h", resourceCulture);
             }
         }
         

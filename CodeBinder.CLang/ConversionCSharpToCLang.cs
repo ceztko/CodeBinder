@@ -35,11 +35,13 @@ namespace CodeBinder.CLang
             get { return new string[] { "CLang" }; }
         }
 
+        internal const string BaseTypesHeader = "CBBaseTypes.h";
+
         public override IEnumerable<IConversionWriter> DefaultConversions
         {
             get
             {
-                yield return new StringConversionWriter("BaseTypes.h", () => CLangResources.BaseTypes_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter(BaseTypesHeader, () => CLangResources.CBBaseTypes_h) { GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter("cstrings.h", () => CLangResources.cstrings_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
             }
         }

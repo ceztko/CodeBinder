@@ -51,12 +51,12 @@ namespace CodeBinder.Apple
             // Forward declared classes
             builder.AppendLine("// Forward declared classes");
             builder.AppendLine();
-            foreach (var type in Context.Classes)
+            foreach (var type in Compilation.Classes)
             {
                 if (ShouldSkipType(type))
                     continue;
 
-                builder.Append("@class").Space().Append(type.GetObjCName(Context)).EndOfStatement();
+                builder.Append("@class").Space().Append(type.GetObjCName(Compilation)).EndOfStatement();
             }
 
             builder.AppendLine();
@@ -64,12 +64,12 @@ namespace CodeBinder.Apple
             // Forward declared interfaces
             builder.AppendLine("// Forward declared interfaces");
             builder.AppendLine();
-            foreach (var type in Context.Interfaces)
+            foreach (var type in Compilation.Interfaces)
             {
                 if (ShouldSkipType(type))
                     continue;
 
-                builder.Append("@protocol").Space().Append(type.GetObjCName(Context)).EndOfStatement();
+                builder.Append("@protocol").Space().Append(type.GetObjCName(Compilation)).EndOfStatement();
             }
         }
 
@@ -79,13 +79,13 @@ namespace CodeBinder.Apple
             builder.AppendLine("// Enums");
             builder.AppendLine();
             var tmpbuilder = new StringBuilder();
-            foreach (var enm in Context.Enums)
+            foreach (var enm in Compilation.Enums)
             {
                 if (ShouldSkipType(enm))
                     continue;
 
-                string enumName = enm.GetObjCName(Context);
-                var symbol = enm.GetDeclaredSymbol<INamedTypeSymbol>(Context);
+                string enumName = enm.GetObjCName(Compilation);
+                var symbol = enm.GetDeclaredSymbol<INamedTypeSymbol>(Compilation);
                 bool isflag = symbol.HasAttribute<FlagsAttribute>();
                 string underlyingType = ObjCUtils.GetSimpleType(symbol.EnumUnderlyingType!.GetFullName());
                 builder.Append("typedef").Space().Append(isflag ? "NS_OPTIONS" : "NS_ENUM").Parenthesized()
@@ -95,7 +95,7 @@ namespace CodeBinder.Apple
                 {
                     foreach (var item in enm.Members)
                     {
-                        long value = item.GetEnumValue(Context);
+                        long value = item.GetEnumValue(Compilation);
                         builder.Append($"{enumName}_{item.GetName()}").Space().Append("=").Space().Append(value.ToString()).Comma().AppendLine();
                     }
                 }
@@ -109,11 +109,11 @@ namespace CodeBinder.Apple
             // Callbacks
             builder.AppendLine("// Callbacks");
             builder.AppendLine();
-            foreach (var callback in Context.Callbacks)
+            foreach (var callback in Compilation.Callbacks)
             {
                 string name;
                 AttributeData? bidingAttrib;
-                if (callback.TryGetAttribute<NativeBindingAttribute>(Context, out bidingAttrib))
+                if (callback.TryGetAttribute<NativeBindingAttribute>(Compilation, out bidingAttrib))
                     name = bidingAttrib.GetConstructorArgument<string>(0);
                 else
                     name = callback.Identifier.Text;
@@ -152,7 +152,7 @@ namespace CodeBinder.Apple
 
         bool ShouldSkipType(BaseTypeDeclarationSyntax type)
         {
-            bool publicType = type.HasAccessibility(Accessibility.Public, Context);
+            bool publicType = type.HasAccessibility(Accessibility.Public, Compilation);
             if (IsInternalHeader)
             {
                 if (publicType)
