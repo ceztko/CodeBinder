@@ -54,6 +54,8 @@ namespace CodeBinder.Apple
             get
             {
                 yield return new ObjCBaseTypesHeaderConversion();
+                yield return new StringConversionWriter(nameof(ObjCClasses.CBException_h).ToObjCHeaderFilename(), () => ObjCClasses.CBException_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter(nameof(ObjCClasses.CBException_mm).ToObjCImplementationFilename(), () => ObjCClasses.CBException_mm) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter(nameof(ObjCClasses.CBIEqualityCompararer_h).ToObjCHeaderFilename(), () => ObjCClasses.CBIEqualityCompararer_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter(nameof(ObjCClasses.CBIReadOnlyList_h).ToObjCHeaderFilename(), () => ObjCClasses.CBIReadOnlyList_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter(nameof(ObjCClasses.CBIDisposable_h).ToObjCHeaderFilename(), () => ObjCClasses.CBIDisposable_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };

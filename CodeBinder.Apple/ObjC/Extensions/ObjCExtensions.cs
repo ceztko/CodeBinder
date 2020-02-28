@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics.CodeAnalysis;
 using CodeBinder.Attributes;
 using System.Diagnostics;
+using CodeBinder.CLang;
 
 namespace CodeBinder.Apple
 {
@@ -294,9 +295,52 @@ namespace CodeBinder.Apple
             return getObjCName(node.GetDeclaredSymbol<ITypeSymbol>(context), context);
         }
 
+        public static string GetObjCName(this EnumMemberDeclarationSyntax enm, ObjCCompilationContext context)
+        {
+            var fieldSymbol = enm.GetDeclaredSymbol<IFieldSymbol>(context);
+            return getObjCName(fieldSymbol, context);
+        }
+
         public static string GetObjCName(this IMethodSymbol method, ObjCCompilationContext context)
         {
             return context.GetBindedName(method);
+        }
+
+        public static string GetObjCName(this IPropertySymbol property, ObjCCompilationContext context)
+        {
+            return property.Name.ToObjCCase();
+        }
+
+        public static bool HasDistinctObjCName(this IFieldSymbol field, ObjCCompilationContext context, [NotNullWhen(true)]out string? name)
+        {
+            if (field.ContainingType.TypeKind != TypeKind.Enum)
+            {
+                name = null;
+                return false;
+            }
+
+            name = getObjCName(field, context);
+            return true;
+        }
+
+        public static string getObjCName(IFieldSymbol enm, ObjCCompilationContext context)
+        {
+            return $"{enm.ContainingType.GetObjCName(context)}_{enm.Name}";
+        }
+
+        public static string GetCLangName(this ITypeSymbol type, ObjCCompilationContext context)
+        {
+            switch (type.TypeKind)
+            {
+                case TypeKind.Enum:
+                {
+                    return CLangUtils.GetCLangName(type);
+                }
+                default:
+                {
+                    throw new NotSupportedException("Not supported symbol for CLangName");
+                }
+            }
         }
 
         public static string GetObjCName(this ITypeSymbol type, ObjCCompilationContext context)

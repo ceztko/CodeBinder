@@ -102,7 +102,7 @@ namespace CodeBinder.Apple
                     Debug.Assert(Item.IsAbstract(Context));
                     using (Builder.AppendLine().Block())
                     {
-                        Builder.Append("@throw[NSException exceptionWithName: @\"Not implemented\"];");
+                        Builder.Append("@throw [NSException exceptionWithName:@\"Not implemented\" reason:nil userInfo:nil]").EndOfStatement();
                     }
                 }
                 else
@@ -133,7 +133,7 @@ namespace CodeBinder.Apple
                     Debug.Assert(Item.IsAbstract(Context));
                     using (Builder.AppendLine().Block())
                     {
-                        Builder.Append("@throw[NSException exceptionWithName: @\"Not implemented\"];");
+                        Builder.Append("@throw [NSException exceptionWithName:@\"Not implemented\" reason:nil userInfo:nil]").EndOfStatement();
                     }
                 }
                 else

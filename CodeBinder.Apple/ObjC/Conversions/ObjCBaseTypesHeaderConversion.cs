@@ -38,14 +38,15 @@ namespace CodeBinder.Apple
             builder.AppendLine();
             builder.AppendLine("// Interop array box types");
             foreach (var type in ObjCUtils.GetInteropTypes())
-                builder.AppendLine($"#include \"{ObjCUtils.ToArrayBoxTypeName(type)}.h\"");
+                builder.AppendLine($"#import \"{ObjCUtils.ToArrayBoxTypeName(type)}.h\"");
             builder.AppendLine();
             builder.AppendLine("// Other types");
-            builder.AppendLine($"#include {nameof(ObjCClasses.CBIEqualityCompararer_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
-            builder.AppendLine($"#include {nameof(ObjCClasses.CBIReadOnlyList_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
-            builder.AppendLine($"#include {nameof(ObjCClasses.CBIDisposable_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
-            builder.AppendLine($"#include {nameof(ObjCClasses.CBKeyValuePair_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
-            builder.AppendLine($"#include {nameof(ObjCClasses.CBHandleRef_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
+            builder.AppendLine($"#import {nameof(ObjCClasses.CBException_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
+            builder.AppendLine($"#import {nameof(ObjCClasses.CBIEqualityCompararer_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
+            builder.AppendLine($"#import {nameof(ObjCClasses.CBIReadOnlyList_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
+            builder.AppendLine($"#import {nameof(ObjCClasses.CBIDisposable_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
+            builder.AppendLine($"#import {nameof(ObjCClasses.CBKeyValuePair_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
+            builder.AppendLine($"#import {nameof(ObjCClasses.CBHandleRef_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
             EndHeaderGuard(builder);
         }
 

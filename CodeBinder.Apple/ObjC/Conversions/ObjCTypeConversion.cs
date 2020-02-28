@@ -22,7 +22,7 @@ namespace CodeBinder.Apple
             bool hasImports = false;
             foreach (var import in Imports)
             {
-                builder.Append("#include").Space().AppendLine(import);
+                builder.Append("#import").Space().AppendLine(import);
                 hasImports = true;
             }
 

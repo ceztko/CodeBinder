@@ -33,7 +33,7 @@ namespace CodeBinder.Apple
             }
             else
             {
-                builder.AppendLine($"#include \"{HeaderFile}\"");
+                builder.AppendLine($"#import \"{HeaderFile}\"");
                 builder.AppendLine($"#include <cstdlib>");
             }
 

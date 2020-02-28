@@ -71,15 +71,15 @@ namespace CodeBinder.Apple
             }
             else
             {
-                if (Item.Body == null)
+                using (Builder.AppendLine().Block())
                 {
-                    Debug.Assert(Item.IsAbstract(Context));
-                    // Objective C doesn't have abstract properties
-                    Builder.Append("@throw[NSException exceptionWithName: @\"Not implemented\"];");
-                }
-                else
-                {
-                    using (Builder.AppendLine().Block())
+                    if (Item.Body == null)
+                    {
+                        Debug.Assert(Item.IsAbstract(Context));
+                        // Objective C doesn't have abstract properties
+                        Builder.Append("@throw [NSException exceptionWithName:@\"Not implemented\" reason:nil userInfo:nil]").EndOfStatement();
+                    }
+                    else
                     {
                         WriteMethodBodyPrefixInternal();
                         if (DoWriteMethodBody && !Context.Conversion.SkipBody)
@@ -244,45 +244,57 @@ namespace CodeBinder.Apple
 
         protected override void writeReturnType()
         {
-            Builder.Append("id");
+            if (IsStatic)
+                Builder.Append("void");
+            else
+                Builder.Append("id");
         }
 
         protected override void WriteMethodBodyPrefixInternal()
         {
-            Builder.Append("self = ");
-            if (Item.Initializer == null)
+            if (IsStatic)
             {
-                Builder.Append("[super init]").EndOfStatement();
+                var method = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
+                Builder.Append($"if (self != [{method.ContainingType.GetObjCName(Context)} class])").AppendLine()
+                    .IndentChild().Append("return").EndOfStatement().Close();
             }
             else
             {
-                using (Builder.MethodCall())
+                Builder.Append("self = ");
+                if (Item.Initializer == null)
                 {
-                    string selfIdentifier;
-                    switch (Item.Initializer.ThisOrBaseKeyword.Kind())
-                    {
-                        case SyntaxKind.ThisKeyword:
-                            selfIdentifier = "self";
-                            break;
-                        case SyntaxKind.BaseKeyword:
-                            selfIdentifier = "super";
-                            break;
-                        default:
-                            throw new Exception();
-                    }
-
-                    Builder.Append(selfIdentifier).Space().Append("init").Append(Item.Initializer.ArgumentList, Context);
+                    Builder.Append("[super init]").EndOfStatement();
                 }
-                Builder.EndOfStatement();
-            }
-            Builder.Append("if (self == nil)").AppendLine()
-                .IndentChild().Append("return nil").EndOfStatement().Close();
+                else
+                {
+                    using (Builder.MethodCall())
+                    {
+                        string selfIdentifier;
+                        switch (Item.Initializer.ThisOrBaseKeyword.Kind())
+                        {
+                            case SyntaxKind.ThisKeyword:
+                                selfIdentifier = "self";
+                                break;
+                            case SyntaxKind.BaseKeyword:
+                                selfIdentifier = "super";
+                                break;
+                            default:
+                                throw new Exception();
+                        }
 
+                        Builder.Append(selfIdentifier).Space().Append("init").Append(Item.Initializer.ArgumentList, Context);
+                    }
+                    Builder.EndOfStatement();
+                }
+                Builder.Append("if (self == nil)").AppendLine()
+                    .IndentChild().Append("return nil").EndOfStatement().Close();
+            }
         }
 
         protected override void WriteMethodBodyPostfixInternal()
         {
-            Builder.Append("return self").EndOfStatement();
+            if (!IsStatic)
+                Builder.Append("return self").EndOfStatement();
         }
 
         public override string MethodName

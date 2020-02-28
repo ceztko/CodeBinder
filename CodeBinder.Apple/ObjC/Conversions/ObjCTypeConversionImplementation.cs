@@ -46,7 +46,6 @@ namespace CodeBinder.Apple
 
         protected override CodeWriter GetTypeWriter()
         {
-            return CodeWriter.NullWriter("/* NULL */");
             return new ObjCClassWriter(Context.Node, Context.ComputePartialDeclarationsTree(), Context.Compilation, ObjCFileType.Implementation);
         }
     }
@@ -59,7 +58,6 @@ namespace CodeBinder.Apple
 
         protected override CodeWriter GetTypeWriter()
         {
-            return CodeWriter.NullWriter("/* NULL */");
             return new ObjCStructWriter(Context.Node, Context.ComputePartialDeclarationsTree(), Context.Compilation, ObjCFileType.Implementation);
         }
     }

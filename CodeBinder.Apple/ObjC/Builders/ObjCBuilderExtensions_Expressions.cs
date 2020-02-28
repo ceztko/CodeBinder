@@ -218,10 +218,6 @@ namespace CodeBinder.Apple
 
         public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            return builder;
-
-            /*
-
             if (builder.TryToReplace(syntax, context))
                 return builder;
 
@@ -234,18 +230,31 @@ namespace CodeBinder.Apple
             }
 
             var symbol = syntax.GetSymbol(context)!;
-            if (symbol.Kind == SymbolKind.Property
-                && symbol.OriginalDefinition.ContainingType.GetFullName() == "System.Nullable<T>"
-                && symbol.Name == "Value")
+            switch (symbol.Kind)
             {
-                // There are no nullable types in Java, just discard ".Value" accessor
-                builder.Append(syntax.Expression, context);
-                return builder;
+                case SymbolKind.Field:
+                {
+                    var field = (IFieldSymbol)symbol;
+                    if (field.HasDistinctObjCName(context, out string? name))
+                        return builder.Append(name);
+
+                    break;
+                }
+                case SymbolKind.Property:
+                {
+                    if (symbol.OriginalDefinition.ContainingType.GetFullName() == "System.Nullable<T>"
+                        && symbol.Name == "Value")
+                    {
+                        // There are no nullable types in Java, just discard ".Value" accessor
+                        builder.Append(syntax.Expression, context);
+                        return builder;
+                    }
+                    break;
+                }
             }
 
             builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
             return builder;
-            */
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, ObjCCompilationContext context)
@@ -448,26 +457,41 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, ObjCCompilationContext context)
+        public static CodeBuilder Append(this CodeBuilder builder, IReadOnlyList<ArgumentSyntax> arguments, ObjCCompilationContext context)
         {
             builder.Append(arguments, false, context);
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, bool nativeInvoke, ObjCCompilationContext context)
+        public static CodeBuilder Append(this CodeBuilder builder, IReadOnlyList<ArgumentSyntax> arguments, bool nativeInvoke, ObjCCompilationContext context)
         {
             if (nativeInvoke)
             {
                 bool first = true;
                 foreach (var arg in arguments)
                 {
-                    builder.ColonSeparator(ref first);
+                    // Handle special cases when invoking native methods
+                    var type = arg.Expression.GetTypeSymbol(context)!;
+                    if (type.TypeKind == TypeKind.Enum)
+                    {
+                        // Native enums need cast
+                        builder.CommaSeparator(ref first).Parenthesized().Append(type.GetCLangName(context)).Close().Append(arg.Expression, context);
+                        return builder;
+                    }
+
+                    builder.CommaSeparator(ref first).Append(arg.Expression, context);
+                    if (type.GetFullName() == "System.Runtime.InteropServices.HandleRef")
+                    {
+                        // Passing "System.HandleRef" to hantive methods needs further accessing handle
+                        builder.Dot().Append("handle");
+                    }
                 }
             }
             else
             {
+                bool first = true;
                 foreach (var arg in arguments)
-                    builder.Colon().Append(arg.Expression, context);
+                    builder.Space(ref first).Colon().Append(arg.Expression, context);
             }
 
             return builder;

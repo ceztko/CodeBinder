@@ -45,7 +45,7 @@ namespace CodeBinder.Apple
                     return null;
                 case "System.UIntPtr":
                 case "System.IntPtr":
-                    return "nil";
+                    return "NULL";
                 case "System.Boolean":
                     return "NO";
                 case "System.Char":
@@ -298,7 +298,7 @@ namespace CodeBinder.Apple
             }
         }
 
-        static void writeObjCPropertyIdentifier(CodeBuilder builder, SyntaxNode syntax, IPropertySymbol property, ICompilationContextProvider context)
+        static void writeObjCPropertyIdentifier(CodeBuilder builder, SyntaxNode syntax, IPropertySymbol property, ObjCCompilationContext context)
         {
             bool isSetter = false;
             SyntaxNode child = syntax;
@@ -344,10 +344,7 @@ namespace CodeBinder.Apple
                 }
                 else
                 {
-                    if (isSetter)
-                        builder.Append("set").Append(property.Name);
-                    else
-                        builder.Append("get").Append(property.Name).EmptyParameterList();
+                    builder.Append(property.GetObjCName(context));
                 }
             }
         }
@@ -563,14 +560,14 @@ namespace CodeBinder.Apple
                 }
                 case "System.Exception":
                 {
-                    knownObjCType = "NSException";
+                    knownObjCType = "CBException";
                     objcTypeKind = ObjCTypeKind.Class;
                     TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.NotImplementedException":
                 {
-                    knownObjCType = "NSException";
+                    knownObjCType = "CBException";
                     objcTypeKind = ObjCTypeKind.Class;
                     TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;

@@ -30,7 +30,7 @@ namespace CodeBinder.Apple
                 if (ShouldIgnore(iface, out basepath))
                     continue;
 
-                builder.Append("#include").Space().AppendLine($"{basepath}{iface.GetObjCName(Compilation)}".ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst));
+                builder.Append("#import").Space().AppendLine($"{basepath}{iface.GetObjCName(Compilation)}".ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst));
             }
 
             builder.AppendLine("// Classes");
@@ -39,7 +39,7 @@ namespace CodeBinder.Apple
                 if (ShouldIgnore(cls))
                     continue;
 
-                builder.Append("#include").Space().AppendLine(cls.GetObjCName(Compilation).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst));
+                builder.Append("#import").Space().AppendLine(cls.GetObjCName(Compilation).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst));
             }
             builder.AppendLine();
             EndHeaderGuard(builder);

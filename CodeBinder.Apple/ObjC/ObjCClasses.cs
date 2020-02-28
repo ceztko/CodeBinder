@@ -6,6 +6,42 @@ namespace CodeBinder.Apple
 {
     static class ObjCClasses
     {
+        public const string CBException_h = @"#ifndef CB_EXCPETION
+#define CB_EXCPETION
+
+#import <Foundation/Foundation.h>
+
+// Substitute for .NET Excpetion
+@interface CBException : NSException
+- (id)init;
+- (id)init:(NSString *)message;
+@end
+
+#endif // CB_EXCPETION
+";
+
+        public const string CBException_mm = @"#import ""CBException.h""
+
+@implementation CBException
+
+- (id)init
+{
+    self = [super init];
+    if (self == nil)
+        return nil;
+
+    return self;
+}
+- (id)init:(NSString *)message
+{
+    self = [super initWithName:@""Exception"" reason:message userInfo:nil];
+    if (self == nil)
+        return nil;
+
+    return self;
+}
+@end";
+
         public const string CBIReadOnlyList_h = @"#ifndef CB_IREADONLYLIST
 #define CB_IREADONLYLIST
 
@@ -63,7 +99,7 @@ namespace CodeBinder.Apple
 ";
 
         public const string CBKeyValuePair_mm =
-@"#include ""CBKeyValuePair.h""
+@"#import ""CBKeyValuePair.h""
 
 @implementation CBKeyValuePair
 
@@ -117,7 +153,7 @@ namespace CodeBinder.Apple
 ";
 
         public const string CBHandleRef_mm =
-@"#include ""CBHandleRef.h""
+@"#import ""CBHandleRef.h""
 
 @implementation CBHandleRef
 

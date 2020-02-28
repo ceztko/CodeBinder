@@ -33,9 +33,9 @@ namespace CodeBinder.Apple
             BeginHeaderGuard(builder);
             builder.AppendLine();
             if (IsInternalHeader)
-                builder.AppendLine($"#include \"../{ConversionCSharpToObjC.TypesHeader}\"");
+                builder.AppendLine($"#import \"../{ConversionCSharpToObjC.TypesHeader}\"");
             else
-                builder.AppendLine($"#include \"{BaseTypesHeader}\"");
+                builder.AppendLine($"#import \"{BaseTypesHeader}\"");
             builder.AppendLine();
             writeOpaqueTypes(builder);
             builder.AppendLine();
@@ -96,7 +96,7 @@ namespace CodeBinder.Apple
                     foreach (var item in enm.Members)
                     {
                         long value = item.GetEnumValue(Compilation);
-                        builder.Append($"{enumName}_{item.GetName()}").Space().Append("=").Space().Append(value.ToString()).Comma().AppendLine();
+                        builder.Append(item.GetObjCName(Compilation)).Space().Append("=").Space().Append(value.ToString()).Comma().AppendLine();
                     }
                 }
 
