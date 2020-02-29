@@ -261,12 +261,14 @@ namespace CodeBinder.Apple
         {
             if (IsStatic)
             {
+                // https://stackoverflow.com/questions/992070/static-constructor-equivalent-in-objective-c
                 var method = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
                 Builder.Append($"if (self != [{method.ContainingType.GetObjCName(Context)} class])").AppendLine()
                     .IndentChild().Append("return").EndOfStatement().Close();
             }
             else
             {
+                // https://stackoverflow.com/a/7185530/213871
                 Builder.Append("self = ");
                 if (Item.Initializer == null)
                 {

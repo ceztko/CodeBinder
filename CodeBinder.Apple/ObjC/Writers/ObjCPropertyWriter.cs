@@ -18,6 +18,8 @@ namespace CodeBinder.Apple
         protected bool IsAutomatic { get; private set; }
         protected bool IsReadonly { get; private set; }
 
+        protected bool IsWriteOnly { get; private set; }
+
         public bool IsStatic { get; private set; }
 
         protected PropertyWriter(TProperty syntax, ObjCCompilationContext context, ObjCFileType fileType)
@@ -25,6 +27,7 @@ namespace CodeBinder.Apple
         {
             IsAutomatic = syntax.IsAutomatic(Context);
             IsReadonly = syntax.IsReadOnly(Context);
+            IsWriteOnly = syntax.IsWriteOnly(Context);
             IsStatic = Item.IsStatic(Context);
         }
 
@@ -82,6 +85,9 @@ namespace CodeBinder.Apple
                 default:
                     throw new Exception();
             }
+
+            if (IsWriteOnly)
+                WriteGetter(null);
         }
 
         private void WriteSetter(AccessorDeclarationSyntax accessor)
@@ -116,7 +122,7 @@ namespace CodeBinder.Apple
             }
         }
 
-        private void WriteGetter(AccessorDeclarationSyntax accessor)
+        private void WriteGetter(AccessorDeclarationSyntax? accessor)
         {
             Builder.Append(Modifier).Space().Parenthesized().Append(ObjCType).Close().Append(GetterName);
             WriteGetterParameters();
@@ -127,10 +133,10 @@ namespace CodeBinder.Apple
             }
             else // Is implementation
             {
-                if (accessor.Body == null)
+                if (accessor == null || accessor.Body == null)
                 {
                     // Objective C doesn't have abstract properties
-                    Debug.Assert(Item.IsAbstract(Context));
+                    // Also on WriteOnly properties https://stackoverflow.com/a/18637623/213871
                     using (Builder.AppendLine().Block())
                     {
                         Builder.Append("@throw [NSException exceptionWithName:@\"Not implemented\" reason:nil userInfo:nil]").EndOfStatement();

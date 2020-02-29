@@ -851,6 +851,11 @@ namespace CodeBinder.Shared.CSharp
             return property.GetDeclaredSymbol<IPropertySymbol>(provider).IsReadOnly;
         }
 
+        public static bool IsWriteOnly(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
+        {
+            return property.GetDeclaredSymbol<IPropertySymbol>(provider).IsWriteOnly;
+        }
+
         public static bool IsAutomatic(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
         {
             if (property.GetDeclaredSymbol<IPropertySymbol>(provider).IsAbstract)
