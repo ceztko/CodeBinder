@@ -97,7 +97,14 @@ namespace CodeBinder.Apple
                     suffix = suffixAttrib.GetConstructorArgument<string>(0);
             }
 
-            string bindedName = methodSymbol.Name + suffix;
+            string methodName = methodSymbol.Name;
+            if (methodSymbol.ExplicitInterfaceImplementations.Length != 0)
+            {
+                // Get name of explicitly interface implemented method
+                methodName = methodSymbol.ExplicitInterfaceImplementations[0].Name;
+            }
+
+            string bindedName = methodName + suffix;
             string qualifiedBindedName = $"{methodSymbol.ContainingType.GetFullName()}.{bindedName}";
             List<IMethodSymbol>? bindedMethods;
             if (_uniqueMethodNames.TryGetValue(qualifiedBindedName, out bindedMethods))
