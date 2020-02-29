@@ -193,9 +193,7 @@ namespace CodeBinder.Apple
                         case ObjCFileType.InternalHeader:
                         case ObjCFileType.InternalOnlyHeader:
                         case ObjCFileType.Implementation:
-                            return false;
-                        // TODO
-                        ////return true;
+                            return true;
                         default:
                             throw new NotSupportedException();
                     }
