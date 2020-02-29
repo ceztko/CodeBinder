@@ -50,6 +50,8 @@ namespace CodeBinder.Apple
                     return "NO";
                 case "System.Char":
                     return "unichar()";
+                case "CodeBinder.Apple.NSUInteger":
+                case "CodeBinder.Apple.NSInteger":
                 case "System.Byte":
                 case "System.SByte":
                 case "System.Int16":
@@ -483,7 +485,7 @@ namespace CodeBinder.Apple
             }
             else
             {
-                objcTypeKind = GetTypeKind(symbol);
+                objcTypeKind = GetUnkwownTypeKind(symbol);
                 switch (symbol.Kind)
                 {
                     case SymbolKind.NamedType:
@@ -534,7 +536,7 @@ namespace CodeBinder.Apple
                 return true;
             }
 
-            // Reference types
+            // Known reference types
             switch (fullTypeName)
             {
                 case "System.Runtime.InteropServices.HandleRef":
@@ -656,7 +658,8 @@ namespace CodeBinder.Apple
             }
         }
 
-        static ObjCTypeKind GetTypeKind(ITypeSymbol symbol)
+        // Get Type kind 
+        static ObjCTypeKind GetUnkwownTypeKind(ITypeSymbol symbol)
         {
             switch (symbol.TypeKind)
             {
@@ -666,16 +669,14 @@ namespace CodeBinder.Apple
                     return ObjCTypeKind.Class;
                 case TypeKind.Struct:
                 {
-                    if (symbol.IsCLRPrimitiveType())
-                        return ObjCTypeKind.Other;
-                    else
-                        return ObjCTypeKind.Class;
+                    Debug.Assert(!symbol.IsCLRPrimitiveType());
+                    return ObjCTypeKind.Class;
                 }
                 case TypeKind.TypeParameter:
                 {
                     var typeparam = (ITypeParameterSymbol)symbol;
                     Debug.Assert(typeparam.ConstraintTypes.Length == 1);
-                    return GetTypeKind(typeparam.ConstraintTypes[0]);
+                    return GetUnkwownTypeKind(typeparam.ConstraintTypes[0]);
                 }
                 default:
                     return ObjCTypeKind.Other;

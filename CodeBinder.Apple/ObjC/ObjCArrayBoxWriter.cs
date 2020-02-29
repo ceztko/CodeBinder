@@ -46,7 +46,7 @@ namespace CodeBinder.Apple
                     // Fields
                     builder.AppendLine("@private");
                     builder.Append(ArrayTypeDeclaration).Space().Append("_values").EndOfStatement();
-                    builder.Append("NSInteger").Space().Append("_count").EndOfStatement();
+                    builder.Append("NSUInteger").Space().Append("_count").EndOfStatement();
                 }
             }
             else
@@ -56,7 +56,7 @@ namespace CodeBinder.Apple
 
             builder.AppendLine();
             // Constructor with parameter
-            builder.Append("-(id)init").Colon().Append("(NSInteger)").Append("count");
+            builder.Append("-(id)init").Colon().Append("(NSUInteger)").Append("count");
             if (IsHeader)
             {
                 builder.EndOfStatement();
@@ -79,7 +79,7 @@ namespace CodeBinder.Apple
             if (IsHeader)
             {
                 builder.Append("@property (nonatomic)").Space().Append($"{ArrayTypeDeclaration}").Space().Append("values").EndOfStatement();
-                builder.Append("@property (nonatomic)").Space().Append("NSInteger count").EndOfStatement();
+                builder.Append("@property (nonatomic)").Space().Append("NSUInteger count").EndOfStatement();
                 builder.AppendLine();
             }
 
@@ -113,7 +113,7 @@ namespace CodeBinder.Apple
             }
             builder.AppendLine();
 
-            builder.Append($"-(NSInteger)count");
+            builder.Append($"-(NSUInteger)count");
             if (IsHeader)
             {
                 builder.EndOfStatement();

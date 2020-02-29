@@ -5,6 +5,7 @@ using CodeBinder.Shared.CSharp;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System;
+using CodeBinder.Attributes;
 
 namespace CodeBinder.Apple
 {
@@ -97,7 +98,6 @@ namespace CodeBinder.Apple
             {
                 Builder.AppendLine(ref first);
                 var parameter = list.Parameters[i];
-                Builder.Colon();
                 writeParameter(parameter);
             }
         }
@@ -105,6 +105,13 @@ namespace CodeBinder.Apple
         private void writeParameter(ParameterSyntax parameter)
         {
             bool isRef = parameter.IsRef() | parameter.IsOut();
+            if (parameter.TryGetAttribute<SelectorAttribute>(Context, out var selector))
+            {
+                // This parameter has a specified selector
+                Builder.Append(selector.GetConstructorArgument<string>(0));
+            }
+
+            Builder.Colon();
             Builder.Parenthesized(() =>
                 WriteType(parameter.Type!, isRef ? ObjCTypeUsageKind.DeclarationByRef : ObjCTypeUsageKind.Declaration)
             );

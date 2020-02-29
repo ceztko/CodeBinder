@@ -67,6 +67,14 @@ namespace CodeBinder.Apple
                 case "System.Void":
                     typeName = "void";
                     return true;
+                case "CodeBinder.Apple.NSUInteger":
+                    typeName = "NSUInteger";
+                    AdaptValueType(ref typeName, usage);
+                    return true;
+                case "CodeBinder.Apple.NSInteger":
+                    typeName = "NSInteger";
+                    AdaptValueType(ref typeName, usage);
+                    return true;
                 case "System.UIntPtr":
                     typeName = "void *";
                     AdaptValueType(ref typeName, usage);
@@ -133,6 +141,8 @@ namespace CodeBinder.Apple
         {
             switch (typeName)
             {
+                case "CodeBinder.Apple.NSUInteger":
+                case "CodeBinder.Apple.NSInteger":
                 case "System.UIntPtr":
                 case "System.IntPtr":
                 case "System.Boolean":
@@ -159,6 +169,12 @@ namespace CodeBinder.Apple
         {
             switch (typeName)
             {
+                case "CodeBinder.Apple.NSUInteger":
+                    boxTypeName = "CBNSUIntegerArray";
+                    return true;
+                case "CodeBinder.Apple.NSInteger":
+                    boxTypeName = "CBNSIntegerArray";
+                    return true;
                 case "System.UIntPtr":
                     boxTypeName = "CBPtrArray";
                     return true;
@@ -214,6 +230,8 @@ namespace CodeBinder.Apple
         {
             return type switch
             {
+                ObjCInteropType.NSUInteger => "CBNSUIntegerArray",
+                ObjCInteropType.NSInteger => "CBNSIntegerArray",
                 ObjCInteropType.UIntPtr => "CBPtrArray",
                 ObjCInteropType.IntPtr => "CBPtrArray",
                 ObjCInteropType.Boolean => "CBBoolArray",
@@ -237,6 +255,10 @@ namespace CodeBinder.Apple
         {
             switch (type)
             {
+                case ObjCInteropType.NSUInteger:
+                    return "NSUInteger *";
+                case ObjCInteropType.NSInteger:
+                    return "NSInteger *";
                 case ObjCInteropType.UIntPtr:
                     return "void **";
                 case ObjCInteropType.IntPtr:
@@ -276,6 +298,10 @@ namespace CodeBinder.Apple
         {
             switch (type)
             {
+                case ObjCInteropType.NSUInteger:
+                    return "NSUInteger";
+                case ObjCInteropType.NSInteger:
+                    return "NSInteger";
                 case ObjCInteropType.UIntPtr:
                     return "void *";
                 case ObjCInteropType.IntPtr:
@@ -322,7 +348,7 @@ namespace CodeBinder.Apple
                 {
                     type = $"{type} *";
                     return;
-            }
+                }
                 case ObjCTypeUsageKind.Declaration:
                 case ObjCTypeUsageKind.Normal:
                     return;
@@ -573,6 +599,8 @@ namespace CodeBinder.Apple
 
     enum ObjCInteropType
     {
+        NSUInteger, // This is an arithmetic type, differently than UIntPtr
+        NSInteger,  // This is an arithmetic type, differently than IntPtr
         UIntPtr,
         IntPtr,
         Boolean,

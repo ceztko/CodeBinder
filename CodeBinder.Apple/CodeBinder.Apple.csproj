@@ -16,6 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="CodeBinder.Apple.Redist">
+      <HintPath>..\..\ENLibPdf\deps\net\CodeBinder.Apple.Redist.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="ObjC\Resources\ObjCResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
