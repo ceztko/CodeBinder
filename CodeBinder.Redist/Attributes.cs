@@ -100,9 +100,9 @@ namespace CodeBinder.Attributes
     /// This attribute tells that the method, parameter or return value that should map to a native counterpart
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
-    public sealed class NativeAttribute : CodeBinderAttribute
+    public sealed class NativeMappingAttribute : CodeBinderAttribute
     {
-        public NativeAttribute()
+        public NativeMappingAttribute()
         { }
     }
 

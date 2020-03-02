@@ -187,9 +187,7 @@ namespace CodeBinder.Apple
                 case SyntaxKind.ConstructorDeclaration:
                     return new[] { new ObjCConstructorWriter((ConstructorDeclarationSyntax)member, context, fileType) };
                 case SyntaxKind.DestructorDeclaration:
-                    return Enumerable.Empty<IObjCCodeWriter>();
-                    // TODO
-                    ////return new[] { new ObjCDestructorWriter((DestructorDeclarationSyntax)member, context, fileType) };
+                    return new[] { new ObjCDestructorWriter((DestructorDeclarationSyntax)member, context, fileType) };
                 case SyntaxKind.MethodDeclaration:
                     return GetWriters((MethodDeclarationSyntax)member, context, fileType);
                 case SyntaxKind.PropertyDeclaration:
