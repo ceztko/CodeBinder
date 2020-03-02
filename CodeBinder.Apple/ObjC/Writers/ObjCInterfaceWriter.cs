@@ -20,7 +20,8 @@ namespace CodeBinder.Apple
         {
             /* Do nothing */
             // TODO: Support base interfaces
-            Debug.Assert(Item.BaseList == null);
+            if (Item.BaseList != null)
+                throw new NotImplementedException("Missing base interfaces support");
         }
 
         protected override void WriteTypeParameters()

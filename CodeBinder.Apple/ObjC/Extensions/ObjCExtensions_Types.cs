@@ -173,7 +173,7 @@ namespace CodeBinder.Apple
             var builder = new CodeBuilder();
             var typeSymbol = type.GetTypeSymbol(context);
             ObjCTypeKind objcTypeKind;
-            writeTypeSymbol(builder, typeSymbol.GetFullName(), typeSymbol, ObjCTypeUsageKind.Normal, context, out objcTypeKind);
+            writeTypeSymbol(builder, typeSymbol, ObjCTypeUsageKind.Normal, context, out objcTypeKind);
             return builder.ToString();
         }
 
@@ -183,7 +183,7 @@ namespace CodeBinder.Apple
             var typeSymbol = type.GetTypeSymbol(context);
             string fullName = typeSymbol.GetFullName();
             var ret = new ObjCTypeInfo();
-            writeTypeSymbol(builder, typeSymbol.GetFullName(), typeSymbol, ObjCTypeUsageKind.Normal, context, out ret.Kind);
+            writeTypeSymbol(builder, typeSymbol, ObjCTypeUsageKind.Normal, context, out ret.Kind);
             ret.Reachability = GetReachability(typeSymbol, context);
             ret.TypeName = builder.ToString();
             return ret;
@@ -194,7 +194,7 @@ namespace CodeBinder.Apple
             var builder = new CodeBuilder();
             ObjCTypeKind objcTypeKind;
             var typeSymbol = type.GetTypeSymbol(context);
-            writeTypeSymbol(builder, typeSymbol.GetFullName(), typeSymbol, displayKind, context, out objcTypeKind);
+            writeTypeSymbol(builder, typeSymbol, displayKind, context, out objcTypeKind);
             return builder.ToString();
         }
 
@@ -220,7 +220,7 @@ namespace CodeBinder.Apple
                 {
                     ObjCTypeKind objcTypeKind;
                     var typeSymbol = (ITypeSymbol)symbol;
-                    writeTypeSymbol(builder, typeSymbol.GetFullName(), typeSymbol, usageKind, context, out objcTypeKind);
+                    writeTypeSymbol(builder, typeSymbol, usageKind, context, out objcTypeKind);
                     return builder;
                 }
                 case SymbolKind.Method:
@@ -404,11 +404,12 @@ namespace CodeBinder.Apple
             }
         }
 
-        static void writeTypeSymbol(CodeBuilder builder, string fullTypeName, ITypeSymbol symbol,
+        static void writeTypeSymbol(CodeBuilder builder, ITypeSymbol symbol,
             ObjCTypeUsageKind usage, ObjCCompilationContext context, out ObjCTypeKind objcTypeKind)
         {
             // Try to adjust the typename, looking for know types
             string? objCTypeName;
+            string fullTypeName;
             switch (symbol.Kind)
             {
                 case SymbolKind.NamedType:
@@ -434,6 +435,10 @@ namespace CodeBinder.Apple
                         else
                             fullTypeName = namedType.ConstructedFrom.GetFullName();
                     }
+                    else
+                    {
+                        fullTypeName = symbol.GetFullName();
+                    }
 
                     if (namedType.IsValueType && usage == ObjCTypeUsageKind.DeclarationByRef)
                     {
@@ -451,6 +456,8 @@ namespace CodeBinder.Apple
                 }
                 case SymbolKind.TypeParameter:
                     // Nothing to do
+                    var parameter = (ITypeParameterSymbol)symbol;
+                    fullTypeName = parameter.Name;
                     break;
                 default:
                     throw new Exception();
@@ -525,18 +532,19 @@ namespace CodeBinder.Apple
                     }
                     case SymbolKind.ArrayType:
                     {
+                        var arrayType = (IArrayTypeSymbol)symbol;
+                        if (arrayType.ElementType.IsValueType && arrayType.ElementType.ShouldDiscard(context.Conversion))
+                        {
+                            // TODO: We can partially support array of value types for ignored types
+
+                        }
+                        // TODO: the long term is just support value types as struct
                         throw new NotSupportedException("Array type with non primitive types are not supported");
                     }
                     default:
                         throw new Exception();
                 }
             }
-        }
-
-        static CodeBuilder Append(this CodeBuilder builder, ITypeSymbol symbol, ObjCCompilationContext context)
-        {
-            writeTypeSymbol(builder, symbol.GetFullName(), symbol, ObjCTypeUsageKind.Normal, context, out var objcTypeKind);
-            return builder;
         }
 
         static bool IsKnownObjCType(string fullTypeName, SymbolKind typeKind, ObjCTypeUsageKind usage,
