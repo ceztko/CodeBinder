@@ -280,9 +280,17 @@ namespace CodeBinder.Apple
         /// <summary>
         /// True when the file type is Internal or InternalOnly header
         /// </summary>
-        public static bool IsInternalKindHeader(this ObjCFileType filetype)
+        public static bool IsInternalLikeHeader(this ObjCFileType filetype)
         {
             return filetype == ObjCFileType.InternalHeader || filetype == ObjCFileType.InternalOnlyHeader;
+        }
+
+        /// <summary>
+        /// True when the file type is Public or InternalOnly header
+        /// </summary>
+        public static bool IsPublicLikeHeader(this ObjCFileType filetype)
+        {
+            return filetype == ObjCFileType.PublicHeader || filetype == ObjCFileType.InternalOnlyHeader;
         }
 
         public static string GetObjCName(this PropertyDeclarationSyntax node, ObjCCompilationContext context)
@@ -376,10 +384,10 @@ namespace CodeBinder.Apple
                 return symbol.Name;
         }
 
-        public static string GetObjCModifiersString(this FieldDeclarationSyntax node)
+        public static string GetObjCModifierString(this FieldDeclarationSyntax field, ObjCCompilationContext context)
         {
-            var modifiers = node.GetCSharpModifiers();
-            return ObjCUtils.GetFieldModifiersString(modifiers);
+            var accessibility = field.GetAccessibility(context);
+            return ObjCUtils.GetFieldModifiersString(accessibility);
         }
 
         public static string GetObjCModifiersString(this BaseMethodDeclarationSyntax node)

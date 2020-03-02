@@ -1,4 +1,7 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿using System;
+using CodeBinder.Shared.CSharp;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeBinder.Apple
 {
@@ -17,17 +20,36 @@ namespace CodeBinder.Apple
 
         protected override void Write()
         {
-            Builder.Append(Item.Type, ObjCTypeUsageKind.Declaration, Context).Space().Append(ObjCPropertyWriter.GetUnderlyingFieldName(Item, Context)).EndOfStatement();
+            Builder.Append("@private").Space().Append(Item.Type, ObjCTypeUsageKind.Declaration, Context).Space().Append(ObjCPropertyWriter.GetUnderlyingFieldName(Item, Context)).EndOfStatement();
         }
     }
 
     class ObjCFieldWriter : ObjCFieldWriterBase<FieldDeclarationSyntax>
     {
+        public bool IsStatic { get; private set; }
+
         public ObjCFieldWriter(FieldDeclarationSyntax syntax, ObjCCompilationContext context)
-            : base(syntax, context) { }
+            : base(syntax, context)
+        {
+            IsStatic = syntax.IsStatic(context);
+        }
 
         protected override void Write()
         {
+            var symbol = Item.GetDeclaredSymbol<IFieldSymbol>(Context);
+            if (IsStatic)
+            {
+                Builder.Append("static");
+                if (symbol.DeclaredAccessibility == Accessibility.Public)
+                    throw new Exception("Unsupported public static field");
+            }
+            else
+                Builder.Append(Item.GetObjCModifierString(Context));
+
+            Builder.Space();
+            if (symbol.IsConst)
+                Builder.Append("const").Space();
+
             Builder.Append(Item.Declaration, Context).EndOfStatement();
         }
     }

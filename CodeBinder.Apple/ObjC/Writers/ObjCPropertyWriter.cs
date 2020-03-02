@@ -44,7 +44,7 @@ namespace CodeBinder.Apple
                 }
                 else
                 {
-                    if (FileType.IsInternalKindHeader())
+                    if (FileType.IsInternalLikeHeader())
                         WriteDeclaration();
                 }
 
@@ -125,6 +125,14 @@ namespace CodeBinder.Apple
         private void WriteGetter(AccessorDeclarationSyntax? accessor)
         {
             Builder.Append(Modifier).Space().Parenthesized().Append(ObjCType).Close().Append(GetterName);
+            if (accessor == null)
+            {
+                // Happens on WriteOnly properties https://stackoverflow.com/a/18637623/213871
+                Debug.Assert(IsWriteOnly);
+                if (FileType.IsHeader())
+                    Builder.Space().Append("UNAVAILABLE_ATTRIBUTE");
+            }
+
             WriteGetterParameters();
 
             if (FileType.IsHeader())
@@ -136,7 +144,6 @@ namespace CodeBinder.Apple
                 if (accessor == null || accessor.Body == null)
                 {
                     // Objective C doesn't have abstract properties
-                    // Also on WriteOnly properties https://stackoverflow.com/a/18637623/213871
                     using (Builder.AppendLine().Block())
                     {
                         Builder.Append("@throw [NSException exceptionWithName:@\"Not implemented\" reason:nil userInfo:nil]").EndOfStatement();

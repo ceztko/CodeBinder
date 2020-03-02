@@ -408,11 +408,25 @@ namespace CodeBinder.Apple
             ObjCTypeUsageKind usage, ObjCCompilationContext context, out ObjCTypeKind objcTypeKind)
         {
             // Try to adjust the typename, looking for know types
+            string? objCTypeName;
             switch (symbol.Kind)
             {
                 case SymbolKind.NamedType:
                 {
                     var namedType = (INamedTypeSymbol)symbol;
+                    if (namedType.IsNative())
+                    {
+                        // Handle CLang types, for example
+                        if (namedType.TryGetAttribute<NativeBindingAttribute>(out var binding))
+                        {
+                            objCTypeName = binding.GetConstructorArgument<string>(0);
+                            objcTypeKind = GetUnkwownTypeKind(symbol);
+                            TryAdaptRefType(ref objCTypeName, usage, objcTypeKind);
+                            builder.Append(objCTypeName);
+                            return;
+                        }
+                    }
+
                     if (namedType.IsGenericType)
                     {
                         if (namedType.IsNullable(out var underlyingType))
@@ -442,7 +456,6 @@ namespace CodeBinder.Apple
                     throw new Exception();
             }
 
-            string? objCTypeName;
             ObjCTypeKind? tempTypeKind;
             if (IsKnownObjCType(fullTypeName, symbol.Kind, usage, out objCTypeName, out tempTypeKind))
             {
@@ -532,7 +545,7 @@ namespace CodeBinder.Apple
             if (IsKnowSimpleObjCType(fullTypeName, typeKind, usage, out knownObjCType))
             {
                 // Primitives value types + void
-                objcTypeKind = ObjCTypeKind.Other;
+                objcTypeKind = ObjCTypeKind.Value;
                 return true;
             }
 
@@ -679,7 +692,7 @@ namespace CodeBinder.Apple
                     return GetUnkwownTypeKind(typeparam.ConstraintTypes[0]);
                 }
                 default:
-                    return ObjCTypeKind.Other;
+                    return ObjCTypeKind.Value;
             }
         }
 
@@ -737,8 +750,11 @@ namespace CodeBinder.Apple
         /// </summary>
         static void TryAdaptRefType(ref string type, ObjCTypeUsageKind usage, ObjCTypeKind typeKind)
         {
-            if (typeKind == ObjCTypeKind.Other)
+            if (typeKind == ObjCTypeKind.Value)
+            {
+                // This methods adapts only ref types
                 return;
+            }
 
             switch (usage)
             {

@@ -36,7 +36,7 @@ namespace CodeBinder.Apple
             if (FileType.IsImplementation())
                 return;
 
-            if (FileType == ObjCFileType.PublicHeader || FileType == ObjCFileType.InternalOnlyHeader)
+            if (FileType.IsPublicLikeHeader())
             {
                 // Write type parameters and base types
                 if (Arity > 0)
@@ -113,9 +113,10 @@ namespace CodeBinder.Apple
 
         protected void WriteTypeMembers(IEnumerable<MemberDeclarationSyntax> members, PartialDeclarationsTree partialDeclarations)
         {
-            var fieldWriters = new List<IObjCCodeWriter>();
+            var name = ObjCTypeName;
+            var memberFieldWriters = new List<IObjCCodeWriter>();
+            var staticFieldWriters = new List<IObjCCodeWriter>();
             var otherTypeWriters = new List<IObjCCodeWriter>();
-            bool first = true;
             foreach (var member in members)
             {
                 if (member.ShouldDiscard(Context))
@@ -128,21 +129,39 @@ namespace CodeBinder.Apple
                 foreach (var writer in GetWriters(member, partialDeclarations, Context, FileType))
                 {
                     if (writer.Type == ObjWriterType.Field)
-                        fieldWriters.Add(writer);
+                    {
+                        var fieldWriter = (ObjCFieldWriter)writer;
+                        if (fieldWriter.IsStatic)
+                            staticFieldWriters.Add(fieldWriter);
+                        else
+                            memberFieldWriters.Add(fieldWriter);
+                    }
                     else
                         otherTypeWriters.Add(writer);
                 }
             }
 
-            if (fieldWriters.Count != 0)
+            if (FileType.IsPublicLikeHeader() && memberFieldWriters.Count != 0)
             {
-                // Write fields block
+                // Write ivar fields block
+                bool first = true;
                 using (Builder.Block())
                 {
-                    foreach (var writer in fieldWriters)
-                    {
+                    foreach (var writer in memberFieldWriters)
                         Builder.AppendLine(ref first).Append(writer);
-                    }
+                }
+
+                Builder.AppendLine();
+            }
+
+            if (FileType.IsImplementation() && staticFieldWriters.Count != 0)
+            {
+                // Write static fields
+                bool first = true;
+                using (Builder.Indent())
+                {
+                    foreach (var writer in staticFieldWriters)
+                        Builder.AppendLine(ref first).Append(writer);
                 }
 
                 Builder.AppendLine();
@@ -150,6 +169,7 @@ namespace CodeBinder.Apple
 
             using (Builder.Indent())
             {
+                bool first = true;
                 // Write the other members
                 foreach (var writer in otherTypeWriters)
                 {
@@ -177,12 +197,13 @@ namespace CodeBinder.Apple
                 case SyntaxKind.IndexerDeclaration:
                     return new[] { new ObjCIndexerWriter((IndexerDeclarationSyntax)member, context, fileType) };
                 case SyntaxKind.FieldDeclaration:
-                    if (fileType == ObjCFileType.Implementation)
+                {
+                    var field = (FieldDeclarationSyntax)member;
+                    if (fileType == ObjCFileType.Implementation && !field.IsStatic(context))
                         return Enumerable.Empty<IObjCCodeWriter>();
 
-                    return Enumerable.Empty<IObjCCodeWriter>();
-                    // TODO
-                    ////return new[] { new ObjCFieldWriter((FieldDeclarationSyntax)member, context) };
+                    return new[] { new ObjCFieldWriter(field, context) };
+                }
                 default:
                     throw new NotSupportedException();
             }
@@ -192,7 +213,7 @@ namespace CodeBinder.Apple
         {
             var list = new List<IObjCCodeWriter>();
             list.Add(new ObjCPropertyWriter(property, context, fileType));
-            if (property.IsAutomatic(context) && fileType.IsInternalKindHeader())
+            if (property.IsAutomatic(context) && fileType.IsInternalLikeHeader())
                 list.Add(new ObjCUnderlyingFieldWriter(property, context));
 
             return list;
@@ -261,11 +282,12 @@ namespace CodeBinder.Apple
                     switch (filetype)
                     {
                         // Public fields are emited only in public or internal only headers
+                        // Static fields are emited in the implementation
                         case ObjCFileType.PublicHeader:
                         case ObjCFileType.InternalOnlyHeader:
+                        case ObjCFileType.Implementation:
                             return true;
                         case ObjCFileType.InternalHeader:
-                        case ObjCFileType.Implementation:
                             return false;
                         default:
                             throw new NotSupportedException();
@@ -297,11 +319,12 @@ namespace CodeBinder.Apple
                     switch (filetype)
                     {
                         // Internal fields are emited only in the internal or internal only header
+                        // Static fields are emited in the implementation
                         case ObjCFileType.InternalHeader:
                         case ObjCFileType.InternalOnlyHeader:
+                        case ObjCFileType.Implementation:
                             return true;
                         case ObjCFileType.PublicHeader:
-                        case ObjCFileType.Implementation:
                             return false;
                         default:
                             throw new NotSupportedException();

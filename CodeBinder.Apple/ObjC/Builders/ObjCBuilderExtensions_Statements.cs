@@ -252,7 +252,7 @@ namespace CodeBinder.Apple
         public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, ObjCCompilationContext context)
         {
             Debug.Assert(syntax.Variables.Count == 1);
-            builder.Append(syntax.Type, context).Space().Append(syntax.Variables[0], context);
+            builder.Append(syntax.Type, ObjCTypeUsageKind.Declaration, context).Space().Append(syntax.Variables[0], context);
             return builder;
         }
 

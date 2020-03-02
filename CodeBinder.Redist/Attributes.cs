@@ -16,7 +16,6 @@ namespace CodeBinder.Attributes
     /// <summary>
     /// Describe a module useful for native code generation and others (eg. JNI)
     /// </summary>
-    [Conditional(ConditionString)]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class ModuleAttribute : CodeBinderAttribute
     {
@@ -31,7 +30,6 @@ namespace CodeBinder.Attributes
     /// <summary>
     /// Describe an additional import for the target language
     /// </summary>
-    [Conditional(ConditionString)]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public sealed class ImportAttribute : CodeBinderAttribute
     {
@@ -87,8 +85,6 @@ namespace CodeBinder.Attributes
         }
     }
 
-    /// <remarks>This attribute is not marked with Conditional since it
-    /// may be useful for mapping outside of the assembly</remarks>
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
     public sealed class OverloadSuffixAttribute : CodeBinderAttribute
     {
@@ -101,6 +97,16 @@ namespace CodeBinder.Attributes
     }
 
     /// <summary>
+    /// This attribute tells that the method, parameter or return value that should map to a native counterpart
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
+    public sealed class NativeAttribute : CodeBinderAttribute
+    {
+        public NativeAttribute()
+        { }
+    }
+
+    /// <summary>
     /// Inerit this class to create a binder of a parameter/return value type to a differently named type
     /// </summary>
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
@@ -109,8 +115,6 @@ namespace CodeBinder.Attributes
         protected NativeTypeBinder() { }
     }
 
-    /// <remarks>This attribute is not marked with Conditional since it
-    /// may be useful for mapping outside of the assembly</remarks>
     [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Enum
         | AttributeTargets.Field | AttributeTargets.Delegate)]
     public sealed class NativeBindingAttribute : CodeBinderAttribute
@@ -124,9 +128,10 @@ namespace CodeBinder.Attributes
         public string Name { get; private set; }
     }
 
-    /// <remarks>This attribute is not marked with Conditional since it
-    /// may be useful for mapping outside of the assembly</remarks>
-    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Enum )]
+    /// <summary>
+    /// Substitution pattern for enum members, example NativeSubstitution(@"R(\d+)", "$1")
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Enum )]
     public sealed class NativeSubstitutionAttribute : CodeBinderAttribute
     {
         public NativeSubstitutionAttribute(string pattern, string replacement)
@@ -142,8 +147,6 @@ namespace CodeBinder.Attributes
     /// <summary>
     /// Set the return value const
     /// </summary>
-    /// <remarks>This attribute is not marked with Conditional since it
-    /// may be useful for mapping outside of the assembly</remarks>
     [AttributeUsage(AttributeTargets.ReturnValue| AttributeTargets.Parameter)]
     public sealed class ConstAttribute : CodeBinderAttribute
     {
@@ -152,8 +155,6 @@ namespace CodeBinder.Attributes
     /// <summary>
     /// Set the parameter non const
     /// </summary>
-    /// <remarks>This attribute is not marked with Conditional since it
-    /// may be useful for mapping outside of the assembly</remarks>
     [AttributeUsage(AttributeTargets.Parameter)]
     public sealed class MutableAttribute : CodeBinderAttribute
     {
@@ -164,9 +165,6 @@ namespace CodeBinder.Attributes
     ///
     /// Currently used for enums as a prefix for items or max value infix
     /// </summary>
-    /// <remarks>This attribute is not marked with Conditional since it
-    /// may be useful for mapping outside of the assembly</remarks>
-    [Conditional(ConditionString)]
     public sealed class NativeStemAttribute : CodeBinderAttribute
     {
         public NativeStemAttribute(string prefix)
@@ -181,9 +179,6 @@ namespace CodeBinder.Attributes
     /// <summary>
     /// Attribute to specify the library name. Used for example in the export defines in CLang
     /// </summary>
-    /// <remarks>This attribute is not marked with Conditional since it
-    /// may be useful for mapping outside of the assembly</remarks>
-    [Conditional(ConditionString)]
     public sealed class NativeLibraryAttribute : CodeBinderAttribute
     {
         public NativeLibraryAttribute(string name)

@@ -670,6 +670,11 @@ namespace CodeBinder.Shared.CSharp
             return method.IsExtern && method.HasAttribute<DllImportAttribute>();
         }
 
+        public static bool IsNative(this ITypeSymbol type)
+        {
+            return type.TypeKind == TypeKind.Delegate && type.HasAttribute<UnmanagedFunctionPointerAttribute>();
+        }
+
         public static bool IsNative(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
         {
             if (!method.HasAttribute<DllImportAttribute>(provider))
@@ -690,24 +695,24 @@ namespace CodeBinder.Shared.CSharp
 
         public static bool ShouldDiscard(this SyntaxNode node, ICompilationContextProvider provider, LanguageConversion conversion)
         {
-            var symbol = GetDefaultDeclarationSymbol(node, provider);
+            var symbol = getDeclaredSymbol(node, provider);
             if (symbol == null)
                 return false;
 
             return symbol.ShouldDiscard(conversion);
         }
 
-        public static bool HasAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider)
+        public static bool HasAttribute<TAttribute>(this CSharpSyntaxNode node, ICompilationContextProvider provider)
             where TAttribute : Attribute
         {
-            return GetDefaultDeclarationSymbol(node, provider)?.HasAttribute<TAttribute>() == true;
+            return GetDeclaredSymbol(node, provider)?.HasAttribute<TAttribute>() == true;
         }
 
 
-        public static bool TryGetAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)] out AttributeData? data)
+        public static bool TryGetAttribute<TAttribute>(this CSharpSyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)] out AttributeData? data)
             where TAttribute : Attribute
         {
-            var symbol = GetDefaultDeclarationSymbol(node, provider);
+            var symbol = GetDeclaredSymbol(node, provider);
             if (symbol == null)
             {
                 data = null;
@@ -717,7 +722,7 @@ namespace CodeBinder.Shared.CSharp
             return symbol.TryGetAttribute<TAttribute>(out data);
         }
 
-        public static AttributeData GetAttribute<TAttribute>(this SyntaxNode node, ICompilationContextProvider provider)
+        public static AttributeData GetAttribute<TAttribute>(this CSharpSyntaxNode node, ICompilationContextProvider provider)
             where TAttribute : Attribute
         {
             AttributeData? ret;
@@ -727,7 +732,19 @@ namespace CodeBinder.Shared.CSharp
             return ret!;
         }
 
-        private static ISymbol? GetDefaultDeclarationSymbol(SyntaxNode node, ICompilationContextProvider provider)
+        public static TSymbol GetDeclaredSymbol<TSymbol>(this CSharpSyntaxNode node, ICompilationContextProvider provider)
+            where TSymbol : class, ISymbol
+        {
+            return getDeclaredSymbol(node, provider) as TSymbol ?? throw new Exception($"Unable to get declared symbol {typeof(ISymbol).Name} in syntax: {node}");
+        }
+
+        // In fields declaration, get synbol of first declared symbol
+        public static ISymbol? GetDeclaredSymbol(CSharpSyntaxNode node, ICompilationContextProvider provider)
+        {
+            return getDeclaredSymbol(node, provider);
+        }
+
+        static ISymbol? getDeclaredSymbol(SyntaxNode node, ICompilationContextProvider provider)
         {
             if (node.IsKind(SyntaxKind.FieldDeclaration))
             {
@@ -831,16 +848,6 @@ namespace CodeBinder.Shared.CSharp
             return property.GetDeclaredSymbol<IPropertySymbol>(provider).IsAbstract;
         }
 
-        public static bool IsStatic(this BasePropertyDeclarationSyntax method, ICompilationContextProvider provider)
-        {
-            return method.GetDeclaredSymbol(provider)!.IsStatic;
-        }
-
-        public static bool IsStatic(this BaseMethodDeclarationSyntax method, ICompilationContextProvider provider)
-        {
-            return method.GetDeclaredSymbol(provider)!.IsStatic;
-        }
-
         public static bool IsAbstract(this BaseMethodDeclarationSyntax property, ICompilationContextProvider provider)
         {
             return property.GetDeclaredSymbol(provider)!.IsAbstract;
@@ -898,7 +905,7 @@ namespace CodeBinder.Shared.CSharp
 
         public static Accessibility GetAccessibility(this MemberDeclarationSyntax member, ICompilationContextProvider context)
         {
-            return GetDefaultDeclarationSymbol(member, context)!.DeclaredAccessibility;
+            return GetDeclaredSymbol(member, context)!.DeclaredAccessibility;
         }
 
         public static Accessibility GetAccessibility(this AccessorDeclarationSyntax accessor, ICompilationContextProvider context)
@@ -910,6 +917,18 @@ namespace CodeBinder.Shared.CSharp
         {
             var symbol = (IFieldSymbol)node.GetDeclaredSymbol(context)!;
             return Convert.ToInt64(symbol.ConstantValue);
+        }
+
+        public static bool IsConst(this BaseFieldDeclarationSyntax field, ICompilationContextProvider context)
+        {
+            var fieldSymbol = (IFieldSymbol)GetDeclaredSymbol(field, context)!;
+            return fieldSymbol.IsConst;
+        }
+
+        public static bool IsStatic(this MemberDeclarationSyntax field, ICompilationContextProvider context)
+        {
+            var fieldSymbol = GetDeclaredSymbol(field, context)!;
+            return fieldSymbol.IsStatic;
         }
 
         /// <summary>

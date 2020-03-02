@@ -1,4 +1,5 @@
 ﻿using CodeBinder.Util;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
@@ -357,9 +358,23 @@ namespace CodeBinder.Apple
             }
         }
 
-        public static string GetFieldModifiersString(IEnumerable<SyntaxKind> modifiers)
+        public static string GetFieldModifiersString(Accessibility accessibility)
         {
-            return getObjcModifiersString(modifiers, tryGetObjcFieldModifier);
+            switch (accessibility)
+            {
+                case Accessibility.Public:
+                    return "@public";
+                case Accessibility.Protected:
+                    return "@protected";
+                case Accessibility.Private:
+                    return "@private";
+                case Accessibility.Internal:
+                    return "@package";
+                case Accessibility.ProtectedAndInternal:
+                    return "@public";
+                default:
+                    throw new Exception("Unsupported accessibility " + accessibility);
+            }
         }
 
         public static string GetMethodModifiersString(IEnumerable<SyntaxKind> modifiers)
@@ -386,45 +401,6 @@ namespace CodeBinder.Apple
             }
 
             return builder.ToString();
-        }
-
-        private static bool tryGetObjcFieldModifier(SyntaxKind modifier, [NotNullWhen(true)]out string? modifierStr)
-        {
-            switch (modifier)
-            {
-                case SyntaxKind.PublicKeyword:
-                    modifierStr = "@public";
-                    return true;
-                case SyntaxKind.ProtectedKeyword:
-                    modifierStr = "@protected";
-                    return true;
-                case SyntaxKind.PrivateKeyword:
-                    modifierStr = "@private";
-                    return true;
-                case SyntaxKind.StaticKeyword:
-                    //modifierStr = "static";
-                    //return true;
-                    // TODO: per ora lancio una tuona se incontro un campo di classe statico
-                    modifierStr = null;
-                    return false;
-                case SyntaxKind.ReadOnlyKeyword:
-                    modifierStr = null;
-                    return false;
-                case SyntaxKind.ConstKeyword:
-                    //modifierStr = "final";
-                    //return true;
-                    //modifierStr = "static";
-                    //return true;
-                    // TODO: per ora lancio una tuona se incontro un campo di classe const
-                case SyntaxKind.NewKeyword:
-                    modifierStr = null;
-                    return false;
-                case SyntaxKind.InternalKeyword:
-                    modifierStr = null;
-                    return false;
-                default:
-                    throw new Exception();
-            }
         }
 
         private static bool tryGetObjCTypeModifier(SyntaxKind modifier, [NotNullWhen(true)]out string? modifierSTr)
