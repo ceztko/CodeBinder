@@ -15,11 +15,15 @@ namespace CodeBinder.Apple
 {
     static partial class ObjCBuilderExtension
     {
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, ArrayCreationExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Append("new").Space().Append(syntax.Type, context);
+            builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close()
+                .Append("init").Space().Append(syntax.GetArrayInitializationSize().ToString()).Close();
             if (syntax.Initializer != null)
-                builder.Append(syntax.Initializer, context);
+                ;//// FIXME
+                ////throw new NotSupportedException("ObjC doesn't yet support initializer");
+                ////builder.Append(syntax.Initializer, context);
 
             return builder;
         }
@@ -74,7 +78,7 @@ namespace CodeBinder.Apple
             {
                 case SyntaxKind.AsExpression:
                 {
-                    builder.Append("BinderUtils").Dot().Append("as").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context).Dot().Append("class");
+                    builder.Append("CBBinderAsOperator").AngleBracketed().Append(syntax.Right, context).Close().Parenthesized().Append(syntax.Left, context).Close();
                     return builder;
                 }
                 case SyntaxKind.EqualsExpression:
@@ -115,9 +119,10 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Parenthesized().Append(syntax.Type, context).Close().Append(syntax.Expression, context);
+            builder.Append("CBBinderCastOperator").AngleBracketed().Append(syntax.Type, context).Close().Parenthesized().Append(syntax.Expression, context).Close();
             return builder;
         }
 
@@ -150,15 +155,17 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, BaseExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Append("super");
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, ThisExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Append("this");
+            builder.Append("self");
             return builder;
         }
 
@@ -172,17 +179,12 @@ namespace CodeBinder.Apple
                 return builder;
             }
 
-            if (methodSymbol.IsNative() && methodSymbol.ReturnType.TypeKind == TypeKind.Enum)
-                builder.Append(methodSymbol.ReturnType.Name).Dot().Append("fromValue").Parenthesized(() => append(builder, syntax, context));
+            if (methodSymbol.IsNative())
+                builder.Append(syntax.Expression, context).Parenthesized().Append(syntax.ArgumentList.Arguments, true, context).Close();
             else
-                append(builder, syntax, context);
+                builder.Bracketed().Append(syntax.Expression, context).Space().Append(syntax.ArgumentList.Arguments, false, context).Close();
 
             return builder;
-        }
-
-        static void append(CodeBuilder builder, InvocationExpressionSyntax syntax, ObjCCompilationContext context)
-        {
-            builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, ObjCCompilationContext context)
@@ -257,9 +259,12 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Append("new").Space().Append(syntax.Type, context).Append(syntax.ArgumentList!, context);
+            var constructorSymbol = syntax.GetSymbol<IMethodSymbol>(context);
+            builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close()
+                .Append(constructorSymbol.GetObjCName(context)).Append(syntax.ArgumentList!.Arguments, false, context);
             return builder;
         }
 
@@ -438,21 +443,6 @@ namespace CodeBinder.Apple
                 builder.Bracketed().Append(syntax.Arguments, context);
             else
                 builder.Append(syntax.Arguments, context);
-
-            return builder;
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, ArgumentListSyntax syntax, ObjCCompilationContext context)
-        {
-            var parentSymbol = syntax.Parent.GetSymbol(context);
-            bool isNativeInvocation = false;
-            if (parentSymbol?.Kind == SymbolKind.Method && (parentSymbol as IMethodSymbol)!.IsNative())
-                isNativeInvocation = true;
-
-            if (isNativeInvocation)
-                builder.Parenthesized().Append(syntax.Arguments, isNativeInvocation, context);
-            else
-                builder.Append(syntax.Arguments, isNativeInvocation, context);
 
             return builder;
         }

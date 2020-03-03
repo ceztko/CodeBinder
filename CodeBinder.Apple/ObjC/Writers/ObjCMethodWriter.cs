@@ -291,7 +291,7 @@ namespace CodeBinder.Apple
                                 throw new Exception();
                         }
 
-                        Builder.Append(selfIdentifier).Space().Append("init").Append(Item.Initializer.ArgumentList, Context);
+                        Builder.Append(selfIdentifier).Space().Append("init").Append(Item.Initializer.ArgumentList.Arguments, false, Context);
                     }
                     Builder.EndOfStatement();
                 }

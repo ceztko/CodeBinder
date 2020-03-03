@@ -192,39 +192,53 @@ namespace CodeBinder.Apple
 @end
 ";
 
-        public const string BinderUtils =
-@"public class BinderUtils
+        public const string CBBinderUtils_h =
+@"#ifndef CB_BINDERUTILS
+#define CB_BINDERUTILS
+
+#import <Foundation/Foundation.h>
+
+inline BOOL CBBinderEquals(NSString *lhs, NSString *rhs)
 {
-    // Simulates as operator https://stackoverflow.com/a/148949/213871
-    public static <T> T as(Object obj, Class<T> clazz)
+    if (lhs == nil)
     {
-        if (clazz.isInstance(obj))
-            return clazz.cast(obj);
-
-        return null;
-    }
-
-    public static boolean equals(String lhs, String rhs)
-    {
-        if (lhs == null)
-        {
-            if (rhs == null)
-                return true;
-            else
-                return false;
-        }
+        if (rhs == nil)
+            return YES;
         else
-        {
-            return lhs.equals(rhs);
-        }
+            return NO;
     }
+    else
+    {
+        return [lhs isEqualToString:rhs];
+    }
+}
 
-    // TODO: Consider moving this methods to generation of exising .NET class BinderUtils.
-    // See CodeBinder.Redist
-    public static native long newGlobalRef(Object obj);
-    public static native void deleteGlobalRef(long globalref);
-    public static native long newGlobalWeakRef(Object obj);
-    public static native void deleteGlobalWeakRef(long globalref);
-}";
+
+template<typename T>
+T * CBBinderAsOperator(NSObject *obj)
+{
+    if (obj == nil)
+        return nil;
+	
+	if ([obj isKindOfClass:[T class]])
+		return (T *)obj;
+	else
+		return nil;
+}
+
+template<typename T>
+T * CBBinderCastOperator(NSObject *obj)
+{
+    if (obj == nil)
+        return nil;
+	
+	if ([obj isKindOfClass:[T class]])
+		return (T *)obj;
+	else
+		@throw [NSException exceptionWithName:@""InvalidCastException"" reason:nil userInfo:nil];
+}
+
+#endif // CB_BINDERUTILS
+";
     }
 }

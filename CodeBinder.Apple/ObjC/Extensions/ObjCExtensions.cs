@@ -26,8 +26,7 @@ namespace CodeBinder.Apple
                 // java.lang.Object
                 { "System.Object", new Dictionary<string, SymbolReplacement>() {
                     { "GetHashCode", new SymbolReplacement() { Name = "hashCode", Kind = SymbolReplacementKind.Method } },
-                    { "Equals", new SymbolReplacement() { Name = "equals", Kind = SymbolReplacementKind.Method } },
-                    { "Clone", new SymbolReplacement() { Name = "clone", Kind = SymbolReplacementKind.Method } },
+                    { "Equals", new SymbolReplacement() { Name = "isEqual", Kind = SymbolReplacementKind.Method } },
                     { "ToString", new SymbolReplacement() { Name = "toString", Kind = SymbolReplacementKind.Method } },
                 } },
                 // java.lang.String
@@ -36,7 +35,7 @@ namespace CodeBinder.Apple
                     { "op_Inequality", new SymbolReplacement() { Name = "BinderUtils.equals", Kind = SymbolReplacementKind.StaticMethod, Negate = true } },
                 } },
                 { "System.IntPtr", new Dictionary<string, SymbolReplacement>() {
-                    { "Zero", new SymbolReplacement() { Name = "0", Kind = SymbolReplacementKind.Literal } },
+                    { "Zero", new SymbolReplacement() { Name = "NULL", Kind = SymbolReplacementKind.Literal } },
                 } },
                 { "System.Array", new Dictionary<string, SymbolReplacement>() {
                     { "Length", new SymbolReplacement() { Name = "length", Kind = SymbolReplacementKind.Field } },

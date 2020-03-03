@@ -92,7 +92,11 @@ namespace CodeBinder.Apple
 
         public string GetBindedName(IMethodSymbol symbol)
         {
-            return _bindedMethodNames[symbol];
+            // FIXME
+            if (_bindedMethodNames.TryGetValue(symbol, out var found))
+                return found;
+
+            return "init";
         }
 
         public IEnumerable<EnumDeclarationSyntax> Enums

@@ -216,7 +216,7 @@ namespace CodeBinder.Util
         void doChecks()
         {
             if (_closed)
-                throw new ObjectDisposedException(nameof(CodeBuilder));
+                throw new ObjectDisposedException($"Can't close {nameof(CodeBuilder)}, ensure you are attempting to close a child instance");
 
             closeChild();
         }

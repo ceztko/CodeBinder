@@ -41,6 +41,7 @@ namespace CodeBinder.Apple
                 builder.AppendLine($"#import \"{ObjCUtils.ToArrayBoxTypeName(type)}.h\"");
             builder.AppendLine();
             builder.AppendLine("// Other types");
+            builder.AppendLine($"#import {nameof(ObjCClasses.CBBinderUtils_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
             builder.AppendLine($"#import {nameof(ObjCClasses.CBException_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
             builder.AppendLine($"#import {nameof(ObjCClasses.CBIEqualityCompararer_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
             builder.AppendLine($"#import {nameof(ObjCClasses.CBIReadOnlyList_h).ToObjCHeaderFilename(ObjCHeaderNameUse.IncludeRelativeFirst)}");
