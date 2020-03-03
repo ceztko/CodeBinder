@@ -18,12 +18,18 @@ namespace CodeBinder.Apple
         // OK
         public static CodeBuilder Append(this CodeBuilder builder, ArrayCreationExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close()
-                .Append("init").Space().Append(syntax.GetArrayInitializationSize().ToString()).Close();
-            if (syntax.Initializer != null)
-                ;//// FIXME
-                ////throw new NotSupportedException("ObjC doesn't yet support initializer");
-                ////builder.Append(syntax.Initializer, context);
+
+            if (syntax.Initializer == null)
+            {
+                builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close().Space()
+                    .Append("init").Space().Append(syntax.Type.RankSpecifiers[0].Sizes[0], context).Close();
+            }
+            else
+            {
+                builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close().Space()
+                    .Append("initWithValues").Colon().Append(syntax.Initializer.Expressions.Count.ToString())
+                    .Space().Append(syntax.Initializer, context).Close();
+            }
 
             return builder;
         }
@@ -151,7 +157,7 @@ namespace CodeBinder.Apple
 
         public static CodeBuilder Append(this CodeBuilder builder, InitializerExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Braced().Append(syntax.Expressions, context);
+            builder.Append(syntax.Expressions, context);
             return builder;
         }
 
@@ -491,7 +497,7 @@ namespace CodeBinder.Apple
         {
             bool first = true;
             foreach (var expression in expressions)
-                builder.CommaSeparator(ref first).Append(expression, context);
+                builder.Space(ref first).Colon().Append(expression, context);
 
             return builder;
         }

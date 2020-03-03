@@ -170,7 +170,7 @@ namespace CodeBinder.Apple
         protected override string HeaderGuardStem => IsInternalHeader ? "INTERNAL_TYPES" : "TYPES";
 
         public string BaseTypesHeader => IsInternalHeader
-            ? ConversionCSharpToObjC.BaseTypesHeader
-            : $"{ConversionCSharpToObjC.InternalBasePath}/{ConversionCSharpToObjC.BaseTypesHeader}";
+            ? $"../{ConversionCSharpToObjC.BaseTypesHeader}"
+            : ConversionCSharpToObjC.BaseTypesHeader;
     }
 }

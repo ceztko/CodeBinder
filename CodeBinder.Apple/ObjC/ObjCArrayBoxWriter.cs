@@ -20,7 +20,7 @@ namespace CodeBinder.Apple
 
         protected override string GetFileName() => IsHeader ? HeaderFile : ImplementationFile;
 
-        protected override string GetBasePath() => ConversionCSharpToObjC.InternalBasePath;
+        protected override string GetBasePath() => ConversionCSharpToObjC.SupportBasePath;
 
         protected override void write(CodeBuilder builder)
         {
@@ -71,6 +71,30 @@ namespace CodeBinder.Apple
                     builder.Append("    return nil").EndOfStatement();
                     builder.Append("_values = ").Append($"({ArrayTypeDeclaration})").Append($"calloc(count, sizeof({PrimitiveType.ToTypeName()}))").EndOfStatement();
                     builder.Append("_count = count").EndOfStatement(); ;
+                    builder.Append("return self").EndOfStatement();
+                }
+            }
+            builder.AppendLine();
+            builder.Append("-(id)initWithValues").Colon().Append("(NSUInteger)").Append("count").Append(", ...");
+            if (IsHeader)
+            {
+                builder.EndOfStatement();
+            }
+            else
+            {
+                builder.AppendLine();
+                using (builder.Block())
+                {
+                    builder.Append("self = [self init:count]").EndOfStatement();
+                    builder.Append("if (self == nil)").AppendLine();
+                    builder.Append("    return nil").EndOfStatement();
+                    builder.Append("va_list args").EndOfStatement();
+                    builder.Append("va_start(args, count)").EndOfStatement();
+                    builder.Append("for (int i = 0; i < count; i++)").AppendLine();
+                    using (builder.Block())
+                    {
+                        builder.Append($"_values[i] = va_arg(args, {ToPromotedType(PrimitiveType)})").EndOfStatement();
+                    }
                     builder.Append("return self").EndOfStatement();
                 }
             }
@@ -132,6 +156,50 @@ namespace CodeBinder.Apple
             {
                 builder.AppendLine();
                 builder.AppendLine($"#endif // CB_{BoxTypeName.ToUpper()}");
+            }
+        }
+
+        // Narrowed types are promoted https://stackoverflow.com/a/28054417/213871
+        static string ToPromotedType(ObjCInteropType type)
+        {
+            switch (type)
+            {
+                case ObjCInteropType.NSUInteger:
+                    return "NSUInteger";
+                case ObjCInteropType.NSInteger:
+                    return "NSInteger";
+                case ObjCInteropType.UIntPtr:
+                    return "void *";
+                case ObjCInteropType.IntPtr:
+                    return "void *";
+                case ObjCInteropType.Boolean:
+                    return "int32_t";
+                case ObjCInteropType.Char:
+                    return "int32_t";
+                case ObjCInteropType.Byte:
+                    return "int32_t";
+                case ObjCInteropType.SByte:
+                    return "int32_t";
+                case ObjCInteropType.UInt16:
+                    return "int32_t";
+                case ObjCInteropType.Int16:
+                    return "int32_t";
+                case ObjCInteropType.UInt32:
+                    return "uint32_t";
+                case ObjCInteropType.Int32:
+                    return "int32_t";
+                case ObjCInteropType.UInt64:
+                    return "uint64_t";
+                case ObjCInteropType.Int64:
+                    return "int64_t";
+                case ObjCInteropType.Single:
+                    return "double";
+                case ObjCInteropType.Double:
+                    return "double";
+                case ObjCInteropType.String:
+                    return "NSString *";
+                default:
+                    throw new Exception();
             }
         }
 

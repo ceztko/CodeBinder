@@ -175,7 +175,6 @@ namespace CodeBinder.Apple
             return builder.UsingChild("]");
         }
 
-
         /// <remarks>One line. Child istance</remarks>
         public static CodeBuilder AngleBracketed(this CodeBuilder builder)
         {

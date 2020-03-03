@@ -422,14 +422,21 @@ namespace CodeBinder.Apple
 
             return char.ToUpperInvariant(text[0]) + text.Substring(1);
         }
+
         public static string ToObjCHeaderFilename(this string name, ObjCHeaderNameUse use = ObjCHeaderNameUse.Normal)
+        {
+            return ToObjCHeaderFilename(name, null, use);
+        }
+
+        public static string ToObjCHeaderFilename(this string name, string? basePath, ObjCHeaderNameUse use = ObjCHeaderNameUse.Normal)
         {
             const string extension = "_h";
             string headerName;
+            basePath = basePath == null ? null : $"{basePath}/";
             if (name.EndsWith(extension))
-                headerName = $"{name.Substring(0, name.Length - extension.Length)}.{ConversionCSharpToObjC.HeaderExtension}";
+                headerName = $"{basePath}{name.Substring(0, name.Length - extension.Length)}.{ConversionCSharpToObjC.HeaderExtension}";
             else
-                headerName = $"{name}.{ConversionCSharpToObjC.HeaderExtension}";
+                headerName = $"{basePath}{name}.{ConversionCSharpToObjC.HeaderExtension}";
 
             switch (use)
             {

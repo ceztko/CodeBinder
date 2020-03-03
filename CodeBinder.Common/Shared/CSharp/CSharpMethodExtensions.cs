@@ -43,16 +43,6 @@ namespace CodeBinder.Shared.CSharp
             return null;
         }
 
-        public static int GetArrayInitializationSize(this ArrayCreationExpressionSyntax syntax)
-        {
-            if (syntax.Type.RankSpecifiers.Count != 0)
-                return syntax.Type.RankSpecifiers[0].Rank;
-            else if (syntax.Initializer != null)
-                return syntax.Initializer.Expressions.Count;
-            else
-                throw new Exception("Array creation doesn't have initialization size");
-        }
-
         public static bool IsPartialMethod(this BaseMethodDeclarationSyntax method, out bool hasEmptyBody)
         {
             if (method.Modifiers.Any(SyntaxKind.PartialKeyword))
