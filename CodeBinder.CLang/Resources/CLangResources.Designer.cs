@@ -68,17 +68,22 @@ namespace CodeBinder.CLang {
         ///#include &lt;cstdint&gt;
         ///#else // __cplusplus
         ///#include &lt;stdint.h&gt;
-        ///#ifdef __APPLE__
-        ///#include &lt;Foundation/NSString.h&gt;
-        ///typedef unichar char16_t;
-        ///#else // __APPLE__
+        ///#ifndef __APPLE__
         ///#include &lt;uchar.h&gt;
         ///#endif // __APPLE__
         ///#endif // __cplusplus
         ///
+        ///#if defined(__cplusplus) &amp;&amp; defined(_MSC_VER)
+        ///// In MSVC bool is guaranteed to be 1 byte, with true == 1 and false == 0
+        ///typedef bool BBool;
+        ///#else
         ///#define BBool signed char
+        ///#endif
         ///
-        ///#endif // CODE_BINDER_BASE_TYPES.
+        ///#ifdef __APPLE__
+        ///typedef char * cbstring_t;
+        ///typedef char cbchar_t;
+        ///#define CB_NULL_TERMI [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBBaseTypes_h {
             get {
@@ -87,38 +92,31 @@ namespace CodeBinder.CLang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #include &lt;cstring&gt;
-        ///#include &lt;string&gt;
-        ///#include &lt;stdexcept&gt;
+        ///   Looks up a localized string similar to #ifndef CODE_BINDER_STRING_HEADER
+        ///#define CODE_BINDER_STRING_HEADER
+        ///
+        ///#include &lt;cstring&gt;
         ///#include &lt;cstdlib&gt;
-        ///#endif
+        ///#include &lt;string&gt;
+        ///#include &lt;codecvt&gt;
+        ///#include &lt;stdexcept&gt;
+        ///#include &quot;../CBBaseTypes.h&quot;
         ///
         ///#ifdef WIN32
-        ///extern &quot;C&quot; __declspec(dllimport) void * __stdcall CoTaskMemAlloc(size_t cb);
-        ///#else
+        ///extern &quot;C&quot; __declspec(dllimport) void* __stdcall CoTaskMemAlloc(size_t cb);
+        ///extern &quot;C&quot; __declspec(dllimport) void __stdcall CoTaskMemFree(void* pv);
+        ///#endif
         ///
-        ///extern &quot;C&quot;
+        ///namespace cb
         ///{
-        ///    struct cstring16
-        ///    {
-        ///        char16_t* string;
-        ///        intptr_t length;
-        ///    };
-        ///
-        ///    struct cstring
-        ///    {
-        ///        char* string;
-        ///        intptr_t length;
-        ///    };
-        ///
-        ///    inline cstring16 alloc_cstring16(const char16_t* str, size_t len)
+        ///    inline cbstring_t CopyString(const cbchar_t* str, size_t len)
         ///    {
         ///        if (str == nullptr)
-        ///            return { [rest of string was truncated]&quot;;.
+        ///            r [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string cstrings_h {
+        internal static string CBInterop_h {
             get {
-                return ResourceManager.GetString("cstrings_h", resourceCulture);
+                return ResourceManager.GetString("CBInterop_h", resourceCulture);
             }
         }
     }

@@ -163,7 +163,7 @@ namespace CodeBinder.CLang
                     if (!returnType && !attributes.HasAttribute<MutableAttribute>())
                         constParameter |= true;
 
-                    return "char16_t *";
+                    return "cbstring_t";
                 case "System.Runtime.InteropServices.HandleRef":
                 case "System.IntPtr":
                     var binder = attributes.FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
@@ -175,7 +175,7 @@ namespace CodeBinder.CLang
                     // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
                     return "BBool";
                 case "System.Char":
-                    return "char16_t";
+                    return "cbchar_t";
                 case "System.Byte":
                     return "uint8_t";
                 case "System.SByte":
@@ -207,7 +207,7 @@ namespace CodeBinder.CLang
             switch (typeName)
             {
                 case "System.String":
-                    return "char16_t **";
+                    return "cbstring_t *";
                 case "System.Runtime.InteropServices.HandleRef":
                 case "System.IntPtr":
                     var binder = attributes.FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
@@ -219,7 +219,7 @@ namespace CodeBinder.CLang
                     // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
                     return "BBool *";
                 case "System.Char":
-                    return "char16_t *";
+                    return "cbchar_t *";
                 case "System.Byte":
                     return "uint8_t *";
                 case "System.SByte":
