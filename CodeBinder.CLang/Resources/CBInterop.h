@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <string>
 #include <codecvt>
-#include <stdexcept>
+#include <new>
 #include <StringIntl.h>
 #include "../CBBaseTypes.h"
 
@@ -77,7 +77,7 @@ namespace cb
             return nullptr;
 
 #ifdef CBSTRING_UTF8
-        auto u8str = _U16ToU8(str_, len_);
+        auto u8str = usr::_U16ToU8(str_, len_);
         auto str = u8str.c_str();
         size_t len = u8str.length();
 #else
