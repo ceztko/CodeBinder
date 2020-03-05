@@ -59,5 +59,44 @@ namespace CodeBinder.Apple {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #ifndef CBOCINTEROP_HEADER
+        ///#define CBOCINTEROP_HEADER
+        ///#pragma once
+        ///
+        ///#import &lt;Foundation/Foundation.h&gt;
+        ///#include &lt;CBInterop.h&gt;
+        ///
+        ///class SN2OC
+        ///{
+        ///private:
+        ///    bool m_handled;
+        ///    cbstring_t m_cstr;
+        ///	NSString * __strong * m_ocstr;	
+        ///public:
+        ///    SN2OC(NSString * __strong * str)
+        ///	{
+        ///		m_handled = true;
+        ///		m_cstr = nullptr;
+        ///		m_ocstr = str;	
+        ///	}
+        ///
+        ///    SN2OC(const cbstring_t str)
+        ///	{
+        ///		m_handled = false;		
+        ///		m_cstr = (cbstring_t)str;
+        ///		m_ocstr = nullptr;
+        ///	}
+        ///	
+        ///    SN2OC(cbstring_t &amp;&amp;str)
+        ///	{
+        ///		m_ [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CBOCInterop_h {
+            get {
+                return ResourceManager.GetString("CBOCInterop_h", resourceCulture);
+            }
+        }
     }
 }

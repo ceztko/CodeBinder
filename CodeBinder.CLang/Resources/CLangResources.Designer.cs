@@ -73,6 +73,10 @@ namespace CodeBinder.CLang {
         ///#endif // __APPLE__
         ///#endif // __cplusplus
         ///
+        ///#ifdef __APPLE__
+        ///#define CBSTRING_UTF8
+        ///#endif
+        ///
         ///#if defined(__cplusplus) &amp;&amp; defined(_MSC_VER)
         ///// In MSVC bool is guaranteed to be 1 byte, with true == 1 and false == 0
         ///typedef bool BBool;
@@ -80,10 +84,8 @@ namespace CodeBinder.CLang {
         ///#define BBool signed char
         ///#endif
         ///
-        ///#ifdef __APPLE__
-        ///typedef char * cbstring_t;
-        ///typedef char cbchar_t;
-        ///#define CB_NULL_TERMI [rest of string was truncated]&quot;;.
+        ///#ifdef CBSTRING_UTF8
+        ///typedef char cbcha [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBBaseTypes_h {
             get {
@@ -92,31 +94,61 @@ namespace CodeBinder.CLang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #ifndef CODE_BINDER_STRING_HEADER
-        ///#define CODE_BINDER_STRING_HEADER
+        ///   Looks up a localized string similar to #ifndef CODE_BINDER_INTEROP_HEADER
+        ///#define CODE_BINDER_INTEROP_HEADER
+        ///#pragma once
         ///
-        ///#include &lt;cstring&gt;
         ///#include &lt;cstdlib&gt;
         ///#include &lt;string&gt;
-        ///#include &lt;codecvt&gt;
-        ///#include &lt;stdexcept&gt;
-        ///#include &quot;../CBBaseTypes.h&quot;
+        ///#include &quot;CBBaseTypes.h&quot;
         ///
         ///#ifdef WIN32
-        ///extern &quot;C&quot; __declspec(dllimport) void* __stdcall CoTaskMemAlloc(size_t cb);
         ///extern &quot;C&quot; __declspec(dllimport) void __stdcall CoTaskMemFree(void* pv);
+        ///extern &quot;C&quot; __declspec(dllimport) void __stdcall LocalFree(void* pv);
         ///#endif
         ///
         ///namespace cb
         ///{
-        ///    inline cbstring_t CopyString(const cbchar_t* str, size_t len)
+        ///    inline void FreeString(cbstring_t str)
         ///    {
-        ///        if (str == nullptr)
-        ///            r [rest of string was truncated]&quot;;.
+        ///#ifdef WIN32
+        ///        CoTaskMemFree(str);
+        ///#else
+        ///        std::free(str);
+        ///#endif
+        ///    }
+        ///
+        ///    inline void FreeMemory(vo [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBInterop_h {
             get {
                 return ResourceManager.GetString("CBInterop_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #ifndef CODE_BINDER_INTEROP_INTERNAL_HEADER
+        ///#define CODE_BINDER_INTEROP_INTERNAL_HEADER
+        ///#pragma once
+        ///
+        ///#include &quot;../CBInterop.h&quot;
+        ///#include &lt;cstddef&gt;
+        ///#include &lt;cstring&gt;
+        ///#include &lt;string&gt;
+        ///#include &lt;codecvt&gt;
+        ///#include &lt;new&gt;
+        ///#include &lt;StringIntl.h&gt;
+        ///
+        ///#ifdef WIN32
+        ///extern &quot;C&quot; __declspec(dllimport) void* __stdcall CoTaskMemAlloc(size_t cb);
+        ///extern &quot;C&quot; __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
+        ///#endif
+        ///
+        ///// _CBU: Narrow to platform specific codebinder unicode st [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CBInteropInternal_h {
+            get {
+                return ResourceManager.GetString("CBInteropInternal_h", resourceCulture);
             }
         }
     }

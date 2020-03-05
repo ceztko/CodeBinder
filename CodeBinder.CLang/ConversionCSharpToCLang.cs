@@ -42,7 +42,8 @@ namespace CodeBinder.CLang
             get
             {
                 yield return new StringConversionWriter(BaseTypesHeader, () => CLangResources.CBBaseTypes_h) { GeneratedPreamble = SourcePreamble };
-                yield return new StringConversionWriter("CBInterop.h", () => CLangResources.CBInterop_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter("CBInterop.h", () => CLangResources.CBInterop_h) { GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter("CBInterop.h", () => CLangResources.CBInteropInternal_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
             }
         }
     }

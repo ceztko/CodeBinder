@@ -30,9 +30,15 @@ namespace CodeBinder.Apple
                 {
                     yield return $"<{Compilation.CLangLibraryHeaderName}>";
                     if (ImplementationType == ObjImplementationType.PublicType)
+                    {
                         yield return $"\"{ConversionCSharpToObjC.InternalBasePath}/{Compilation.ObjCLibraryHeaderName}\"";
+                        yield return $"\"{ConversionCSharpToObjC.InternalBasePath}/{nameof(ObjCResources.CBOCInterop_h).ToObjCHeaderFilename()}\"";
+                    }
                     else
+                    {
                         yield return $"\"{Compilation.ObjCLibraryHeaderName}\"";
+                        yield return $"\"{nameof(ObjCResources.CBOCInterop_h).ToObjCHeaderFilename()}\"";
+                    }
                 }
             }
         }
