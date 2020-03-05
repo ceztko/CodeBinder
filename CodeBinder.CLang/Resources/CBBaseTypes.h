@@ -10,6 +10,10 @@
 #endif // __APPLE__
 #endif // __cplusplus
 
+#ifdef __APPLE__
+#define CBSTRING_UTF8
+#endif
+
 #if defined(__cplusplus) && defined(_MSC_VER)
 // In MSVC bool is guaranteed to be 1 byte, with true == 1 and false == 0
 typedef bool BBool;
@@ -17,13 +21,13 @@ typedef bool BBool;
 #define BBool signed char
 #endif
 
-#ifdef __APPLE__
+#ifdef CBSTRING_UTF8
 typedef char cbchar_t;
 #define CB_NULL_TERMINATION '\0'
-#else // __APPLE__
+#else // CBSTRING_UTF8
 typedef char16_t cbchar_t;
 #define CB_NULL_TERMINATION u'\0'
-#endif // __APPLE__
+#endif // CBSTRING_UTF8
 
 #define cbstring_t cbchar_t *
 

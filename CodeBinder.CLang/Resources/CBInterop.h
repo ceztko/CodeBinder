@@ -1,7 +1,6 @@
-/* This file was generated. DO NOT EDIT! */
-/* This file was generated. DO NOT EDIT! */
 #ifndef CODE_BINDER_INTEROP_HEADER
 #define CODE_BINDER_INTEROP_HEADER
+#pragma once
 
 #include <cstddef>
 #include <cstring>
@@ -9,6 +8,7 @@
 #include <string>
 #include <codecvt>
 #include <stdexcept>
+#include <StringIntl.h>
 #include "../CBBaseTypes.h"
 
 #ifdef WIN32
@@ -18,25 +18,16 @@ extern "C" __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags,
 extern "C" __declspec(dllimport) void __stdcall LocalFree(void* pv);
 #endif
 
-// _CBM: Marshal string to cbstring_t
-// _CBU: Wrap to platform specific codebinder unicode string (std::string in Apple, std::u16string everywhere else)
-#define _CBM(str) cb::MarshalString(str)
-#define _CBN(str) (cbstring_t)cb::WrapNarrow(str).c_str()
+// _CBU: Narrow to platform specific codebinder unicode string (std::string in Apple,
+//       std::u16string everywhere else) and take data view
+#ifdef CBSTRING_UTF8
+#define _CBU(str) _U8C(str)
+#else // CBSTRING_UTF8
+#define _CBU(str) _U16C(str)
+#endif // CBSTRING_UTF8
 
 namespace cb
 {
-    inline std::string _U16ToU8(const char16_t* str, size_t len)
-    {
-        std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-        return convert.to_bytes(str, str + len);
-    }
-
-    inline std::u16string _U8ToU16(const char* str, size_t len)
-    {
-        std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
-        return convert.from_bytes(str, str + len);
-    }
-
     inline cbstring_t CopyString(const cbchar_t* str, size_t len)
     {
         // Allocate also the space of the termination character
@@ -58,11 +49,11 @@ namespace cb
         if (str_ == nullptr)
             return nullptr;
 
-#ifdef __APPLE__
+#ifdef CBSTRING_UTF8
         auto str = str_;
         size_t len = len_;
 #else
-        auto u16str = _U8ToU16(str_, len_);
+        auto u16str = usr::_U8ToU16(str_, len_);
         auto str = u16str.c_str();
         size_t len = u16str.length();
 #endif
@@ -85,7 +76,7 @@ namespace cb
         if (str_ == nullptr)
             return nullptr;
 
-#ifdef __APPLE__
+#ifdef CBSTRING_UTF8
         auto u8str = _U16ToU8(str_, len_);
         auto str = u8str.c_str();
         size_t len = u8str.length();
@@ -107,7 +98,6 @@ namespace cb
     }
 
 #ifdef WIN32
-
     inline cbstring_t MarshalString(const wchar_t* str, size_t len)
     {
         return MarshalString(reinterpret_cast<const char16_t*>(str), len);
@@ -122,7 +112,6 @@ namespace cb
     {
         return MarshalString(reinterpret_cast<const std::u16string&>(str));
     }
-
 #endif // WIN32
 
     inline void FreeString(cbstring_t str)
@@ -141,6 +130,7 @@ namespace cb
         auto ret = LocalAlloc(LMEM_FIXED, size);
 #else
         auto ret = malloc(size);
+
 #endif
         if (ret == nullptr)
             throw std::bad_alloc();
