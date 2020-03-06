@@ -354,34 +354,11 @@ namespace CodeBinder.Apple
         static void writeObjCParameterIdentifier(CodeBuilder builder, TypeSyntax syntax, IParameterSymbol parameter,
             ObjCCompilationContext context)
         {
-            void writeBoxValueAccess()
+            if (parameter.RefKind != RefKind.None
+                && ((parameter.ContainingSymbol as IMethodSymbol)?.IsNative() == false
+                    || parameter.Type.GetFullName() != "System.String"))
             {
-                writeObjCIdentifier(builder, syntax, parameter, context);
-                builder.Dot().Append("value");
-            }
-
-            if (parameter.RefKind != RefKind.None)
-            {
-                switch (parameter.Type.TypeKind)
-                {
-                    case TypeKind.Enum:
-                    {
-                        writeBoxValueAccess();
-                        return;
-                    }
-                    case TypeKind.Struct:
-                    {
-                        if (parameter.Type.IsCLRPrimitiveType())
-                        {
-                            writeBoxValueAccess();
-                            return;
-                        }
-
-                        break;
-                    }
-                    default:
-                        throw new Exception();
-                }
+                builder.Append("&");
             }
 
             writeObjCIdentifier(builder, syntax, parameter, context);

@@ -505,11 +505,38 @@ namespace CodeBinder.Apple
                         return builder;
                     }
 
-                    builder.CommaSeparator(ref first).Append(arg.Expression, context);
-                    if (type.GetFullName() == "System.Runtime.InteropServices.HandleRef")
+                    void appendExpression()
                     {
-                        // Passing "System.HandleRef" to hantive methods needs further accessing handle
-                        builder.Dot().Append("handle");
+                        builder.CommaSeparator(ref first).Append(arg.Expression, context);
+                    }
+
+                    string fullname = type.GetFullName();
+                    switch (fullname)
+                    {
+                        case "System.Runtime.InteropServices.HandleRef":
+                        {
+                            // Passing "System.HandleRef" to hantive methods needs further accessing handle
+                            builder.Dot().Append("handle");
+                            appendExpression();
+                            break;
+                        }
+                        case "System.String":
+                        {
+                            if (arg.RefKindKeyword.Kind() == SyntaxKind.None)
+                            {
+                                builder.Bracketed(() =>
+                                {
+                                    appendExpression();
+                                    builder.Space().Append("UTF8String");
+                                });
+                            }
+                            else
+                            {
+                                builder.Append("SN2OC").Parenthesized(() => appendExpression());
+                            }
+
+                            break;
+                        }
                     }
                 }
             }

@@ -180,6 +180,14 @@ namespace CodeBinder.Apple
             return builder.UsingChild("]");
         }
 
+        /// <remarks>One line</remarks>
+        public static CodeBuilder Bracketed(this CodeBuilder builder, Action bracketed)
+        {
+            builder.Append("[");
+            bracketed();
+            return builder.Append("]");
+        }
+
         /// <remarks>One line. Child istance</remarks>
         public static CodeBuilder AngleBracketed(this CodeBuilder builder)
         {
