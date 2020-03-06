@@ -185,11 +185,25 @@ namespace CodeBinder.Apple
                 // Partial method has no implementation
                 return builder;
             }
-
             if (methodSymbol.IsNative())
+            {
                 builder.Append(syntax.Expression, context).Parenthesized().Append(syntax.ArgumentList.Arguments, true, context).Close();
+            }
             else
-                builder.Bracketed().Append(syntax.Expression, context).Space().Append(syntax.ArgumentList.Arguments, false, context).Close();
+            {
+                if (syntax.Parent.IsStatement())
+                {
+                    // Objective C static or instance message
+                    builder.Bracketed().Append(methodSymbol.IsStatic ? methodSymbol.ContainingType.GetObjCName(context) : "self").Space()
+                        .Append(syntax.Expression, context).Space().Append(syntax.ArgumentList.Arguments, false, context).Close();
+                }
+                else
+                {
+                    builder.Append(syntax.Expression, context).Space().Append(syntax.ArgumentList.Arguments, false, context);
+                }
+
+            }
+
 
             return builder;
         }
@@ -263,6 +277,11 @@ namespace CodeBinder.Apple
                     }
 
                     builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
+                    break;
+                }
+                case SymbolKind.Method:
+                {
+                    builder.Bracketed().Append(syntax.Expression, context).Space().Append(syntax.Name, context).Close();
                     break;
                 }
                 default:

@@ -117,6 +117,11 @@ namespace CodeBinder.Shared.CSharp
             return true;
         }
 
+        public static bool IsExpression(this SyntaxNode node)
+        {
+            return IsExpression(node, out var kind);
+        }
+
         public static bool IsExpression(this SyntaxNode node, out ExpressionKind kind)
         {
             switch (node.Kind())
@@ -436,6 +441,11 @@ namespace CodeBinder.Shared.CSharp
 
             statement = (TStatement)node;
             return true;
+        }
+
+        public static bool IsStatement(this SyntaxNode node)
+        {
+            return IsStatement(node, out var kind);
         }
 
         public static bool IsStatement(this SyntaxNode node, out StatementKind kind)
