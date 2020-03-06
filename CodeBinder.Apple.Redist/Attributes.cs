@@ -16,4 +16,12 @@ namespace CodeBinder.Attributes
             Selector = selector;
         }
     }
+
+    // Specify that the attribute is a C type (for example add "struct"
+    // qualifier in the method signatures
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum, AllowMultiple = false)]
+    public sealed class CLangTypeAttribute : CodeBinderAttribute
+    {
+        public CLangTypeAttribute() { }
+    }
 }

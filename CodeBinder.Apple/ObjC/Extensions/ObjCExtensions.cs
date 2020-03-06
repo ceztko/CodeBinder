@@ -372,7 +372,19 @@ namespace CodeBinder.Apple
             if (context.IsCompilationDefinedType(symbol) && !symbol.HasAttribute<IgnoreAttribute>())
                 return $"{ConversionCSharpToObjC.ConversionPrefix}{symbol.Name}";
             else
-                return symbol.Name;
+            {
+                if (symbol.HasAttribute<CLangTypeAttribute>())
+                {
+                    // The following is very lacking. anyway it's mostly unuseful
+                    if (symbol.TypeKind == TypeKind.Enum)
+                        return $"enum {symbol.Name}";
+                    else
+                        return $"struct {symbol.Name}";
+                }
+                else
+                    return symbol.Name;
+            }
+
         }
 
         public static string GetObjCModifierString(this FieldDeclarationSyntax field, ObjCCompilationContext context)

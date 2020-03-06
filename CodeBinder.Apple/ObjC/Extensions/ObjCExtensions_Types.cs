@@ -781,7 +781,8 @@ namespace CodeBinder.Apple
                     if (typeKind == ObjCTypeKind.Protocol)
                         type = $"id<{type}> *";
                     else
-                        type = $"{type} **";
+                        // Ensure arc is working https://stackoverflow.com/a/39053139
+                        type = $"{type} * __strong *";
                     return;
                 }
                 case ObjCTypeUsageKind.Normal:
