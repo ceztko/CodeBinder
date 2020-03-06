@@ -204,7 +204,6 @@ namespace CodeBinder.Apple
 
             }
 
-
             return builder;
         }
 
