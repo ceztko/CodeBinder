@@ -422,7 +422,7 @@ namespace CodeBinder.Apple
                         {
                             objCTypeName = binding.GetConstructorArgument<string>(0);
                             objcTypeKind = GetUnkwownTypeKind(symbol);
-                            TryAdaptRefType(ref objCTypeName, usage, objcTypeKind);
+                            TryAdaptType(ref objCTypeName, usage, objcTypeKind);
                             builder.Append(objCTypeName);
                             return;
                         }
@@ -440,7 +440,8 @@ namespace CodeBinder.Apple
                         fullTypeName = symbol.GetFullName();
                     }
 
-                    if (namedType.IsValueType && usage == ObjCTypeUsageKind.DeclarationByRef)
+                    if (namedType.IsValueType && namedType.TypeKind != TypeKind.Enum
+                        && usage == ObjCTypeUsageKind.DeclarationByRef)
                     {
                         // We don't support value types, yet
                         usage = ObjCTypeUsageKind.Declaration;
@@ -478,7 +479,7 @@ namespace CodeBinder.Apple
                                 throw new NotSupportedException("Unsupported underlying nullable types");
 
                             objcTypeKind = ObjCTypeKind.Class;
-                            TryAdaptRefType(ref boxTypeName, usage, objcTypeKind);
+                            TryAdaptType(ref boxTypeName, usage, objcTypeKind);
                             builder.Append(boxTypeName);
                             return;
                         }
@@ -519,14 +520,14 @@ namespace CodeBinder.Apple
                         // NOTE: in case of named types, we don't append generic parameters here:
                         // ObjectiveC has only the so called "lightweight generics", that are useful
                         // only for swift interop
-                        TryAdaptRefType(ref objCTypeName, usage, objcTypeKind);
+                        TryAdaptType(ref objCTypeName, usage, objcTypeKind);
                         builder.Append(objCTypeName);
                         break;
                     }
                     case SymbolKind.TypeParameter:
                     {
                         objCTypeName = symbol.GetObjCName(context);
-                        TryAdaptRefType(ref objCTypeName, usage, objcTypeKind);
+                        TryAdaptType(ref objCTypeName, usage, objcTypeKind);
                         builder.Append(objCTypeName);
                         break;
                     }
@@ -564,77 +565,77 @@ namespace CodeBinder.Apple
                 {
                     knownObjCType = "CBHandleRef";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Object":
                 {
                     knownObjCType = "NSObject";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.String":
                 {
                     knownObjCType = "NSString";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Exception":
                 {
                     knownObjCType = "CBException";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.NotImplementedException":
                 {
                     knownObjCType = "CBException";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.IDisposable":
                 {
                     knownObjCType = "CBIDisposable";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.IReadOnlyList<out T>":
                 {
                     knownObjCType = "CBIReadOnlyList";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.IEqualityComparer<in T>":
                 {
                     knownObjCType = "CBIEqualityCompararer";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.IEnumerable<out T>":
                 {
                     knownObjCType = "NSFastEnumeration";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.List<T>":
                 {
                     knownObjCType = "NSMutableArray";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.KeyValuePair<TKey, TValue>":
                 {
                     knownObjCType = "CBKeyValuePair";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptRefType(ref knownObjCType, usage, objcTypeKind.Value);
+                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 default:
@@ -658,7 +659,7 @@ namespace CodeBinder.Apple
                 {
                     if (ObjCUtils.TryGeArrayBoxType(fullTypeName, out knownObjCType))
                     {
-                        TryAdaptRefType(ref knownObjCType, usage, ObjCTypeKind.Class);
+                        TryAdaptType(ref knownObjCType, usage, ObjCTypeKind.Class);
                         return true;
                     }
                     else
@@ -756,39 +757,41 @@ namespace CodeBinder.Apple
         /// <summary>
         /// Try fix the ref type based on the usage
         /// </summary>
-        static void TryAdaptRefType(ref string type, ObjCTypeUsageKind usage, ObjCTypeKind typeKind)
+        static void TryAdaptType(ref string type, ObjCTypeUsageKind usage, ObjCTypeKind typeKind)
         {
             if (typeKind == ObjCTypeKind.Value)
             {
-                // This methods adapts only ref types
-                return;
+                if (usage == ObjCTypeUsageKind.DeclarationByRef)
+                    type = $"{type} *";
             }
-
-            switch (usage)
+            else
             {
-                case ObjCTypeUsageKind.Declaration:
+                switch (usage)
                 {
-                    // Handle special declaration for protocols
-                    if (typeKind == ObjCTypeKind.Protocol)
-                        type = $"id<{type}>";
-                    else
-                        type = $"{type} *";
-                    return;
+                    case ObjCTypeUsageKind.Declaration:
+                    {
+                        // Handle special declaration for protocols
+                        if (typeKind == ObjCTypeKind.Protocol)
+                            type = $"id<{type}>";
+                        else
+                            type = $"{type} *";
+                        break;
+                    }
+                    case ObjCTypeUsageKind.DeclarationByRef:
+                    {
+                        // Handle special declaration for protocols
+                        if (typeKind == ObjCTypeKind.Protocol)
+                            type = $"id<{type}> *";
+                        else
+                            // Ensure arc is working https://stackoverflow.com/a/39053139
+                            type = $"{type} * __strong *";
+                        break;
+                    }
+                    case ObjCTypeUsageKind.Normal:
+                        break;
+                    default:
+                        throw new NotSupportedException();
                 }
-                case ObjCTypeUsageKind.DeclarationByRef:
-                {
-                    // Handle special declaration for protocols
-                    if (typeKind == ObjCTypeKind.Protocol)
-                        type = $"id<{type}> *";
-                    else
-                        // Ensure arc is working https://stackoverflow.com/a/39053139
-                        type = $"{type} * __strong *";
-                    return;
-                }
-                case ObjCTypeUsageKind.Normal:
-                    return;
-                default:
-                    throw new NotSupportedException();
             }
         }
     }

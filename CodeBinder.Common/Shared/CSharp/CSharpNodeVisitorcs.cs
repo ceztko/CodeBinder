@@ -246,7 +246,7 @@ namespace CodeBinder.Shared.CSharp
 
             foreach (var arg in node.Arguments)
             {
-                if (!arg.RefKindKeyword.IsNone())
+                if (!(arg.RefKindKeyword.IsNone() || Compilation.Conversion.SupportedPolicies.Contains(Policies.PassByRef)))
                 {
                     var argSymbol = arg.Expression.GetSymbol(this);
                     ITypeSymbol argType = null!;
