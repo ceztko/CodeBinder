@@ -100,6 +100,11 @@ namespace CodeBinder.Apple
             return builder.Append(".");
         }
 
+        public static CodeBuilder Dereference(this CodeBuilder builder)
+        {
+            return builder.Append("->");
+        }
+
         public static CodeBuilder Comma(this CodeBuilder builder)
         {
             return builder.Append(",");

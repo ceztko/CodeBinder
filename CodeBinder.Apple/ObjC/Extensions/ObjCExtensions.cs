@@ -23,16 +23,16 @@ namespace CodeBinder.Apple
         {
             _replacements = new Dictionary<string, Dictionary<string, SymbolReplacement>>()
             {
-                // java.lang.Object
+                // NSObject
                 { "System.Object", new Dictionary<string, SymbolReplacement>() {
-                    { "GetHashCode", new SymbolReplacement() { Name = "hashCode", Kind = SymbolReplacementKind.Method } },
+                    { "GetHashCode", new SymbolReplacement() { Name = "hash", Kind = SymbolReplacementKind.Property } },
                     { "Equals", new SymbolReplacement() { Name = "isEqual", Kind = SymbolReplacementKind.Method } },
-                    { "ToString", new SymbolReplacement() { Name = "toString", Kind = SymbolReplacementKind.Method } },
+                    { "ToString", new SymbolReplacement() { Name = "description", Kind = SymbolReplacementKind.Property } },
                 } },
-                // java.lang.String
+                // NSString
                 { "System.String", new Dictionary<string, SymbolReplacement>() {
-                    { "op_Equality", new SymbolReplacement() { Name = "BinderUtils.equals", Kind = SymbolReplacementKind.StaticMethod } },
-                    { "op_Inequality", new SymbolReplacement() { Name = "BinderUtils.equals", Kind = SymbolReplacementKind.StaticMethod, Negate = true } },
+                    { "op_Equality", new SymbolReplacement() { Name = "CBBinderEqual", Kind = SymbolReplacementKind.StaticMethod } },
+                    { "op_Inequality", new SymbolReplacement() { Name = "CBBinderNotEqual", Kind = SymbolReplacementKind.StaticMethod } },
                 } },
                 { "System.IntPtr", new Dictionary<string, SymbolReplacement>() {
                     { "Zero", new SymbolReplacement() { Name = "NULL", Kind = SymbolReplacementKind.Literal } },
@@ -40,18 +40,10 @@ namespace CodeBinder.Apple
                 { "System.Array", new Dictionary<string, SymbolReplacement>() {
                     { "Length", new SymbolReplacement() { Name = "length", Kind = SymbolReplacementKind.Field } },
                 } },
-                // java.lang.AutoCloseable
+                // NSMutableArray
                 { "System.Collections.Generic.List<T>", new Dictionary<string, SymbolReplacement>() {
-                    { "Add", new SymbolReplacement() { Name = "add", Kind = SymbolReplacementKind.Method } },
-                    { "Clear", new SymbolReplacement() { Name = "clear", Kind = SymbolReplacementKind.Method } },
-                } },
-                // java.lang.AutoCloseable
-                { "System.IDisposable", new Dictionary<string, SymbolReplacement>() {
-                    { "Dispose", new SymbolReplacement() { Name = "close", Kind = SymbolReplacementKind.Method } }
-                } },
-                // java.lang.Iterable<T>
-                { "System.Collections.Generic.IEnumerable<out T>", new Dictionary<string, SymbolReplacement>() {
-                    { "GetEnumerator", new SymbolReplacement() { Name = "iterator", Kind = SymbolReplacementKind.Method } }
+                    { "Add", new SymbolReplacement() { Name = "addObject", Kind = SymbolReplacementKind.Method } },
+                    { "Clear", new SymbolReplacement() { Name = "removeAllObjects", Kind = SymbolReplacementKind.Method } },
                 } },
             };
         }

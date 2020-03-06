@@ -28,6 +28,7 @@ namespace CodeBinder.Apple
             {
                 builder.AppendLine($"#ifndef CB_{BoxTypeName.ToUpper()}");
                 builder.AppendLine($"#define CB_{BoxTypeName.ToUpper()}");
+                builder.AppendLine("#pragma once");
                 builder.AppendLine();
                 builder.AppendLine($"#import <Foundation/Foundation.h>");
             }
@@ -46,7 +47,7 @@ namespace CodeBinder.Apple
                     // Fields
                     builder.AppendLine("@private");
                     builder.Append(ArrayTypeDeclaration).Space().Append("_values").EndOfStatement();
-                    builder.Append("NSUInteger").Space().Append("_count").EndOfStatement();
+                    builder.Append("NSUInteger").Space().Append("_length").EndOfStatement();
                 }
             }
             else
@@ -56,7 +57,7 @@ namespace CodeBinder.Apple
 
             builder.AppendLine();
             // Constructor with parameter
-            builder.Append("-(id)init").Colon().Append("(NSUInteger)").Append("count");
+            builder.Append("-(id)init").Colon().Append("(NSUInteger)").Append("length");
             if (IsHeader)
             {
                 builder.EndOfStatement();
@@ -69,13 +70,13 @@ namespace CodeBinder.Apple
                     builder.Append("self = [super init]").EndOfStatement();
                     builder.Append("if (self == nil)").AppendLine();
                     builder.Append("    return nil").EndOfStatement();
-                    builder.Append("_values = ").Append($"({ArrayTypeDeclaration})").Append($"calloc(count, sizeof({PrimitiveType.ToTypeName()}))").EndOfStatement();
-                    builder.Append("_count = count").EndOfStatement(); ;
+                    builder.Append("_values = ").Append($"({ArrayTypeDeclaration})").Append($"calloc(length, sizeof({PrimitiveType.ToTypeName()}))").EndOfStatement();
+                    builder.Append("_length = length").EndOfStatement(); ;
                     builder.Append("return self").EndOfStatement();
                 }
             }
             builder.AppendLine();
-            builder.Append("-(id)initWithValues").Colon().Append("(NSUInteger)").Append("count").Append(", ...");
+            builder.Append("-(id)initWithValues").Colon().Append("(NSUInteger)").Append("length").Append(", ...");
             if (IsHeader)
             {
                 builder.EndOfStatement();
@@ -85,12 +86,12 @@ namespace CodeBinder.Apple
                 builder.AppendLine();
                 using (builder.Block())
                 {
-                    builder.Append("self = [self init:count]").EndOfStatement();
+                    builder.Append("self = [self init:length]").EndOfStatement();
                     builder.Append("if (self == nil)").AppendLine();
                     builder.Append("    return nil").EndOfStatement();
                     builder.Append("va_list args").EndOfStatement();
-                    builder.Append("va_start(args, count)").EndOfStatement();
-                    builder.Append("for (int i = 0; i < count; i++)").AppendLine();
+                    builder.Append("va_start(args, length)").EndOfStatement();
+                    builder.Append("for (int i = 0; i < length; i++)").AppendLine();
                     using (builder.Block())
                     {
                         builder.Append($"_values[i] = va_arg(args, {ToPromotedType(PrimitiveType)})").EndOfStatement();
@@ -103,7 +104,7 @@ namespace CodeBinder.Apple
             if (IsHeader)
             {
                 builder.Append("@property (nonatomic)").Space().Append($"{ArrayTypeDeclaration}").Space().Append("values").EndOfStatement();
-                builder.Append("@property (nonatomic)").Space().Append("NSUInteger count").EndOfStatement();
+                builder.Append("@property (nonatomic)").Space().Append("NSUInteger length").EndOfStatement();
                 builder.AppendLine();
             }
 
@@ -137,7 +138,7 @@ namespace CodeBinder.Apple
             }
             builder.AppendLine();
 
-            builder.Append($"-(NSUInteger)count");
+            builder.Append($"-(NSUInteger)length");
             if (IsHeader)
             {
                 builder.EndOfStatement();
@@ -147,7 +148,7 @@ namespace CodeBinder.Apple
                 builder.AppendLine();
                 using (builder.Block())
                 {
-                    builder.Append("return _count").EndOfStatement();
+                    builder.Append("return _length").EndOfStatement();
                 }
             }
 

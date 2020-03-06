@@ -77,6 +77,7 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, BinaryExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var kind = syntax.Kind();
@@ -100,9 +101,6 @@ namespace CodeBinder.Apple
                             {
                                 case SymbolReplacementKind.StaticMethod:
                                 {
-                                    if (replacement.Negate)
-                                        builder.ExclamationMark();
-
                                     builder.Append(replacement.Name).Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context);
                                     return builder;
                                 }
@@ -132,6 +130,7 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, ConditionalExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Append(syntax.Condition, context).Space().QuestionMark().Space()
@@ -140,6 +139,7 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        // Element access like array "arr[5]"
         public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var symbol = syntax.GetSymbol(context);
@@ -175,6 +175,7 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context)!;
@@ -193,6 +194,7 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var kind = syntax.Kind();
@@ -224,6 +226,7 @@ namespace CodeBinder.Apple
             }
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, ObjCCompilationContext context)
         {
             if (builder.TryToReplace(syntax, context))
@@ -246,6 +249,7 @@ namespace CodeBinder.Apple
                     if (field.HasDistinctObjCName(context, out string? name))
                         return builder.Append(name);
 
+                    builder.Append(syntax.Expression, context).Dereference().Append(syntax.Name, context);
                     break;
                 }
                 case SymbolKind.Property:
@@ -257,11 +261,15 @@ namespace CodeBinder.Apple
                         builder.Append(syntax.Expression, context);
                         return builder;
                     }
+
+                    builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
                     break;
                 }
+                default:
+                    throw new NotSupportedException();
             }
 
-            builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
+
             return builder;
         }
 
@@ -274,27 +282,31 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, ParenthesizedExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Parenthesized().Append(syntax.Expression, context);
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, PostfixUnaryExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Append(syntax.Operand, context).Append(syntax.GetObjCOperator());
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, PrefixUnaryExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Append(syntax.GetObjCOperator()).Append(syntax.Operand, context);
             return builder;
         }
 
+        // OK
         public static CodeBuilder Append(this CodeBuilder builder, TypeOfExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Append(syntax.Type, context).Append(".class");
+            builder.Bracketed().Append(syntax.Type, context).Space().Append("class").Close();
             return builder;
         }
 

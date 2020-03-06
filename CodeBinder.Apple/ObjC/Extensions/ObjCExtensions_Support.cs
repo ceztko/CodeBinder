@@ -9,7 +9,6 @@ namespace CodeBinder.Apple
         public string Name { get; set; } = string.Empty;
         public SymbolReplacementKind Kind { get; set; }
         public string SetterName { get; set; } = string.Empty;
-        public bool Negate { get; set; }
     }
 
     enum SymbolReplacementKind
@@ -17,6 +16,7 @@ namespace CodeBinder.Apple
         Method,
         StaticMethod,
         Field,
-        Literal
+        Literal,
+        Property
     }
 }

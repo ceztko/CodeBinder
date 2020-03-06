@@ -8,6 +8,7 @@ namespace CodeBinder.Apple
     {
         public const string CBException_h = @"#ifndef CB_EXCPETION
 #define CB_EXCPETION
+#pragma once
 
 #import <Foundation/Foundation.h>
 
@@ -44,6 +45,7 @@ namespace CodeBinder.Apple
 
         public const string CBIReadOnlyList_h = @"#ifndef CB_IREADONLYLIST
 #define CB_IREADONLYLIST
+#pragma once
 
 // Substitute for .NET IReadOnlyList
 @protocol CBIReadOnlyList
@@ -54,6 +56,7 @@ namespace CodeBinder.Apple
 
         public const string CBIEqualityCompararer_h = @"#ifndef CB_IEQUALITYCOMPARARER
 #define CB_IEQUALITYCOMPARARER
+#pragma once
 
 // Substitute for .NET IReadOnlyList
 @protocol CBIEqualityCompararer
@@ -76,6 +79,7 @@ namespace CodeBinder.Apple
         public const string CBKeyValuePair_h =
 @"#ifndef CB_KEYVALUEPAIR
 #define CB_KEYVALUEPAIR
+#pragma once
 
 #import <Foundation/Foundation.h>
 
@@ -129,6 +133,7 @@ namespace CodeBinder.Apple
         public const string CBHandleRef_h =
 @"#ifndef CB_HANDLEREF
 #define CB_HANDLEREF
+#pragma once
 
 #import <Foundation/Foundation.h>
 
@@ -195,10 +200,11 @@ namespace CodeBinder.Apple
         public const string CBBinderUtils_h =
 @"#ifndef CB_BINDERUTILS
 #define CB_BINDERUTILS
+#pragma once
 
 #import <Foundation/Foundation.h>
 
-inline BOOL CBBinderEquals(NSString *lhs, NSString *rhs)
+inline BOOL CBBinderEqual(NSString *lhs, NSString *rhs)
 {
     if (lhs == nil)
     {
@@ -213,6 +219,20 @@ inline BOOL CBBinderEquals(NSString *lhs, NSString *rhs)
     }
 }
 
+inline BOOL CBBinderNotEqual(NSString *lhs, NSString *rhs)
+{
+    if (lhs == nil)
+    {
+        if (rhs == nil)
+            return NO;
+        else
+            return YES;
+    }
+    else
+    {
+        return ![lhs isEqualToString:rhs];
+    }
+}
 
 template<typename T>
 T * CBBinderAsOperator(NSObject *obj)

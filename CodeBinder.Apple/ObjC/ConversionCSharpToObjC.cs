@@ -17,7 +17,7 @@ namespace CodeBinder.Apple
         internal const string ImplementationExtension = "mm";
         internal const string ConversionPrefix = "OC";
         internal const string TypesHeader = "OCTypes.h";
-        internal const string BaseTypesHeader = "CBBaseTypes.h";
+        internal const string BaseTypesHeader = "CBOCBaseTypes.h";
         internal const string InternalBasePath = "Internal";
         internal const string SupportBasePath = "Support";
 
@@ -55,7 +55,7 @@ namespace CodeBinder.Apple
             get
             {
                 yield return new ObjCBaseTypesHeaderConversion();
-                yield return new StringConversionWriter(nameof(ObjCResources.CBOCInterop_h).ToObjCHeaderFilename(), () => ObjCResources.CBOCInterop_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter(nameof(ObjCResources.CBOCInterop_h).ToObjCHeaderFilename(), () => ObjCResources.CBOCInterop_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter(nameof(ObjCClasses.CBBinderUtils_h).ToObjCHeaderFilename(), () => ObjCClasses.CBBinderUtils_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter(nameof(ObjCClasses.CBException_h).ToObjCHeaderFilename(), () => ObjCClasses.CBException_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter(nameof(ObjCClasses.CBException_mm).ToObjCImplementationFilename(), () => ObjCClasses.CBException_mm) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
@@ -71,8 +71,6 @@ namespace CodeBinder.Apple
                     yield return new ObjCArrayBoxWriter(type, true);
                     yield return new ObjCArrayBoxWriter(type, false);
                 }
-
-                ////yield return new StringConversionBuilder($"{nameof(ObjCClasses.BinderUtils)}.h", () => ObjCClasses.BinderUtils) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
             }
         }
     }

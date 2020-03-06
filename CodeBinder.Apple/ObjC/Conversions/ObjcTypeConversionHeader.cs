@@ -31,6 +31,7 @@ namespace CodeBinder.Apple
             {
                 builder.AppendLine($"#ifndef {HeaderGuard}");
                 builder.AppendLine($"#define {HeaderGuard}");
+                builder.AppendLine("#pragma once");
                 builder.AppendLine();
             }
 
