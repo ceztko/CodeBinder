@@ -1,6 +1,4 @@
 ObjC:
-- ObjCCompilationContext.GetBindedName
-
 - ObjC: Public static fields
 - ObjC: support include dependencies for type parameters, support for dipendencies for covariant return types.
 Suggested solution: create a correct tree of dependencies and print base types without any methods (just fields and base types?) in order in "OCTypes.h"

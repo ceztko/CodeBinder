@@ -31,14 +31,8 @@ namespace CodeBinder.Apple
                 } },
                 // NSString
                 { "System.String", new Dictionary<string, SymbolReplacement>() {
-                    { "op_Equality(String, String)", new SymbolReplacement() { Name = "CBBinderEqual", Kind = SymbolReplacementKind.StaticMethod } },
-                    { "op_Inequality(String, String)", new SymbolReplacement() { Name = "CBBinderNotEqual", Kind = SymbolReplacementKind.StaticMethod } },
-                } },
-                { "System.IntPtr", new Dictionary<string, SymbolReplacement>() {
-                    { "Zero", new SymbolReplacement() { Name = "NULL", Kind = SymbolReplacementKind.Literal } },
-                } },
-                { "System.Array", new Dictionary<string, SymbolReplacement>() {
-                    { "Length", new SymbolReplacement() { Name = "length", Kind = SymbolReplacementKind.Field } },
+                    { "op_Equality(String, String)", new SymbolReplacement() { Name = "CBBinderStringEqual", Kind = SymbolReplacementKind.StaticMethod } },
+                    { "op_Inequality(String, String)", new SymbolReplacement() { Name = "CBBinderStringNotEqual", Kind = SymbolReplacementKind.StaticMethod } },
                 } },
                 // NSMutableArray
                 { "System.Collections.Generic.List<T>", new Dictionary<string, SymbolReplacement>() {
@@ -46,13 +40,20 @@ namespace CodeBinder.Apple
                     { "Add(T)", new SymbolReplacement() { Name = "addObject", Kind = SymbolReplacementKind.Method } },
                     { "Clear()", new SymbolReplacement() { Name = "removeAllObjects", Kind = SymbolReplacementKind.Method } },
                 } },
+                // Pointer types
+                { "System.IntPtr", new Dictionary<string, SymbolReplacement>() {
+                    { "Zero", new SymbolReplacement() { Name = "NULL", Kind = SymbolReplacementKind.Literal } },
+                } },
+                { "System.UIntPtr", new Dictionary<string, SymbolReplacement>() {
+                    { "Zero", new SymbolReplacement() { Name = "NULL", Kind = SymbolReplacementKind.Literal } },
+                } },
             };
         }
 
         public static bool HasObjCReplacement(this IMethodSymbol methodSymbol, [NotNullWhen(true)]out SymbolReplacement? objCReplacement)
         {
             methodSymbol = methodSymbol.OriginalDefinition;
-            var uniqueMethodName = methodSymbol.GetNameWithParmeters();
+            var uniqueMethodName = methodSymbol.GetNameWithParameters();
             var containingType = methodSymbol.ContainingType;
             Dictionary<string, SymbolReplacement>? replacements;
             foreach (var iface in containingType.AllInterfaces)
@@ -300,7 +301,7 @@ namespace CodeBinder.Apple
         public static string GetObjCName(this EnumMemberDeclarationSyntax enm, ObjCCompilationContext context)
         {
             var fieldSymbol = enm.GetDeclaredSymbol<IFieldSymbol>(context);
-            return getObjCName(fieldSymbol, context);
+            return getEnumMemberObjCName(fieldSymbol, context);
         }
 
         public static string GetObjCName(this IMethodSymbol method, ObjCCompilationContext context)
@@ -334,6 +335,7 @@ namespace CodeBinder.Apple
             return property.Name.ToObjCCase();
         }
 
+        /// <summary>Handle fields with distinct Objective-C name, like enum members</summary>
         public static bool HasDistinctObjCName(this IFieldSymbol field, ObjCCompilationContext context, [NotNullWhen(true)]out string? name)
         {
             if (field.ContainingType.TypeKind != TypeKind.Enum)
@@ -342,11 +344,11 @@ namespace CodeBinder.Apple
                 return false;
             }
 
-            name = getObjCName(field, context);
+            name = getEnumMemberObjCName(field, context);
             return true;
         }
 
-        public static string getObjCName(IFieldSymbol enm, ObjCCompilationContext context)
+        public static string getEnumMemberObjCName(IFieldSymbol enm, ObjCCompilationContext context)
         {
             return $"{enm.ContainingType.GetObjCName(context)}_{enm.Name}";
         }

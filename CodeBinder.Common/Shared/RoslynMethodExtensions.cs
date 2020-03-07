@@ -510,7 +510,18 @@ namespace CodeBinder.Shared
             return SymbolDisplay.ToDisplayString(symbol.ContainingNamespace, DisplayFormats.FullnameFormat);
         }
 
-        public static string GetNameWithParmeters(this IMethodSymbol symbol)
+        /// <summary>
+        /// Compute type name normalizing type parameter names (eg. List&lt;Int32&gt; -> List&lt;T&gt;)
+        /// </summary>
+        public static string GetFullNameNormalized(this ITypeSymbol symbol)
+        {
+            return SymbolDisplay.ToDisplayString(symbol.OriginalDefinition, DisplayFormats.FullnameFormat);
+        }
+
+        /// <summary>
+        /// Compute method names with parameter types
+        /// </summary>
+        public static string GetNameWithParameters(this IMethodSymbol symbol)
         {
             return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.NameWithParameters);
         }

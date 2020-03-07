@@ -113,6 +113,15 @@ namespace CodeBinder.Apple
                     }
                     break;
                 }
+                case SyntaxKind.AddExpression:
+                {
+                    if (syntax.Left.GetTypeSymbol(context)!.GetFullName() == "System.String")
+                    {
+                        builder.Append("CBBinderStringAdd").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context).Close();
+                        return builder;
+                    }
+                    break;
+                }
                 default:
                 {
                     break;
@@ -136,22 +145,6 @@ namespace CodeBinder.Apple
             builder.Append(syntax.Condition, context).Space().QuestionMark().Space()
                 .Append(syntax.WhenTrue, context).Space().Colon().Space()
                 .Append(syntax.WhenFalse, context);
-            return builder;
-        }
-
-        // Element access like array "arr[5]"
-        public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, ObjCCompilationContext context)
-        {
-            var symbol = syntax.GetSymbol(context);
-            if (symbol?.Kind == SymbolKind.Property)
-            {
-                var property = (IPropertySymbol)symbol;
-                Debug.Assert(property.IsIndexer);
-                builder.Append(syntax.Expression, context).Dot().Append(syntax, property, context).Parenthesized().Append(syntax.ArgumentList, false, context);
-                return builder;
-            }
-
-            builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
             return builder;
         }
 
@@ -187,6 +180,11 @@ namespace CodeBinder.Apple
             }
             if (methodSymbol.IsNative())
             {
+                if (methodSymbol.ReturnType.TypeKind == TypeKind.Enum)
+                    builder.Parenthesized().Append(methodSymbol.ReturnType.GetObjCName(context)).Close();
+                else if (methodSymbol.ReturnType.GetFullName() == "System.String")
+                    builder.Parenthesized().Append("SN2OC").Close();
+
                 builder.Append(syntax.Expression, context).Parenthesized().Append(syntax.ArgumentList.Arguments, true, context).Close();
             }
             else
@@ -239,19 +237,36 @@ namespace CodeBinder.Apple
             }
         }
 
+        // Element access like array "arr[5]"
+        public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, ObjCCompilationContext context)
+        {
+            var symbol = syntax.GetSymbol(context);
+            if (symbol?.Kind == SymbolKind.Property)
+            {
+                // Handle indexer properties
+                var property = (IPropertySymbol)symbol;
+                Debug.Assert(property.IsIndexer);
+
+                void appendProperty() => builder.Append(syntax.Expression, context).Space()
+                    .Append(syntax, property, context).Append(syntax.ArgumentList, false, context);
+
+                if (syntax.Parent.IsStatement())
+                    builder.Bracketed(appendProperty);
+                else
+                    appendProperty();
+
+                return builder;
+            }
+
+            builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
+            return builder;
+        }
+
         // OK
         public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, ObjCCompilationContext context)
         {
             if (builder.TryToReplace(syntax, context))
                 return builder;
-
-            var typeSymbol = syntax.Expression.GetTypeSymbol(context);
-            if (typeSymbol?.IsCLRPrimitiveType() == true)
-            {
-                string objCBoxType = ObjCUtils.GetBoxType(typeSymbol.GetFullName())!;
-                builder.Parenthesized().Parenthesized().Append(objCBoxType).Close().Append(syntax.Expression, context).Close().Dot().Append(syntax.Name, context);
-                return builder;
-            }
 
             var symbol = syntax.GetSymbol(context)!;
             switch (symbol.Kind)
@@ -272,6 +287,13 @@ namespace CodeBinder.Apple
                     {
                         // There are no nullable types in Java, just discard ".Value" accessor
                         builder.Append(syntax.Expression, context);
+                        return builder;
+                    }
+                    var property = (IPropertySymbol)symbol;
+                    if (property.IsIndexer && syntax.Parent.IsStatement())
+                    {
+                        // Handle eg. obj.Property[5] = false -> [obj.Property set:NO]
+                        builder.Bracketed().Append(syntax.Expression, context).Dot().Append(syntax.Name, context).Close();
                         return builder;
                     }
 
@@ -511,32 +533,41 @@ namespace CodeBinder.Apple
                         builder.Append(arg.Expression, context);
                     }
 
-                    string fullname = type.GetFullName();
-                    switch (fullname)
+                    if (type.TypeKind == TypeKind.Array)
                     {
-                        case "System.Runtime.InteropServices.HandleRef":
+                        appendExpression();
+                        builder.Dot().Append("values");
+                    }
+                    else
+                    {
+                        string fullname = type.GetFullNameNormalized();
+                        switch (fullname)
                         {
-                            // Passing "System.HandleRef" to hantive methods needs further accessing handle
-                            appendExpression();
-                            builder.Dot().Append("handle");
-                            break;
-                        }
-                        case "System.String":
-                        {
-                            if (arg.RefKindKeyword.Kind() == SyntaxKind.None)
+                            case "System.Runtime.InteropServices.HandleRef":
                             {
-                                builder.Bracketed(() =>
+                                // Passing "System.HandleRef" to hantive methods needs further accessing handle
+                                appendExpression();
+                                builder.Dot().Append("handle");
+                                break;
+                            }
+                            case "System.String":
+                            {
+                                if (arg.RefKindKeyword.Kind() == SyntaxKind.None)
                                 {
+                                    builder.Bracketed(() =>
+                                    {
+                                        appendExpression();
+                                        builder.Space().Append("UTF8String");
+                                    });
+                                }
+                                else
+                                {
+                                    builder.Parenthesized().Append("SN2OC").Close();
                                     appendExpression();
-                                    builder.Space().Append("UTF8String");
-                                });
-                            }
-                            else
-                            {
-                                builder.Append("SN2OC").Parenthesized(() => appendExpression());
-                            }
+                                }
 
-                            break;
+                                break;
+                            }
                         }
                     }
                 }

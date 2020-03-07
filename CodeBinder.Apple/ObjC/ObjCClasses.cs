@@ -204,7 +204,12 @@ namespace CodeBinder.Apple
 
 #import <Foundation/Foundation.h>
 
-inline BOOL CBBinderEqual(NSString *lhs, NSString *rhs)
+inline NSString * CBBinderStringAdd(NSString *lhs, NSObject *rhs)
+{
+    return [lhs initWithString:[rhs description]];
+}
+
+inline BOOL CBBinderStringEqual(NSString *lhs, NSString *rhs)
 {
     if (lhs == nil)
     {
@@ -219,7 +224,7 @@ inline BOOL CBBinderEqual(NSString *lhs, NSString *rhs)
     }
 }
 
-inline BOOL CBBinderNotEqual(NSString *lhs, NSString *rhs)
+inline BOOL CBBinderStringNotEqual(NSString *lhs, NSString *rhs)
 {
     if (lhs == nil)
     {
