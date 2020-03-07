@@ -15,6 +15,148 @@ namespace CodeBinder.Apple
 {
     static partial class ObjCBuilderExtension
     {
+
+        // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
+        public static CodeBuilder Append(this CodeBuilder builder, ExpressionSyntax expression, ObjCCompilationContext context)
+        {
+            var kind = expression.Kind();
+            switch (kind)
+            {
+                case SyntaxKind.ArrayCreationExpression:
+                    return builder.Append((ArrayCreationExpressionSyntax)expression, context);
+                case SyntaxKind.OmittedArraySizeExpression:
+                    return builder.Append((OmittedArraySizeExpressionSyntax)expression, context);
+                case SyntaxKind.AddAssignmentExpression:
+                case SyntaxKind.AndAssignmentExpression:
+                case SyntaxKind.DivideAssignmentExpression:
+                case SyntaxKind.ExclusiveOrAssignmentExpression:
+                case SyntaxKind.LeftShiftAssignmentExpression:
+                case SyntaxKind.ModuloAssignmentExpression:
+                case SyntaxKind.MultiplyAssignmentExpression:
+                case SyntaxKind.OrAssignmentExpression:
+                case SyntaxKind.RightShiftAssignmentExpression:
+                case SyntaxKind.SimpleAssignmentExpression:
+                case SyntaxKind.SubtractAssignmentExpression:
+                    return builder.Append((AssignmentExpressionSyntax)expression, context);
+                case SyntaxKind.AddExpression:
+                case SyntaxKind.SubtractExpression:
+                case SyntaxKind.MultiplyExpression:
+                case SyntaxKind.DivideExpression:
+                case SyntaxKind.ModuloExpression:
+                case SyntaxKind.LeftShiftExpression:
+                case SyntaxKind.RightShiftExpression:
+                case SyntaxKind.LogicalOrExpression:
+                case SyntaxKind.LogicalAndExpression:
+                case SyntaxKind.BitwiseOrExpression:
+                case SyntaxKind.BitwiseAndExpression:
+                case SyntaxKind.ExclusiveOrExpression:
+                case SyntaxKind.EqualsExpression:
+                case SyntaxKind.NotEqualsExpression:
+                case SyntaxKind.LessThanExpression:
+                case SyntaxKind.LessThanOrEqualExpression:
+                case SyntaxKind.GreaterThanExpression:
+                case SyntaxKind.GreaterThanOrEqualExpression:
+                case SyntaxKind.IsExpression:
+                case SyntaxKind.AsExpression:
+                    return builder.Append((BinaryExpressionSyntax)expression, context);
+                case SyntaxKind.CastExpression:
+                    return builder.Append((CastExpressionSyntax)expression, context);
+                case SyntaxKind.ConditionalExpression:
+                    return builder.Append((ConditionalExpressionSyntax)expression, context);
+                case SyntaxKind.ElementAccessExpression:
+                    return builder.Append((ElementAccessExpressionSyntax)expression, context);
+                case SyntaxKind.ObjectInitializerExpression:
+                case SyntaxKind.CollectionInitializerExpression:
+                case SyntaxKind.ArrayInitializerExpression:
+                case SyntaxKind.ComplexElementInitializerExpression:
+                    return builder.Append((InitializerExpressionSyntax)expression, context);
+                case SyntaxKind.BaseExpression:
+                    return builder.Append((BaseExpressionSyntax)expression, context);
+                case SyntaxKind.ThisExpression:
+                    return builder.Append((ThisExpressionSyntax)expression, context);
+                case SyntaxKind.InvocationExpression:
+                    return builder.Append((InvocationExpressionSyntax)expression, context);
+                case SyntaxKind.NumericLiteralExpression:
+                case SyntaxKind.StringLiteralExpression:
+                case SyntaxKind.CharacterLiteralExpression:
+                case SyntaxKind.TrueLiteralExpression:
+                case SyntaxKind.FalseLiteralExpression:
+                case SyntaxKind.NullLiteralExpression:
+                    return builder.Append((LiteralExpressionSyntax)expression, context);
+                case SyntaxKind.SimpleMemberAccessExpression:
+                    return builder.Append((MemberAccessExpressionSyntax)expression, context);
+                case SyntaxKind.ObjectCreationExpression:
+                    return builder.Append((ObjectCreationExpressionSyntax)expression, context);
+                case SyntaxKind.ParenthesizedExpression:
+                    return builder.Append((ParenthesizedExpressionSyntax)expression, context);
+                case SyntaxKind.PostIncrementExpression:
+                case SyntaxKind.PostDecrementExpression:
+                    return builder.Append((PostfixUnaryExpressionSyntax)expression, context);
+                case SyntaxKind.UnaryPlusExpression:
+                case SyntaxKind.UnaryMinusExpression:
+                case SyntaxKind.BitwiseNotExpression:
+                case SyntaxKind.LogicalNotExpression:
+                case SyntaxKind.PreIncrementExpression:
+                case SyntaxKind.PreDecrementExpression:
+                    return builder.Append((PrefixUnaryExpressionSyntax)expression, context);
+                case SyntaxKind.TypeOfExpression:
+                    return builder.Append((TypeOfExpressionSyntax)expression, context);
+                case SyntaxKind.QualifiedName:
+                case SyntaxKind.ArrayType:
+                case SyntaxKind.GenericName:
+                case SyntaxKind.IdentifierName:
+                case SyntaxKind.NullableType:
+                case SyntaxKind.OmittedTypeArgument:
+                case SyntaxKind.PredefinedType:
+                case SyntaxKind.RefType:
+                    return builder.Append((TypeSyntax)expression, context);
+                // Unsupported expressions
+                case SyntaxKind.RefExpression:
+                case SyntaxKind.DeclarationExpression:
+                case SyntaxKind.ThrowExpression:
+                case SyntaxKind.DefaultExpression:
+                case SyntaxKind.AnonymousMethodExpression:
+                case SyntaxKind.ParenthesizedLambdaExpression:
+                case SyntaxKind.SimpleLambdaExpression:
+                case SyntaxKind.RefValueExpression:
+                case SyntaxKind.RefTypeExpression:
+                case SyntaxKind.ImplicitArrayCreationExpression:
+                case SyntaxKind.ElementBindingExpression:
+                case SyntaxKind.ImplicitElementAccess:
+                case SyntaxKind.MemberBindingExpression:
+                case SyntaxKind.SizeOfExpression:
+                case SyntaxKind.MakeRefExpression:
+                case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
+                case SyntaxKind.InterpolatedStringExpression:
+                case SyntaxKind.AwaitExpression:
+                case SyntaxKind.QueryExpression:
+                case SyntaxKind.StackAllocArrayCreationExpression:
+                case SyntaxKind.AnonymousObjectCreationExpression:
+                case SyntaxKind.TupleExpression:
+                case SyntaxKind.IsPatternExpression:
+                case SyntaxKind.CheckedExpression:
+                case SyntaxKind.ConditionalAccessExpression:
+                // Unsupported prefix unary expressions
+                case SyntaxKind.AddressOfExpression:
+                case SyntaxKind.PointerIndirectionExpression:
+                // Unsupported binary expressions
+                case SyntaxKind.CoalesceExpression:
+                // Unsupported member access expressions
+                case SyntaxKind.PointerMemberAccessExpression:
+                // Unsupported literal expressions
+                case SyntaxKind.ArgListExpression:
+                case SyntaxKind.DefaultLiteralExpression:
+                // Unsupported type expressions
+                case SyntaxKind.AliasQualifiedName:
+                case SyntaxKind.TupleType:
+                case SyntaxKind.PointerType:
+                default:
+                    throw new NotSupportedException("Unsupported syntax");
+            }
+        }
+
+        #region Expressions
+
         // OK
         public static CodeBuilder Append(this CodeBuilder builder, ArrayCreationExpressionSyntax syntax, ObjCCompilationContext context)
         {
@@ -350,144 +492,9 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
-        public static CodeBuilder Append(this CodeBuilder builder, ExpressionSyntax expression, ObjCCompilationContext context)
-        {
-            var kind = expression.Kind();
-            switch (kind)
-            {
-                case SyntaxKind.ArrayCreationExpression:
-                    return builder.Append((ArrayCreationExpressionSyntax)expression, context);
-                case SyntaxKind.OmittedArraySizeExpression:
-                    return builder.Append((OmittedArraySizeExpressionSyntax)expression, context);
-                case SyntaxKind.AddAssignmentExpression:
-                case SyntaxKind.AndAssignmentExpression:
-                case SyntaxKind.DivideAssignmentExpression:
-                case SyntaxKind.ExclusiveOrAssignmentExpression:
-                case SyntaxKind.LeftShiftAssignmentExpression:
-                case SyntaxKind.ModuloAssignmentExpression:
-                case SyntaxKind.MultiplyAssignmentExpression:
-                case SyntaxKind.OrAssignmentExpression:
-                case SyntaxKind.RightShiftAssignmentExpression:
-                case SyntaxKind.SimpleAssignmentExpression:
-                case SyntaxKind.SubtractAssignmentExpression:
-                    return builder.Append((AssignmentExpressionSyntax)expression, context);
-                case SyntaxKind.AddExpression:
-                case SyntaxKind.SubtractExpression:
-                case SyntaxKind.MultiplyExpression:
-                case SyntaxKind.DivideExpression:
-                case SyntaxKind.ModuloExpression:
-                case SyntaxKind.LeftShiftExpression:
-                case SyntaxKind.RightShiftExpression:
-                case SyntaxKind.LogicalOrExpression:
-                case SyntaxKind.LogicalAndExpression:
-                case SyntaxKind.BitwiseOrExpression:
-                case SyntaxKind.BitwiseAndExpression:
-                case SyntaxKind.ExclusiveOrExpression:
-                case SyntaxKind.EqualsExpression:
-                case SyntaxKind.NotEqualsExpression:
-                case SyntaxKind.LessThanExpression:
-                case SyntaxKind.LessThanOrEqualExpression:
-                case SyntaxKind.GreaterThanExpression:
-                case SyntaxKind.GreaterThanOrEqualExpression:
-                case SyntaxKind.IsExpression:
-                case SyntaxKind.AsExpression:
-                    return builder.Append((BinaryExpressionSyntax)expression, context);
-                case SyntaxKind.CastExpression:
-                    return builder.Append((CastExpressionSyntax)expression, context);
-                case SyntaxKind.ConditionalExpression:
-                    return builder.Append((ConditionalExpressionSyntax)expression, context);
-                case SyntaxKind.ElementAccessExpression:
-                    return builder.Append((ElementAccessExpressionSyntax)expression, context);
-                case SyntaxKind.ObjectInitializerExpression:
-                case SyntaxKind.CollectionInitializerExpression:
-                case SyntaxKind.ArrayInitializerExpression:
-                case SyntaxKind.ComplexElementInitializerExpression:
-                    return builder.Append((InitializerExpressionSyntax)expression, context);
-                case SyntaxKind.BaseExpression:
-                    return builder.Append((BaseExpressionSyntax)expression, context);
-                case SyntaxKind.ThisExpression:
-                    return builder.Append((ThisExpressionSyntax)expression, context);
-                case SyntaxKind.InvocationExpression:
-                    return builder.Append((InvocationExpressionSyntax)expression, context);
-                case SyntaxKind.NumericLiteralExpression:
-                case SyntaxKind.StringLiteralExpression:
-                case SyntaxKind.CharacterLiteralExpression:
-                case SyntaxKind.TrueLiteralExpression:
-                case SyntaxKind.FalseLiteralExpression:
-                case SyntaxKind.NullLiteralExpression:
-                    return builder.Append((LiteralExpressionSyntax)expression, context);
-                case SyntaxKind.SimpleMemberAccessExpression:
-                    return builder.Append((MemberAccessExpressionSyntax)expression, context);
-                case SyntaxKind.ObjectCreationExpression:
-                    return builder.Append((ObjectCreationExpressionSyntax)expression, context);
-                case SyntaxKind.ParenthesizedExpression:
-                    return builder.Append((ParenthesizedExpressionSyntax)expression, context);
-                case SyntaxKind.PostIncrementExpression:
-                case SyntaxKind.PostDecrementExpression:
-                    return builder.Append((PostfixUnaryExpressionSyntax)expression, context);
-                case SyntaxKind.UnaryPlusExpression:
-                case SyntaxKind.UnaryMinusExpression:
-                case SyntaxKind.BitwiseNotExpression:
-                case SyntaxKind.LogicalNotExpression:
-                case SyntaxKind.PreIncrementExpression:
-                case SyntaxKind.PreDecrementExpression:
-                    return builder.Append((PrefixUnaryExpressionSyntax)expression, context);
-                case SyntaxKind.TypeOfExpression:
-                    return builder.Append((TypeOfExpressionSyntax)expression, context);
-                case SyntaxKind.QualifiedName:
-                case SyntaxKind.ArrayType:
-                case SyntaxKind.GenericName:
-                case SyntaxKind.IdentifierName:
-                case SyntaxKind.NullableType:
-                case SyntaxKind.OmittedTypeArgument:
-                case SyntaxKind.PredefinedType:
-                case SyntaxKind.RefType:
-                    return builder.Append((TypeSyntax)expression, context);
-                // Unsupported expressions
-                case SyntaxKind.RefExpression:
-                case SyntaxKind.DeclarationExpression:
-                case SyntaxKind.ThrowExpression:
-                case SyntaxKind.DefaultExpression:
-                case SyntaxKind.AnonymousMethodExpression:
-                case SyntaxKind.ParenthesizedLambdaExpression:
-                case SyntaxKind.SimpleLambdaExpression:
-                case SyntaxKind.RefValueExpression:
-                case SyntaxKind.RefTypeExpression:
-                case SyntaxKind.ImplicitArrayCreationExpression:
-                case SyntaxKind.ElementBindingExpression:
-                case SyntaxKind.ImplicitElementAccess:
-                case SyntaxKind.MemberBindingExpression:
-                case SyntaxKind.SizeOfExpression:
-                case SyntaxKind.MakeRefExpression:
-                case SyntaxKind.ImplicitStackAllocArrayCreationExpression:
-                case SyntaxKind.InterpolatedStringExpression:
-                case SyntaxKind.AwaitExpression:
-                case SyntaxKind.QueryExpression:
-                case SyntaxKind.StackAllocArrayCreationExpression:
-                case SyntaxKind.AnonymousObjectCreationExpression:
-                case SyntaxKind.TupleExpression:
-                case SyntaxKind.IsPatternExpression:
-                case SyntaxKind.CheckedExpression:
-                case SyntaxKind.ConditionalAccessExpression:
-                // Unsupported prefix unary expressions
-                case SyntaxKind.AddressOfExpression:
-                case SyntaxKind.PointerIndirectionExpression:
-                // Unsupported binary expressions
-                case SyntaxKind.CoalesceExpression:
-                // Unsupported member access expressions
-                case SyntaxKind.PointerMemberAccessExpression:
-                // Unsupported literal expressions
-                case SyntaxKind.ArgListExpression:
-                case SyntaxKind.DefaultLiteralExpression:
-                // Unsupported type expressions
-                case SyntaxKind.AliasQualifiedName:
-                case SyntaxKind.TupleType:
-                case SyntaxKind.PointerType:
-                default:
-                    throw new NotSupportedException("Unsupported syntax");
-            }
-        }
+        #endregion // Expressions
+
+        #region Support
 
         public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, ObjCCompilationContext context)
         {
@@ -590,5 +597,7 @@ namespace CodeBinder.Apple
 
             return builder;
         }
+
+        #endregion // Support
     }
 }

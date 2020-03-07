@@ -259,6 +259,13 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        static CodeBuilder Append(this CodeBuilder builder, ITypeSymbol typeSymbol, ObjCTypeUsageKind displayKind, ObjCCompilationContext context)
+        {
+            ObjCTypeKind objcTypeKind;
+            writeTypeSymbol(builder, typeSymbol, displayKind, context, out objcTypeKind);
+            return builder;
+        }
+
         static void writeObjCMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol method,
             ObjCCompilationContext context)
         {
@@ -303,30 +310,57 @@ namespace CodeBinder.Apple
                 parent = child.Parent;
             }
 
-            // TODO: Better handle symbol replacements need/not need of parameter list
-            SymbolReplacement? propertyReplacement;
-            if (property.HasObjCReplacement(out propertyReplacement))
+            void appendProperty()
             {
-                if (isSetter)
-                    builder.Append(propertyReplacement.SetterName);
+                // TODO: Better handle symbol replacements need/not need of parameter list
+                SymbolReplacement? propertyReplacement;
+                if (property.HasObjCReplacement(out propertyReplacement))
+                {
+                    if (isSetter)
+                        builder.Append(propertyReplacement.SetterName);
+                    else
+                        builder.Append(propertyReplacement.Name);
+                }
                 else
-                    builder.Append(propertyReplacement.Name);
+                {
+                    // NOTE: proper use of the setter symbol is done eagerly
+                    // while writing AssignmentExpressionSyntax
+                    if (property.IsIndexer)
+                    {
+                        if (isSetter)
+                            builder.Append("set");
+                        else
+                            builder.Append("get");
+                    }
+                    else
+                    {
+                        builder.Append(property.GetObjCName(context));
+                    }
+                }
+            }
+
+            if (property.IsStatic)
+            {
+                // Static property https://stackoverflow.com/a/15811719/213871
+                if (property.IsIndexer)
+                {
+                    appendProperty();
+                }
+                else
+                {
+                    builder.Append(property.ContainingType, ObjCTypeUsageKind.Normal, context).Dot();
+                    appendProperty();
+                }
+
+                // CHECK-ME This has not been verified
+                throw new NotSupportedException();
             }
             else
             {
-                // NOTE: proper use of the setter symbol is done eagerly
-                // while writing AssignmentExpressionSyntax
-                if (property.IsIndexer)
-                {
-                    if (isSetter)
-                        builder.Append("set");
-                    else
-                        builder.Append("get");
-                }
-                else
-                {
-                    builder.Append(property.GetObjCName(context));
-                }
+                if (parent?.Parent.IsStatement() == true && !property.IsIndexer)
+                    builder.Append("self").Dot();
+
+                appendProperty();
             }
         }
 
