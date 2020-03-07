@@ -502,12 +502,13 @@ namespace CodeBinder.Apple
                     {
                         // Native enums need cast
                         builder.CommaSeparator(ref first).Parenthesized().Append(type.GetCLangName(context)).Close().Append(arg.Expression, context);
-                        return builder;
+                        continue;
                     }
 
+                    builder.CommaSeparator(ref first);
                     void appendExpression()
                     {
-                        builder.CommaSeparator(ref first).Append(arg.Expression, context);
+                        builder.Append(arg.Expression, context);
                     }
 
                     string fullname = type.GetFullName();
@@ -516,8 +517,8 @@ namespace CodeBinder.Apple
                         case "System.Runtime.InteropServices.HandleRef":
                         {
                             // Passing "System.HandleRef" to hantive methods needs further accessing handle
-                            builder.Dot().Append("handle");
                             appendExpression();
+                            builder.Dot().Append("handle");
                             break;
                         }
                         case "System.String":
