@@ -262,36 +262,15 @@ namespace CodeBinder.Apple
         static void writeObjCMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol method,
             ObjCCompilationContext context)
         {
-            SymbolReplacement? replacement;
-            string objCMethodName;
-            if (method.HasObjCReplacement(out replacement))
-            {
-                objCMethodName = replacement.Name;
-            }
-            else
-            {
-                if (method.IsNative())
-                {
-                    objCMethodName = method.Name;
-                }
-                else
-                {
-                    objCMethodName = context.Conversion.MethodsLowerCase ? method.Name.ToObjCCase() : method.Name;
-                }
-            }
-
+            string objCMethodName = method.GetObjCName(context);
             var kind = syntax.Kind();
             switch (kind)
             {
+                // NOTE: Don't append generic parameters here: ObjectiveC
+                // does not support generic methods
+                case SyntaxKind.GenericName:
                 case SyntaxKind.IdentifierName:
                 {
-                    builder.Append(objCMethodName);
-                    break;
-                }
-                case SyntaxKind.GenericName:
-                {
-                    // NOTE: Don't append generic parameters here: ObjectiveC does not support
-                    // generic methods
                     builder.Append(objCMethodName);
                     break;
                 }

@@ -510,6 +510,11 @@ namespace CodeBinder.Shared
             return SymbolDisplay.ToDisplayString(symbol.ContainingNamespace, DisplayFormats.FullnameFormat);
         }
 
+        public static string GetNameWithParmeters(this IMethodSymbol symbol)
+        {
+            return SymbolDisplay.ToDisplayString(symbol, DisplayFormats.NameWithParameters);
+        }
+
         /// <summary>
         /// Get no namespace qualified name
         /// </summary>
@@ -518,7 +523,6 @@ namespace CodeBinder.Shared
             return SymbolDisplay.ToDisplayString(symbol, includeTypeParameters
                 ? DisplayFormats.QualifiedFormat : DisplayFormats.QualifiedFormatNoTypeParameters);
         }
-
 
         public static string GetDebugName(this ISymbol symbol)
         {

@@ -97,7 +97,12 @@ namespace CodeBinder.Apple
                     suffix = suffixAttrib.GetConstructorArgument<string>(0);
             }
 
-            string methodName = methodSymbol.Name;
+            string methodName;
+            if (methodSymbol.MethodKind == MethodKind.Constructor)
+                methodName = "init";
+            else
+                methodName = methodSymbol.Name;
+
             if (methodSymbol.ExplicitInterfaceImplementations.Length != 0)
             {
                 // Get name of explicitly interface implemented method

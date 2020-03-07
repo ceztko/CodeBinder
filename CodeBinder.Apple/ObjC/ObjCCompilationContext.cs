@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace CodeBinder.Apple
@@ -90,13 +91,12 @@ namespace CodeBinder.Apple
             _bindedMethodNames.Add(symbol, bindedName);
         }
 
-        public string GetBindedName(IMethodSymbol symbol)
+        public bool TryGetBindedName(IMethodSymbol symbol, [NotNullWhen(true)]out string? name)
         {
-            // FIXME
-            if (_bindedMethodNames.TryGetValue(symbol, out var found))
-                return found;
+            if (_bindedMethodNames.TryGetValue(symbol, out name))
+                return true;
 
-            return "init";
+            return false;
         }
 
         public IEnumerable<EnumDeclarationSyntax> Enums

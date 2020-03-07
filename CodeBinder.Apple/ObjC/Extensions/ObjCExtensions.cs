@@ -25,14 +25,14 @@ namespace CodeBinder.Apple
             {
                 // NSObject
                 { "System.Object", new Dictionary<string, SymbolReplacement>() {
-                    { "GetHashCode", new SymbolReplacement() { Name = "hash", Kind = SymbolReplacementKind.Property } },
-                    { "Equals", new SymbolReplacement() { Name = "isEqual", Kind = SymbolReplacementKind.Method } },
-                    { "ToString", new SymbolReplacement() { Name = "description", Kind = SymbolReplacementKind.Property } },
+                    { "GetHashCode()", new SymbolReplacement() { Name = "hash", Kind = SymbolReplacementKind.Property } },
+                    { "Equals(Object)", new SymbolReplacement() { Name = "isEqual", Kind = SymbolReplacementKind.Method } },
+                    { "ToString()", new SymbolReplacement() { Name = "description", Kind = SymbolReplacementKind.Property } },
                 } },
                 // NSString
                 { "System.String", new Dictionary<string, SymbolReplacement>() {
-                    { "op_Equality", new SymbolReplacement() { Name = "CBBinderEqual", Kind = SymbolReplacementKind.StaticMethod } },
-                    { "op_Inequality", new SymbolReplacement() { Name = "CBBinderNotEqual", Kind = SymbolReplacementKind.StaticMethod } },
+                    { "op_Equality(String, String)", new SymbolReplacement() { Name = "CBBinderEqual", Kind = SymbolReplacementKind.StaticMethod } },
+                    { "op_Inequality(String, String)", new SymbolReplacement() { Name = "CBBinderNotEqual", Kind = SymbolReplacementKind.StaticMethod } },
                 } },
                 { "System.IntPtr", new Dictionary<string, SymbolReplacement>() {
                     { "Zero", new SymbolReplacement() { Name = "NULL", Kind = SymbolReplacementKind.Literal } },
@@ -42,14 +42,17 @@ namespace CodeBinder.Apple
                 } },
                 // NSMutableArray
                 { "System.Collections.Generic.List<T>", new Dictionary<string, SymbolReplacement>() {
-                    { "Add", new SymbolReplacement() { Name = "addObject", Kind = SymbolReplacementKind.Method } },
-                    { "Clear", new SymbolReplacement() { Name = "removeAllObjects", Kind = SymbolReplacementKind.Method } },
+                    { "List(Int32)", new SymbolReplacement() { Name = "initWithCapacity", Kind = SymbolReplacementKind.Method } },
+                    { "Add(T)", new SymbolReplacement() { Name = "addObject", Kind = SymbolReplacementKind.Method } },
+                    { "Clear()", new SymbolReplacement() { Name = "removeAllObjects", Kind = SymbolReplacementKind.Method } },
                 } },
             };
         }
 
         public static bool HasObjCReplacement(this IMethodSymbol methodSymbol, [NotNullWhen(true)]out SymbolReplacement? objCReplacement)
         {
+            methodSymbol = methodSymbol.OriginalDefinition;
+            var uniqueMethodName = methodSymbol.GetNameWithParmeters();
             var containingType = methodSymbol.ContainingType;
             Dictionary<string, SymbolReplacement>? replacements;
             foreach (var iface in containingType.AllInterfaces)
@@ -62,7 +65,7 @@ namespace CodeBinder.Apple
                         if (member.Kind != SymbolKind.Method)
                             continue;
 
-                        if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
+                        if (replacements.TryGetValue(uniqueMethodName, out var replacement))
                         {
                             if (SymbolEqualityComparer.Default.Equals(containingType.FindImplementationForInterfaceMember(member), methodSymbol))
                             {
@@ -82,7 +85,7 @@ namespace CodeBinder.Apple
 
             if (_replacements.TryGetValue(containingTypeFullname, out replacements))
             {
-                if (replacements.TryGetValue(methodSymbol.Name, out var replacement))
+                if (replacements.TryGetValue(uniqueMethodName, out var replacement))
                 {
                     objCReplacement = replacement;
                     return true;
@@ -302,7 +305,28 @@ namespace CodeBinder.Apple
 
         public static string GetObjCName(this IMethodSymbol method, ObjCCompilationContext context)
         {
-            return context.GetBindedName(method);
+            if (context.TryGetBindedName(method, out var bindedName))
+                return bindedName;
+
+            SymbolReplacement? replacement;
+            if (method.HasObjCReplacement(out replacement))
+            {
+                return replacement.Name;
+            }
+            else
+            {
+                if (method.IsNative())
+                {
+                    return method.Name;
+                }
+                else
+                {
+                    if (method.MethodKind == MethodKind.Constructor)
+                        return "init";
+
+                    return context.Conversion.MethodsLowerCase ? method.Name.ToObjCCase() : method.Name;
+                }
+            }
         }
 
         public static string GetObjCName(this IPropertySymbol property, ObjCCompilationContext context)

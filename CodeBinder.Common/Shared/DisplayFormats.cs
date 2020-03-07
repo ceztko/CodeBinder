@@ -53,6 +53,20 @@ namespace CodeBinder.Shared
                 globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces);
 
+        public static readonly SymbolDisplayFormat NameWithParameters = new SymbolDisplayFormat(
+            globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameOnly,
+            localOptions: SymbolDisplayLocalOptions.None,
+            memberOptions:
+                SymbolDisplayMemberOptions.IncludeParameters |
+                SymbolDisplayMemberOptions.IncludeRef |
+                SymbolDisplayMemberOptions.IncludeExplicitInterface,
+            parameterOptions:
+                SymbolDisplayParameterOptions.IncludeParamsRefOut |
+                SymbolDisplayParameterOptions.IncludeExtensionThis |
+                SymbolDisplayParameterOptions.IncludeType
+        );
+
         // Reference https://github.com/dotnet/roslyn/blob/master/src/Compilers/Core/Portable/SymbolDisplay/SymbolDisplayFormat.cs
         public static readonly SymbolDisplayFormat DebugFormat = new SymbolDisplayFormat(
             globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,

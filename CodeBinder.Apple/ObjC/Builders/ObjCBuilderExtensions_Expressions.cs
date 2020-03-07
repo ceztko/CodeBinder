@@ -295,7 +295,7 @@ namespace CodeBinder.Apple
         public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var constructorSymbol = syntax.GetSymbol<IMethodSymbol>(context);
-            builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close()
+            builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close().Space()
                 .Append(constructorSymbol.GetObjCName(context)).Append(syntax.ArgumentList!.Arguments, false, context);
             return builder;
         }

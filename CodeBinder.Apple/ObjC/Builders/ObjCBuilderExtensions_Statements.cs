@@ -98,18 +98,7 @@ namespace CodeBinder.Apple
         {
             bool first = true;
             foreach (var statement in staments)
-            {
-                IEnumerable<CodeWriter>? writers;
-                if (statement.HasReplacementWriters(context, out writers))
-                {
-                    foreach (var writer in writers)
-                        builder.AppendLine(ref first).Append(writer);
-                }
-                else
-                {
-                    builder.AppendLine(ref first).Append(statement, context);
-                }
-            }
+                builder.AppendLine(ref first).Append(statement, context);
 
             return builder;
         }
