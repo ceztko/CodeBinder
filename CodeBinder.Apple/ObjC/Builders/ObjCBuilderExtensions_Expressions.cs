@@ -10,6 +10,7 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
+using CodeBinder.CLang;
 
 namespace CodeBinder.Apple
 {
@@ -331,15 +332,16 @@ namespace CodeBinder.Apple
             }
             else
             {
-                if (syntax.Parent.IsStatement())
+                if (syntax.Parent.IsExpression(ExpressionKind.MemberAccess))
                 {
-                    // Objective C static or instance message
-                    builder.Bracketed().Append(methodSymbol.IsStatic ? methodSymbol.ContainingType.GetObjCName(context) : "self").Space()
-                        .Append(syntax.Expression, context).Space().Append(syntax.ArgumentList.Arguments, false, context).Close();
+                    // We assume parent expressions started a bracketed invocation
+                    builder.Append(syntax.Expression, context).Space().Append(syntax.ArgumentList.Arguments, false, context);
                 }
                 else
                 {
-                    builder.Append(syntax.Expression, context).Space().Append(syntax.ArgumentList.Arguments, false, context);
+                    // Objective C static or instance message, we need to start a bracketed invocation
+                    builder.Bracketed().Append(methodSymbol.IsStatic ? methodSymbol.ContainingType.GetObjCName(context) : "self").Space()
+                        .Append(syntax.Expression, context).Space().Append(syntax.ArgumentList.Arguments, false, context).Close();
                 }
 
             }
@@ -530,7 +532,7 @@ namespace CodeBinder.Apple
                     if (type.TypeKind == TypeKind.Enum)
                     {
                         // Native enums need cast
-                        builder.CommaSeparator(ref first).Parenthesized().Append(type.GetCLangName(context)).Close().Append(arg.Expression, context);
+                        builder.CommaSeparator(ref first).Parenthesized().Append(type.GetCLangName(arg.IsRefLike() ? CLangTypeUsageKind.DeclarationByRef : CLangTypeUsageKind.Declaration, context)).Close().Append(arg.Expression, context);
                         continue;
                     }
 
@@ -573,6 +575,11 @@ namespace CodeBinder.Apple
                                     appendExpression();
                                 }
 
+                                break;
+                            }
+                            default:
+                            {
+                                appendExpression();
                                 break;
                             }
                         }

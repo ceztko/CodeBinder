@@ -353,13 +353,13 @@ namespace CodeBinder.Apple
             return $"{enm.ContainingType.GetObjCName(context)}_{enm.Name}";
         }
 
-        public static string GetCLangName(this ITypeSymbol type, ObjCCompilationContext context)
+        public static string GetCLangName(this ITypeSymbol type, CLangTypeUsageKind usage, ObjCCompilationContext context)
         {
             switch (type.TypeKind)
             {
                 case TypeKind.Enum:
                 {
-                    return CLangUtils.GetCLangName(type);
+                    return CLangUtils.GetCLangName(type, usage);
                 }
                 default:
                 {

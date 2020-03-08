@@ -594,7 +594,6 @@ namespace CodeBinder.Apple
         String,
     }
 
-    [Flags]
     enum ObjCTypeUsageKind
     {
         /// <summary>

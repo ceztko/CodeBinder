@@ -4,6 +4,9 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
+    /// <summary>
+    /// This merge statements kinds, for example all goto statements are merged in StatementKind.Goto
+    /// </summary>
     public enum StatementKind
     {
         Unknown,

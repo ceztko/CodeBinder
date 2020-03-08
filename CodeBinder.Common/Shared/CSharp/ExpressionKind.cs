@@ -4,6 +4,9 @@ using System.Text;
 
 namespace CodeBinder.Shared.CSharp
 {
+    /// <summary>
+    /// This merge espressions kinds, for example all assignment operations are merged in ExpressionKind.Assignment
+    /// </summary>
     public enum ExpressionKind
     {
         Unknown,

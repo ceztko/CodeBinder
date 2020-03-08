@@ -122,6 +122,14 @@ namespace CodeBinder.Shared.CSharp
             return IsExpression(node, out var kind);
         }
 
+        public static bool IsExpression(this SyntaxNode node, ExpressionKind kind)
+        {
+            if (IsExpression(node, out var actualkind))
+                return actualkind == kind;
+            else
+                return false;
+        }
+
         public static bool IsExpression(this SyntaxNode node, out ExpressionKind kind)
         {
             switch (node.Kind())
@@ -443,6 +451,14 @@ namespace CodeBinder.Shared.CSharp
             return true;
         }
 
+        public static bool IsStatement(this SyntaxNode node, StatementKind kind)
+        {
+            if (IsStatement(node, out var actualkind))
+                return actualkind == kind;
+            else
+                return false;
+        }
+
         public static bool IsStatement(this SyntaxNode node)
         {
             return IsStatement(node, out var kind);
@@ -668,6 +684,11 @@ namespace CodeBinder.Shared.CSharp
                 parameters.Add(new CSharpTypeParameter(type, constraints));
             }
             return new CSharpTypeParameters(parameters);
+        }
+
+        public static bool IsRefLike(this ArgumentSyntax argument)
+        {
+            return argument.RefKindKeyword.Kind() != SyntaxKind.None;
         }
 
         public static bool IsNone(this SyntaxToken token)

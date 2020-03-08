@@ -368,10 +368,14 @@ namespace CodeBinder.Apple
             ObjCCompilationContext context)
         {
             if (parameter.RefKind != RefKind.None
+                && parameter.Type.TypeKind != TypeKind.Struct // We still consider all struct types as reference types
                 && ((parameter.ContainingSymbol as IMethodSymbol)?.IsNative() == false
                     || parameter.Type.GetFullName() != "System.String"))
             {
-                builder.Append("&");
+                if (syntax.Parent.IsExpression(ExpressionKind.Assignment) && (syntax.Parent as AssignmentExpressionSyntax)!.Left == syntax)
+                    builder.Append("*");
+                else
+                    builder.Append("&");
             }
 
             writeObjCIdentifier(builder, syntax, parameter, context);
