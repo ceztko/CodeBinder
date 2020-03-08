@@ -239,9 +239,13 @@ namespace CodeBinder.Apple
                     break;
                 }
                 case SymbolKind.Local:
+                {
+                    writeObjCLocalIdentifier(builder, syntax, (ILocalSymbol)symbol, context);
+                    break;
+                }
                 case SymbolKind.Field:
                 {
-                    writeObjCIdentifier(builder, syntax, symbol, context);
+                    writeObjCFieldIdentifier(builder, syntax, (IFieldSymbol)symbol, context);
                     break;
                 }
                 case SymbolKind.Namespace:
@@ -367,34 +371,31 @@ namespace CodeBinder.Apple
         static void writeObjCParameterIdentifier(CodeBuilder builder, TypeSyntax syntax, IParameterSymbol parameter,
             ObjCCompilationContext context)
         {
-            if (parameter.RefKind != RefKind.None
-                && parameter.Type.TypeKind != TypeKind.Struct // We still consider all struct types as reference types
-                && ((parameter.ContainingSymbol as IMethodSymbol)?.IsNative() == false
-                    || parameter.Type.GetFullName() != "System.String"))
-            {
-                if (syntax.Parent.IsExpression(ExpressionKind.Assignment) && (syntax.Parent as AssignmentExpressionSyntax)!.Left == syntax)
-                    builder.Append("*");
-                else
-                    builder.Append("&");
-            }
-
-            writeObjCIdentifier(builder, syntax, parameter, context);
+            handleRefLikeIndentifierSyntax(builder, syntax, parameter.RefKind != RefKind.None, parameter.Type, context);
+            builder.Append(parameter.Name);
         }
 
-        static void writeObjCIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol,
-            ObjCCompilationContext context)
+        private static void writeObjCFieldIdentifier(CodeBuilder builder, TypeSyntax syntax, IFieldSymbol fieldSymbol, ObjCCompilationContext context)
         {
-            var kind = syntax.Kind();
-            switch (kind)
+            handleRefLikeIndentifierSyntax(builder, syntax, false, fieldSymbol.Type, context);
+            builder.Append(fieldSymbol.Name);
+        }
+
+        private static void writeObjCLocalIdentifier(CodeBuilder builder, TypeSyntax syntax, ILocalSymbol localSymbol, ObjCCompilationContext context)
+        {
+            handleRefLikeIndentifierSyntax(builder, syntax, false, localSymbol.Type, context);
+            builder.Append(localSymbol.Name);
+        }
+
+        static void handleRefLikeIndentifierSyntax(CodeBuilder builder, TypeSyntax syntax, bool passByRef, ITypeSymbol typeSymbol, ObjCCompilationContext context)
+        {
+            if (typeSymbol.GetFullName() != "System.String") // String is handled in invocation
             {
-                case SyntaxKind.IdentifierName:
-                {
-                    var identifierName = (IdentifierNameSyntax)syntax;
-                    builder.Append(identifierName.GetName());
-                    break;
-                }
-                default:
-                    throw new Exception();
+                if (passByRef && syntax.Parent.IsExpression(ExpressionKind.Assignment) && (syntax.Parent as AssignmentExpressionSyntax)!.Left == syntax)
+                    builder.Append("*");
+                else if (syntax.Parent.IsKind(SyntaxKind.Argument) && (syntax.Parent as ArgumentSyntax)!.IsRefLike()
+                        && (typeSymbol.TypeKind != TypeKind.Struct || typeSymbol.IsCLRPrimitiveType()))
+                    builder.Append("&");
             }
         }
 
