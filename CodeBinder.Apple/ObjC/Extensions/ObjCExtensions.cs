@@ -293,6 +293,19 @@ namespace CodeBinder.Apple
             return node.Identifier.Text.ToObjCCase();
         }
 
+        public static bool TryGetDistinctObjCName(this CaseSwitchLabelSyntax node,
+            ObjCCompilationContext context, [NotNullWhen(true)]out string? name)
+        {
+            if (node.Value.TryGetSymbol<IFieldSymbol>(context, out var symbol))
+            {
+                name = getEnumMemberObjCName(symbol, context);
+                return true;
+            }
+
+            name = null;
+            return false;
+        }
+
         public static string GetObjCName(this BaseTypeDeclarationSyntax node, ObjCCompilationContext context)
         {
             return getObjCName(node.GetDeclaredSymbol<ITypeSymbol>(context), context);
@@ -336,7 +349,7 @@ namespace CodeBinder.Apple
         }
 
         /// <summary>Handle fields with distinct Objective-C name, like enum members</summary>
-        public static bool HasDistinctObjCName(this IFieldSymbol field, ObjCCompilationContext context, [NotNullWhen(true)]out string? name)
+        public static bool TryGetDistinctObjCName(this IFieldSymbol field, ObjCCompilationContext context, [NotNullWhen(true)]out string? name)
         {
             if (field.ContainingType.TypeKind != TypeKind.Enum)
             {

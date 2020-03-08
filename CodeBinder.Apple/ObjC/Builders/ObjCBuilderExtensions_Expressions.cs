@@ -418,7 +418,7 @@ namespace CodeBinder.Apple
                 case SymbolKind.Field:
                 {
                     var field = (IFieldSymbol)symbol;
-                    if (field.HasDistinctObjCName(context, out string? name))
+                    if (field.TryGetDistinctObjCName(context, out string? name))
                         return builder.Append(name);
 
                     builder.Append(syntax.Expression, context).Dereference().Append(syntax.Name, context);

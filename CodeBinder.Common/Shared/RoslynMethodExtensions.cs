@@ -11,6 +11,7 @@ using System.Text;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace CodeBinder.Shared
 {
@@ -592,6 +593,13 @@ namespace CodeBinder.Shared
             }
 
             return attrib;
+        }
+
+        public static void DebugBreakWhen(this SyntaxNode node, Func<string, bool> condition)
+        {
+            string toString = node.ToString();
+            if (condition(toString))
+                Debugger.Break();
         }
     }
 }

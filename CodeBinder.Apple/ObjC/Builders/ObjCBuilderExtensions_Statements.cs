@@ -201,6 +201,7 @@ namespace CodeBinder.Apple
                 bool first = true;
                 foreach (var section in syntax.Sections)
                     builder.AppendLine(ref first).Append(section, context);
+                builder.AppendLine();
             }
             return builder;
         }
@@ -336,12 +337,9 @@ namespace CodeBinder.Apple
 
         public static CodeBuilder Append(this CodeBuilder builder, CaseSwitchLabelSyntax syntax, ObjCCompilationContext context)
         {
-            var typeSymbol = syntax.Value.GetTypeSymbol(context)!;
-            if (typeSymbol.TypeKind == TypeKind.Enum)
+            if (syntax.TryGetDistinctObjCName(context, out var name))
             {
-                // Shitty Java wants enum elements to be written unqualified
-                var symbol = syntax.Value.GetSymbol<IFieldSymbol>(context);
-                builder.Append(symbol.Name);
+                builder.Append(name);
                 return builder;
             }
 
