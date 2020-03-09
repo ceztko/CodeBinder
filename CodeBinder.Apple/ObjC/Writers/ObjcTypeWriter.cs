@@ -113,7 +113,6 @@ namespace CodeBinder.Apple
 
         protected void WriteTypeMembers(IEnumerable<MemberDeclarationSyntax> members, PartialDeclarationsTree partialDeclarations)
         {
-            var name = ObjCTypeName;
             var memberFieldWriters = new List<IObjCCodeWriter>();
             var staticFieldWriters = new List<IObjCCodeWriter>();
             var otherTypeWriters = new List<IObjCCodeWriter>();
@@ -239,27 +238,27 @@ namespace CodeBinder.Apple
 
         bool ShouldEmit(MemberDeclarationSyntax member)
         {
-            return ShouldEmitSyntax(member.Kind(), member.GetAccessibility(Context), FileType);
+            return ShouldEmitSyntax(member.Kind(), member.GetAccessibility(Context), member.IsStatic(Context), FileType);
         }
 
         // Valid for all type members, excpet property accessors
-        static bool ShouldEmitSyntax(SyntaxKind kind, Accessibility accessibility, ObjCFileType filetype)
+        static bool ShouldEmitSyntax(SyntaxKind kind, Accessibility accessibility, bool isStatic, ObjCFileType filetype)
         {
             switch (accessibility)
             {
                 case Accessibility.Public:
-                    return ShouldEmitPublicSyntax(kind, filetype);
+                    return ShouldEmitPublicSyntax(kind, isStatic, filetype);
                 case Accessibility.Protected:
                 case Accessibility.Private:
                 case Accessibility.ProtectedAndInternal:
                 case Accessibility.Internal:
-                    return ShouldEmitInternalSyntax(kind, filetype);
+                    return ShouldEmitInternalSyntax(kind, isStatic, filetype);
                 default:
                     throw new NotSupportedException();
             }
         }
 
-        static bool ShouldEmitPublicSyntax(SyntaxKind kind, ObjCFileType filetype)
+        static bool ShouldEmitPublicSyntax(SyntaxKind kind, bool isStatic, ObjCFileType filetype)
         {
             switch (kind)
             {
@@ -277,26 +276,14 @@ namespace CodeBinder.Apple
                 }
                 case SyntaxKind.FieldDeclaration:
                 {
-                    switch (filetype)
-                    {
-                        // Public fields are emited only in public or internal only headers
-                        // Static fields are emited in the implementation
-                        case ObjCFileType.PublicHeader:
-                        case ObjCFileType.InternalOnlyHeader:
-                        case ObjCFileType.Implementation:
-                            return true;
-                        case ObjCFileType.InternalHeader:
-                            return false;
-                        default:
-                            throw new NotSupportedException();
-                    }
+                    return ShouldEmitFieldSyntax(isStatic, filetype);
                 }
                 default:
                     throw new NotSupportedException();
             }
         }
 
-        static bool ShouldEmitInternalSyntax(SyntaxKind kind, ObjCFileType filetype)
+        static bool ShouldEmitInternalSyntax(SyntaxKind kind, bool isStatic, ObjCFileType filetype)
         {
             switch (kind)
             {
@@ -314,23 +301,47 @@ namespace CodeBinder.Apple
                 }
                 case SyntaxKind.FieldDeclaration:
                 {
-                    switch (filetype)
-                    {
-                        // Internal fields are emited only in the internal or internal only header
-                        // Static fields are emited in the implementation
-                        case ObjCFileType.InternalHeader:
-                        case ObjCFileType.InternalOnlyHeader:
-                        case ObjCFileType.Implementation:
-                            return true;
-                        case ObjCFileType.PublicHeader:
-                            return false;
-                        default:
-                            throw new NotSupportedException();
-                    }
+                    return ShouldEmitFieldSyntax(isStatic, filetype);
                 }
                 default:
                     throw new NotSupportedException();
             }
+        }
+
+        static bool ShouldEmitFieldSyntax(bool isStatic, ObjCFileType filetype)
+        {
+            if (isStatic)
+            {
+                switch (filetype)
+                {
+                    // Static fields are emited just in the implementation
+                    case ObjCFileType.Implementation:
+                        return true;
+                    case ObjCFileType.PublicHeader:
+                    case ObjCFileType.InternalOnlyHeader:
+                    case ObjCFileType.InternalHeader:
+                        return false;
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+            else
+            {
+                switch (filetype)
+                {
+                    // Fields (public or private) are emited only in public or internal only headers
+                    case ObjCFileType.PublicHeader:
+                    case ObjCFileType.InternalOnlyHeader:
+                        return true;
+                    case ObjCFileType.Implementation:
+                    case ObjCFileType.InternalHeader:
+                        return false;
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+
+
         }
 
         bool ShouldWriteBaseProtocol(ObjCTypeReachability reachability, ObjCFileType filetype)

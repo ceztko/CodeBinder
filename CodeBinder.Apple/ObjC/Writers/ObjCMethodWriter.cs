@@ -72,7 +72,6 @@ namespace CodeBinder.Apple
             }
             else
             {
-                var str = MethodName;
                 using (Builder.AppendLine().Block())
                 {
                     if (Item.Body == null)

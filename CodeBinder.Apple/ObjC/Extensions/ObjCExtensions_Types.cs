@@ -361,8 +361,12 @@ namespace CodeBinder.Apple
             }
             else
             {
-                if (parent?.Parent.IsStatement() == true && !property.IsIndexer)
+                if (!property.IsIndexer &&
+                    (!syntax.Parent.IsExpression(ExpressionKind.MemberAccess)
+                    || (syntax.Parent as MemberAccessExpressionSyntax)!.Expression == syntax))
+                {
                     builder.Append("self").Dot();
+                }
 
                 appendProperty();
             }

@@ -315,6 +315,22 @@ namespace CodeBinder.Apple
         public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context)!;
+            if (methodSymbol.HasObjCReplacement(out var replacement) && replacement.Kind == SymbolReplacementKind.Property)
+            {
+                // Property replacement, like [NSObject hash], [NSObject description]
+                if (syntax.Expression.IsExpression(ExpressionKind.MemberAccess))
+                {
+                    builder.Append(syntax.Expression, context);
+                }
+                else
+                {
+                    // If the invocation expression is a member access, we assume we don't need to qualify the invocation object
+                    builder.Append("self").Dot().Append(syntax.Expression, context);
+                }
+
+                return builder;
+            }
+
             bool hasEmptyBody;
             if (methodSymbol.IsPartialMethod(out hasEmptyBody) && (hasEmptyBody || methodSymbol.PartialImplementationPart!.ShouldDiscard(context.Conversion)))
             {
@@ -334,6 +350,7 @@ namespace CodeBinder.Apple
             {
                 if (syntax.Expression.IsExpression(ExpressionKind.MemberAccess))
                 {
+                    // If the invocation expression is a member access, we assume we don't need to qualify the invocation with object
                     builder.Bracketed().Append(syntax.Expression, context).Append(syntax.ArgumentList.Arguments, false, context).Close();
                 }
                 else
@@ -445,7 +462,11 @@ namespace CodeBinder.Apple
                 }
                 case SymbolKind.Method:
                 {
-                    builder.Append(syntax.Expression, context).Space().Append(syntax.Name, context);
+                    var methodSymbol = (IMethodSymbol)symbol;
+                    if (methodSymbol.HasObjCReplacement(out var replacement) && replacement.Kind == SymbolReplacementKind.Property)
+                        builder.Append(syntax.Expression, context).Dot().Append(syntax.Name, context);
+                    else
+                        builder.Append(syntax.Expression, context).Space().Append(syntax.Name, context);
                     break;
                 }
                 default:
