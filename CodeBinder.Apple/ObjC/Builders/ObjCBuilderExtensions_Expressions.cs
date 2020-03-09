@@ -342,7 +342,7 @@ namespace CodeBinder.Apple
                         if (syntax.Expression.IsExpression(ExpressionKind.MemberAccess))
                         {
                             var memberAccess = (MemberAccessExpressionSyntax)syntax.Expression;
-                            builder.Append("CBBinderGetHashCode").Parenthesized().Append(memberAccess.Expression, context).Close();
+                            builder.Append("CBUtilsGetHashCode").Parenthesized().Append(memberAccess.Expression, context).Close();
                             return builder;
                         }
 

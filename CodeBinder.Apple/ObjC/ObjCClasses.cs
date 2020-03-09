@@ -204,6 +204,26 @@ namespace CodeBinder.Apple
 
 #import <Foundation/Foundation.h>
 
+inline NSUInteger CBUtilsGetHashCode(NSObject *obj)
+{
+    return obj.hash;
+}
+
+inline NSUInteger CBUtilsGetHashCode(int32_t value)
+{
+    return value;
+}
+
+inline NSUInteger CBUtilsGetHashCode(uint32_t value)
+{
+    return value;
+}
+
+inline NSUInteger CBUtilsGetHashCode(void *ptr)
+{
+    return (NSUInteger)ptr;
+}
+
 inline NSString * CBBinderStringAdd(NSString *lhs, NSObject *rhs)
 {
     return [lhs initWithString:[rhs description]];
