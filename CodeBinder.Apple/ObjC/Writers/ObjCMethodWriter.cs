@@ -160,7 +160,11 @@ namespace CodeBinder.Apple
 
         protected override void writeReturnType()
         {
-            WriteType(Item.ReturnType, ObjCTypeUsageKind.Declaration);
+            var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
+            if (methodSymbol.HasObjCReplacement(ObjCSymbolUsage.Declaration, out var replacement) && replacement.ReturnType != null)
+                Builder.Append(replacement.ReturnType);
+            else
+                WriteType(Item.ReturnType, ObjCTypeUsageKind.Declaration);
         }
 
         protected override void WriteMethodBodyPrefixInternal()
@@ -207,10 +211,7 @@ namespace CodeBinder.Apple
             {
                 // Try first look for replacements
                 var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
-                if (methodSymbol.HasObjCReplacement(out var replacement))
-                    return replacement.Name;
-
-                return methodSymbol.GetObjCName(Context);
+                return methodSymbol.GetObjCName(ObjCSymbolUsage.Declaration, Context);
             }
         }
 

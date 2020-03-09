@@ -99,4 +99,16 @@ namespace CodeBinder.Apple
         /// </summary>
         IncludeGlobalFirst
     }
+
+    enum ObjCSymbolUsage
+    {
+        /// <summary>
+        /// Normal symbol usage (eg. invocation, assignment, access..)
+        /// </summary>
+        Normal,
+        /// <summary>
+        /// Symbol declaration (field, method signature..)
+        /// </summary>
+        Declaration
+    }
 }

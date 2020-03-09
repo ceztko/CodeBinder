@@ -49,7 +49,7 @@ namespace CodeBinder.Apple
                 case "System.Boolean":
                     return "NO";
                 case "System.Char":
-                    return "unichar()";
+                    return "char()";
                 case "CodeBinder.Apple.NSUInteger":
                 case "CodeBinder.Apple.NSInteger":
                 case "System.Byte":
@@ -105,7 +105,7 @@ namespace CodeBinder.Apple
                 case SyntaxKind.BoolKeyword:
                     return "BOOL";
                 case SyntaxKind.CharKeyword:
-                    return "unichar";
+                    return "char";
                 case SyntaxKind.SByteKeyword:
                     return "int8_t";
                 case SyntaxKind.ByteKeyword:

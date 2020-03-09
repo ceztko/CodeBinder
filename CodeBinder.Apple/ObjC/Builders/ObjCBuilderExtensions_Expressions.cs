@@ -278,7 +278,11 @@ namespace CodeBinder.Apple
         // OK
         public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Append("CBBinderCastOperator").AngleBracketed().Append(syntax.Type, context).Close().Parenthesized().Append(syntax.Expression, context).Close();
+            var type = syntax.Type.GetTypeSymbol(context);
+            if (type.IsCLRPrimitiveType(out var objcName))
+                builder.Parenthesized().Append(objcName).Close().Append(syntax.Expression, context);
+            else
+                builder.Append("CBBinderCastOperator").AngleBracketed().Append(syntax.Type, context).Close().Parenthesized().Append(syntax.Expression, context).Close();
             return builder;
         }
 
@@ -315,20 +319,36 @@ namespace CodeBinder.Apple
         public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context)!;
-            if (methodSymbol.HasObjCReplacement(out var replacement) && replacement.Kind == SymbolReplacementKind.Property)
+            if (methodSymbol.HasObjCReplacement(out var replacement))
             {
-                // Property replacement, like [NSObject hash], [NSObject description]
-                if (syntax.Expression.IsExpression(ExpressionKind.MemberAccess))
+                switch(replacement.Kind)
                 {
-                    builder.Append(syntax.Expression, context);
-                }
-                else
-                {
-                    // If the invocation expression is a member access, we assume we don't need to qualify the invocation object
-                    builder.Append("self").Dot().Append(syntax.Expression, context);
-                }
+                    case SymbolReplacementKind.Property:
+                    {
+                        // Property replacement, like [NSObject hash], [NSObject description]
+                        if (syntax.Expression.IsExpression(ExpressionKind.MemberAccess))
+                        {
+                            builder.Append(syntax.Expression, context);
+                        }
+                        else
+                        {
+                            // If the invocation expression is a member access, we assume we don't need to qualify the invocation object
+                            builder.Append("self").Dot().Append(syntax.Expression, context);
+                        }
+                        return builder;
+                    }
+                    case SymbolReplacementKind.StaticMethod:
+                    {
+                        if (syntax.Expression.IsExpression(ExpressionKind.MemberAccess))
+                        {
+                            var memberAccess = (MemberAccessExpressionSyntax)syntax.Expression;
+                            builder.Append("CBBinderGetHashCode").Parenthesized().Append(memberAccess.Expression, context).Close();
+                            return builder;
+                        }
 
-                return builder;
+                        break;
+                    }
+                }
             }
 
             bool hasEmptyBody;

@@ -1,4 +1,5 @@
 ObjC:
+- Support for ToString()/GetHashCode() for primitive types (Make a replacement CBUtilsGetHashCode() that use that)
 - Support value types:
 - Public static fields
 - support include dependencies for type parameters, support for dipendencies for covariant return types.

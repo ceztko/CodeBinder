@@ -8,7 +8,12 @@ namespace CodeBinder.Apple
     {
         public string Name { get; set; } = string.Empty;
         public SymbolReplacementKind Kind { get; set; }
+
+        // Valid only for properties
         public string SetterName { get; set; } = string.Empty;
+
+        // Valid only for methods/properties
+        public string? ReturnType { get; set; } = null;
     }
 
     enum SymbolReplacementKind

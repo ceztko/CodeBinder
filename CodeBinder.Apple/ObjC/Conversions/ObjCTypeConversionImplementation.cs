@@ -52,8 +52,8 @@ namespace CodeBinder.Apple
 
         protected override CodeWriter GetTypeWriter()
         {
-            //if (Context.Node.Identifier.Text == "PdfSigningContext" || Context.Node.Identifier.Text == "PdfMessageHandler")
-            //    return CodeWriter.NullWriter("/* NULL */");
+            if (Context.Node.Identifier.Text == "PdfSigningContext" || Context.Node.Identifier.Text == "PdfMessageHandler")
+                return CodeWriter.NullWriter("/* NULL */");
 
             return new ObjCClassWriter(Context.Node, Context.ComputePartialDeclarationsTree(), Context.Compilation, ObjCFileType.Implementation);
         }

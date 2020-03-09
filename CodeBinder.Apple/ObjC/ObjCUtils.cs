@@ -50,6 +50,62 @@ namespace CodeBinder.Apple
                 throw new Exception($"Unsupported ObjectiveC type for {typeName}");
         }
 
+
+        /// <summary>Primitive types as defined by https://docs.microsoft.com/en-us/dotnet/api/system.type.isprimitive
+        /// </summary>
+        /// <returns>Return true if the given symbol is a blittable non-structured system type</returns>
+        public static bool IsCLRPrimitiveType(this ITypeSymbol symbol, [NotNullWhen(true)]out string? objcname)
+        {
+            switch (symbol.SpecialType)
+            {
+                case SpecialType.System_IntPtr:
+                    objcname = "void *";
+                    return true;
+                case SpecialType.System_UIntPtr:
+                    objcname = "void *";
+                    return true;
+                case SpecialType.System_Boolean:
+                    objcname = "BOOL";
+                    return true;
+                case SpecialType.System_Char:
+                    objcname = "char";
+                    return true;
+                case SpecialType.System_SByte:
+                    objcname = "int8_t";
+                    return true;
+                case SpecialType.System_Byte:
+                    objcname = "uint8_t";
+                    return true;
+                case SpecialType.System_UInt16:
+                    objcname = "uint16_t";
+                    return true;
+                case SpecialType.System_Int16:
+                    objcname = "int16_t";
+                    return true;
+                case SpecialType.System_UInt32:
+                    objcname = "uint32_t";
+                    return true;
+                case SpecialType.System_Int32:
+                    objcname = "int32_t";
+                    return true;
+                case SpecialType.System_UInt64:
+                    objcname = "uint64_t";
+                    return true;
+                case SpecialType.System_Int64:
+                    objcname = "int64_t";
+                    return true;
+                case SpecialType.System_Single:
+                    objcname = "float";
+                    return true;
+                case SpecialType.System_Double:
+                    objcname = "double";
+                    return true;
+                default:
+                    objcname = null;
+                    return false;
+            }
+        }
+
         /// <summary>
         /// Simple type is primitive value types plus void
         /// </summary>
@@ -267,7 +323,7 @@ namespace CodeBinder.Apple
                 case ObjCInteropType.Boolean:
                     return "BOOL *";
                 case ObjCInteropType.Char:
-                    return "unichar *";
+                    return "char *";
                 case ObjCInteropType.Byte:
                     return "uint8_t *";
                 case ObjCInteropType.SByte:
@@ -310,7 +366,7 @@ namespace CodeBinder.Apple
                 case ObjCInteropType.Boolean:
                     return "BOOL";
                 case ObjCInteropType.Char:
-                    return "unichar";
+                    return "char";
                 case ObjCInteropType.Byte:
                     return "uint8_t";
                 case ObjCInteropType.SByte:
