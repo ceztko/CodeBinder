@@ -165,13 +165,13 @@ namespace CodeBinder.Apple
             if (syntax.Initializer == null)
             {
                 builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close().Space()
-                    .Append("init").Space().Append(syntax.Type.RankSpecifiers[0].Sizes[0], context).Close();
+                    .Append("init").Colon().Append(syntax.Type.RankSpecifiers[0].Sizes[0], context).Close();
             }
             else
             {
                 builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close().Space()
                     .Append("initWithValues").Colon().Append(syntax.Initializer.Expressions.Count.ToString())
-                    .Space().Append(syntax.Initializer, context).Close();
+                    .Colon().Append(syntax.Initializer, context).Close();
             }
 
             return builder;

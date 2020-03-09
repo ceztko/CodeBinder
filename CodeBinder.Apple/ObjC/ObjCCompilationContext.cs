@@ -88,6 +88,9 @@ namespace CodeBinder.Apple
 
         public void AddMethodBinding(IMethodSymbol symbol, string bindedName)
         {
+            if (Conversion.MethodsLowerCase)
+                bindedName = bindedName.ToObjCCase();
+
             _bindedMethodNames.Add(symbol, bindedName);
         }
 

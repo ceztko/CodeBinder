@@ -72,6 +72,7 @@ namespace CodeBinder.Apple
             }
             else
             {
+                var str = MethodName;
                 using (Builder.AppendLine().Block())
                 {
                     if (Item.Body == null)
@@ -210,12 +211,7 @@ namespace CodeBinder.Apple
                 if (methodSymbol.HasObjCReplacement(out var replacement))
                     return replacement.Name;
 
-                var methodName = methodSymbol.GetObjCName(Context);
-                if (Context.Conversion.MethodsLowerCase)
-                    return methodName.ToObjCCase();
-                else
-                    return methodName;
-
+                return methodSymbol.GetObjCName(Context);
             }
         }
 
