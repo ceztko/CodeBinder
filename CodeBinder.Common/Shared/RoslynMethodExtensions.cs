@@ -595,6 +595,12 @@ namespace CodeBinder.Shared
             return attrib;
         }
 
+        public static void DebugBreakWhen(this string str, Func<string, bool> condition)
+        {
+            if (condition(str))
+                Debugger.Break();
+        }
+
         public static void DebugBreakWhen(this SyntaxNode node, Func<string, bool> condition)
         {
             string toString = node.ToString();

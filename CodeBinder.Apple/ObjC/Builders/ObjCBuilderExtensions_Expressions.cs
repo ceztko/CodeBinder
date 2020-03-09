@@ -164,12 +164,12 @@ namespace CodeBinder.Apple
 
             if (syntax.Initializer == null)
             {
-                builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close().Space()
+                builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close()
                     .Append("init").Colon().Append(syntax.Type.RankSpecifiers[0].Sizes[0], context).Close();
             }
             else
             {
-                builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close().Space()
+                builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close()
                     .Append("initWithValues").Colon().Append(syntax.Initializer.Expressions.Count.ToString())
                     .Colon().Append(syntax.Initializer, context).Close();
             }
@@ -332,16 +332,15 @@ namespace CodeBinder.Apple
             }
             else
             {
-                if (syntax.Parent.IsExpression(ExpressionKind.MemberAccess))
+                if (syntax.Expression.IsExpression(ExpressionKind.MemberAccess))
                 {
-                    // We assume parent expressions started a bracketed invocation
-                    builder.Append(syntax.Expression, context).Space().Append(syntax.ArgumentList.Arguments, false, context);
+                    builder.Bracketed().Append(syntax.Expression, context).Append(syntax.ArgumentList.Arguments, false, context).Close();
                 }
                 else
                 {
                     // Objective C static or instance message, we need to start a bracketed invocation
                     builder.Bracketed().Append(methodSymbol.IsStatic ? methodSymbol.ContainingType.GetObjCName(context) : "self").Space()
-                        .Append(syntax.Expression, context).Space().Append(syntax.ArgumentList.Arguments, false, context).Close();
+                        .Append(syntax.Expression, context).Append(syntax.ArgumentList.Arguments, false, context).Close();
                 }
 
             }
@@ -446,7 +445,7 @@ namespace CodeBinder.Apple
                 }
                 case SymbolKind.Method:
                 {
-                    builder.Bracketed().Append(syntax.Expression, context).Space().Append(syntax.Name, context).Close();
+                    builder.Append(syntax.Expression, context).Space().Append(syntax.Name, context);
                     break;
                 }
                 default:
@@ -461,7 +460,7 @@ namespace CodeBinder.Apple
         public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var constructorSymbol = syntax.GetSymbol<IMethodSymbol>(context);
-            builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close().Space()
+            builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close()
                 .Append(constructorSymbol.GetObjCName(context)).Append(syntax.ArgumentList!.Arguments, false, context);
             return builder;
         }
