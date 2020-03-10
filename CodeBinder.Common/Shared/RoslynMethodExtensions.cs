@@ -384,7 +384,7 @@ namespace CodeBinder.Shared
         public static TSymbol GetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
             where TSymbol : class,ISymbol
         {
-            return GetSymbol(node, provider) as TSymbol ?? throw new Exception($"Unable to get symbol {typeof(ISymbol).Name} in syntax: {node}");
+            return GetSymbol(node, provider) as TSymbol ?? throw new Exception($"Unable to get symbol {typeof(TSymbol).Name} in syntax: {node}");
         }
 
         public static ISymbol? GetSymbol(this SyntaxNode node, ICompilationContextProvider provider)
@@ -405,10 +405,48 @@ namespace CodeBinder.Shared
             return model.GetDeclaredSymbol(node);
         }
 
+        /// <summary>Get unconverted type symbol</summary>
+        public static ITypeSymbol? GetTypeSymbolRaw(this SyntaxNode node, ICompilationContextProvider provider)
+        {
+            var info = node.GetTypeInfo(provider);
+            return info.Type;
+        }
+
+        /// <summary>Get unconverted type symbol</summary>
+        public static TSymbol GetTypeSymbolRaw<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
+            where TSymbol : class, ITypeSymbol
+        {
+            return GetTypeSymbolRaw(node, provider) as TSymbol ?? throw new Exception($"Unable to get symbol {typeof(TSymbol).Name} in syntax: {node}");
+        }
+
+        /// <summary>Get unconverted type symbol</summary>
+        public static bool TryGetTypeSymbolRaw<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)]out TSymbol? symbol)
+            where TSymbol : class, ITypeSymbol
+        {
+            symbol = GetTypeSymbolRaw(node, provider) as TSymbol;
+            return symbol != null;
+        }
+
+        /// <summary>Get inferred (possibly converted) type symbol</summary>
         public static ITypeSymbol? GetTypeSymbol(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var info = node.GetTypeInfo(provider);
             return info.ConvertedType;
+        }
+
+        /// <summary>Get inferred (possibly converted) type symbol</summary>
+        public static TSymbol GetTypeSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
+            where TSymbol : class,ITypeSymbol
+        {
+            return GetTypeSymbol(node, provider) as TSymbol ?? throw new Exception($"Unable to get symbol {typeof(TSymbol).Name} in syntax: {node}");
+        }
+
+        /// <summary>Get inferred (possibly converted) type symbol</summary>
+        public static bool TryGetTypeSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)]out TSymbol? symbol)
+            where TSymbol : class,ITypeSymbol
+        {
+            symbol = GetTypeSymbol(node, provider) as TSymbol;
+            return symbol != null;
         }
 
         public static SemanticModel GetSemanticModel(this SyntaxNode node, ICompilationContextProvider provider)

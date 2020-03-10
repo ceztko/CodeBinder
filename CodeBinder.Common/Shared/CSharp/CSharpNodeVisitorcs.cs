@@ -201,6 +201,14 @@ namespace CodeBinder.Shared.CSharp
 
         #region Unsupported syntax
 
+        public override void VisitForEachStatement(ForEachStatementSyntax node)
+        {
+            if (node.Expression.TryGetTypeSymbolRaw<IArrayTypeSymbol>(Compilation, out var arraySymbol))
+                Unsupported(node, "Iteration of array");
+
+            DefaultVisit(node);
+        }
+
         public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
         {
             var leftSymbol = node.Left.GetSymbol(this);
