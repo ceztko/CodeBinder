@@ -4,7 +4,7 @@
 
 #include <cstdlib>
 #include <string>
-#include "CBOCBaseTypes.h"
+#include "CBBaseTypes.h"
 
 #ifdef WIN32
 extern "C" __declspec(dllimport) void __stdcall CoTaskMemFree(void* pv);
