@@ -438,11 +438,17 @@ namespace CodeBinder.Apple
                 return builder;
             }
 
-            builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
+            // Access "arr" type in "arr[5]" syntax
+            var typeSymbol = syntax.Expression.GetTypeSymbol(context);
+            if (typeSymbol!.TypeKind == TypeKind.Array)
+                builder.Append(syntax.Expression, context).Dot().Append("values").Append(syntax.ArgumentList, context);
+            else
+                builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
+
             return builder;
         }
 
-        // OK
+        // Member access like this.Foo(), or obj.Property
         public static CodeBuilder Append(this CodeBuilder builder, MemberAccessExpressionSyntax syntax, ObjCCompilationContext context)
         {
             if (builder.TryToReplace(syntax, context))
@@ -546,10 +552,14 @@ namespace CodeBinder.Apple
 
         public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, bool bracketed, ObjCCompilationContext context)
         {
+            if (syntax.Arguments.Count == 0)
+                return builder;
+
+            Debug.Assert(syntax.Arguments.Count == 1);
             if (bracketed)
-                builder.Bracketed().Append(syntax.Arguments, context);
+                builder.Bracketed().Append(syntax.Arguments[0].Expression, context);
             else
-                builder.Append(syntax.Arguments, context);
+                builder.Append(syntax.Arguments[0].Expression, context);
 
             return builder;
         }
