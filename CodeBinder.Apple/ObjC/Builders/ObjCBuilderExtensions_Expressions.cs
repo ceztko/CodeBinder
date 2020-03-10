@@ -297,7 +297,7 @@ namespace CodeBinder.Apple
 
         public static CodeBuilder Append(this CodeBuilder builder, InitializerExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Append(syntax.Expressions, context);
+            builder.Append(syntax.Expressions, false, context);
             return builder;
         }
 
@@ -646,11 +646,20 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ExpressionSyntax> expressions, ObjCCompilationContext context)
+        public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ExpressionSyntax> expressions, bool commaSeparated, ObjCCompilationContext context)
         {
-            bool first = true;
-            foreach (var expression in expressions)
-                builder.Space(ref first).Colon().Append(expression, context);
+            if (commaSeparated)
+            {
+                bool first = true;
+                foreach (var expression in expressions)
+                    builder.CommaSeparator(ref first).Append(expression, context);
+            }
+            else
+            {
+                bool first = true;
+                foreach (var expression in expressions)
+                    builder.Space(ref first).Colon().Append(expression, context);
+            }
 
             return builder;
         }

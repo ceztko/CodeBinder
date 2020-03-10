@@ -151,7 +151,7 @@ namespace CodeBinder.Apple
                 builder.SemiColonSeparator();
                 if (syntax.Condition != null)
                     builder.Append(syntax.Condition, context);
-                builder.SemiColonSeparator().Append(syntax.Incrementors, context);
+                builder.SemiColonSeparator().Append(syntax.Incrementors, true, context);
             }).AppendLine();
             builder.IndentChild().Append(syntax.Statement, context);
             return builder;
