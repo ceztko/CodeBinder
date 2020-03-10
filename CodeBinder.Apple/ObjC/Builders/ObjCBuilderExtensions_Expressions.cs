@@ -202,9 +202,9 @@ namespace CodeBinder.Apple
                                     break;
 
                                 var elementAccess = (ElementAccessExpressionSyntax)syntax.Left;
-                                builder.Append(elementAccess.Expression, context).Dot()
-                                    .Append(elementAccess, property, context)
-                                        .Parenthesized().Append(elementAccess.ArgumentList, false, context).CommaSeparator().Append(syntax.Right, context); ;
+                                builder.Bracketed().Append(elementAccess.Expression, context).Space() // [expr set :i :value]
+                                    .Append(elementAccess, property, context).Space().Append(elementAccess.ArgumentList, false, context).Space()
+                                    .Colon().Append(syntax.Right, context).Close();
                                 return builder;
                             }
 
@@ -427,13 +427,8 @@ namespace CodeBinder.Apple
                 var property = (IPropertySymbol)symbol;
                 Debug.Assert(property.IsIndexer);
 
-                void appendProperty() => builder.Append(syntax.Expression, context).Space()
-                    .Append(syntax, property, context).Append(syntax.ArgumentList, false, context);
-
-                if (syntax.Parent.IsStatement())
-                    builder.Bracketed(appendProperty);
-                else
-                    appendProperty();
+                builder.Bracketed().Append(syntax.Expression, context).Space()
+                    .Append(syntax, property, context).Append(syntax.ArgumentList, false, context).Close();
 
                 return builder;
             }
@@ -441,9 +436,9 @@ namespace CodeBinder.Apple
             // Access "arr" type in "arr[5]" syntax
             var typeSymbol = syntax.Expression.GetTypeSymbol(context);
             if (typeSymbol!.TypeKind == TypeKind.Array)
-                builder.Append(syntax.Expression, context).Dot().Append("values").Append(syntax.ArgumentList, context);
+                builder.Append(syntax.Expression, context).Dot().Append("values").Append(syntax.ArgumentList, true, context);
             else
-                builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
+                builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, true, context);
 
             return builder;
         }
@@ -544,22 +539,17 @@ namespace CodeBinder.Apple
 
         #region Support
 
-        public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, ObjCCompilationContext context)
-        {
-            builder.Append(syntax, true, context);
-            return builder;
-        }
-
-        public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, bool bracketed, ObjCCompilationContext context)
+        /// <param name="clangBracketed">True if the invocation is a CLang stile bracketed invocation</param>
+        public static CodeBuilder Append(this CodeBuilder builder, BracketedArgumentListSyntax syntax, bool clangBracketed, ObjCCompilationContext context)
         {
             if (syntax.Arguments.Count == 0)
                 return builder;
 
             Debug.Assert(syntax.Arguments.Count == 1);
-            if (bracketed)
+            if (clangBracketed)
                 builder.Bracketed().Append(syntax.Arguments[0].Expression, context);
             else
-                builder.Append(syntax.Arguments[0].Expression, context);
+                builder.Colon().Append(syntax.Arguments[0].Expression, context);
 
             return builder;
         }
