@@ -93,7 +93,7 @@ namespace CodeBinder.Apple
         private void WriteSetter(AccessorDeclarationSyntax accessor)
         {
             Builder.Append(Modifier).Space().Append("(void)").Append(SetterName);
-            WriteSetterParameters();
+            WriteAccessorParameters(true);
             Builder.Colon().Parenthesized().Append(ObjCType).Close().Append("value");
 
             if (FileType.IsHeader())
@@ -125,6 +125,7 @@ namespace CodeBinder.Apple
         private void WriteGetter(AccessorDeclarationSyntax? accessor)
         {
             Builder.Append(Modifier).Space().Parenthesized().Append(ObjCType).Close().Append(GetterName);
+            WriteAccessorParameters(false);
             if (accessor == null)
             {
                 // Happens on WriteOnly properties https://stackoverflow.com/a/18637623/213871
@@ -164,7 +165,7 @@ namespace CodeBinder.Apple
 
         protected virtual void WriteGetterParameters() { /* Do nothing */ }
 
-        protected virtual void WriteSetterParameters()
+        protected virtual void WriteAccessorParameters(bool isSetter)
         {
             // Do nothing
         }
@@ -302,15 +303,17 @@ namespace CodeBinder.Apple
             // Do nothing. Indexers has no par in Objective-C
         }
 
-        protected override void WriteSetterParameters()
+        protected override void WriteAccessorParameters(bool isSetter)
         {
+            bool first = true;
             foreach (var parameter in Item.ParameterList.Parameters)
             {
-                Builder.Colon().Parenthesized()
+                Builder.Space(ref first).Colon().Parenthesized()
                     .Append(parameter.Type!, ObjCTypeUsageKind.Declaration, Context).Close().Append(parameter.Identifier.Text);
-
-                Builder.Space();
             }
+
+            if (isSetter)
+                Builder.Space();
         }
     }
 }
