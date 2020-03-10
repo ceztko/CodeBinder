@@ -208,8 +208,7 @@ namespace CodeBinder.Apple
                                 return builder;
                             }
 
-                            builder.Append(syntax.Left, context).Parenthesized().Append(syntax.Right, context);
-                            return builder;
+                            break;
                         }
                     default:
                         throw new Exception();
@@ -463,14 +462,27 @@ namespace CodeBinder.Apple
                 }
                 case SymbolKind.Property:
                 {
+                    var property = (IPropertySymbol)symbol;
                     if (symbol.OriginalDefinition.ContainingType.GetFullName() == "System.Nullable<T>"
                         && symbol.Name == "Value")
                     {
-                        // There are no nullable types in Java, just discard ".Value" accessor
-                        builder.Append(syntax.Expression, context);
+                        var underlyingType = property.Type;
+                        Debug.Assert(underlyingType.IsValueType);
+                        if (underlyingType.IsCLRPrimitiveType())
+                        {
+                            // The only supported nullable type in ObjC is NSNumber
+                            // https://developer.apple.com/documentation/foundation/nsnumber?language=objc
+                            builder.Append(syntax.Expression, context).Dot().Append(underlyingType.GetNSNumberAccessProperty());
+                        }
+                        else
+                        {
+                            // We assume the other value types are treated as reference tpes in ObjC
+                            builder.Append(syntax.Expression, context);
+                        }
+
                         return builder;
                     }
-                    var property = (IPropertySymbol)symbol;
+
                     if (property.IsIndexer && syntax.Parent.IsStatement())
                     {
                         // Handle eg. obj.Property[5] = false -> [obj.Property set:NO]

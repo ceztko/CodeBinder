@@ -30,7 +30,6 @@ namespace CodeBinder.Apple
             builder.AppendLine("#include <cinttypes>");
             builder.AppendLine("#else // __cplusplus");
             builder.AppendLine("#include <stdint.h>");
-            builder.AppendLine("#include <uchar.h>");
             builder.AppendLine("#include <inttypes.h>");
             builder.AppendLine("#endif // __cplusplus");
             builder.AppendLine();
@@ -39,7 +38,6 @@ namespace CodeBinder.Apple
                 builder.AppendLine($"#import {ObjCUtils.ToArrayBoxTypeName(type).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");
             builder.AppendLine();
             builder.AppendLine("// Other types");
-            builder.AppendLine($"#import {nameof(ObjCClasses.CBBinderUtils_h).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");
             builder.AppendLine($"#import {nameof(ObjCClasses.CBException_h).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");
             builder.AppendLine($"#import {nameof(ObjCClasses.CBIEqualityCompararer_h).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");
             builder.AppendLine($"#import {nameof(ObjCClasses.CBIReadOnlyList_h).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");

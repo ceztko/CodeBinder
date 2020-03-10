@@ -50,7 +50,6 @@ namespace CodeBinder.Apple
                 throw new Exception($"Unsupported ObjectiveC type for {typeName}");
         }
 
-
         /// <summary>Primitive types as defined by https://docs.microsoft.com/en-us/dotnet/api/system.type.isprimitive
         /// </summary>
         /// <returns>Return true if the given symbol is a blittable non-structured system type</returns>
@@ -70,11 +69,11 @@ namespace CodeBinder.Apple
                 case SpecialType.System_Char:
                     objcname = "char";
                     return true;
-                case SpecialType.System_SByte:
-                    objcname = "int8_t";
-                    return true;
                 case SpecialType.System_Byte:
                     objcname = "uint8_t";
+                    return true;
+                case SpecialType.System_SByte:
+                    objcname = "int8_t";
                     return true;
                 case SpecialType.System_UInt16:
                     objcname = "uint16_t";
@@ -102,6 +101,70 @@ namespace CodeBinder.Apple
                     return true;
                 default:
                     objcname = null;
+                    return false;
+            }
+        }
+
+        public static string GetNSNumberAccessProperty(this ITypeSymbol symbol)
+        {
+            if (TryGetNSNumberAccessProperty(symbol, out var accessProperty))
+                return accessProperty;
+            else
+                throw new Exception($"No available NSNumber property access for {symbol}");
+        }
+
+        /// <summary>
+        /// Get numeric access method for NSNumber
+        /// https://developer.apple.com/documentation/foundation/nsnumber?language=objc
+        /// </summary>
+        public static bool TryGetNSNumberAccessProperty(this ITypeSymbol symbol, [NotNullWhen(true)]out string? accessProperty)
+        {
+            switch (symbol.SpecialType)
+            {
+                case SpecialType.System_IntPtr:
+                    accessProperty = "integerValue";
+                    return true;
+                case SpecialType.System_UIntPtr:
+                    accessProperty = "unsignedIntegerValue";
+                    return true;
+                case SpecialType.System_Boolean:
+                    accessProperty = "boolValue";
+                    return true;
+                case SpecialType.System_Char:
+                    accessProperty = "charValue";
+                    return true;
+                case SpecialType.System_Byte:
+                    accessProperty = "unsignedCharValue";
+                    return true;
+                case SpecialType.System_SByte:
+                    accessProperty = "charValue";
+                    return true;
+                case SpecialType.System_UInt16:
+                    accessProperty = "unsignedShortValue";
+                    return true;
+                case SpecialType.System_Int16:
+                    accessProperty = "shortValue";
+                    return true;
+                case SpecialType.System_UInt32:
+                    accessProperty = "unsignedIntValue";
+                    return true;
+                case SpecialType.System_Int32:
+                    accessProperty = "intValue";
+                    return true;
+                case SpecialType.System_UInt64:
+                    accessProperty = "unsignedLongLongValue";
+                    return true;
+                case SpecialType.System_Int64:
+                    accessProperty = "longLongValue";
+                    return true;
+                case SpecialType.System_Single:
+                    accessProperty = "floatValue";
+                    return true;
+                case SpecialType.System_Double:
+                    accessProperty = "doubleValue";
+                    return true;
+                default:
+                    accessProperty = null;
                     return false;
             }
         }
