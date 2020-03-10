@@ -596,8 +596,7 @@ namespace CodeBinder.Apple
 
                     if (type.TypeKind == TypeKind.Array)
                     {
-                        appendExpression();
-                        builder.Dot().Append("values");
+                        builder.Append("CBUtilsGetNativeArray").Parenthesized(appendExpression);
                     }
                     else
                     {
@@ -606,9 +605,8 @@ namespace CodeBinder.Apple
                         {
                             case "System.Runtime.InteropServices.HandleRef":
                             {
-                                // Passing "System.HandleRef" to hantive methods needs further accessing handle
-                                appendExpression();
-                                builder.Dot().Append("handle");
+                                // Passing "System.HandleRef" to native methods needs further accessing handle
+                                builder.Append("CBUtilsGetNativeHandle").Parenthesized(appendExpression);
                                 break;
                             }
                             case "System.String":

@@ -305,7 +305,7 @@ namespace CodeBinder.Apple
                     boxTypeName = "CBBoolArray";
                     return true;
                 case "System.Char":
-                    boxTypeName = "CBUniCharArray";
+                    boxTypeName = "CBCharArray";
                     return true;
                 case "System.Byte":
                     boxTypeName = "CBUInt8Array";
@@ -355,7 +355,7 @@ namespace CodeBinder.Apple
                 ObjCInteropType.UIntPtr => "CBPtrArray",
                 ObjCInteropType.IntPtr => "CBPtrArray",
                 ObjCInteropType.Boolean => "CBBoolArray",
-                ObjCInteropType.Char => "CBUniCharArray",
+                ObjCInteropType.Char => "CBCharArray",
                 ObjCInteropType.Byte => "CBUInt8Array",
                 ObjCInteropType.SByte => "CBInt8Array",
                 ObjCInteropType.UInt16 => "CBUInt16Array",

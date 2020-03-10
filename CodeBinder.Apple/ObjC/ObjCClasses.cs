@@ -203,6 +203,148 @@ namespace CodeBinder.Apple
 #pragma once
 
 #import <Foundation/Foundation.h>
+#import ""../CBOCBaseTypes.h""
+
+inline void * CBUtilsGetNativeHandle(CBHandleRef *handle)
+{
+    if (handle == nil)
+        return nullptr;
+
+    return handle.handle;
+}
+
+inline void * CBUtilsGetNativeHandle(void *handle)
+{
+    return handle;
+}
+
+inline NSUInteger * CBUtilsGetNativeArray(CBNSUIntegerArray *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline NSInteger * CBUtilsGetNativeArray(CBNSIntegerArray *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline void ** CBUtilsGetNativeArray(CBPtrArray *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline BOOL * CBUtilsGetNativeArray(CBBoolArray *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline char * CBUtilsGetNativeArray(CBCharArray *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline uint8_t * CBUtilsGetNativeArray(CBUInt8Array *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline int8_t * CBUtilsGetNativeArray(CBInt8Array *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline uint16_t * CBUtilsGetNativeArray(CBUInt16Array *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline int16_t * CBUtilsGetNativeArray(CBInt16Array *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline uint32_t * CBUtilsGetNativeArray(CBUInt32Array *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline int32_t * CBUtilsGetNativeArray(CBInt32Array *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline uint64_t * CBUtilsGetNativeArray(CBUInt64Array *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline int64_t * CBUtilsGetNativeArray(CBInt64Array *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline float * CBUtilsGetNativeArray(CBFloatArray *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline double * CBUtilsGetNativeArray(CBDoubleArray *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
+
+inline NSString * __strong * CBUtilsGetNativeArray(CBStringArray *arr)
+{
+    if (arr == nil)
+        return nullptr;
+
+    return arr.values;
+}
 
 inline NSUInteger CBUtilsGetHashCode(NSObject *obj)
 {

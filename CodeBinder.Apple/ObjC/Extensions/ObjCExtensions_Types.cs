@@ -45,7 +45,7 @@ namespace CodeBinder.Apple
                     return null;
                 case "System.UIntPtr":
                 case "System.IntPtr":
-                    return "NULL";
+                    return "nullptr";
                 case "System.Boolean":
                     return "NO";
                 case "System.Char":
