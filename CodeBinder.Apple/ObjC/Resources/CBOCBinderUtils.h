@@ -3,7 +3,7 @@
 #pragma once
 
 #import <Foundation/Foundation.h>
-#import ""../CBOCBaseTypes.h""
+#import "../CBOCBaseTypes.h"
 
 inline void* CBUtilsGetNativeHandle(CBHandleRef* handle)
 {
@@ -222,7 +222,7 @@ T* CBBinderCastOperator(NSObject* obj)
     if ([obj isKindOfClass : [T class] ])
         return (T*)obj;
     else
-        @throw[NSException exceptionWithName : @""InvalidCastException"" reason:nil userInfo : nil];
+        @throw[NSException exceptionWithName : @"InvalidCastException" reason:nil userInfo : nil];
 }
 
 #endif // CB_BINDERUTILS

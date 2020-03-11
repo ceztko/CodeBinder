@@ -192,9 +192,15 @@ namespace CodeBinder.Apple
         public static string GetObjCType(this TypeSyntax type, ObjCTypeUsageKind displayKind, ObjCCompilationContext context)
         {
             var builder = new CodeBuilder();
-            ObjCTypeKind objcTypeKind;
             var typeSymbol = type.GetTypeSymbol(context);
-            writeTypeSymbol(builder, typeSymbol, displayKind, context, out objcTypeKind);
+            writeTypeSymbol(builder, typeSymbol, displayKind, context, out var objcTypeKind);
+            return builder.ToString();
+        }
+
+        public static string GetObjCType(this ITypeSymbol typeSymbol, ObjCTypeUsageKind displayKind, ObjCCompilationContext context)
+        {
+            var builder = new CodeBuilder();
+            writeTypeSymbol(builder, typeSymbol, displayKind, context, out var objcTypeKind);
             return builder.ToString();
         }
 
@@ -464,7 +470,7 @@ namespace CodeBinder.Apple
             }
 
             ObjCTypeKind? tempTypeKind;
-            if (IsKnownObjCType(fullTypeName, symbol.Kind, usage, out objCTypeName, out tempTypeKind))
+            if (IsKnownObjCType(fullTypeName, symbol.Kind, out objCTypeName, out tempTypeKind))
             {
                 switch (symbol.Kind)
                 {
@@ -489,6 +495,7 @@ namespace CodeBinder.Apple
 
                         // NOTE: We don't append generic parameters here: ObjectiveC has only the so
                         // called "lightweight generics", that are useful only for swift interop
+                        TryAdaptType(ref objCTypeName, usage, objcTypeKind);
                         builder.Append(objCTypeName);
                         break;
                     }
@@ -496,6 +503,7 @@ namespace CodeBinder.Apple
                     case SymbolKind.ArrayType:
                     {
                         objcTypeKind = tempTypeKind.Value;
+                        TryAdaptType(ref objCTypeName, usage, objcTypeKind);
                         builder.Append(objCTypeName);
                         break;
                     }
@@ -547,15 +555,11 @@ namespace CodeBinder.Apple
             }
         }
 
-        static bool IsKnownObjCType(string fullTypeName, SymbolKind typeKind, ObjCTypeUsageKind usage,
+        static bool IsKnownObjCType(string fullTypeName, SymbolKind typeKind,
             [NotNullWhen(true)]out string? knownObjCType, [NotNullWhen(true)]out ObjCTypeKind? objcTypeKind)
         {
-            if (IsKnowSimpleObjCType(fullTypeName, typeKind, usage, out knownObjCType))
-            {
-                // Primitives value types + void
-                objcTypeKind = ObjCTypeKind.Value;
+            if (IsKnowSimpleObjCType(fullTypeName, typeKind, out knownObjCType, out objcTypeKind))
                 return true;
-            }
 
             // Known reference types
             switch (fullTypeName)
@@ -564,77 +568,66 @@ namespace CodeBinder.Apple
                 {
                     knownObjCType = "CBHandleRef";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Object":
                 {
                     knownObjCType = "NSObject";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.String":
                 {
                     knownObjCType = "NSString";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Exception":
                 {
                     knownObjCType = "CBException";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.NotImplementedException":
                 {
                     knownObjCType = "CBException";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.IDisposable":
                 {
                     knownObjCType = "CBIDisposable";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.IReadOnlyList<out T>":
                 {
                     knownObjCType = "CBIReadOnlyList";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.IEqualityComparer<in T>":
                 {
                     knownObjCType = "CBIEqualityCompararer";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.IEnumerable<out T>":
                 {
                     knownObjCType = "NSFastEnumeration";
                     objcTypeKind = ObjCTypeKind.Protocol;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.List<T>":
                 {
                     knownObjCType = "NSMutableArray";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 case "System.Collections.Generic.KeyValuePair<TKey, TValue>":
                 {
                     knownObjCType = "CBKeyValuePair";
                     objcTypeKind = ObjCTypeKind.Class;
-                    TryAdaptType(ref knownObjCType, usage, objcTypeKind.Value);
                     return true;
                 }
                 default:
@@ -647,36 +640,51 @@ namespace CodeBinder.Apple
         }
 
         /// <summary>
-        /// Simple types are primitives value types + void
+        /// Simple types are primitives value types, array types + void
         /// </summary>
-        static bool IsKnowSimpleObjCType(string fullTypeName, SymbolKind typekind, ObjCTypeUsageKind usage,
-            [NotNullWhen(true)]out string? knownObjCType)
+        static bool IsKnowSimpleObjCType(string fullTypeName, SymbolKind typekind,
+            [NotNullWhen(true)]out string? knownObjCType, [NotNullWhen(true)]out ObjCTypeKind? objcTypeKind)
         {
+            if (fullTypeName == "System.Void")
+            {
+                objcTypeKind = ObjCTypeKind.Void;
+                knownObjCType = "void";
+                return true;
+            }
+
             switch (typekind)
             {
                 case SymbolKind.ArrayType:
                 {
                     if (ObjCUtils.TryGeArrayBoxType(fullTypeName, out knownObjCType))
                     {
-                        TryAdaptType(ref knownObjCType, usage, ObjCTypeKind.Class);
+                        objcTypeKind = ObjCTypeKind.Class;
                         return true;
                     }
-                    else
-                    {
-                        return false;
-                    }
+                    break;
                 }
                 case SymbolKind.Parameter:
                 {
-                    // Type parameter usage must not be a declaration
-                    Debug.Assert(usage == ObjCTypeUsageKind.Normal);
-                    return TryGetSimpleGenericType(fullTypeName, out knownObjCType);
+                    if (TryGetPrimitiveParameterType(fullTypeName, out knownObjCType))
+                    {
+                        objcTypeKind = ObjCTypeKind.Class;
+                        return true;
+                    }
+                    break;
                 }
                 default:
                 {
-                    return ObjCUtils.TryGetSimpleType(fullTypeName, out knownObjCType);
+                    if (ObjCUtils.TryGetPrimitiveType(fullTypeName, out knownObjCType))
+                    {
+                        objcTypeKind = ObjCTypeKind.Value;
+                        return true;
+                    }
+                    break;
                 }
             }
+
+            objcTypeKind = null;
+            return false;
         }
 
         // Get Type kind 
@@ -726,7 +734,7 @@ namespace CodeBinder.Apple
         /// <param name="fullTypeName"></param>
         /// <param name="typeName"></param>
         /// <returns></returns>
-        static bool TryGetSimpleGenericType(string fullTypeName, [NotNullWhen(true)]out string? typeName)
+        static bool TryGetPrimitiveParameterType(string fullTypeName, [NotNullWhen(true)]out string? typeName)
         {
             switch (fullTypeName)
             {
@@ -758,38 +766,62 @@ namespace CodeBinder.Apple
         /// </summary>
         static void TryAdaptType(ref string type, ObjCTypeUsageKind usage, ObjCTypeKind typeKind)
         {
-            if (typeKind == ObjCTypeKind.Value)
+            switch (typeKind)
             {
-                if (usage == ObjCTypeUsageKind.DeclarationByRef)
-                    type = $"{type} *";
-            }
-            else
-            {
-                switch (usage)
+                case ObjCTypeKind.Void:
                 {
-                    case ObjCTypeUsageKind.Declaration:
+                    if (usage != ObjCTypeUsageKind.Declaration)
+                        throw new NotSupportedException($"Unsupported usage {usage} for type void");
+
+                    break;
+                }
+                case ObjCTypeKind.Value:
+                {
+                    switch (usage)
                     {
-                        // Handle special declaration for protocols
-                        if (typeKind == ObjCTypeKind.Protocol)
-                            type = $"id<{type}>";
-                        else
+                        case ObjCTypeUsageKind.Normal:
+                        case ObjCTypeUsageKind.Declaration:
+                            break;
+                        case ObjCTypeUsageKind.DeclarationByRef:
+                        case ObjCTypeUsageKind.Pointer:
                             type = $"{type} *";
-                        break;
+                            break;
+                        default:
+                            throw new NotSupportedException();
                     }
-                    case ObjCTypeUsageKind.DeclarationByRef:
+                    break;
+                }
+                case ObjCTypeKind.Class:
+                case ObjCTypeKind.Protocol:
+                {
+                    switch (usage)
                     {
-                        // Handle special declaration for protocols
-                        if (typeKind == ObjCTypeKind.Protocol)
-                            type = $"id<{type}> *";
-                        else
-                            // Ensure arc is working https://stackoverflow.com/a/39053139
-                            type = $"{type} * __strong *";
-                        break;
+                        case ObjCTypeUsageKind.Declaration:
+                        case ObjCTypeUsageKind.Pointer:
+                        {
+                            // Handle special declaration for protocols
+                            if (typeKind == ObjCTypeKind.Protocol)
+                                type = $"id<{type}>";
+                            else
+                                type = $"{type} *";
+                            break;
+                        }
+                        case ObjCTypeUsageKind.DeclarationByRef:
+                        {
+                            // Handle special declaration for protocols
+                            if (typeKind == ObjCTypeKind.Protocol)
+                                type = $"id<{type}> *";
+                            else
+                                // Ensure arc is working https://stackoverflow.com/a/39053139
+                                type = $"{type} * __strong *";
+                            break;
+                        }
+                        case ObjCTypeUsageKind.Normal:
+                            break;
+                        default:
+                            throw new NotSupportedException();
                     }
-                    case ObjCTypeUsageKind.Normal:
-                        break;
-                    default:
-                        throw new NotSupportedException();
+                    break;
                 }
             }
         }

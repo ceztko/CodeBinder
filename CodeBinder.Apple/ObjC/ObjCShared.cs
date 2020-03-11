@@ -63,9 +63,13 @@ namespace CodeBinder.Apple
         /// </summary>
         Protocol,
         /// <summary>
-        /// Any other value type kind
+        /// Value types
         /// </summary>
         Value,
+        /// <summary>
+        /// Special type "void"
+        /// </summary>
+        Void,
     }
 
     enum ObjCTypeReachability

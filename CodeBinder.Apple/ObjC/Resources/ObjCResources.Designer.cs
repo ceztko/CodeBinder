@@ -66,7 +66,7 @@ namespace CodeBinder.Apple {
         ///#pragma once
         ///
         ///#import &lt;Foundation/Foundation.h&gt;
-        ///#import &quot;&quot;../CBOCBaseTypes.h&quot;&quot;
+        ///#import &quot;../CBOCBaseTypes.h&quot;
         ///
         ///inline void* CBUtilsGetNativeHandle(CBHandleRef* handle)
         ///{
@@ -89,7 +89,7 @@ namespace CodeBinder.Apple {
         ///    return arr.values;
         ///}
         ///
-        ///inline NSI [rest of string was truncated]&quot;;.
+        ///inline NSInt [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBOCBinderUtils_h {
             get {

@@ -38,18 +38,6 @@ namespace CodeBinder.Apple
             };
         }
 
-        /// <summary>
-        /// Simple type is primitive value types plus void
-        /// </summary>
-        public static string GetSimpleType(string typeName, ObjCTypeUsageKind usage = ObjCTypeUsageKind.Normal)
-        {
-            string? ret;
-            if (TryGetSimpleType(typeName, usage, out ret))
-                return ret;
-            else
-                throw new Exception($"Unsupported ObjectiveC type for {typeName}");
-        }
-
         /// <summary>Primitive types as defined by https://docs.microsoft.com/en-us/dotnet/api/system.type.isprimitive
         /// </summary>
         /// <returns>Return true if the given symbol is a blittable non-structured system type</returns>
@@ -103,6 +91,14 @@ namespace CodeBinder.Apple
                     objcname = null;
                     return false;
             }
+        }
+
+        public static string GetCLRPrimitiveType(this ITypeSymbol symbol)
+        {
+            if (IsCLRPrimitiveType(symbol, out var objcname))
+                return objcname;
+            else
+                throw new Exception($"Not a CLR Primitive type {symbol}");
         }
 
         public static string GetNSNumberAccessProperty(this ITypeSymbol symbol)
@@ -170,86 +166,59 @@ namespace CodeBinder.Apple
         }
 
         /// <summary>
-        /// Simple type is primitive value types plus void
+        /// Get ObjC primitive value types
         /// </summary>
-        public static bool TryGetSimpleType(string fullTypeName, [NotNullWhen(true)]out string? typeName)
-        {
-            return TryGetSimpleType(fullTypeName, ObjCTypeUsageKind.Normal, out typeName);
-        }
-
-        /// <summary>
-        /// Simple type is primitive value types plus void
-        /// </summary>
-        public static bool TryGetSimpleType(string fullTypeName, ObjCTypeUsageKind usage, [NotNullWhen(true)]out string? typeName)
+        public static bool TryGetPrimitiveType(string fullTypeName, [NotNullWhen(true)]out string? typeName)
         {
             switch (fullTypeName)
             {
-                case "System.Void":
-                    typeName = "void";
-                    return true;
                 case "CodeBinder.Apple.NSUInteger":
                     typeName = "NSUInteger";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "CodeBinder.Apple.NSInteger":
                     typeName = "NSInteger";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.UIntPtr":
                     typeName = "void *";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.IntPtr":
                     typeName = "void *";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.Boolean":
                     typeName = "BOOL";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.Char":
                     typeName = "char";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.Byte":
                     typeName = "uint8_t";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.SByte":
                     typeName = "int8_t";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.UInt16":
                     typeName = "uint16_t";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.Int16":
                     typeName = "int16_t";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.UInt32":
                     typeName = "uint32_t";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.Int32":
                     typeName = "int32_t";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.UInt64":
                     typeName = "uint64_t";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.Int64":
                     typeName = "int64_t";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.Single":
                     typeName = "float";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 case "System.Double":
                     typeName = "double";
-                    AdaptValueType(ref typeName, usage);
                     return true;
                 default:
                     typeName = null;
@@ -454,26 +423,6 @@ namespace CodeBinder.Apple
                     return "NSString * __strong";
                 default:
                     throw new Exception();
-            }
-        }
-
-        /// <summary>
-        /// Try fix the type based on the usage
-        /// </summary>
-        static void AdaptValueType(ref string type, ObjCTypeUsageKind usage)
-        {
-            switch (usage)
-            {
-                case ObjCTypeUsageKind.DeclarationByRef:
-                {
-                    type = $"{type} *";
-                    return;
-                }
-                case ObjCTypeUsageKind.Declaration:
-                case ObjCTypeUsageKind.Normal:
-                    return;
-                default:
-                    throw new NotSupportedException();
             }
         }
 
@@ -716,16 +665,20 @@ namespace CodeBinder.Apple
     enum ObjCTypeUsageKind
     {
         /// <summary>
-        /// All other uses
+        /// Type declaration, generic parameters
         /// </summary>
         Normal,
         /// <summary>
-        /// Local, member, parameter declarations
+        /// Local, member, method parameter declarations
         /// </summary>
         Declaration,
         /// <summary>
         /// Parameter declarations by ref
         /// </summary>
         DeclarationByRef,
+        /// <summary>
+        /// Pointer type only, if supported
+        /// </summary>
+        Pointer
     }
 }

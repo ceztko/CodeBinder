@@ -395,6 +395,10 @@ namespace CodeBinder.Apple
             {
                 case SyntaxKind.NullLiteralExpression:
                 {
+                    var typeSymbol = syntax.GetTypeSymbol(context);
+                    if (typeSymbol != null) // NOTE: Null check on nullable types don't infer a pointer type
+                        builder.Parenthesized().Append(typeSymbol.GetObjCType(ObjCTypeUsageKind.Pointer, context)).Close();
+
                     return builder.Append("nil");
                 }
                 case SyntaxKind.StringLiteralExpression:

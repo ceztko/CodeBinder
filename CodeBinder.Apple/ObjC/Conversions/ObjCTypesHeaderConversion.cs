@@ -95,7 +95,7 @@ namespace CodeBinder.Apple
                 string enumName = enm.GetObjCName(Compilation);
                 var symbol = enm.GetDeclaredSymbol<INamedTypeSymbol>(Compilation);
                 bool isflag = symbol.HasAttribute<FlagsAttribute>();
-                string underlyingType = ObjCUtils.GetSimpleType(symbol.EnumUnderlyingType!.GetFullName());
+                string underlyingType = symbol.EnumUnderlyingType!.GetCLRPrimitiveType();
                 builder.Append("typedef").Space().Append(isflag ? "NS_OPTIONS" : "NS_ENUM").Parenthesized()
                     .Append(underlyingType).CommaSeparator().Append(enumName).Close().AppendLine();
 
@@ -134,28 +134,6 @@ namespace CodeBinder.Apple
                     .EndOfLine();
                 */
             }
-        }
-
-        string getCLangSplittedIdentifier(StringBuilder builder, string prefix, string[] splitted)
-        {
-            builder.Clear();
-            if (prefix != null)
-            {
-                builder.Append(prefix);
-                builder.Append("_");
-            }
-
-            bool first = true;
-            foreach (var str in splitted)
-            {
-                if (first)
-                    first = false;
-                else
-                    builder.Append("_");
-                builder.Append(str.ToUpperInvariant());
-            }
-
-            return builder.ToString();
         }
 
         bool ShouldSkipType(BaseTypeDeclarationSyntax type)
