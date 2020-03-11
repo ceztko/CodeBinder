@@ -61,6 +61,43 @@ namespace CodeBinder.Apple {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to #ifndef CB_BINDERUTILS
+        ///#define CB_BINDERUTILS
+        ///#pragma once
+        ///
+        ///#import &lt;Foundation/Foundation.h&gt;
+        ///#import &quot;&quot;../CBOCBaseTypes.h&quot;&quot;
+        ///
+        ///inline void* CBUtilsGetNativeHandle(CBHandleRef* handle)
+        ///{
+        ///    if (handle == nil)
+        ///        return nullptr;
+        ///
+        ///    return handle.handle;
+        ///}
+        ///
+        ///inline void* CBUtilsGetNativeHandle(void* handle)
+        ///{
+        ///    return handle;
+        ///}
+        ///
+        ///inline NSUInteger* CBUtilsGetNativeArray(CBNSUIntegerArray* arr)
+        ///{
+        ///    if (arr == nil)
+        ///        return nullptr;
+        ///
+        ///    return arr.values;
+        ///}
+        ///
+        ///inline NSI [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CBOCBinderUtils_h {
+            get {
+                return ResourceManager.GetString("CBOCBinderUtils_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to #ifndef CBOCINTEROP_HEADER
         ///#define CBOCINTEROP_HEADER
         ///#pragma once

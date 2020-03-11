@@ -37,7 +37,7 @@ namespace CodeBinder.Apple
                 builder.AppendLine($"#import \"../{ConversionCSharpToObjC.TypesHeader}\"");
                 // TODO: CBBinderUtils.h should be included in a currently missing
                 // internal only header that only has tools for code generation
-                builder.AppendLine($"#import \"{nameof(ObjCClasses.CBBinderUtils_h).ToObjCHeaderFilename()}\"");
+                builder.AppendLine($"#import \"{nameof(ObjCResources.CBOCBinderUtils_h).ToObjCHeaderFilename()}\"");
             }
             else
             {

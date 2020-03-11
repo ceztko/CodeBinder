@@ -30,7 +30,7 @@ namespace CodeBinder.Apple
                     { new ReplacementIdentity("Equals(Object)", ObjCSymbolUsage.Declaration), new SymbolReplacement() { Name = "isEqualTo", Kind = SymbolReplacementKind.Method } },
                     { new ReplacementIdentity("Equals(Object)", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "isEqualTo", Kind = SymbolReplacementKind.Method } },
                     { new ReplacementIdentity("ToString()", ObjCSymbolUsage.Declaration), new SymbolReplacement() { Name = "description", Kind = SymbolReplacementKind.Property } },
-                    { new ReplacementIdentity("ToString()", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "description", Kind = SymbolReplacementKind.Property } },
+                    { new ReplacementIdentity("ToString()", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "CBUtilsToString", Kind = SymbolReplacementKind.StaticMethod } },
                 } },
                 // NSString
                 { "System.String", new Dictionary<ReplacementIdentity, SymbolReplacement>() {

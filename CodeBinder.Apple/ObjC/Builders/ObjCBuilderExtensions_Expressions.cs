@@ -169,9 +169,10 @@ namespace CodeBinder.Apple
             }
             else
             {
+                // The array initializers requires C variadic syntax
                 builder.Bracketed().Bracketed().Append(syntax.Type, context).Space().Append("alloc").Close()
                     .Append("initWithValues").Colon().Append(syntax.Initializer.Expressions.Count.ToString())
-                    .Colon().Append(syntax.Initializer, context).Close();
+                    .CommaSeparator().Append(syntax.Initializer, context).Close();
             }
 
             return builder;
@@ -294,9 +295,11 @@ namespace CodeBinder.Apple
             return builder;
         }
 
+        // Expressions like new double[] { 2, 3, 4 }
+        // NOTE: CBxxxxArray(s) initiatialization requires comma separated syntax invocation
         public static CodeBuilder Append(this CodeBuilder builder, InitializerExpressionSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Append(syntax.Expressions, false, context);
+            builder.Append(syntax.Expressions, true, context);
             return builder;
         }
 
