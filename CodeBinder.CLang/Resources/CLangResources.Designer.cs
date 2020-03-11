@@ -74,18 +74,18 @@ namespace CodeBinder.CLang {
         ///#endif // __cplusplus
         ///
         ///#ifdef __APPLE__
+        ///#include &lt;objc/objc.h&gt;
         ///#define CBSTRING_UTF8
         ///#endif
         ///
         ///#if defined(__cplusplus) &amp;&amp; defined(_MSC_VER)
         ///// In MSVC bool is guaranteed to be 1 byte, with true == 1 and false == 0
-        ///typedef bool BBool;
-        ///#else
-        ///#define BBool signed char
+        ///typedef bool CBBool;
+        ///#elif defined(__APPLE__)
+        ///typedef BOOL CBBool;
         ///#endif
         ///
-        ///#ifdef CBSTRING_UTF8
-        ///typedef char cbcha [rest of string was truncated]&quot;;.
+        ///# [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBBaseTypes_h {
             get {
@@ -105,7 +105,7 @@ namespace CodeBinder.CLang {
         ///#ifdef WIN32
         ///extern &quot;C&quot; __declspec(dllimport) void __stdcall CoTaskMemFree(void* pv);
         ///extern &quot;C&quot; __declspec(dllimport) void __stdcall LocalFree(void* pv);
-        ///#endif
+        ///#endif // WIN32
         ///
         ///namespace cb
         ///{
@@ -118,7 +118,7 @@ namespace CodeBinder.CLang {
         ///#endif
         ///    }
         ///
-        ///    inline void FreeMemory(vo [rest of string was truncated]&quot;;.
+        ///    inline void Free [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBInterop_h {
             get {
@@ -142,9 +142,9 @@ namespace CodeBinder.CLang {
         ///#ifdef WIN32
         ///extern &quot;C&quot; __declspec(dllimport) void* __stdcall CoTaskMemAlloc(size_t cb);
         ///extern &quot;C&quot; __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
-        ///#endif
+        ///#endif // WIN32
         ///
-        ///// _CBU: Narrow to platform specific codebinder unicode st [rest of string was truncated]&quot;;.
+        ///// _CBU: Narrow to platform specific codebinder u [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBInteropInternal_h {
             get {

@@ -11,14 +11,15 @@
 #endif // __cplusplus
 
 #ifdef __APPLE__
+#include <objc/objc.h>
 #define CBSTRING_UTF8
 #endif
 
 #if defined(__cplusplus) && defined(_MSC_VER)
 // In MSVC bool is guaranteed to be 1 byte, with true == 1 and false == 0
-typedef bool BBool;
-#else
-#define BBool signed char
+typedef bool CBBool;
+#elif defined(__APPLE__)
+typedef BOOL CBBool;
 #endif
 
 #ifdef CBSTRING_UTF8

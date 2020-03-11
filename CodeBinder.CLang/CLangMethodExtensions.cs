@@ -173,7 +173,7 @@ namespace CodeBinder.CLang
                     return "void *";
                 case "System.Boolean":
                     // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
-                    return "BBool";
+                    return "CBBool";
                 case "System.Char":
                     return "cbchar_t";
                 case "System.Byte":
@@ -217,7 +217,7 @@ namespace CodeBinder.CLang
                     return "void **";
                 case "System.Boolean":
                     // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
-                    return "BBool *";
+                    return "CBBool *";
                 case "System.Char":
                     return "cbchar_t *";
                 case "System.Byte":
