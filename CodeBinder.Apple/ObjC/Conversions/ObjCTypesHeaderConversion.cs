@@ -34,6 +34,7 @@ namespace CodeBinder.Apple
             builder.AppendLine();
             if (IsInternalHeader)
             {
+                builder.AppendLine($"#include <stdexcept>");
                 builder.AppendLine($"#import \"../{ConversionCSharpToObjC.TypesHeader}\"");
                 // TODO: CBBinderUtils.h should be included in a currently missing
                 // internal only header that only has tools for code generation
@@ -99,17 +100,61 @@ namespace CodeBinder.Apple
                 builder.Append("typedef").Space().Append(isflag ? "NS_OPTIONS" : "NS_ENUM").Parenthesized()
                     .Append(underlyingType).CommaSeparator().Append(enumName).Close().AppendLine();
 
+                var members = getMemberNames(enm);
                 using (builder.EnumBlock())
                 {
-                    foreach (var item in enm.Members)
-                    {
-                        long value = item.GetEnumValue(Compilation);
-                        builder.Append(item.GetObjCName(Compilation)).Space().Append("=").Space().Append(value.ToString()).Comma().AppendLine();
-                    }
+                    foreach (var member in members)
+                        builder.Append(member.Name).Space().Append("=").Space().Append(member.Value.ToString()).Comma().AppendLine();
                 }
 
                 builder.AppendLine();
             }
+
+            if (IsInternalHeader)
+            {
+                builder.AppendLine("// CBToString for enums");
+                foreach (var enm in Compilation.Enums)
+                {
+                    string enumName = enm.GetObjCName(Compilation);
+                    var members = getMemberNames(enm);
+                    writeCBToStringMethod(builder, enumName, members);
+                    builder.AppendLine();
+                }
+            }
+        }
+
+        // Write a CBToString() method for this enum
+        private void writeCBToStringMethod(CodeBuilder builder, string enumName, List<EnumMember> members)
+        {
+            builder.Append("NSString *").Space().Append("CBToString").Parenthesized().Append(enumName).Space().Append("value").Close().AppendLine();
+            using (builder.Block())
+            {
+                builder.Append("switch (value)").AppendLine();
+                using (builder.Block())
+                {
+                    foreach (var member in members)
+                    {
+                        builder.Append("case").Space().Append(member.Name).Colon().AppendLine();
+                        builder.IndentChild().Append("return").Append($"@\"{member.Name}\"").EndOfStatement();
+                    }
+
+                    builder.Append("default").Colon().AppendLine();
+                    builder.IndentChild().Append("throw std::runtime_error(\"Unsupported\")").EndOfStatement();
+                }
+            }
+        }
+
+        List<EnumMember> getMemberNames(EnumDeclarationSyntax enm)
+        {
+            var ret = new List<EnumMember>(enm.Members.Count);
+            foreach (var item in enm.Members)
+            {
+                string name = item.GetObjCName(Compilation);
+                long value = item.GetEnumValue(Compilation);
+                ret.Add(new EnumMember() { Name = name, Value = value });
+            }
+
+            return ret;
         }
 
         private void writeCallbacks(CodeBuilder builder)
@@ -158,5 +203,12 @@ namespace CodeBinder.Apple
         public string BaseTypesHeader => IsInternalHeader
             ? $"../{ConversionCSharpToObjC.BaseTypesHeader}"
             : ConversionCSharpToObjC.BaseTypesHeader;
+
+
+        struct EnumMember
+        {
+            public string Name;
+            public long Value;
+        }
     }
 }

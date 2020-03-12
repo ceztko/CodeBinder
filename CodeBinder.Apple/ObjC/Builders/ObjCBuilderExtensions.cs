@@ -201,6 +201,7 @@ namespace CodeBinder.Apple
             return builder.Append(")");
         }
 
+        // Enum uses a C style type block
         public static CodeBuilder EnumBlock(this CodeBuilder builder, bool appendLine = true)
         {
             builder.AppendLine("{");
