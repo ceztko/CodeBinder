@@ -144,7 +144,7 @@ namespace CodeBinder.Apple
 
         public static CodeBuilder Append(this CodeBuilder builder, ForStatementSyntax syntax, ObjCCompilationContext context)
         {
-            builder.Append("for").Space().Parenthesized(() =>
+            builder.Append("for").Space().Parenthesized((builder) =>
             {
                 if (syntax.Declaration != null)
                     builder.Append(syntax.Declaration, context);

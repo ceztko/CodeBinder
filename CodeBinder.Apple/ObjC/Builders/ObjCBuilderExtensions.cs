@@ -145,26 +145,60 @@ namespace CodeBinder.Apple
             return builder.Append("{ }");
         }
 
-        /// <remarks>One line</remarks>
-        public static CodeBuilder Parenthesized(this CodeBuilder builder, Action parenthesized)
+        /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
+        public static CodeBuilder Parenthesized(this CodeBuilder builder, bool childIstance = true)
         {
             builder.Append("(");
-            parenthesized();
-            return builder.Append(")");
+            if (childIstance)
+                return builder.UsingChild(")");
+            else
+                return builder.Using(")");
         }
 
-        /// <remarks>One line. Child istance</remarks>
-        public static CodeBuilder Parenthesized(this CodeBuilder builder)
-        {
-            builder.Append("(");
-            return builder.UsingChild(")");
-        }
-
-        /// <remarks>One line. Child istance</remarks>
-        public static CodeBuilder Braced(this CodeBuilder builder)
+        /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
+        public static CodeBuilder Braced(this CodeBuilder builder, bool childIstance = true)
         {
             builder.Append("{ ");
-            return builder.UsingChild(" }");
+            if (childIstance)
+                return builder.UsingChild(" }");
+            else
+                return builder.Using(" }");
+        }
+
+        /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
+        public static CodeBuilder Bracketed(this CodeBuilder builder, bool childIstance = true)
+        {
+            builder.Append("[");
+            if (childIstance)
+                return builder.UsingChild("]");
+            else
+                return builder.Using("]");
+        }
+
+        /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
+        public static CodeBuilder AngleBracketed(this CodeBuilder builder, bool childIstance = true)
+        {
+            builder.Append("<");
+            if (childIstance)
+                return builder.UsingChild(">");
+            else
+                return builder.Using(">");
+        }
+
+        /// <remarks>For one line calls</remarks>
+        public static CodeBuilder Bracketed(this CodeBuilder builder, Action<CodeBuilder> bracketed)
+        {
+            builder.Append("[");
+            bracketed(builder);
+            return builder.Append("]");
+        }
+
+        /// <remarks>For one line calls</remarks>
+        public static CodeBuilder Parenthesized(this CodeBuilder builder, Action<CodeBuilder> parenthesized)
+        {
+            builder.Append("(");
+            parenthesized(builder);
+            return builder.Append(")");
         }
 
         public static CodeBuilder EnumBlock(this CodeBuilder builder, bool appendLine = true)
@@ -173,38 +207,10 @@ namespace CodeBinder.Apple
             return builder.Indent("};", appendLine);
         }
 
-        /// <remarks>One line. Child istance</remarks>
-        public static CodeBuilder Bracketed(this CodeBuilder builder)
-        {
-            builder.Append("[");
-            return builder.UsingChild("]");
-        }
-
-        /// <remarks>One line</remarks>
-        public static CodeBuilder Bracketed(this CodeBuilder builder, Action bracketed)
-        {
-            builder.Append("[");
-            bracketed();
-            return builder.Append("]");
-        }
-
-        /// <remarks>One line. Child istance</remarks>
-        public static CodeBuilder AngleBracketed(this CodeBuilder builder)
-        {
-            builder.Append("<");
-            return builder.UsingChild(">");
-        }
-
         public static CodeBuilder Block(this CodeBuilder builder, bool appendLine = true)
         {
             builder.AppendLine("{");
             return builder.Indent("}", appendLine);
-        }
-
-        public static CodeBuilder MethodCall(this CodeBuilder builder)
-        {
-            builder.Append("[");
-            return builder.Using("]");
         }
 
         // Used for CLang invocations

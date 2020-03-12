@@ -52,6 +52,13 @@ namespace CodeBinder.Util
 
         #region Public methods
 
+        // CHECK-ME: Evaluate if performings checks, and which builder actually return
+        public CodeBuilder Append(Action<CodeBuilder> action)
+        {
+            action(this);
+            return this;
+        }
+
         public CodeBuilder Append(string str)
         {
             doChecks();

@@ -1,4 +1,5 @@
-﻿using CodeBinder.Util;
+﻿using CodeBinder.Shared;
+using CodeBinder.Util;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -38,69 +39,6 @@ namespace CodeBinder.Apple
             };
         }
 
-        /// <summary>Primitive types as defined by https://docs.microsoft.com/en-us/dotnet/api/system.type.isprimitive
-        /// </summary>
-        /// <returns>Return true if the given symbol is a blittable non-structured system type</returns>
-        public static bool IsCLRPrimitiveType(this ITypeSymbol symbol, [NotNullWhen(true)]out string? objcname)
-        {
-            switch (symbol.SpecialType)
-            {
-                case SpecialType.System_IntPtr:
-                    objcname = "void *";
-                    return true;
-                case SpecialType.System_UIntPtr:
-                    objcname = "void *";
-                    return true;
-                case SpecialType.System_Boolean:
-                    objcname = "BOOL";
-                    return true;
-                case SpecialType.System_Char:
-                    objcname = "char";
-                    return true;
-                case SpecialType.System_Byte:
-                    objcname = "uint8_t";
-                    return true;
-                case SpecialType.System_SByte:
-                    objcname = "int8_t";
-                    return true;
-                case SpecialType.System_UInt16:
-                    objcname = "uint16_t";
-                    return true;
-                case SpecialType.System_Int16:
-                    objcname = "int16_t";
-                    return true;
-                case SpecialType.System_UInt32:
-                    objcname = "uint32_t";
-                    return true;
-                case SpecialType.System_Int32:
-                    objcname = "int32_t";
-                    return true;
-                case SpecialType.System_UInt64:
-                    objcname = "uint64_t";
-                    return true;
-                case SpecialType.System_Int64:
-                    objcname = "int64_t";
-                    return true;
-                case SpecialType.System_Single:
-                    objcname = "float";
-                    return true;
-                case SpecialType.System_Double:
-                    objcname = "double";
-                    return true;
-                default:
-                    objcname = null;
-                    return false;
-            }
-        }
-
-        public static string GetCLRPrimitiveType(this ITypeSymbol symbol)
-        {
-            if (IsCLRPrimitiveType(symbol, out var objcname))
-                return objcname;
-            else
-                throw new Exception($"Not a CLR Primitive type {symbol}");
-        }
-
         public static string GetNSNumberAccessProperty(this ITypeSymbol symbol)
         {
             if (TryGetNSNumberAccessProperty(symbol, out var accessProperty))
@@ -115,49 +53,127 @@ namespace CodeBinder.Apple
         /// </summary>
         public static bool TryGetNSNumberAccessProperty(this ITypeSymbol symbol, [NotNullWhen(true)]out string? accessProperty)
         {
-            switch (symbol.SpecialType)
+            string fullname = symbol.GetFullName();
+            switch (fullname)
             {
-                case SpecialType.System_IntPtr:
-                    accessProperty = "integerValue";
-                    return true;
-                case SpecialType.System_UIntPtr:
+                case "CodeBinder.Apple.NSUInteger":
                     accessProperty = "unsignedIntegerValue";
                     return true;
-                case SpecialType.System_Boolean:
+                case "CodeBinder.Apple.NSInteger":
+                    accessProperty = "integerValue";
+                    return true;
+                case "System.IntPtr":
+                    accessProperty = "integerValue";
+                    return true;
+                case "System.UIntPtr":
+                    accessProperty = "unsignedIntegerValue";
+                    return true;
+                case "System.Boolean":
                     accessProperty = "boolValue";
                     return true;
-                case SpecialType.System_Char:
+                case "System.Char":
                     accessProperty = "charValue";
                     return true;
-                case SpecialType.System_Byte:
+                case "System.Byte":
                     accessProperty = "unsignedCharValue";
                     return true;
-                case SpecialType.System_SByte:
+                case "System.SByte":
                     accessProperty = "charValue";
                     return true;
-                case SpecialType.System_UInt16:
+                case "System.UInt16":
                     accessProperty = "unsignedShortValue";
                     return true;
-                case SpecialType.System_Int16:
+                case "System.Int16":
                     accessProperty = "shortValue";
                     return true;
-                case SpecialType.System_UInt32:
+                case "System.UInt32":
                     accessProperty = "unsignedIntValue";
                     return true;
-                case SpecialType.System_Int32:
+                case "System.Int32":
                     accessProperty = "intValue";
                     return true;
-                case SpecialType.System_UInt64:
+                case "System.UInt64":
                     accessProperty = "unsignedLongLongValue";
                     return true;
-                case SpecialType.System_Int64:
+                case "System.Int64":
                     accessProperty = "longLongValue";
                     return true;
-                case SpecialType.System_Single:
+                case "System.Single":
                     accessProperty = "floatValue";
                     return true;
-                case SpecialType.System_Double:
+                case "System.Double":
                     accessProperty = "doubleValue";
+                    return true;
+                default:
+                    accessProperty = null;
+                    return false;
+            }
+        }
+
+        public static string GetNSNumberInitMethod(this ITypeSymbol symbol)
+        {
+            if (TryGetNSNumberInitMethod(symbol, out var accessProperty))
+                return accessProperty;
+            else
+                throw new Exception($"No available NSNumber property access for {symbol}");
+        }
+
+        /// <summary>
+        /// Get numeric access method for NSNumber
+        /// https://developer.apple.com/documentation/foundation/nsnumber?language=objc
+        /// </summary>
+        public static bool TryGetNSNumberInitMethod(this ITypeSymbol symbol, [NotNullWhen(true)]out string? accessProperty)
+        {
+            string fullname = symbol.GetFullName();
+            switch (fullname)
+            {
+                case "CodeBinder.Apple.NSUInteger":
+                    accessProperty = "numberWithUnsignedInteger";
+                    return true;
+                case "CodeBinder.Apple.NSInteger":
+                    accessProperty = "numberWithInteger";
+                    return true;
+                case "System.IntPtr":
+                    accessProperty = "numberWithInteger";
+                    return true;
+                case "System.UIntPtr":
+                    accessProperty = "numberWithUnsignedInteger";
+                    return true;
+                case "System.Boolean":
+                    accessProperty = "numberWithBool";
+                    return true;
+                case "System.Char":
+                    accessProperty = "numberWithChar";
+                    return true;
+                case "System.Byte":
+                    accessProperty = "numberWithUnsignedChar";
+                    return true;
+                case "System.SByte":
+                    accessProperty = "numberWithChar";
+                    return true;
+                case "System.UInt16":
+                    accessProperty = "numberWithUnsignedShort";
+                    return true;
+                case "System.Int16":
+                    accessProperty = "numberWithShort";
+                    return true;
+                case "System.UInt32":
+                    accessProperty = "numberWithUnsignedInt";
+                    return true;
+                case "System.Int32":
+                    accessProperty = "numberWithInt";
+                    return true;
+                case "System.UInt64":
+                    accessProperty = "numberWithUnsignedLongLong";
+                    return true;
+                case "System.Int64":
+                    accessProperty = "numberWithLongLong";
+                    return true;
+                case "System.Single":
+                    accessProperty = "numberWithFloat";
+                    return true;
+                case "System.Double":
+                    accessProperty = "numberWithDouble";
                     return true;
                 default:
                     accessProperty = null;
@@ -168,7 +184,37 @@ namespace CodeBinder.Apple
         /// <summary>
         /// Get ObjC primitive value types
         /// </summary>
-        public static bool TryGetPrimitiveType(string fullTypeName, [NotNullWhen(true)]out string? typeName)
+        public static bool IsObjCPrimitiveType(this ITypeSymbol typeSymbol)
+        {
+            if (TryGetObjCPrimitiveType(typeSymbol, out var typeName))
+                return true;
+            else
+                return false;
+        }
+
+        /// <summary>
+        /// Get ObjC primitive value types
+        /// </summary>
+        public static string GetObjCPrimitiveType(this ITypeSymbol typeSymbol)
+        {
+            if (TryGetObjCPrimitiveType(typeSymbol, out var typeName))
+                return typeName;
+            else
+                throw new Exception("Not a primitive type");
+        }
+
+        /// <summary>
+        /// Get ObjC primitive value types
+        /// </summary>
+        public static bool TryGetObjCPrimitiveType(this ITypeSymbol typeSymbol, [NotNullWhen(true)]out string? typeName)
+        {
+            return TryGetObjCPrimitiveType(typeSymbol.GetFullName(), out typeName);
+        }
+
+        /// <summary>
+        /// Get ObjC primitive value types
+        /// </summary>
+        public static bool TryGetObjCPrimitiveType(string fullTypeName, [NotNullWhen(true)]out string? typeName)
         {
             switch (fullTypeName)
             {

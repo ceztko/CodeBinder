@@ -166,12 +166,17 @@ inline NSUInteger CBUtilsGetHashCode(void* ptr)
     return (NSUInteger)ptr;
 }
 
-inline NSString* CBBinderStringAdd(NSString* lhs, NSObject* rhs)
+inline NSString* CBUtilsStringAdd(NSString* lhs, NSString* rhs)
 {
-    return[lhs initWithString : [rhs description] ];
+    return[lhs initWithString :rhs];
 }
 
-inline BOOL CBBinderStringEqual(NSString* lhs, NSString* rhs)
+inline NSString* CBUtilsStringAdd(NSString* lhs, NSObject* rhs)
+{
+    return[lhs initWithString :[rhs description]];
+}
+
+inline BOOL CBUtilsStringEqual(NSString* lhs, NSString* rhs)
 {
     if (lhs == nil)
     {
@@ -186,7 +191,7 @@ inline BOOL CBBinderStringEqual(NSString* lhs, NSString* rhs)
     }
 }
 
-inline BOOL CBBinderStringNotEqual(NSString* lhs, NSString* rhs)
+inline BOOL CBUtilsStringNotEqual(NSString* lhs, NSString* rhs)
 {
     if (lhs == nil)
     {
@@ -202,7 +207,19 @@ inline BOOL CBBinderStringNotEqual(NSString* lhs, NSString* rhs)
 }
 
 template<typename T>
-T* CBBinderAsOperator(NSObject* obj)
+BOOL CBUtilsIsInstanceOf(NSObject* obj)
+{
+    if (obj == nil)
+        return NO;
+
+    if ([obj isKindOfClass : [T class] ])
+        return YES;
+    else
+        return NO;
+}
+
+template<typename T>
+T* CBUtilsAsOperator(NSObject* obj)
 {
     if (obj == nil)
         return nil;
@@ -214,7 +231,7 @@ T* CBBinderAsOperator(NSObject* obj)
 }
 
 template<typename T>
-T* CBBinderCastOperator(NSObject* obj)
+T* CBUtilsCastOperator(NSObject* obj)
 {
     if (obj == nil)
         return nil;

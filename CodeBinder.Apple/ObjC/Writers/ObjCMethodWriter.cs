@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System;
 using CodeBinder.Attributes;
+using CodeBinder.Util;
 
 namespace CodeBinder.Apple
 {
@@ -112,7 +113,7 @@ namespace CodeBinder.Apple
             }
 
             Builder.Colon();
-            Builder.Parenthesized(() =>
+            Builder.Parenthesized((builder) =>
                 WriteType(parameter.Type!, isRef ? ObjCTypeUsageKind.DeclarationByRef : ObjCTypeUsageKind.Declaration)
             );
             Builder.Append(parameter.Identifier.Text);
@@ -126,7 +127,10 @@ namespace CodeBinder.Apple
 
         protected void WriteReturnType()
         {
-            Builder.Parenthesized(writeReturnType);
+            using (Builder.Parenthesized(false))
+            {
+                writeReturnType();
+            }
         }
 
         protected virtual void writeReturnType()
@@ -175,7 +179,7 @@ namespace CodeBinder.Apple
                 if (typeSymbol.SpecialType != SpecialType.System_Void)
                     Builder.Append("return").Space();
 
-                using (Builder.MethodCall())
+                using (Builder.Bracketed(false))
                 {
                     Builder.Append("self").Space().Append(MethodName).Colon();
                     for (int i = 0; i < Item.ParameterList.Parameters.Count; i++)
@@ -272,7 +276,7 @@ namespace CodeBinder.Apple
                 }
                 else
                 {
-                    using (Builder.MethodCall())
+                    using (Builder.Bracketed(false))
                     {
                         string selfIdentifier;
                         switch (Item.Initializer.ThisOrBaseKeyword.Kind())

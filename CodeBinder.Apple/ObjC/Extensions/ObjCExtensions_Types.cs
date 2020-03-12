@@ -404,7 +404,7 @@ namespace CodeBinder.Apple
                 if (passByRef && syntax.Parent.IsExpression(ExpressionKind.Assignment) && (syntax.Parent as AssignmentExpressionSyntax)!.Left == syntax)
                     builder.Append("*");
                 else if (syntax.Parent.IsKind(SyntaxKind.Argument) && (syntax.Parent as ArgumentSyntax)!.IsRefLike()
-                        && (typeSymbol.TypeKind != TypeKind.Struct || typeSymbol.IsCLRPrimitiveType()))
+                        && (typeSymbol.TypeKind != TypeKind.Struct || typeSymbol.IsCLRPrimitiveType())) /* CHECK-ME */
                     builder.Append("&");
             }
         }
@@ -674,7 +674,7 @@ namespace CodeBinder.Apple
                 }
                 default:
                 {
-                    if (ObjCUtils.TryGetPrimitiveType(fullTypeName, out knownObjCType))
+                    if (ObjCUtils.TryGetObjCPrimitiveType(fullTypeName, out knownObjCType))
                     {
                         objcTypeKind = ObjCTypeKind.Value;
                         return true;
@@ -698,7 +698,7 @@ namespace CodeBinder.Apple
                     return ObjCTypeKind.Class;
                 case TypeKind.Struct:
                 {
-                    Debug.Assert(!symbol.IsCLRPrimitiveType());
+                    Debug.Assert(!symbol.IsCLRPrimitiveType()); /* CHECK-ME */
                     return ObjCTypeKind.Class;
                 }
                 case TypeKind.TypeParameter:

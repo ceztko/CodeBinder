@@ -95,7 +95,7 @@ namespace CodeBinder.Apple
                 string enumName = enm.GetObjCName(Compilation);
                 var symbol = enm.GetDeclaredSymbol<INamedTypeSymbol>(Compilation);
                 bool isflag = symbol.HasAttribute<FlagsAttribute>();
-                string underlyingType = symbol.EnumUnderlyingType!.GetCLRPrimitiveType();
+                string underlyingType = symbol.EnumUnderlyingType!.GetObjCPrimitiveType();
                 builder.Append("typedef").Space().Append(isflag ? "NS_OPTIONS" : "NS_ENUM").Parenthesized()
                     .Append(underlyingType).CommaSeparator().Append(enumName).Close().AppendLine();
 

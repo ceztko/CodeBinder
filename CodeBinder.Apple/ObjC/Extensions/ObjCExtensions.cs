@@ -197,10 +197,9 @@ namespace CodeBinder.Apple
                     return ">";
                 case SyntaxKind.GreaterThanOrEqualExpression:
                     return ">=";
-                case SyntaxKind.IsExpression:
-                    return "instanceof";
                 // Unsupported
-                case SyntaxKind.AsExpression:   // NOTE: Unsupported as an operator
+                case SyntaxKind.IsExpression:   // NOTE: Unsupported only as a binary operator
+                case SyntaxKind.AsExpression:   // NOTE: Unsupported only as a binary operator
                 case SyntaxKind.CoalesceExpression:
                 default:
                     throw new Exception();
