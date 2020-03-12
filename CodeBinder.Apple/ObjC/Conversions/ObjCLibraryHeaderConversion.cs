@@ -23,6 +23,18 @@ namespace CodeBinder.Apple
         {
             BeginHeaderGuard(builder);
             builder.AppendLine();
+            if (IsInternalHeader)
+            {
+                // TODO: Move this to a better internal header JUST FOR THE COMPILATION UNITS (*.mm files) and not the headers
+                // NOTE: shitty NS_OPTIONS on C++ does #typedef NS_OPTIONS(type, Flags) => typedef int32_t Flags; enum : int32_t ...
+                // which causes clashes on CBToString(...). Undef it and redef it to tricky version that allows also
+                // to def FlagsInternal so we can overload on that. See ObjCTypesHeaderConversion.writeCBToStringMethod()
+                builder.AppendLine("#import <Foundation/Foundation.h>");
+                builder.AppendLine("#undef NS_OPTIONS");
+                builder.AppendLine("#define NS_OPTIONS(type, name) type name; enum name ## Flags : type");
+                builder.AppendLine();
+                builder.AppendLine("#import \"OCTypes.h\"");
+            }
             builder.AppendLine("// Protocols");
             foreach (var iface in Compilation.Interfaces)
             {

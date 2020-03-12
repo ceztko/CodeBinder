@@ -117,16 +117,16 @@ namespace CodeBinder.Apple
                 {
                     string enumName = enm.GetObjCName(Compilation);
                     var members = getMemberNames(enm);
-                    writeCBToStringMethod(builder, enumName, members);
+                    writeCBToStringMethod(builder, enumName, enm.IsFlag(Compilation), members);
                     builder.AppendLine();
                 }
             }
         }
 
         // Write a CBToString() method for this enum
-        private void writeCBToStringMethod(CodeBuilder builder, string enumName, List<EnumMember> members)
+        private void writeCBToStringMethod(CodeBuilder builder, string enumName, bool isFlag, List<EnumMember> members)
         {
-            builder.Append("NSString *").Space().Append("CBToString").Parenthesized().Append(enumName).Space().Append("value").Close().AppendLine();
+            builder.Append("NSString *").Space().Append("CBToString").Parenthesized().Append(isFlag ? $"{enumName}Flags" : enumName).Space().Append("value").Close().AppendLine();
             using (builder.Block())
             {
                 builder.Append("switch (value)").AppendLine();
