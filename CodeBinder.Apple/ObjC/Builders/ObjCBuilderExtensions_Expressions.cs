@@ -302,9 +302,20 @@ namespace CodeBinder.Apple
                 }
                 case SyntaxKind.AddExpression:
                 {
-                    if (syntax.Left.GetTypeSymbol(context)!.GetFullName() == "System.String")
+                    if (syntax.Left.GetTypeSymbol(context)!.SpecialType == SpecialType.System_String)
                     {
-                        builder.Append("CBStringAdd").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context).Close();
+                        void AppendRhsExpression(CodeBuilder builder)
+                        {
+                            var rhsTypeSymbol = syntax.Right.GetTypeSymbol(context)!;
+                            if (rhsTypeSymbol.IsObjCPrimitiveType() || rhsTypeSymbol.TypeKind == TypeKind.Enum)
+                                builder.Append("CBToString").Parenthesized().Append(syntax.Right, context).Close();
+                            else
+                                builder.Append(syntax.Right, context).Close();
+                        }
+
+                        builder.Append("CBStringAdd").Parenthesized().Append(syntax.Left, context).CommaSeparator()
+                            .Append(AppendRhsExpression).Close();
+
                         return builder;
                     }
                     break;
