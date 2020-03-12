@@ -306,7 +306,8 @@ namespace CodeBinder.Apple
                     {
                         void AppendRhsExpression(CodeBuilder builder)
                         {
-                            var rhsTypeSymbol = syntax.Right.GetTypeSymbol(context)!;
+                            // We need the raw type of the rhs expression otherwise it gets boxed to System.Object
+                            var rhsTypeSymbol = syntax.Right.GetTypeSymbolRaw(context)!;
                             if (rhsTypeSymbol.IsObjCPrimitiveType() || rhsTypeSymbol.TypeKind == TypeKind.Enum)
                                 builder.Append("CBToString").Parenthesized().Append(syntax.Right, context).Close();
                             else
