@@ -26,11 +26,11 @@ namespace CodeBinder.Apple
                 // NSObject
                 { "System.Object", new Dictionary<ReplacementIdentity, SymbolReplacement>() {
                     { new ReplacementIdentity("GetHashCode()", ObjCSymbolUsage.Declaration), new SymbolReplacement() { Name = "hash", Kind = SymbolReplacementKind.Property, ReturnType = "NSUInteger" } },
-                    { new ReplacementIdentity("GetHashCode()", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "CBUtilsGetHashCode", Kind = SymbolReplacementKind.StaticMethod } },
+                    { new ReplacementIdentity("GetHashCode()", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "CBGetHashCode", Kind = SymbolReplacementKind.StaticMethod } },
                     { new ReplacementIdentity("Equals(Object)", ObjCSymbolUsage.Declaration), new SymbolReplacement() { Name = "isEqualTo", Kind = SymbolReplacementKind.Method } },
                     { new ReplacementIdentity("Equals(Object)", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "isEqualTo", Kind = SymbolReplacementKind.Method } },
                     { new ReplacementIdentity("ToString()", ObjCSymbolUsage.Declaration), new SymbolReplacement() { Name = "description", Kind = SymbolReplacementKind.Property } },
-                    { new ReplacementIdentity("ToString()", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "CBUtilsToString", Kind = SymbolReplacementKind.StaticMethod } },
+                    { new ReplacementIdentity("ToString()", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "CBToString", Kind = SymbolReplacementKind.StaticMethod } },
                 } },
                 // NSString
                 { "System.String", new Dictionary<ReplacementIdentity, SymbolReplacement>() {

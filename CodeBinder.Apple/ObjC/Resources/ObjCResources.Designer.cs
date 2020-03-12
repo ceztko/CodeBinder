@@ -65,10 +65,12 @@ namespace CodeBinder.Apple {
         ///#define CB_BINDERUTILS
         ///#pragma once
         ///
-        ///#import &lt;Foundation/Foundation.h&gt;
         ///#import &quot;../CBOCBaseTypes.h&quot;
+        ///#include &lt;cstdint&gt;
+        ///#include &lt;cinttypes&gt;
+        ///#import &lt;Foundation/Foundation.h&gt;
         ///
-        ///inline void* CBUtilsGetNativeHandle(CBHandleRef* handle)
+        ///inline void* CBGetNativeHandle(CBHandleRef* handle)
         ///{
         ///    if (handle == nil)
         ///        return nullptr;
@@ -76,20 +78,17 @@ namespace CodeBinder.Apple {
         ///    return handle.handle;
         ///}
         ///
-        ///inline void* CBUtilsGetNativeHandle(void* handle)
+        ///inline void* CBGetNativeHandle(void* handle)
         ///{
         ///    return handle;
         ///}
         ///
-        ///inline NSUInteger* CBUtilsGetNativeArray(CBNSUIntegerArray* arr)
+        ///inline NSUInteger* CBGetNativeArray(CBNSUIntegerArray* arr)
         ///{
         ///    if (arr == nil)
         ///        return nullptr;
         ///
-        ///    return arr.values;
-        ///}
-        ///
-        ///inline NSInt [rest of string was truncated]&quot;;.
+        ///    return arr [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBOCBinderUtils_h {
             get {

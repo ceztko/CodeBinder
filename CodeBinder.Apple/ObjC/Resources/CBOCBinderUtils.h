@@ -2,10 +2,12 @@
 #define CB_BINDERUTILS
 #pragma once
 
-#import <Foundation/Foundation.h>
 #import "../CBOCBaseTypes.h"
+#include <cstdint>
+#include <cinttypes>
+#import <Foundation/Foundation.h>
 
-inline void* CBUtilsGetNativeHandle(CBHandleRef* handle)
+inline void* CBGetNativeHandle(CBHandleRef* handle)
 {
     if (handle == nil)
         return nullptr;
@@ -13,12 +15,12 @@ inline void* CBUtilsGetNativeHandle(CBHandleRef* handle)
     return handle.handle;
 }
 
-inline void* CBUtilsGetNativeHandle(void* handle)
+inline void* CBGetNativeHandle(void* handle)
 {
     return handle;
 }
 
-inline NSUInteger* CBUtilsGetNativeArray(CBNSUIntegerArray* arr)
+inline NSUInteger* CBGetNativeArray(CBNSUIntegerArray* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -26,7 +28,7 @@ inline NSUInteger* CBUtilsGetNativeArray(CBNSUIntegerArray* arr)
     return arr.values;
 }
 
-inline NSInteger* CBUtilsGetNativeArray(CBNSIntegerArray* arr)
+inline NSInteger* CBGetNativeArray(CBNSIntegerArray* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -34,7 +36,7 @@ inline NSInteger* CBUtilsGetNativeArray(CBNSIntegerArray* arr)
     return arr.values;
 }
 
-inline void** CBUtilsGetNativeArray(CBPtrArray* arr)
+inline void** CBGetNativeArray(CBPtrArray* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -42,7 +44,7 @@ inline void** CBUtilsGetNativeArray(CBPtrArray* arr)
     return arr.values;
 }
 
-inline BOOL* CBUtilsGetNativeArray(CBBoolArray* arr)
+inline BOOL* CBGetNativeArray(CBBoolArray* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -50,7 +52,7 @@ inline BOOL* CBUtilsGetNativeArray(CBBoolArray* arr)
     return arr.values;
 }
 
-inline char* CBUtilsGetNativeArray(CBCharArray* arr)
+inline char* CBGetNativeArray(CBCharArray* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -58,7 +60,7 @@ inline char* CBUtilsGetNativeArray(CBCharArray* arr)
     return arr.values;
 }
 
-inline uint8_t* CBUtilsGetNativeArray(CBUInt8Array* arr)
+inline uint8_t* CBGetNativeArray(CBUInt8Array* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -66,7 +68,7 @@ inline uint8_t* CBUtilsGetNativeArray(CBUInt8Array* arr)
     return arr.values;
 }
 
-inline int8_t* CBUtilsGetNativeArray(CBInt8Array* arr)
+inline int8_t* CBGetNativeArray(CBInt8Array* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -74,7 +76,7 @@ inline int8_t* CBUtilsGetNativeArray(CBInt8Array* arr)
     return arr.values;
 }
 
-inline uint16_t* CBUtilsGetNativeArray(CBUInt16Array* arr)
+inline uint16_t* CBGetNativeArray(CBUInt16Array* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -82,7 +84,7 @@ inline uint16_t* CBUtilsGetNativeArray(CBUInt16Array* arr)
     return arr.values;
 }
 
-inline int16_t* CBUtilsGetNativeArray(CBInt16Array* arr)
+inline int16_t* CBGetNativeArray(CBInt16Array* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -90,7 +92,7 @@ inline int16_t* CBUtilsGetNativeArray(CBInt16Array* arr)
     return arr.values;
 }
 
-inline uint32_t* CBUtilsGetNativeArray(CBUInt32Array* arr)
+inline uint32_t* CBGetNativeArray(CBUInt32Array* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -98,7 +100,7 @@ inline uint32_t* CBUtilsGetNativeArray(CBUInt32Array* arr)
     return arr.values;
 }
 
-inline int32_t* CBUtilsGetNativeArray(CBInt32Array* arr)
+inline int32_t* CBGetNativeArray(CBInt32Array* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -106,7 +108,7 @@ inline int32_t* CBUtilsGetNativeArray(CBInt32Array* arr)
     return arr.values;
 }
 
-inline uint64_t* CBUtilsGetNativeArray(CBUInt64Array* arr)
+inline uint64_t* CBGetNativeArray(CBUInt64Array* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -114,7 +116,7 @@ inline uint64_t* CBUtilsGetNativeArray(CBUInt64Array* arr)
     return arr.values;
 }
 
-inline int64_t* CBUtilsGetNativeArray(CBInt64Array* arr)
+inline int64_t* CBGetNativeArray(CBInt64Array* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -122,7 +124,7 @@ inline int64_t* CBUtilsGetNativeArray(CBInt64Array* arr)
     return arr.values;
 }
 
-inline float* CBUtilsGetNativeArray(CBFloatArray* arr)
+inline float* CBGetNativeArray(CBFloatArray* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -130,7 +132,7 @@ inline float* CBUtilsGetNativeArray(CBFloatArray* arr)
     return arr.values;
 }
 
-inline double* CBUtilsGetNativeArray(CBDoubleArray* arr)
+inline double* CBGetNativeArray(CBDoubleArray* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -138,7 +140,7 @@ inline double* CBUtilsGetNativeArray(CBDoubleArray* arr)
     return arr.values;
 }
 
-inline NSString* __strong* CBUtilsGetNativeArray(CBStringArray* arr)
+inline NSString* __strong* CBGetNativeArray(CBStringArray* arr)
 {
     if (arr == nil)
         return nullptr;
@@ -146,37 +148,111 @@ inline NSString* __strong* CBUtilsGetNativeArray(CBStringArray* arr)
     return arr.values;
 }
 
-inline NSUInteger CBUtilsGetHashCode(NSObject* obj)
+inline NSUInteger CBGetHashCode(NSObject* obj)
 {
     return obj.hash;
 }
 
-inline NSUInteger CBUtilsGetHashCode(int32_t value)
+inline NSUInteger CBGetHashCode(int32_t value)
 {
     return value;
 }
 
-inline NSUInteger CBUtilsGetHashCode(uint32_t value)
+inline NSUInteger CBGetHashCode(uint32_t value)
 {
     return value;
 }
 
-inline NSUInteger CBUtilsGetHashCode(void* ptr)
+inline NSUInteger CBGetHashCode(void* ptr)
 {
     return (NSUInteger)ptr;
 }
 
-inline NSString* CBUtilsStringAdd(NSString* lhs, NSString* rhs)
+inline NSString* CBToString(NSUInteger value)
+{
+#if INTPTR_MAX == INT64_MAX // 64 bit
+    return[NSString stringWithFormat : @"%lu", value];
+#else // 32 bit
+    return[NSString stringWithFormat : @"%u", value];
+#endif
+}
+
+inline NSString* CBToString(NSInteger value)
+{
+#if INTPTR_MAX == INT64_MAX // 64 bit
+    return[NSString stringWithFormat : @"%ld", value];
+#else // 32 bit
+    return[NSString stringWithFormat : @"%d", value];
+#endif
+}
+
+inline NSString* CBToString(void * value)
+{
+    return [NSString stringWithFormat :@"%p", value];
+}
+
+inline NSString* CBToString(char value)
+{
+    return [NSString stringWithFormat :@"%c", value];
+}
+
+inline NSString* CBToString(uint8_t value)
+{
+    return [NSString stringWithFormat :@"%" PRIu8, value];
+}
+
+inline NSString* CBToString(int8_t value)
+{
+    return [NSString stringWithFormat :@"%" PRId8, value];
+}
+
+inline NSString* CBToString(uint16_t value)
+{
+    return [NSString stringWithFormat :@"%" PRIu16, value];
+}
+
+inline NSString* CBToString(int16_t value)
+{
+    return [NSString stringWithFormat :@"%" PRId16, value];
+}
+
+#if INTPTR_MAX == INT64_MAX // 64bit
+
+inline NSString* CBToString(uint32_t value)
+{
+    return [NSString stringWithFormat :@"%" PRIu32, value];
+}
+
+inline NSString* CBToString(int32_t value)
+{
+    return [NSString stringWithFormat :@"%" PRId32, value];
+}
+
+#else // 32bit
+
+inline NSString* CBToString(uint64_t value)
+{
+    return [NSString stringWithFormat :@"%" PRIu64, value];
+}
+
+inline NSString* CBToString(int64_t value)
+{
+    return [NSString stringWithFormat :@"%" PRId64, value];
+}
+
+#endif // 32bit
+
+inline NSString* CBStringAdd(NSString* lhs, NSString* rhs)
 {
     return[lhs initWithString :rhs];
 }
 
-inline NSString* CBUtilsStringAdd(NSString* lhs, NSObject* rhs)
+inline NSString* CBStringAdd(NSString* lhs, NSObject* rhs)
 {
     return[lhs initWithString :[rhs description]];
 }
 
-inline BOOL CBUtilsStringEqual(NSString* lhs, NSString* rhs)
+inline BOOL CBStringEqual(NSString* lhs, NSString* rhs)
 {
     if (lhs == nil)
     {
@@ -191,7 +267,7 @@ inline BOOL CBUtilsStringEqual(NSString* lhs, NSString* rhs)
     }
 }
 
-inline BOOL CBUtilsStringNotEqual(NSString* lhs, NSString* rhs)
+inline BOOL CBStringNotEqual(NSString* lhs, NSString* rhs)
 {
     if (lhs == nil)
     {
@@ -207,7 +283,7 @@ inline BOOL CBUtilsStringNotEqual(NSString* lhs, NSString* rhs)
 }
 
 template<typename T>
-BOOL CBUtilsIsInstanceOf(NSObject* obj)
+BOOL CBIsInstanceOf(NSObject* obj)
 {
     if (obj == nil)
         return NO;
@@ -219,7 +295,7 @@ BOOL CBUtilsIsInstanceOf(NSObject* obj)
 }
 
 template<typename T>
-T* CBUtilsAsOperator(NSObject* obj)
+T* CBAsOperator(NSObject* obj)
 {
     if (obj == nil)
         return nil;
@@ -231,7 +307,7 @@ T* CBUtilsAsOperator(NSObject* obj)
 }
 
 template<typename T>
-T* CBUtilsCastOperator(NSObject* obj)
+T* CBCastOperator(NSObject* obj)
 {
     if (obj == nil)
         return nil;

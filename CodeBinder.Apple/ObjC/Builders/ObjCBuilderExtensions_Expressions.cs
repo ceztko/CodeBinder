@@ -267,12 +267,12 @@ namespace CodeBinder.Apple
             {
                 case SyntaxKind.IsExpression:
                 {
-                    builder.Append("CBUtilsIsInstanceOf").AngleBracketed().Append(syntax.Right, context).Close().Parenthesized().Append(syntax.Left, context).Close();
+                    builder.Append("CBIsInstanceOf").AngleBracketed().Append(syntax.Right, context).Close().Parenthesized().Append(syntax.Left, context).Close();
                     return builder;
                 }
                 case SyntaxKind.AsExpression:
                 {
-                    builder.Append("CBUtilsAsOperator").AngleBracketed().Append(syntax.Right, context).Close().Parenthesized().Append(syntax.Left, context).Close();
+                    builder.Append("CBAsOperator").AngleBracketed().Append(syntax.Right, context).Close().Parenthesized().Append(syntax.Left, context).Close();
                     return builder;
                 }
                 case SyntaxKind.EqualsExpression:
@@ -304,7 +304,7 @@ namespace CodeBinder.Apple
                 {
                     if (syntax.Left.GetTypeSymbol(context)!.GetFullName() == "System.String")
                     {
-                        builder.Append("CBUtilsStringAdd").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context).Close();
+                        builder.Append("CBStringAdd").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context).Close();
                         return builder;
                     }
                     break;
@@ -326,7 +326,7 @@ namespace CodeBinder.Apple
             if (type.TryGetObjCPrimitiveType(out var objcName))
                 builder.Parenthesized().Append(objcName).Close().Append(syntax.Expression, context);
             else
-                builder.Append("CBUtilsCastOperator").AngleBracketed().Append(syntax.Type, context).Close().Parenthesized().Append(syntax.Expression, context).Close();
+                builder.Append("CBCastOperator").AngleBracketed().Append(syntax.Type, context).Close().Parenthesized().Append(syntax.Expression, context).Close();
             return builder;
         }
 
@@ -388,7 +388,7 @@ namespace CodeBinder.Apple
                         if (syntax.Expression.IsExpression(ExpressionKind.MemberAccess))
                         {
                             var memberAccess = (MemberAccessExpressionSyntax)syntax.Expression;
-                            builder.Append("CBUtilsGetHashCode").Parenthesized().Append(memberAccess.Expression, context).Close();
+                            builder.Append("CBGetHashCode").Parenthesized().Append(memberAccess.Expression, context).Close();
                             return builder;
                         }
 
@@ -647,7 +647,7 @@ namespace CodeBinder.Apple
 
                     if (type.TypeKind == TypeKind.Array)
                     {
-                        builder.Append("CBUtilsGetNativeArray").Parenthesized(appendExpression);
+                        builder.Append("CBGetNativeArray").Parenthesized(appendExpression);
                     }
                     else
                     {
@@ -657,7 +657,7 @@ namespace CodeBinder.Apple
                             case "System.Runtime.InteropServices.HandleRef":
                             {
                                 // Passing "System.HandleRef" to native methods needs further accessing handle
-                                builder.Append("CBUtilsGetNativeHandle").Parenthesized(appendExpression);
+                                builder.Append("CBGetNativeHandle").Parenthesized(appendExpression);
                                 break;
                             }
                             case "System.String":
