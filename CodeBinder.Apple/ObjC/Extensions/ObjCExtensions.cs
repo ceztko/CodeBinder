@@ -34,8 +34,8 @@ namespace CodeBinder.Apple
                 } },
                 // NSString
                 { "System.String", new Dictionary<ReplacementIdentity, SymbolReplacement>() {
-                    { new ReplacementIdentity("op_Equality(String, String)", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "CBBinderStringEqual", Kind = SymbolReplacementKind.StaticMethod } },
-                    { new ReplacementIdentity("op_Inequality(String, String)", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "CBBinderStringNotEqual", Kind = SymbolReplacementKind.StaticMethod } },
+                    { new ReplacementIdentity("operator ==(String, String)", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "CBStringEqual", Kind = SymbolReplacementKind.StaticMethod } },
+                    { new ReplacementIdentity("operator !=(String, String)", ObjCSymbolUsage.Normal), new SymbolReplacement() { Name = "CBStringNotEqual", Kind = SymbolReplacementKind.StaticMethod } },
                 } },
                 // NSMutableArray
                 { "System.Collections.Generic.List<T>", new Dictionary<ReplacementIdentity, SymbolReplacement>() {
