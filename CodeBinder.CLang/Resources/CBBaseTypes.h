@@ -20,6 +20,8 @@
 typedef bool CBBool;
 #elif defined(__APPLE__)
 typedef BOOL CBBool;
+#else // Others
+typedef signed char CBBool;
 #endif
 
 #ifdef CBSTRING_UTF8

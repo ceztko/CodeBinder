@@ -83,9 +83,7 @@ namespace CodeBinder.CLang {
         ///typedef bool CBBool;
         ///#elif defined(__APPLE__)
         ///typedef BOOL CBBool;
-        ///#endif
-        ///
-        ///# [rest of string was truncated]&quot;;.
+        ///#else // Ot [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBBaseTypes_h {
             get {
