@@ -43,6 +43,8 @@ namespace CodeBinder.CLang
                 builder.Append("#define").Space().AppendLine(LIBRARY_IMPORT);
                 builder.AppendLine("#ifdef _MSC_VER");
                 builder.IndentChild().Append("#define").Space().Append(LIBRARY_SHARED_API).Space().AppendLine("__declspec(dllimport)").Close();
+                builder.AppendLine("#else");
+                builder.IndentChild().Append("#define").Space().AppendLine(LIBRARY_SHARED_API).Close();
                 builder.AppendLine("#endif");
             }
             builder.AppendLine("#endif");
