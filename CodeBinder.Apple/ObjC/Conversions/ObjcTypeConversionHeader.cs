@@ -92,6 +92,8 @@ namespace CodeBinder.Apple
                         throw new NotSupportedException();
                 }
             }
+
+            public override ConversionType ConversionType => ConversionType.Header;
         }
     }
 

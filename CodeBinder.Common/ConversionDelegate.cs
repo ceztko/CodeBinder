@@ -46,6 +46,8 @@ namespace CodeBinder
             write(writer);
         }
 
+        public bool Skip => _builder.Skip;
+
         public string ToFullString()
         {
             var writer = new StringWriter();

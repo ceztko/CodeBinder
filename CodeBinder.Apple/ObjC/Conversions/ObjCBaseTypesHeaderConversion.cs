@@ -36,6 +36,7 @@ namespace CodeBinder.Apple
             builder.AppendLine("// Interop array box types");
             foreach (var type in ObjCUtils.GetInteropTypes())
                 builder.AppendLine($"#import {ObjCUtils.ToArrayBoxTypeName(type).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");
+
             builder.AppendLine();
             builder.AppendLine("// Other types");
             builder.AppendLine($"#import {nameof(ObjCClasses.CBException_h).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");

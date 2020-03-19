@@ -197,7 +197,6 @@ namespace CodeBinder.Apple
 
         #region Expressions
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, ArrayCreationExpressionSyntax syntax, ObjCCompilationContext context)
         {
 
@@ -259,7 +258,6 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, BinaryExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var kind = syntax.Kind();
@@ -331,7 +329,6 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var type = syntax.Type.GetTypeSymbol(context);
@@ -342,7 +339,6 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, ConditionalExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Append(syntax.Condition, context).Space().QuestionMark().Space()
@@ -359,21 +355,18 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, BaseExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Append("super");
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, ThisExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Append("self");
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, InvocationExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var methodSymbol = syntax.GetSymbol<IMethodSymbol>(context)!;
@@ -443,7 +436,6 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var kind = syntax.Kind();
@@ -531,7 +523,7 @@ namespace CodeBinder.Apple
                     {
                         var underlyingType = property.Type;
                         Debug.Assert(underlyingType.IsValueType);
-                        if (underlyingType.IsCLRPrimitiveType()) /* CHECK-ME */
+                        if (underlyingType.IsObjCPrimitiveType())
                         {
                             // The only supported nullable type in ObjC is NSNumber
                             // https://developer.apple.com/documentation/foundation/nsnumber?language=objc
@@ -573,7 +565,6 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, ObjectCreationExpressionSyntax syntax, ObjCCompilationContext context)
         {
             var constructorSymbol = syntax.GetSymbol<IMethodSymbol>(context);
@@ -582,28 +573,24 @@ namespace CodeBinder.Apple
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, ParenthesizedExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Parenthesized().Append(syntax.Expression, context);
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, PostfixUnaryExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Append(syntax.Operand, context).Append(syntax.GetObjCOperator());
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, PrefixUnaryExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Append(syntax.GetObjCOperator()).Append(syntax.Operand, context);
             return builder;
         }
 
-        // OK
         public static CodeBuilder Append(this CodeBuilder builder, TypeOfExpressionSyntax syntax, ObjCCompilationContext context)
         {
             builder.Bracketed().Append(syntax.Type, context).Space().Append("class").Close();

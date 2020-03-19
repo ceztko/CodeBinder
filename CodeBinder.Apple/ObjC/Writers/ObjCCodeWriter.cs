@@ -38,8 +38,10 @@ namespace CodeBinder.Apple
         Unknown,
         Type,
         Field,
+        StaticField,
         Property,
         Method,
+        CLangMethod,
         Constructor,
         Destructor,
     }

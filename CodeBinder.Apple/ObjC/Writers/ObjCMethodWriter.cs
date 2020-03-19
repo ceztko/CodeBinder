@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System;
 using CodeBinder.Attributes;
 using CodeBinder.Util;
+using CodeBinder.Apple.Attributes;
 
 namespace CodeBinder.Apple
 {
@@ -14,11 +15,13 @@ namespace CodeBinder.Apple
         where TMethod : BaseMethodDeclarationSyntax
     {
         public bool IsStatic { get; private set; }
+        public bool IsNative { get; private set; }
 
         protected MethodWriter(TMethod method, ObjCCompilationContext context, ObjCFileType fileType)
             : base(method, context, fileType)
         {
             IsStatic = Item.IsStatic(Context);
+            IsNative = Item.HasAttribute<NativeAttribute>(context);
         }
 
         protected override void Write()
@@ -119,7 +122,7 @@ namespace CodeBinder.Apple
             Builder.Append(parameter.Identifier.Text);
         }
 
-        public override ObjWriterType Type => ObjWriterType.Method;
+        public override ObjWriterType Type => IsNative ? ObjWriterType.CLangMethod : ObjWriterType.Method;
 
         protected virtual void WriteMethodBodyPrefixInternal() { /* Do nothing */ }
 

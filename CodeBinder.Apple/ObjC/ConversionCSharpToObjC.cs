@@ -68,8 +68,8 @@ namespace CodeBinder.Apple
                 yield return new StringConversionWriter(nameof(ObjCClasses.CBHandleRef_mm).ToObjCImplementationFilename(), () => ObjCClasses.CBHandleRef_mm) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
                 foreach (var type in ObjCUtils.GetInteropTypes())
                 {
-                    yield return new ObjCArrayBoxWriter(type, true);
                     yield return new ObjCArrayBoxWriter(type, false);
+                    yield return new ObjCArrayBoxWriter(type, true);
                 }
             }
         }

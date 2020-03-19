@@ -300,7 +300,7 @@ namespace CodeBinder.Apple
             }
         }
 
-        public static bool TryGeArrayBoxType(string typeName, [NotNullWhen(true)]out string? boxTypeName)
+        public static bool TryGetArrayBoxType(string typeName, [NotNullWhen(true)]out string? boxTypeName)
         {
             switch (typeName)
             {
@@ -352,9 +352,6 @@ namespace CodeBinder.Apple
                 case "System.Double":
                     boxTypeName = "CBDoubleArray";
                     return true;
-                case "System.String":
-                    boxTypeName = "CBStringArray";
-                    return true;
                 default:
                     boxTypeName = null;
                     return false;
@@ -381,51 +378,57 @@ namespace CodeBinder.Apple
                 ObjCInteropType.Int64 => "CBInt64Array",
                 ObjCInteropType.Single => "CBFloatArray",
                 ObjCInteropType.Double => "CBDoubleArray",
-                ObjCInteropType.String => "CBStringArray",
                 _ => throw new NotSupportedException(),
             };
         }
 
-        public static string ToArrayTypeName(this ObjCInteropType type)
+        public static string ToArrayTypeName(this ObjCInteropType type, bool isConst)
         {
-            switch (type)
+            if (isConst)
             {
-                case ObjCInteropType.NSUInteger:
-                    return "NSUInteger *";
-                case ObjCInteropType.NSInteger:
-                    return "NSInteger *";
-                case ObjCInteropType.UIntPtr:
-                    return "void **";
-                case ObjCInteropType.IntPtr:
-                    return "void **";
-                case ObjCInteropType.Boolean:
-                    return "BOOL *";
-                case ObjCInteropType.Char:
-                    return "char *";
-                case ObjCInteropType.Byte:
-                    return "uint8_t *";
-                case ObjCInteropType.SByte:
-                    return "int8_t *";
-                case ObjCInteropType.UInt16:
-                    return "uint16_t *";
-                case ObjCInteropType.Int16:
-                    return "int16_t *";
-                case ObjCInteropType.UInt32:
-                    return "uint32_t *";
-                case ObjCInteropType.Int32:
-                    return "int32_t *";
-                case ObjCInteropType.UInt64:
-                    return "uint64_t *";
-                case ObjCInteropType.Int64:
-                    return "int64_t *";
-                case ObjCInteropType.Single:
-                    return "float *";
-                case ObjCInteropType.Double:
-                    return "double *";
-                case ObjCInteropType.String:
-                    return "NSString * __strong *";
-                default:
-                    throw new Exception();
+                return type switch
+                {
+                    ObjCInteropType.NSUInteger => "const NSUInteger *",
+                    ObjCInteropType.NSInteger => "const NSInteger *",
+                    ObjCInteropType.UIntPtr => "void * const *",
+                    ObjCInteropType.IntPtr => "void * const *",
+                    ObjCInteropType.Boolean => "const BOOL *",
+                    ObjCInteropType.Char => "const char *",
+                    ObjCInteropType.Byte => "const uint8_t *",
+                    ObjCInteropType.SByte => "const int8_t *",
+                    ObjCInteropType.UInt16 => "const uint16_t *",
+                    ObjCInteropType.Int16 => "const int16_t *",
+                    ObjCInteropType.UInt32 => "const uint32_t *",
+                    ObjCInteropType.Int32 => "const int32_t *",
+                    ObjCInteropType.UInt64 => "const uint64_t *",
+                    ObjCInteropType.Int64 => "const int64_t *",
+                    ObjCInteropType.Single => "const float *",
+                    ObjCInteropType.Double => "const double *",
+                    _ => throw new NotSupportedException(),
+                };
+            }
+            else
+            {
+                return type switch
+                {
+                    ObjCInteropType.NSUInteger => "NSUInteger *",
+                    ObjCInteropType.NSInteger => "NSInteger *",
+                    ObjCInteropType.UIntPtr => "void **",
+                    ObjCInteropType.IntPtr => "void **",
+                    ObjCInteropType.Boolean => "BOOL *",
+                    ObjCInteropType.Char => "char *",
+                    ObjCInteropType.Byte => "uint8_t *",
+                    ObjCInteropType.SByte => "int8_t *",
+                    ObjCInteropType.UInt16 => "uint16_t *",
+                    ObjCInteropType.Int16 => "int16_t *",
+                    ObjCInteropType.UInt32 => "uint32_t *",
+                    ObjCInteropType.Int32 => "int32_t *",
+                    ObjCInteropType.UInt64 => "uint64_t *",
+                    ObjCInteropType.Int64 => "int64_t *",
+                    ObjCInteropType.Single => "float *",
+                    ObjCInteropType.Double => "double *",
+                    _ => throw new NotSupportedException(),
+                };
             }
         }
 
@@ -465,8 +468,6 @@ namespace CodeBinder.Apple
                     return "float";
                 case ObjCInteropType.Double:
                     return "double";
-                case ObjCInteropType.String:
-                    return "NSString * __strong";
                 default:
                     throw new Exception();
             }
@@ -705,7 +706,6 @@ namespace CodeBinder.Apple
         Int64,
         Single,
         Double,
-        String,
     }
 
     enum ObjCTypeUsageKind

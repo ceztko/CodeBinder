@@ -31,7 +31,7 @@ namespace CodeBinder.Apple
                 // to def FlagsInternal so we can overload on that. See ObjCTypesHeaderConversion.writeCBToStringMethod()
                 builder.AppendLine("#import <Foundation/Foundation.h>");
                 builder.AppendLine("#undef NS_OPTIONS");
-                builder.AppendLine("#define NS_OPTIONS(type, name) type name; enum name ## Flags : type");
+                builder.AppendLine("#define NS_OPTIONS(type, name) type name; enum name ## _Options : type");
                 builder.AppendLine();
                 builder.AppendLine("#import \"OCTypes.h\"");
             }

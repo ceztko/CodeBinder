@@ -140,14 +140,6 @@ inline double* CBGetNativeArray(CBDoubleArray* arr)
     return arr.values;
 }
 
-inline NSString* __strong* CBGetNativeArray(CBStringArray* arr)
-{
-    if (arr == nil)
-        return nullptr;
-
-    return arr.values;
-}
-
 inline NSUInteger CBGetHashCode(NSObject* obj)
 {
     return obj.hash;

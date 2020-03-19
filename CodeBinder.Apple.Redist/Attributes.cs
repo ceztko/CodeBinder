@@ -1,7 +1,8 @@
-﻿using System;
+﻿using CodeBinder.Attributes;
+using System;
 using System.Diagnostics;
 
-namespace CodeBinder.Attributes
+namespace CodeBinder.Apple.Attributes
 {
     /// <summary>ObjC Specific selector for the parameter</summary>
     /// <remarks>This attribute is not marked with Conditional since it
@@ -23,5 +24,19 @@ namespace CodeBinder.Attributes
     public sealed class CLangTypeAttribute : CodeBinderAttribute
     {
         public CLangTypeAttribute() { }
+    }
+
+    /// <summary>
+    /// Ignore conversion writing
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
+    public sealed class IgnoreConversionAttribute : CodeBinderAttribute
+    {
+        public ConversionType Type { get; private set; }
+
+        public IgnoreConversionAttribute(ConversionType type)
+        {
+            Type = type;
+        }
     }
 }

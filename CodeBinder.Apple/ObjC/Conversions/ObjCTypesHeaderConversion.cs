@@ -126,7 +126,7 @@ namespace CodeBinder.Apple
         // Write a CBToString() method for this enum
         private void writeCBToStringMethod(CodeBuilder builder, string enumName, bool isFlag, List<EnumMember> members)
         {
-            builder.Append("inline").Space().Append("NSString *").Space().Append("CBToString").Parenthesized().Append(isFlag ? $"{enumName}Flags" : enumName).Space().Append("value").Close().AppendLine();
+            builder.Append("inline").Space().Append("NSString *").Space().Append("CBToString").Parenthesized().Append(isFlag ? $"{enumName}_Options" : enumName).Space().Append("value").Close().AppendLine();
             using (builder.Block())
             {
                 builder.Append("switch (value)").AppendLine();

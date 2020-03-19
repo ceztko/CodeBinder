@@ -52,5 +52,7 @@ namespace CodeBinder.Apple
 
             Builder.Append(Item.Declaration, Context).EndOfStatement();
         }
+
+        public override ObjWriterType Type => IsStatic ? ObjWriterType.StaticField : ObjWriterType.Field;
     }
 }

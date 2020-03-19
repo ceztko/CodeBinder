@@ -1,4 +1,5 @@
-﻿using CodeBinder.Shared;
+﻿using CodeBinder.Apple.Attributes;
+using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
 using System;
@@ -41,6 +42,8 @@ namespace CodeBinder.Apple
                     yield return $"<{Compilation.CLangLibraryHeaderName}>";
                 }
             }
+
+            public override ConversionType ConversionType => ConversionType.Implementation;
         }
     }
 
@@ -52,9 +55,6 @@ namespace CodeBinder.Apple
 
         protected override CodeWriter GetTypeWriter()
         {
-            if (Context.Node.Identifier.Text == "PdfSigningContext" || Context.Node.Identifier.Text == "PdfMessageHandler")
-                return CodeWriter.NullWriter("/* NULL */");
-
             return new ObjCClassWriter(Context.Node, Context.ComputePartialDeclarationsTree(), Context.Compilation, ObjCFileType.Implementation);
         }
     }

@@ -1,5 +1,6 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
+using CodeBinder.Apple.Attributes;
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
@@ -31,6 +32,22 @@ namespace CodeBinder.Apple
 
             builder.Append(GetTypeWriter());
             writeEnding(builder);
+        }
+
+        public abstract ConversionType ConversionType { get; }
+
+        public override bool Skip
+        {
+            get
+            {
+                if (Context.Node.TryGetAttribute<IgnoreConversionAttribute>(Context, out var attribute))
+                {
+                    if (attribute.GetConstructorArgument<ConversionType>(0).HasFlag(ConversionType))
+                        return true;
+                }
+
+                return false;
+            }
         }
 
         protected virtual void writePreamble(CodeBuilder builder)

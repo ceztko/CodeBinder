@@ -402,10 +402,14 @@ namespace CodeBinder.Apple
             if (typeSymbol.GetFullName() != "System.String") // String is handled in invocation
             {
                 if (passByRef && syntax.Parent.IsExpression(ExpressionKind.Assignment) && (syntax.Parent as AssignmentExpressionSyntax)!.Left == syntax)
+                {
                     builder.Append("*");
+                }
                 else if (syntax.Parent.IsKind(SyntaxKind.Argument) && (syntax.Parent as ArgumentSyntax)!.IsRefLike()
-                        && (typeSymbol.TypeKind != TypeKind.Struct || typeSymbol.IsCLRPrimitiveType())) /* CHECK-ME */
+                    && (typeSymbol.TypeKind != TypeKind.Struct || typeSymbol.IsObjCPrimitiveType()))
+                {
                     builder.Append("&");
+                }
             }
         }
 
@@ -656,7 +660,7 @@ namespace CodeBinder.Apple
             {
                 case SymbolKind.ArrayType:
                 {
-                    if (ObjCUtils.TryGeArrayBoxType(fullTypeName, out knownObjCType))
+                    if (ObjCUtils.TryGetArrayBoxType(fullTypeName, out knownObjCType))
                     {
                         objcTypeKind = ObjCTypeKind.Class;
                         return true;
@@ -698,7 +702,7 @@ namespace CodeBinder.Apple
                     return ObjCTypeKind.Class;
                 case TypeKind.Struct:
                 {
-                    Debug.Assert(!symbol.IsCLRPrimitiveType()); /* CHECK-ME */
+                    Debug.Assert(!symbol.IsObjCPrimitiveType());
                     return ObjCTypeKind.Class;
                 }
                 case TypeKind.TypeParameter:

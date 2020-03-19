@@ -114,6 +114,7 @@ namespace CodeBinder.Apple
         protected void WriteTypeMembers(IEnumerable<MemberDeclarationSyntax> members, PartialDeclarationsTree partialDeclarations)
         {
             var memberFieldWriters = new List<IObjCCodeWriter>();
+            var clangMethodWriters = new List<IObjCCodeWriter>();
             var staticFieldWriters = new List<IObjCCodeWriter>();
             var otherTypeWriters = new List<IObjCCodeWriter>();
             foreach (var member in members)
@@ -127,16 +128,29 @@ namespace CodeBinder.Apple
 
                 foreach (var writer in GetWriters(member, partialDeclarations, Context, FileType))
                 {
-                    if (writer.Type == ObjWriterType.Field)
+                    switch (writer.Type)
                     {
-                        var fieldWriter = (ObjCFieldWriter)writer;
-                        if (fieldWriter.IsStatic)
-                            staticFieldWriters.Add(fieldWriter);
-                        else
-                            memberFieldWriters.Add(fieldWriter);
+                        case ObjWriterType.Field:
+                        {
+                            memberFieldWriters.Add(writer);
+                            break;
+                        }
+                        case ObjWriterType.StaticField:
+                        {
+                            staticFieldWriters.Add(writer);
+                            break;
+                        }
+                        case ObjWriterType.CLangMethod:
+                        {
+                            clangMethodWriters.Add(writer);
+                            break;
+                        }
+                        default:
+                        {
+                            otherTypeWriters.Add(writer);
+                            break;
+                        }
                     }
-                    else
-                        otherTypeWriters.Add(writer);
                 }
             }
 

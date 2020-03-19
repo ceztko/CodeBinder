@@ -48,6 +48,8 @@ namespace CodeBinder.Apple
                     builder.AppendLine("@private");
                     builder.Append(ArrayTypeDeclaration).Space().Append("_values").EndOfStatement();
                     builder.Append("NSUInteger").Space().Append("_length").EndOfStatement();
+                    builder.Append("BOOL").Space().Append("_handled").EndOfStatement();
+                    builder.Append("BOOL").Space().Append("_immutable").EndOfStatement();
                 }
             }
             else
@@ -71,11 +73,14 @@ namespace CodeBinder.Apple
                     builder.Append("if (self == nil)").AppendLine();
                     builder.Append("    return nil").EndOfStatement();
                     builder.Append("_values = ").Append($"({ArrayTypeDeclaration})").Append($"calloc(length, sizeof({PrimitiveType.ToTypeName()}))").EndOfStatement();
-                    builder.Append("_length = length").EndOfStatement(); ;
+                    builder.Append("_length = length").EndOfStatement();
+                    builder.Append("_handled = YES").EndOfStatement();
+                    builder.Append("_immutable = NO").EndOfStatement();
                     builder.Append("return self").EndOfStatement();
                 }
             }
             builder.AppendLine();
+
             builder.Append("-(id)initWithValues").Colon().Append("(NSUInteger)").Append("length").Append(", ...");
             if (IsHeader)
             {
@@ -101,10 +106,144 @@ namespace CodeBinder.Apple
             }
             builder.AppendLine();
 
+            builder.Append("-(id)initWithConstArray").Colon().Append($"({ConstArrayTypeDeclaration})arr")
+                .Space().Colon().Append("(NSUInteger)length");
             if (IsHeader)
             {
-                builder.Append("@property (nonatomic)").Space().Append($"{ArrayTypeDeclaration}").Space().Append("values").EndOfStatement();
-                builder.Append("@property (nonatomic)").Space().Append("NSUInteger length").EndOfStatement();
+                builder.EndOfStatement();
+            }
+            else
+            {
+                builder.AppendLine();
+                using (builder.Block())
+                {
+                    builder.Append("self = [self initWithConstArray:arr :length :NO]").EndOfStatement();
+                    builder.Append("if (self == nil)").AppendLine();
+                    builder.Append("    return nil").EndOfStatement();
+                    builder.Append("return self").EndOfStatement();
+                }
+            }
+            builder.AppendLine();
+
+            builder.Append("-(id)initWithConstArray").Colon().Append($"({ConstArrayTypeDeclaration})arr")
+                .Space().Colon().Append("(NSUInteger)length").Space().Colon().Append("(BOOL)pinned");
+            if (IsHeader)
+            {
+                builder.EndOfStatement();
+            }
+            else
+            {
+                builder.AppendLine();
+                using (builder.Block())
+                {
+                    builder.AppendLine("if (pinned)");
+                    using(builder.Block())
+                    {
+                        builder.Append("self = [super init]").EndOfStatement();
+                        builder.Append("if (self == nil)").AppendLine();
+                        builder.Append("    return nil").EndOfStatement();
+                        builder.Append($"_values = ({ArrayTypeDeclaration})arr").EndOfStatement();
+                        builder.Append("_length = length").EndOfStatement();
+                        builder.Append("_handled = NO").EndOfStatement();
+                        builder.Append("_immutable = YES").EndOfStatement();
+                    }
+                    builder.Append("else").AppendLine();
+                    using (builder.Block())
+                    {
+                        builder.Append("self = [self init:length]").EndOfStatement();
+                        builder.Append("if (self == nil)").AppendLine();
+                        builder.Append("    return nil").EndOfStatement();
+                        builder.Append("memcpy(_values, arr, length)").EndOfStatement();
+                    }
+
+                    builder.Append("return self").EndOfStatement();
+                }
+            }
+            builder.AppendLine();
+
+            builder.Append("-(id)initWithArray").Colon().Append($"({ArrayTypeDeclaration})arr")
+                .Space().Colon().Append("(NSUInteger)length");
+            if (IsHeader)
+            {
+                builder.EndOfStatement();
+            }
+            else
+            {
+                builder.AppendLine();
+                using (builder.Block())
+                {
+                    builder.Append("self = [self initWithArray:arr :length :YES]").EndOfStatement();
+                    builder.Append("if (self == nil)").AppendLine();
+                    builder.Append("    return nil").EndOfStatement();
+                    builder.Append("return self").EndOfStatement();
+                }
+            }
+            builder.AppendLine();
+
+            builder.Append("-(id)initWithArray").Colon().Append($"({ArrayTypeDeclaration})arr")
+                .Space().Colon().Append("(NSUInteger)length").Space().Colon().Append("(BOOL)handled");
+            if (IsHeader)
+            {
+                builder.EndOfStatement();
+            }
+            else
+            {
+                builder.AppendLine();
+                using (builder.Block())
+                {
+                    builder.Append("self = [super init]").EndOfStatement();
+                    builder.Append("if (self == nil)").AppendLine();
+                    builder.Append("    return nil").EndOfStatement();
+                    builder.Append("_values = arr").EndOfStatement();
+                    builder.Append("_length = length").EndOfStatement();
+                    builder.Append("_handled = handled").EndOfStatement();
+                    builder.Append("return self").EndOfStatement();
+                }
+            }
+            builder.AppendLine();
+
+            // https://nshipster.com/object-subscripting/
+            builder.Append($"-({PrimitiveType.ToTypeName()})objectAtIndexedSubscript").Colon().Append("(NSUInteger)idx");
+            if (IsHeader)
+            {
+                builder.EndOfStatement();
+            }
+            else
+            {
+                builder.AppendLine();
+                using (builder.Block())
+                {
+                    builder.AppendLine("if (idx >= _length)");
+                    builder.Append("    @throw [NSException exceptionWithName:@\"IndexOutofRange\" reason:@\"Index was outside the bounds of the array.\" userInfo:nil]").EndOfStatement();
+                    builder.Append("return _values[idx]").EndOfStatement();
+                }
+            }
+            builder.AppendLine();
+
+            builder.Append("-(void)setObject").Colon().Append($"({PrimitiveType.ToTypeName()})value").Space().Append("atIndexedSubscript").Colon().Append("(NSUInteger)idx");
+            if (IsHeader)
+            {
+                builder.EndOfStatement();
+            }
+            else
+            {
+                builder.AppendLine();
+                using (builder.Block())
+                {
+                    builder.AppendLine("if (_immutable)");
+                    builder.Append("    @throw [NSException exceptionWithName:@\"UnsupportedOperationException\" reason:@\"Can't modify an immutable array.\" userInfo:nil]").EndOfStatement();
+                    builder.AppendLine("if (idx >= _length)");
+                    builder.Append("    @throw [NSException exceptionWithName:@\"IndexOutofRange\" reason:@\"Index was outside the bounds of the array.\" userInfo:nil]").EndOfStatement();
+                    builder.Append("_values[idx] = value").EndOfStatement();
+                }
+            }
+            builder.AppendLine();
+
+            if (IsHeader)
+            {
+                builder.Append("@property (readonly,nonatomic)").Space().Append($"{ArrayTypeDeclaration}").Space().Append("values").EndOfStatement();
+                builder.Append("@property (readonly,nonatomic)").Space().Append($"{ConstArrayTypeDeclaration}").Space().Append("constValues").EndOfStatement();
+                builder.Append("@property (readonly,nonatomic)").Space().Append("NSUInteger length").EndOfStatement();
                 builder.AppendLine();
             }
 
@@ -118,7 +257,23 @@ namespace CodeBinder.Apple
                 builder.AppendLine();
                 using (builder.Block())
                 {
-                    builder.Append("free(_values)").EndOfStatement();
+                    builder.AppendLine("if(_handled)");
+                    builder.Append("    free(_values)").EndOfStatement();
+                }
+            }
+            builder.AppendLine();
+
+            builder.Append($"-({ConstArrayTypeDeclaration})constValues");
+            if (IsHeader)
+            {
+                builder.EndOfStatement();
+            }
+            else
+            {
+                builder.AppendLine();
+                using (builder.Block())
+                {
+                    builder.Append("return _values").EndOfStatement();
                 }
             }
             builder.AppendLine();
@@ -133,6 +288,8 @@ namespace CodeBinder.Apple
                 builder.AppendLine();
                 using (builder.Block())
                 {
+                    builder.AppendLine("if (_immutable)");
+                    builder.Append("    @throw [NSException exceptionWithName:@\"UnsupportedOperationException\" reason:@\"Can't modify an immutable array.\" userInfo:nil]").EndOfStatement();
                     builder.Append("return _values").EndOfStatement();
                 }
             }
@@ -197,8 +354,6 @@ namespace CodeBinder.Apple
                     return "double";
                 case ObjCInteropType.Double:
                     return "double";
-                case ObjCInteropType.String:
-                    return "NSString *";
                 default:
                     throw new Exception();
             }
@@ -208,7 +363,9 @@ namespace CodeBinder.Apple
 
         public string ImplementationFile => $"{BoxTypeName}.{ConversionCSharpToObjC.ImplementationExtension}";
 
-        private string ArrayTypeDeclaration => PrimitiveType.ToArrayTypeName();
+        private string ArrayTypeDeclaration => PrimitiveType.ToArrayTypeName(false);
+
+        private string ConstArrayTypeDeclaration => PrimitiveType.ToArrayTypeName(true);
 
         private string BoxTypeName => PrimitiveType.ToArrayBoxTypeName();
     }

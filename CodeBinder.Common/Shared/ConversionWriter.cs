@@ -36,6 +36,8 @@ namespace CodeBinder.Shared
             write(builder);
         }
 
+        public virtual bool Skip => false;
+
         protected abstract void write(CodeBuilder builder);
 
         protected abstract string GetFileName();
@@ -62,5 +64,7 @@ namespace CodeBinder.Shared
         string FileName { get; }
 
         string? BasePath { get; }
+
+        bool Skip { get; }
     }
 }

@@ -12,6 +12,7 @@ using System.Diagnostics.CodeAnalysis;
 using CodeBinder.Attributes;
 using System.Diagnostics;
 using CodeBinder.CLang;
+using CodeBinder.Apple.Attributes;
 
 namespace CodeBinder.Apple
 {
