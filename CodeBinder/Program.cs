@@ -147,7 +147,7 @@ namespace CodeBinder
                 Assembly assembly;
                 try
                 {
-                    assembly = Assembly.LoadFile(dllpath);
+                    assembly = Assembly.LoadFrom(dllpath);
                 }
                 catch
                 {
