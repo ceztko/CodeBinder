@@ -27,7 +27,7 @@ namespace CodeBinder.Java
 
             if (NeedStaticKeyword)
             {
-                var parentKind = Item.Parent.Kind();
+                var parentKind = Item.Parent!.Kind();
                 switch (parentKind)
                 {
                     case SyntaxKind.ClassDeclaration:

@@ -405,7 +405,7 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, ArgumentListSyntax syntax, JavaCodeConversionContext context)
         {
-            var parentSymbol = syntax.Parent.GetSymbol(context);
+            var parentSymbol = syntax.Parent!.GetSymbol(context);
             bool isNativeInvocation = false;
             if (parentSymbol?.Kind == SymbolKind.Method && (parentSymbol as IMethodSymbol)!.IsNative())
                 isNativeInvocation = true;

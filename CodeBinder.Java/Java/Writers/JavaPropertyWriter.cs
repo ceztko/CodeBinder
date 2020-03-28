@@ -39,7 +39,7 @@ namespace CodeBinder.Java
                 }
             }
 
-            _isParentInterface = Item.Parent.Kind() == SyntaxKind.InterfaceDeclaration;
+            _isParentInterface = Item.Parent!.Kind() == SyntaxKind.InterfaceDeclaration;
         }
 
         protected override void Write()

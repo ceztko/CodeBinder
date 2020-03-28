@@ -20,7 +20,7 @@ namespace CodeBinder.JNI
 
         static string getJNIMethodName(string methodName, MethodDeclarationSyntax method, JNIModuleContext module)
         {
-            var parentType = method.Parent.GetDeclaredSymbol(module)!;
+            var parentType = method.Parent!.GetDeclaredSymbol(module)!;
             StringBuilder builder = new StringBuilder();
             string mappedns = module.Compilation.Conversion.NamespaceMapping.GetMappedNamespace(method.GetContainingNamespace(module),
                 NamespaceNormalization.LowerCase);

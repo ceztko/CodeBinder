@@ -368,7 +368,7 @@ namespace CodeBinder.Apple
             else
             {
                 if (!property.IsIndexer &&
-                    (!syntax.Parent.IsExpression(ExpressionKind.MemberAccess)
+                    (!syntax.Parent!.IsExpression(ExpressionKind.MemberAccess)
                     || (syntax.Parent as MemberAccessExpressionSyntax)!.Expression == syntax))
                 {
                     builder.Append("self").Dot();
@@ -401,7 +401,7 @@ namespace CodeBinder.Apple
         {
             if (typeSymbol.GetFullName() != "System.String") // String is handled in invocation
             {
-                if (passByRef && syntax.Parent.IsExpression(ExpressionKind.Assignment) && (syntax.Parent as AssignmentExpressionSyntax)!.Left == syntax)
+                if (passByRef && syntax.Parent!.IsExpression(ExpressionKind.Assignment) && (syntax.Parent as AssignmentExpressionSyntax)!.Left == syntax)
                 {
                     builder.Append("*");
                 }

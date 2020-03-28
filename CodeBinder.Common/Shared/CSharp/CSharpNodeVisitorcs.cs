@@ -96,13 +96,6 @@ namespace CodeBinder.Shared.CSharp
         void addType(CSharpTypeContext type, bool isPartial)
         {
             Compilation.AddType(type);
-            return;
-            if (isPartial)
-                Compilation.AddType(type);
-            else
-            {
-                TreeContext.AddType(type, CurrentParent);
-            }
         }
 
         public override void Visit(SyntaxNode node)
@@ -315,10 +308,10 @@ namespace CodeBinder.Shared.CSharp
                     }
 
                     // Must be within an invocation
-                    assertParent(node.Parent, SyntaxKind.InvocationExpression);
+                    assertParent(node.Parent!, SyntaxKind.InvocationExpression);
 
                     StatementKind statementKind;
-                    if (node.Parent.Parent.IsStatement(out statementKind))
+                    if (node.Parent!.Parent!.IsStatement(out statementKind))
                     {
                         switch (statementKind)
                         {
@@ -326,7 +319,7 @@ namespace CodeBinder.Shared.CSharp
                             case StatementKind.Return:
                             {
                                 // invocation contained in a block
-                                assertParent(node.Parent.Parent.Parent, SyntaxKind.Block, SyntaxKind.SwitchSection);
+                                assertParent(node.Parent!.Parent!.Parent!, SyntaxKind.Block, SyntaxKind.SwitchSection);
                                 goto Exit;
                             }
                         }
@@ -335,15 +328,15 @@ namespace CodeBinder.Shared.CSharp
                     }
 
                     ExpressionKind expressionKind;
-                    if (node.Parent.Parent.IsExpression(out expressionKind))
+                    if (node.Parent!.Parent!.IsExpression(out expressionKind))
                     {
                         switch (expressionKind)
                         {
                             case ExpressionKind.Assignment:
                             {
                                 // non-return invocation contained in a assignment expressio, contained in a block
-                                assertParent(node.Parent.Parent.Parent, SyntaxKind.ExpressionStatement);
-                                assertParent(node.Parent.Parent.Parent.Parent, SyntaxKind.Block, SyntaxKind.SwitchSection);
+                                assertParent(node.Parent!.Parent!.Parent!, SyntaxKind.ExpressionStatement);
+                                assertParent(node.Parent!.Parent!.Parent!.Parent!, SyntaxKind.Block, SyntaxKind.SwitchSection);
                                 goto Exit;
                             }
                         }
@@ -354,8 +347,8 @@ namespace CodeBinder.Shared.CSharp
                     if (node.Parent.Parent.IsKind(SyntaxKind.EqualsValueClause))
                     {
                         // Local declaration and assignment with invocation
-                        assertParent(node.Parent.Parent.Parent.Parent.Parent, SyntaxKind.LocalDeclarationStatement);
-                        assertParent(node.Parent.Parent.Parent.Parent.Parent.Parent, SyntaxKind.Block, SyntaxKind.SwitchSection);
+                        assertParent(node.Parent!.Parent!.Parent!.Parent!.Parent!, SyntaxKind.LocalDeclarationStatement);
+                        assertParent(node.Parent!.Parent!.Parent!.Parent!.Parent!.Parent!, SyntaxKind.Block, SyntaxKind.SwitchSection);
                         goto Exit;
                     }
 
@@ -378,7 +371,7 @@ namespace CodeBinder.Shared.CSharp
 
         public override void VisitParameter(ParameterSyntax node)
         {
-            if (node.Default != null && !node.Parent.Parent.IsKind(SyntaxKind.MethodDeclaration))
+            if (node.Default != null && !node.Parent!.Parent!.IsKind(SyntaxKind.MethodDeclaration))
                 Unsupported(node, "Optional parameter in unsopperted context");
 
             DefaultVisit(node);
@@ -530,7 +523,7 @@ namespace CodeBinder.Shared.CSharp
             isPartial = type.IsPartial();
             if (isPartial)
             {
-                var parentKind = type.Parent.Kind();
+                var parentKind = type.Parent!.Kind();
                 switch (parentKind)
                 {
                     case SyntaxKind.ClassDeclaration:

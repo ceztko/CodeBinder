@@ -538,7 +538,7 @@ namespace CodeBinder.Apple
                         return builder;
                     }
 
-                    if (property.IsIndexer && syntax.Parent.IsStatement())
+                    if (property.IsIndexer && syntax.Parent!.IsStatement())
                     {
                         // Handle eg. obj.Property[5] = false -> [obj.Property set:NO]
                         builder.Bracketed().Append(syntax.Expression, context).Dot().Append(syntax.Name, context).Close();

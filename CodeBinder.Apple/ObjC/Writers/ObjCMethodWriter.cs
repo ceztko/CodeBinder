@@ -209,7 +209,7 @@ namespace CodeBinder.Apple
 
         public bool IsParentInterface
         {
-            get { return Item.Parent.Kind() == SyntaxKind.InterfaceDeclaration; }
+            get { return Item.Parent!.Kind() == SyntaxKind.InterfaceDeclaration; }
         }
 
         public override string MethodName

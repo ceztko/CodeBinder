@@ -5,9 +5,9 @@
     <RootNamespace>CodeBinder.Shared</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.4.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.4.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.4.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.5.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.5.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.5.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CodeBinder.Redist\CodeBinder.Redist.csproj" />

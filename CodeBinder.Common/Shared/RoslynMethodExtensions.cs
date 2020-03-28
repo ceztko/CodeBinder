@@ -303,7 +303,7 @@ namespace CodeBinder.Shared
             return ret;
         }
 
-        public static bool TryGetNamedArgument<T>(this AttributeData data, string name, [MaybeNull]out T value)
+        public static bool TryGetNamedArgument<T>(this AttributeData data, string name, [NotNullWhen(true)]out T value)
         {
             foreach (var pair in data.NamedArguments)
             {
@@ -362,16 +362,16 @@ namespace CodeBinder.Shared
             return symbol.GetAttributes();
         }
 
-        public static IOperation GetOperation(this SyntaxNode node, ICompilationContextProvider provider)
+        public static IOperation? GetOperation(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = node.GetSemanticModel(provider);
             return model.GetOperation(node);
         }
 
-        public static TOperation GetOperation<TOperation>(this SyntaxNode node, ICompilationContextProvider provider)
-            where TOperation : IOperation
+        public static TOperation? GetOperation<TOperation>(this SyntaxNode node, ICompilationContextProvider provider)
+            where TOperation : class,IOperation
         {
-            return (TOperation)GetOperation(node, provider);
+            return (TOperation?)GetOperation(node, provider);
         }
 
         public static bool TryGetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)]out TSymbol? symbol)
