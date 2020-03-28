@@ -23,6 +23,8 @@ namespace CodeBinder.CLang
 
         public override bool IsNative => true;
 
+        public bool OnlyPublicInterface { get; set; }
+
         public override IReadOnlyCollection<string> SupportedPolicies => new[] { Policies.Delegates };
 
         protected override CLangCompilationContext createCompilationContext()
@@ -36,6 +38,17 @@ namespace CodeBinder.CLang
         }
 
         internal const string BaseTypesHeader = "CBBaseTypes.h";
+
+        public override bool TryParseExtraArgs(List<string> args)
+        {
+            if (args.Count == 1 && args[0] == "--onlypublic")
+            {
+                OnlyPublicInterface = true;
+                return true;
+            }
+
+            return false;
+        }
 
         public override IEnumerable<IConversionWriter> DefaultConversions
         {

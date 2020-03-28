@@ -16,35 +16,34 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace CodeBinder
 {
-    public class ProjectConverter<TConversion> : Converter<TConversion>
-         where TConversion : LanguageConversion
+    class ProjectConverter : ConverterActual
     {
-        Project _project;
+        public Project Project { get; private set; }
 
-        internal ProjectConverter(Project project, TConversion conversion)
-            : base(conversion)
+        internal ProjectConverter(Converter converter, Project project)
+            : base(converter)
         {
-            _project = project;
+            Project = project;
         }
 
-        internal protected override IEnumerable<ConversionDelegate> GetConversionDelegates()
+        override internal protected IEnumerable<ConversionDelegate> GetConversionDelegates()
         {
             // Add some language specific preprocessor options
-            var options = (CSharpParseOptions)_project.ParseOptions!;
+            var options = (CSharpParseOptions)Project.ParseOptions!;
             var preprocessorSymbols = options.PreprocessorSymbolNames;
-            if (Options.PreprocessorDefinitionsRemoved != null)
-                preprocessorSymbols = preprocessorSymbols.Except(Options.PreprocessorDefinitionsRemoved).ToArray();
+            if (Converter.Options.PreprocessorDefinitionsRemoved != null)
+                preprocessorSymbols = preprocessorSymbols.Except(Converter.Options.PreprocessorDefinitionsRemoved).ToArray();
 
             options = options.WithPreprocessorSymbols(preprocessorSymbols
                 .Concat(new[] { "CODE_BINDER" })
-                .Concat(Conversion.PreprocessorDefinitions)
-                .Concat(Options.PreprocessorDefinitionsAdded ?? new string[0]));
-            var project = _project.WithParseOptions(options);
+                .Concat(Converter.Conversion.PreprocessorDefinitions)
+                .Concat(Converter.Options.PreprocessorDefinitionsAdded ?? new string[0]));
+            var project = Project.WithParseOptions(options);
 
             var solutionFilePath = project.Solution.FilePath;
             var solutionDir = Path.GetDirectoryName(solutionFilePath);
             var compilation = project.GetCompilationAsync().Result!;
-            if (!Options.IgnoreCompilationErrors)
+            if (!Converter.Options.IgnoreCompilationErrors)
             {
                 string? errors = CompilationOuput.ErrorsForCompilation(compilation, "source");
                 if (!string.IsNullOrEmpty(errors))
@@ -53,7 +52,7 @@ namespace CodeBinder
 
             // Select only syntax tress that belongs to solution dir, if not null
             var syntaxTrees = solutionDir == null ? compilation.SyntaxTrees.ToArray() : compilation.SyntaxTrees.Where(tree => tree.FilePath.StartsWith(solutionDir)).ToArray();
-            var compilationContext = Conversion.GetCompilationContext(compilation);
+            var compilationContext = Converter.Conversion.GetCompilationContext(compilation);
 
             var syntaxTreeContextTypes = getSyntaxTreeContextTypes(compilationContext, syntaxTrees);
             foreach (var pair in syntaxTreeContextTypes)

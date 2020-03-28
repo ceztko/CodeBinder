@@ -63,6 +63,11 @@ namespace CodeBinder.Shared
 
         public virtual bool UseUTF8Bom => true;
 
+        public virtual bool TryParseExtraArgs(List<string> args)
+        {
+            return false;
+        }
+
         /// <summary>Conditional compilation symbols</summary>
         public virtual IReadOnlyList<string> PreprocessorDefinitions
         {

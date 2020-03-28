@@ -37,41 +37,33 @@ namespace CodeBinder
             Options = new ConverterOptions();
         }
 
-        public static ProjectConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Project project, IProgress<string>? progress = null)
+        public static Converter<TLanguageConversion> CreateFor<TLanguageConversion>()
             where TLanguageConversion : LanguageConversion, new()
         {
-            return new ProjectConverter<TLanguageConversion>(project, new TLanguageConversion());
+            return new Converter<TLanguageConversion>(new TLanguageConversion());
         }
 
-        public static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Solution solution, IProgress<string>? progress = null)
-            where TLanguageConversion : LanguageConversion, new()
+        public void ConvertAndWrite(Project project, GeneratorOptions args, IProgress<string>? progress = null)
         {
-            return CreateFor<TLanguageConversion>(solution, solution.Projects, progress);
+            ConvertAndWrite(new ProjectConverter(this, project), args);
         }
 
-        public static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(IEnumerable<Project> projectsToConvert,
-            IProgress<string>? progress = null)
-            where TLanguageConversion : LanguageConversion, new()
+        public void ConvertAndWrite(Solution solution, GeneratorOptions args, IProgress<string>? progress = null)
         {
-            return CreateFor<TLanguageConversion>(null, projectsToConvert, progress);
+            ConvertAndWrite(new SolutionConverter(this, solution, solution.Projects, progress), args);
         }
 
-        private static SolutionConverter<TLanguageConversion> CreateFor<TLanguageConversion>(Solution? solution,
-            IEnumerable<Project> projectsToConvert, IProgress<string>? progress)
-            where TLanguageConversion : LanguageConversion, new()
+        public void ConvertAndWrite(IEnumerable<Project> projectsToConvert, GeneratorOptions args, IProgress<string>? progress = null)
         {
-            if (solution == null)
-                solution = projectsToConvert.First().Solution;
-
-            return new SolutionConverter<TLanguageConversion>(solution, projectsToConvert, new TLanguageConversion(), progress);
+            ConvertAndWrite(new SolutionConverter(this, projectsToConvert.First().Solution, projectsToConvert, progress), args);
         }
 
-        public void ConvertAndWrite(GeneratorOptions args)
+        void ConvertAndWrite(ConverterActual converter, GeneratorOptions args)
         {
             if (args.TargetRootPath == null)
                 throw new ArgumentNullException("args.TargtetRootPath");
 
-            foreach (var conversion in GetConversionDelegates().Concat(Conversion.DefaultConversionDelegates))
+            foreach (var conversion in converter.GetConversionDelegates().Concat(Conversion.DefaultConversionDelegates))
             {
                 if (conversion.Skip)
                     continue;
@@ -94,25 +86,19 @@ namespace CodeBinder
                 }
             }
         }
-
         public LanguageConversion Conversion
         {
             get { return GetConversion(); }
         }
 
         protected abstract LanguageConversion GetConversion();
-
-        /// <summary>
-        /// Get delegates to be iterated to write conversions
-        /// </summary>
-        internal protected abstract IEnumerable<ConversionDelegate> GetConversionDelegates();
     }
 
-    public abstract class Converter<TConversion> : Converter
+    public sealed class Converter<TConversion> : Converter
         where TConversion : LanguageConversion
     {
         public new TConversion Conversion { get; private set; }
-        
+
         internal Converter(TConversion conversion)
         {
             Conversion = conversion;
@@ -122,5 +108,20 @@ namespace CodeBinder
         {
             return Conversion;
         }
+    }
+
+    internal abstract class ConverterActual
+    {
+        public Converter Converter { get; private set; }
+
+        public ConverterActual(Converter converter)
+        {
+            Converter = converter;
+        }
+
+        /// <summary>
+        /// Get delegates to be iterated to write conversions
+        /// </summary>
+        internal protected abstract IEnumerable<ConversionDelegate> GetConversionDelegates();
     }
 }

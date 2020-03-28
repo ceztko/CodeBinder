@@ -12,6 +12,7 @@ using System.Reflection;
 using System.IO;
 using CodeBinder.CLang;
 using CodeBinder.Shared;
+using System.Diagnostics;
 
 namespace CodeBinder
 {
@@ -77,23 +78,6 @@ namespace CodeBinder
                 throw new Exception("A target root path must be specified");
 
             var conversions = GetConverterInfos();
-
-            // Registering MSBuild defaults is necessary otherwise projects will not compile
-            MSBuildLocator.RegisterDefaults();
-            MSBuildWorkspace workspace = MSBuildWorkspace.Create();
-
-            object item;
-            if (projectPath != null)
-            {
-                item = workspace.OpenProjectAsync(projectPath).Result;
-            }
-            else if (solutionPath != null)
-            {
-                item = workspace.OpenSolutionAsync(solutionPath).Result;
-            }
-            else
-                throw new Exception();
-
             ConversionInfo conversionInfo;
             try
             {
@@ -104,15 +88,17 @@ namespace CodeBinder
                 throw new Exception("Target language is missing or unsupported");
             }
 
-            // Find all Converter.CreateFor methods
-            var createForMEthods = (from method in typeof(Converter).GetMethods() where method.Name == nameof(Converter.CreateFor) select method).ToArray();
-
-            // Bind the CreateFor methods with the provided item
-            var arguments = new object?[] { item };
-            var createFor = (MethodInfo)Type.DefaultBinder.BindToMethod(BindingFlags.Public | BindingFlags.Static, createForMEthods, ref arguments, null, null, null, out var state);
+            // Find all Converter.CreateFor method
+            var createForMethod = typeof(Converter).GetMethod("CreateFor")!;
 
             // Istantiate the generic method with the desired conversion type
-            Converter converter = (Converter)createFor.MakeGenericMethod(conversionInfo.Type).Invoke(null, arguments)!;
+            Converter converter = (Converter)createForMethod.MakeGenericMethod(conversionInfo.Type).Invoke(null, null)!;
+
+            if (extra.Count != 0 && !converter.Conversion.TryParseExtraArgs(extra))
+            {
+                ShowHelp(options);
+                throw new Exception("Could not parse extra args: " + extra);
+            }
 
             // Set the namespace mappings in the conversion
             foreach (var nsmapping in namespaceMappings)
@@ -129,7 +115,23 @@ namespace CodeBinder
 
             GeneratorOptions genargs = new GeneratorOptions();
             genargs.TargetRootPath = targetRootPath;
-            converter.ConvertAndWrite(genargs);
+
+            // Registering MSBuild defaults is necessary otherwise projects will not compile
+            MSBuildLocator.RegisterDefaults();
+            MSBuildWorkspace workspace = MSBuildWorkspace.Create();
+
+            if (projectPath != null)
+            {
+                var project = workspace.OpenProjectAsync(projectPath).Result;
+                converter.ConvertAndWrite(project, genargs);
+            }
+            else if (solutionPath != null)
+            {
+                var solution = workspace.OpenSolutionAsync(solutionPath).Result;
+                converter.ConvertAndWrite(solution, genargs);
+            }
+            else
+                throw new Exception();
         }
 
         static IReadOnlyList<ConversionInfo> GetConverterInfos()
@@ -170,6 +172,7 @@ namespace CodeBinder
             return types;
         }
 
+        [DebuggerDisplay("LanguageName = {LanguageName}")]
         struct ConversionInfo
         {
             public Type Type;
