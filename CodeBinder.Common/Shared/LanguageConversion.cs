@@ -56,12 +56,17 @@ namespace CodeBinder.Shared
         /// </summary>
         public virtual bool DiscardNative => false;
 
+        /// <summary>
+        /// False if namespace mapping is needed for this conversion
+        /// </summary>
+        public virtual bool NeedNamespaceMapping => true;
+
+        public virtual bool UseUTF8Bom => true;
+
         public virtual IEnumerable<IConversionWriter> DefaultConversions
         {
             get { yield break; }
         }
-
-        public virtual bool UseUTF8Bom => true;
 
         public virtual bool TryParseExtraArgs(List<string> args)
         {

@@ -50,16 +50,25 @@ namespace CodeBinder
             var definitionsToRemove = new List<string>();
             var namespaceMappings = new List<string>();
             bool shouldShowHelp = false;
+            var conversions = GetConverterInfos();
+
             var options = new OptionSet {
                 { "p|project=", "The project to be converted", p => projectPath = p },
                 { "s|solution=", "The solution to be converted", s => solutionPath = s },
                 { "d|def=", "Preprocessor definition to be added during conversion", d => definitionsToAdd.Add(d) },
                 { "n|nodef=", "Preprocessor definition to be removed during conversion", d => definitionsToRemove.Add(d) },
-                { "ns|nsmapping=", "Mapping for the namespace, must be a colon separated", ns => namespaceMappings.Add(ns) },
+                { "m|nsmapping=", "Mapping for the given, must be colon separated ns1:ns2", ns => namespaceMappings.Add(ns) },
                 { "l|language=", "The target language for the conversion", l => language = l },
                 { "r|rootpath=", "The target root path for the conversion", r => targetRootPath = r },
                 { "h|help", "Show this message and exit", h => shouldShowHelp = h != null },
             };
+
+            var supportedExtraArgs = new List<string>();
+            foreach (var conversion in conversions)
+            {
+                foreach (var swtch in conversion.ConfigurationSwitches)
+                    options.Add(swtch.Name, swtch.Description, arg => supportedExtraArgs.Add(arg));
+            }
 
             List<string> extra = options.Parse(cmdArgs);
             if (shouldShowHelp)
@@ -67,37 +76,44 @@ namespace CodeBinder
                 ShowHelp(options);
                 return;
             }
-
-            if (projectPath == null && solutionPath == null)
-                throw new Exception("A project or a solution must be specified");
-
-            if (namespaceMappings.Count == 0)
-                throw new Exception("Namespace mappings must be specified");
-
-            if (targetRootPath == null)
-                throw new Exception("A target root path must be specified");
-
-            var conversions = GetConverterInfos();
             ConversionInfo conversionInfo;
+            Converter converter;
             try
             {
-                conversionInfo = conversions.First((info) => language == info.LanguageName);
+                if (projectPath == null && solutionPath == null)
+                    throw new Exception("A project or a solution must be specified");
+
+                if (targetRootPath == null)
+                    throw new Exception("A target root path must be specified");
+
+                try
+                {
+                    conversionInfo = conversions.First((info) => language == info.LanguageName);
+                }
+                catch
+                {
+                    throw new Exception("Target language is missing or unsupported");
+                }
+
+                // Find all Converter.CreateFor method
+                var createForMethod = typeof(Converter).GetMethod("CreateFor")!;
+
+                // Istantiate the generic method with the desired conversion type
+                converter = (Converter)createForMethod.MakeGenericMethod(conversionInfo.Type).Invoke(null, null)!;
+
+                if (converter.Conversion.NeedNamespaceMapping && namespaceMappings.Count == 0)
+                    throw new Exception("Namespace mappings must be specified");
+
+                if (extra.Count != 0)
+                    throw new Exception("Could not parse extra args: " + extra);
+
+                if (supportedExtraArgs.Count != 0 && !converter.Conversion.TryParseExtraArgs(supportedExtraArgs))
+                    throw new Exception("Could not parse extra args: " + extra);
             }
             catch
             {
-                throw new Exception("Target language is missing or unsupported");
-            }
-
-            // Find all Converter.CreateFor method
-            var createForMethod = typeof(Converter).GetMethod("CreateFor")!;
-
-            // Istantiate the generic method with the desired conversion type
-            Converter converter = (Converter)createForMethod.MakeGenericMethod(conversionInfo.Type).Invoke(null, null)!;
-
-            if (extra.Count != 0 && !converter.Conversion.TryParseExtraArgs(extra))
-            {
                 ShowHelp(options);
-                throw new Exception("Could not parse extra args: " + extra);
+                throw;
             }
 
             // Set the namespace mappings in the conversion
@@ -160,12 +176,15 @@ namespace CodeBinder
                 {
                     CustomAttributeData? attr = null;
                     if (!type.IsSubclassOf(typeof(LanguageConversion)) ||
-                        (attr = type.CustomAttributes.First((data) => { return data.AttributeType == typeof(ConversionLanguageName); })) == null)
+                        (attr = type.CustomAttributes.First((data) => data.AttributeType == typeof(ConversionLanguageName))) == null)
                     {
                         continue;
                     }
+                    var switches = new List<ConfigurationSwitch>();
+                    foreach (var data in from data in type.CustomAttributes where data.AttributeType == typeof(ConfigurationSwitch) select data)
+                        switches.Add(new ConfigurationSwitch((string)data.ConstructorArguments[0].Value!, (string)data.ConstructorArguments[1].Value!));
 
-                    types.Add(new ConversionInfo() { Type = type, LanguageName = (string)attr.ConstructorArguments[0].Value! });
+                    types.Add(new ConversionInfo() { Type = type, LanguageName = (string)attr.ConstructorArguments[0].Value!, ConfigurationSwitches = switches });
                 }
             }
 
@@ -177,6 +196,7 @@ namespace CodeBinder
         {
             public Type Type;
             public string LanguageName;
+            public List<ConfigurationSwitch> ConfigurationSwitches;
         }
 
         static void ShowHelp(OptionSet options)

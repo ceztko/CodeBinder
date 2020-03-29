@@ -6,11 +6,15 @@ Usage: CodeBinder [OPTIONS]
 Options:
   -p, --project=VALUE        The project to be converted
   -s, --solution=VALUE       The solution to be converted
-  -d, --nodef=VALUE          Preprocessor definition to be removed during
+  -d, --def=VALUE            Preprocessor definition to be added during
                                conversion
-  -n, --namespace=VALUE      The base namespace of the converted project
+  -n, --nodef=VALUE          Preprocessor definition to be removed during
+                               conversion
+  -m, --nsmapping=VALUE      Mapping for the given, must be colon separated ns1:
+                               ns2
   -l, --language=VALUE       The target language for the conversion
   -r, --rootpath=VALUE       The target root path for the conversion
+      --publiciface          Only output public interface (CLang)
   -h, --help                 Show this message and exit
 
 Example:

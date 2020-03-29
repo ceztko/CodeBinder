@@ -14,6 +14,7 @@ namespace CodeBinder.CLang
     /// </summary>
     /// <remarks>Inherit this class to provide custom contexts</remarks>
     [ConversionLanguageName(LanguageName)]
+    [ConfigurationSwitch("publiciface", "Only output public interface (CLang)")]
     public class ConversionCSharpToCLang : LanguageConversion<CLangCompilationContext, CLangSyntaxTreeContext, CLangModuleContext>
     {
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
@@ -22,6 +23,8 @@ namespace CodeBinder.CLang
         public ConversionCSharpToCLang() { }
 
         public override bool IsNative => true;
+
+        public override bool NeedNamespaceMapping => false;
 
         public bool OnlyPublicInterface { get; set; }
 
@@ -41,7 +44,8 @@ namespace CodeBinder.CLang
 
         public override bool TryParseExtraArgs(List<string> args)
         {
-            if (args.Count == 1 && args[0] == "--onlypublic")
+            // Try parse --publiciface switch
+            if (args.Count == 1 && args[0] == "publiciface")
             {
                 OnlyPublicInterface = true;
                 return true;
@@ -56,7 +60,8 @@ namespace CodeBinder.CLang
             {
                 yield return new StringConversionWriter(BaseTypesHeader, () => CLangResources.CBBaseTypes_h) { GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter("CBInterop.h", () => CLangResources.CBInterop_h) { GeneratedPreamble = SourcePreamble };
-                yield return new StringConversionWriter("CBInterop.h", () => CLangResources.CBInteropInternal_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                if (!OnlyPublicInterface)
+                    yield return new StringConversionWriter("CBInterop.h", () => CLangResources.CBInteropInternal_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
             }
         }
     }
