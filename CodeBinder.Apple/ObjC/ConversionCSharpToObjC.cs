@@ -8,7 +8,7 @@ using BinderPolicies = CodeBinder.Attributes.Policies;
 
 namespace CodeBinder.Apple
 {
-    [ConversionLanguageName("ObjetiveC")]
+    [ConversionLanguageName("ObjectiveC")]
     public class ConversionCSharpToObjC : CSharpLanguageConversion<ObjCCompilationContext>
     {
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";

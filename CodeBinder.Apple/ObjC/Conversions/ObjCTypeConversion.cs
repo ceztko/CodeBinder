@@ -20,10 +20,13 @@ namespace CodeBinder.Apple
         protected override void write(CodeBuilder builder)
         {
             if (Context.Node.TryGetAttribute<VerbatimConversionAttribute>(Context, out var attribute)
-                && attribute.GetConstructorArgument<ConversionType>(0) == ConversionType)
+                && (attribute.ConstructorArguments.Length == 1 && ConversionType == ConversionType.Implementation
+                    || attribute.GetConstructorArgument<ConversionType>(0) == ConversionType))
             {
                 // Use the verbatim conversion instead
-                string verbatimStr = attribute.GetConstructorArgument<string>(1);
+                string verbatimStr = attribute.ConstructorArguments.Length == 1
+                    ? attribute.GetConstructorArgument<string>(0)
+                    : attribute.GetConstructorArgument<string>(1);
                 builder.Append(verbatimStr);
                 return;
             }

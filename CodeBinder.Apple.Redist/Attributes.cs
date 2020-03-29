@@ -29,12 +29,15 @@ namespace CodeBinder.Apple.Attributes
     /// <summary>
     /// Verbatim conversion writing
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, AllowMultiple = false)]
     public sealed class VerbatimConversionAttribute : CodeBinderAttribute
     {
         public ConversionType ConversionType { get; private set; }
 
         public string Verbatim { get; private set; }
+
+        public VerbatimConversionAttribute(string verbatim)
+           : this(ConversionType.Implementation, verbatim) { }
 
         public VerbatimConversionAttribute(ConversionType type, string verbatim)
         {

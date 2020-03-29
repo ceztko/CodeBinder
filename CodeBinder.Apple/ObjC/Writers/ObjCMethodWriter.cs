@@ -86,10 +86,23 @@ namespace CodeBinder.Apple
                     }
                     else
                     {
-                        WriteMethodBodyPrefixInternal();
-                        if (DoWriteMethodBody && !Context.Conversion.SkipBody)
-                            Builder.Append(Item.Body, Context, true).AppendLine();
-                        WriteMethodBodyPostfixInternal();
+                        if (Item.TryGetAttribute<VerbatimConversionAttribute>(Context, out var attribute)
+                            && (attribute.ConstructorArguments.Length == 1 ||
+                                attribute.GetConstructorArgument<ConversionType>(0) == ConversionType.Implementation))
+                        {
+                            // Use the verbatim conversion instead
+                            string verbatimStr = attribute.ConstructorArguments.Length == 1
+                                ? attribute.GetConstructorArgument<string>(0)
+                                : attribute.GetConstructorArgument<string>(1);
+                            Builder.AppendLine(verbatimStr);
+                        }
+                        else
+                        {
+                            WriteMethodBodyPrefixInternal();
+                            if (DoWriteMethodBody && !Context.Conversion.SkipBody)
+                                Builder.Append(Item.Body, Context, true).AppendLine();
+                            WriteMethodBodyPostfixInternal();
+                        }
                     }
                 }
             }

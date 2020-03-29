@@ -696,9 +696,14 @@ namespace CodeBinder.Shared.CSharp
             return token.Kind() == SyntaxKind.None;
         }
 
+        /// <summary>
+        /// True if the method is DllImport or if it should be converted as native
+        /// </summary>
         public static bool IsNative(this IMethodSymbol method)
         {
-            return method.IsExtern && method.HasAttribute<DllImportAttribute>();
+            var attributes = method.GetAttributes();
+            return (method.IsExtern && attributes.HasAttribute<DllImportAttribute>())
+                || method.HasAttribute<NativeAttribute>();
         }
 
         public static bool IsNative(this ITypeSymbol type)
