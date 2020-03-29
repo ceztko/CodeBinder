@@ -28,15 +28,12 @@ namespace CodeBinder.Shared
 
     public abstract class LanguageConversion
     {
+        NamespaceMappingTree _NamespaceMapping;
+
         internal LanguageConversion()
         {
-            NamespaceMapping = new NamespaceMappingTree();
+            _NamespaceMapping = new NamespaceMappingTree();
         }
-
-        /// <summary>
-        /// Namespace mapping store
-        /// </summary>
-        public NamespaceMappingTree NamespaceMapping { get; private set; }
 
         /// <summary>
         /// Add here policies supported by this language conversion
@@ -62,6 +59,20 @@ namespace CodeBinder.Shared
         public virtual bool NeedNamespaceMapping => true;
 
         public virtual bool UseUTF8Bom => true;
+
+        /// <summary>
+        /// Namespace mapping store
+        /// </summary>
+        public NamespaceMappingTree NamespaceMapping
+        {
+            get
+            {
+                if (!NeedNamespaceMapping)
+                    throw new Exception("Namespace mapping not supported for this conversion");
+
+                return _NamespaceMapping;
+            }
+        }
 
         public virtual IEnumerable<IConversionWriter> DefaultConversions
         {

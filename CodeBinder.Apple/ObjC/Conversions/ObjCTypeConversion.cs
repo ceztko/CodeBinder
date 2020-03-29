@@ -19,6 +19,15 @@ namespace CodeBinder.Apple
 
         protected override void write(CodeBuilder builder)
         {
+            if (Context.Node.TryGetAttribute<VerbatimConversionAttribute>(Context, out var attribute)
+                && attribute.GetConstructorArgument<ConversionType>(0) == ConversionType)
+            {
+                // Use the verbatim conversion instead
+                string verbatimStr = attribute.GetConstructorArgument<string>(1);
+                builder.Append(verbatimStr);
+                return;
+            }
+
             writePreamble(builder);
             bool hasImports = false;
             foreach (var import in Imports)
@@ -35,20 +44,6 @@ namespace CodeBinder.Apple
         }
 
         public abstract ConversionType ConversionType { get; }
-
-        public override bool Skip
-        {
-            get
-            {
-                if (Context.Node.TryGetAttribute<IgnoreConversionAttribute>(Context, out var attribute))
-                {
-                    if (attribute.GetConstructorArgument<ConversionType>(0).HasFlag(ConversionType))
-                        return true;
-                }
-
-                return false;
-            }
-        }
 
         protected virtual void writePreamble(CodeBuilder builder)
         {

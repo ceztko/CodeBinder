@@ -27,16 +27,19 @@ namespace CodeBinder.Apple.Attributes
     }
 
     /// <summary>
-    /// Ignore conversion writing
+    /// Verbatim conversion writing
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
-    public sealed class IgnoreConversionAttribute : CodeBinderAttribute
+    public sealed class VerbatimConversionAttribute : CodeBinderAttribute
     {
-        public ConversionType Type { get; private set; }
+        public ConversionType ConversionType { get; private set; }
 
-        public IgnoreConversionAttribute(ConversionType type)
+        public string Verbatim { get; private set; }
+
+        public VerbatimConversionAttribute(ConversionType type, string verbatim)
         {
-            Type = type;
+            ConversionType = type;
+            Verbatim = verbatim;
         }
     }
 }

@@ -39,6 +39,8 @@ namespace CodeBinder.Apple
             get { return _policies; }
         }
 
+        public override bool NeedNamespaceMapping => false;
+
         public override bool DiscardNative => true;
 
         public bool SkipBody { get; set; }
