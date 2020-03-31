@@ -490,7 +490,7 @@ namespace CodeBinder.Apple
             // Access "arr" type in "arr[5]" syntax
             var typeSymbol = syntax.Expression.GetTypeSymbol(context);
             if (typeSymbol!.TypeKind == TypeKind.Array)
-                builder.Append(syntax.Expression, context).Dot().Append("values").Append(syntax.ArgumentList, true, context);
+                builder.Append(syntax.Expression, context).Dot().Append("data").Append(syntax.ArgumentList, true, context);
             else
                 builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, true, context);
 

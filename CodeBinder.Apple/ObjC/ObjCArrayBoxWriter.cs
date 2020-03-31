@@ -241,8 +241,8 @@ namespace CodeBinder.Apple
 
             if (IsHeader)
             {
-                builder.Append("@property (readonly,nonatomic)").Space().Append($"{ArrayTypeDeclaration}").Space().Append("values").EndOfStatement();
-                builder.Append("@property (readonly,nonatomic)").Space().Append($"{ConstArrayTypeDeclaration}").Space().Append("constValues").EndOfStatement();
+                builder.Append("@property (readonly,nonatomic)").Space().Append($"{ArrayTypeDeclaration}").Space().Append("data").EndOfStatement();
+                builder.Append("@property (readonly,nonatomic)").Space().Append($"{ConstArrayTypeDeclaration}").Space().Append("constData").EndOfStatement();
                 builder.Append("@property (readonly,nonatomic)").Space().Append("NSUInteger length").EndOfStatement();
                 builder.AppendLine();
             }
