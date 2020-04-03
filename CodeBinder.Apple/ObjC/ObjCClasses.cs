@@ -14,7 +14,7 @@ namespace CodeBinder.Apple
 #import <Foundation/Foundation.h>
 
 // Substitute for .NET Excpetion
-@interface CBException : NSException
+OBJC_CODEBINDER_API @interface CBException : NSException
 - (id)init;
 - (id)init:(NSString *)message;
 @end
@@ -88,7 +88,7 @@ namespace CodeBinder.Apple
 #import <Foundation/Foundation.h>
 
 // Substitute for .NET KeyValuePair
-@interface CBKeyValuePair<__covariant KeyType, __covariant ValueType> : NSObject
+OBJC_CODEBINDER_API @interface CBKeyValuePair<__covariant KeyType, __covariant ValueType> : NSObject
 {
 @private
     KeyType _key;
@@ -145,7 +145,7 @@ namespace CodeBinder.Apple
 #import <Foundation/Foundation.h>
 
 // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
-@interface CBHandleRef : NSObject
+OBJC_CODEBINDER_API @interface CBHandleRef : NSObject
 {
     @private
     NSObject * _wrapper;
