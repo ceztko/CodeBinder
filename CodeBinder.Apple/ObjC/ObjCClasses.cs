@@ -10,6 +10,7 @@ namespace CodeBinder.Apple
 #define CB_EXCPETION
 #pragma once
 
+#import ""cboclibdefs.h""
 #import <Foundation/Foundation.h>
 
 // Substitute for .NET Excpetion
@@ -22,6 +23,8 @@ namespace CodeBinder.Apple
 ";
 
         public const string CBException_mm = @"#import ""CBException.h""
+
+#define OBJC_CODEBINDER_EXPORT
 
 @implementation CBException
 
@@ -81,6 +84,7 @@ namespace CodeBinder.Apple
 #define CB_KEYVALUEPAIR
 #pragma once
 
+#import ""cboclibdefs.h""
 #import <Foundation/Foundation.h>
 
 // Substitute for .NET KeyValuePair
@@ -104,6 +108,8 @@ namespace CodeBinder.Apple
 
         public const string CBKeyValuePair_mm =
 @"#import ""CBKeyValuePair.h""
+
+#define OBJC_CODEBINDER_EXPORT
 
 @implementation CBKeyValuePair
 
@@ -135,6 +141,7 @@ namespace CodeBinder.Apple
 #define CB_HANDLEREF
 #pragma once
 
+#import ""cboclibdefs.h""
 #import <Foundation/Foundation.h>
 
 // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
@@ -159,6 +166,8 @@ namespace CodeBinder.Apple
 
         public const string CBHandleRef_mm =
 @"#import ""CBHandleRef.h""
+
+#define OBJC_CODEBINDER_EXPORT
 
 @implementation CBHandleRef
 

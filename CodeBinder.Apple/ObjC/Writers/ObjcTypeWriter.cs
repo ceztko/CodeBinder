@@ -23,6 +23,9 @@ namespace CodeBinder.Apple
 
         protected override void Write()
         {
+            if (FileType.IsPublicLikeHeader() && Item.GetAccessibility(Context).RequiresApiAttribute())
+                Builder.Append(ObjCLibDefsHeaderConversion.GetLibraryApiMacro(Context)).Space();
+
             Builder.Append(Item.GetObjcTypeDeclaration(FileType.IsHeader())).Space();
             Builder.Append(ObjCTypeName);
             WriteTypeSpecifiers();

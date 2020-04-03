@@ -134,5 +134,31 @@ namespace CodeBinder.Apple {
                 return ResourceManager.GetString("CBOCInterop_h", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #pragma once
+        ///
+        ///#if defined(OBJC_CODEBINDER_SHARED) || !defined(OBJC_CODEBINDER_STATIC)
+        ///
+        ///#ifdef OBJC_CODEBINDER_EXPORT
+        ///    #define OBJC_CODEBINDER_SHARED_API __attribute__ ((visibility (&quot;default&quot;)))
+        ///#else
+        ///    #define OBJC_CODEBINDER_IMPORT
+        ///    #define OBJC_CODEBINDER_API
+        ///#endif
+        ///
+        ///#else
+        ///    #define OBJC_CODEBINDER_API
+        ///    #ifndef OBJC_CODEBINDER_EXPORT
+        ///        #define OBJC_CODEBINDER_IMPORT
+        ///    #endif
+        ///#endif
+        ///.
+        /// </summary>
+        internal static string cboclibdefs_h {
+            get {
+                return ResourceManager.GetString("cboclibdefs_h", resourceCulture);
+            }
+        }
     }
 }

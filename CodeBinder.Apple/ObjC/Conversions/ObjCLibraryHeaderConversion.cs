@@ -25,7 +25,13 @@ namespace CodeBinder.Apple
             builder.AppendLine();
             if (IsInternalHeader)
             {
-                // TODO: Move this to a better internal header JUST FOR THE COMPILATION UNITS (*.mm files) and not the headers
+                // TODO: Move all this conditional in a better internal header JUST FOR THE COMPILATION UNITS (*.mm files) and not the headers
+
+                builder.AppendLine("#if !__has_feature(objc_arc)");
+                builder.AppendLine("    #error \"Code Binder projects are ARC only. Use -fobjc-arc flag\"");
+                builder.AppendLine("#endif");
+                builder.AppendLine();
+
                 // NOTE: shitty NS_OPTIONS on C++ does #typedef NS_OPTIONS(type, Flags) => typedef int32_t Flags; enum : int32_t ...
                 // which causes clashes on CBToString(...). Undef it and redef it to tricky version that allows also
                 // to def FlagsInternal so we can overload on that. See ObjCTypesHeaderConversion.writeCBToStringMethod()

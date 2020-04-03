@@ -296,6 +296,14 @@ namespace CodeBinder.Apple
             return filetype == ObjCFileType.PublicHeader || filetype == ObjCFileType.InternalOnlyHeader;
         }
 
+        /// <summary>
+        /// True when the header type is Public or InternalOnly header
+        /// </summary>
+        public static bool IsPublicLikeHeader(this ObjCHeaderType filetype)
+        {
+            return filetype == ObjCHeaderType.Public || filetype == ObjCHeaderType.InternalOnly;
+        }
+
         public static string GetObjCName(this PropertyDeclarationSyntax node, ObjCCompilationContext context)
         {
             return node.Identifier.Text.ToObjCCase();
@@ -434,6 +442,21 @@ namespace CodeBinder.Apple
             }
 
         }
+
+        /// <returns>True if the given accessibility requires to export symbol</returns>
+        public static bool RequiresApiAttribute(this Accessibility accessibility)
+        {
+            switch (accessibility)
+            {
+                case Accessibility.Public:
+                case Accessibility.Protected:
+                case Accessibility.ProtectedAndInternal:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
 
         public static string GetObjCModifierString(this FieldDeclarationSyntax field, ObjCCompilationContext context)
         {

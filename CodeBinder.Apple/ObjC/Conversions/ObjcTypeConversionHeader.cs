@@ -48,8 +48,11 @@ namespace CodeBinder.Apple
             {
                 get
                 {
+                    if (HeaderType == ObjCHeaderType.Public)
+                        yield return $"\"{ObjCLibDefsHeaderConversion.HeaderFileName}\"";
+
                     yield return $"\"{ConversionCSharpToObjC.TypesHeader}\"";
-                    if (HeaderType == ObjCHeaderType.Public || HeaderType == ObjCHeaderType.InternalOnly)
+                    if (HeaderType.IsPublicLikeHeader())
                     {
                         var attributes = Context.Node.GetAttributes(this);
                         foreach (var attribute in attributes)

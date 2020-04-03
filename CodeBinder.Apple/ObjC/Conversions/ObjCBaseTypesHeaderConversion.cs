@@ -23,6 +23,7 @@ namespace CodeBinder.Apple
             builder.AppendLine();
             builder.AppendLine("// Foundation headers");
             builder.AppendLine("#import <Foundation/Foundation.h>");
+            builder.AppendLine("#import <CoreFoundation/CoreFoundation.h>");
             builder.AppendLine();
             builder.AppendLine("// C Std headers");
             builder.AppendLine("#ifdef __cplusplus");
