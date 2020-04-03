@@ -30,18 +30,20 @@ namespace CodeBinder.Apple
                 builder.AppendLine($"#define CB_{BoxTypeName.ToUpper()}");
                 builder.AppendLine("#pragma once");
                 builder.AppendLine();
-                builder.AppendLine($"#import <Foundation/Foundation.h>");
+                builder.AppendLine(@"#import ""cboclibdefs.h""");
+                builder.AppendLine("#import <Foundation/Foundation.h>");
             }
             else
             {
+                builder.AppendLine("#define OBJC_CODEBINDER_EXPORT");
                 builder.AppendLine($"#import \"{HeaderFile}\"");
-                builder.AppendLine($"#include <cstdlib>");
+                builder.AppendLine("#include <cstdlib>");
             }
 
             builder.AppendLine();
             if (IsHeader)
             {
-                builder.Append("@interface").Space().Append(BoxTypeName).Space().AppendLine(": NSObject");
+                builder.Append("OBJC_CODEBINDER_API").Space().Append("@interface").Space().Append(BoxTypeName).Space().AppendLine(": NSObject");
                 using (builder.Block())
                 {
                     // Fields
