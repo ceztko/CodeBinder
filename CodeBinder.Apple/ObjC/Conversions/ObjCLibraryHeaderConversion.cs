@@ -26,7 +26,11 @@ namespace CodeBinder.Apple
             if (IsInternalHeader)
             {
                 // TODO: Move all this conditional in a better internal header JUST FOR THE COMPILATION UNITS (*.mm files) and not the headers
+                // Ensure compilation units will export symbols
+                builder.AppendLine($"#define {ObjCLibDefsHeaderConversion.GetLibraryExportMacro(Compilation)}");
+                builder.AppendLine();
 
+                // Ensure compilation has ARC enabled
                 builder.AppendLine("#if !__has_feature(objc_arc)");
                 builder.AppendLine("    #error \"Code Binder projects are ARC only. Use -fobjc-arc flag\"");
                 builder.AppendLine("#endif");

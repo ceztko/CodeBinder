@@ -25,12 +25,6 @@ namespace CodeBinder.Apple
             protected override string? GetBasePath() =>
                 ImplementationType == ObjImplementationType.PublicType ? null : ConversionCSharpToObjC.InternalBasePath;
 
-            protected override void writePreamble(CodeBuilder builder)
-            {
-                // We are exporting API
-                builder.AppendLine($"#define {ObjCLibDefsHeaderConversion.GetLibraryExportMacro(Compilation)}");
-            }
-
             protected override IEnumerable<string> Imports
             {
                 get
