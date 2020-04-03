@@ -22,9 +22,8 @@ OBJC_CODEBINDER_API @interface CBException : NSException
 #endif // CB_EXCPETION
 ";
 
-        public const string CBException_mm = @"#import ""CBException.h""
-
-#define OBJC_CODEBINDER_EXPORT
+        public const string CBException_mm = @"#define OBJC_CODEBINDER_EXPORT
+#import ""CBException.h""
 
 @implementation CBException
 
@@ -107,9 +106,8 @@ OBJC_CODEBINDER_API @interface CBKeyValuePair<__covariant KeyType, __covariant V
 ";
 
         public const string CBKeyValuePair_mm =
-@"#import ""CBKeyValuePair.h""
-
-#define OBJC_CODEBINDER_EXPORT
+@"#define OBJC_CODEBINDER_EXPORT
+#import ""CBKeyValuePair.h""
 
 @implementation CBKeyValuePair
 
@@ -165,9 +163,8 @@ OBJC_CODEBINDER_API @interface CBHandleRef : NSObject
 ";
 
         public const string CBHandleRef_mm =
-@"#import ""CBHandleRef.h""
-
-#define OBJC_CODEBINDER_EXPORT
+@"#define OBJC_CODEBINDER_EXPORT
+#import ""CBHandleRef.h""
 
 @implementation CBHandleRef
 
