@@ -25,7 +25,7 @@ inline NSUInteger* CBGetNativeArray(CBNSUIntegerArray* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline NSInteger* CBGetNativeArray(CBNSIntegerArray* arr)
@@ -33,7 +33,7 @@ inline NSInteger* CBGetNativeArray(CBNSIntegerArray* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline void** CBGetNativeArray(CBPtrArray* arr)
@@ -41,7 +41,7 @@ inline void** CBGetNativeArray(CBPtrArray* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline BOOL* CBGetNativeArray(CBBoolArray* arr)
@@ -49,7 +49,7 @@ inline BOOL* CBGetNativeArray(CBBoolArray* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline char* CBGetNativeArray(CBCharArray* arr)
@@ -57,7 +57,7 @@ inline char* CBGetNativeArray(CBCharArray* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline uint8_t* CBGetNativeArray(CBUInt8Array* arr)
@@ -65,7 +65,7 @@ inline uint8_t* CBGetNativeArray(CBUInt8Array* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline int8_t* CBGetNativeArray(CBInt8Array* arr)
@@ -73,7 +73,7 @@ inline int8_t* CBGetNativeArray(CBInt8Array* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline uint16_t* CBGetNativeArray(CBUInt16Array* arr)
@@ -81,7 +81,7 @@ inline uint16_t* CBGetNativeArray(CBUInt16Array* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline int16_t* CBGetNativeArray(CBInt16Array* arr)
@@ -89,7 +89,7 @@ inline int16_t* CBGetNativeArray(CBInt16Array* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline uint32_t* CBGetNativeArray(CBUInt32Array* arr)
@@ -97,7 +97,7 @@ inline uint32_t* CBGetNativeArray(CBUInt32Array* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline int32_t* CBGetNativeArray(CBInt32Array* arr)
@@ -105,7 +105,7 @@ inline int32_t* CBGetNativeArray(CBInt32Array* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline uint64_t* CBGetNativeArray(CBUInt64Array* arr)
@@ -113,7 +113,7 @@ inline uint64_t* CBGetNativeArray(CBUInt64Array* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline int64_t* CBGetNativeArray(CBInt64Array* arr)
@@ -121,7 +121,7 @@ inline int64_t* CBGetNativeArray(CBInt64Array* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline float* CBGetNativeArray(CBFloatArray* arr)
@@ -129,7 +129,7 @@ inline float* CBGetNativeArray(CBFloatArray* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline double* CBGetNativeArray(CBDoubleArray* arr)
@@ -137,7 +137,7 @@ inline double* CBGetNativeArray(CBDoubleArray* arr)
     if (arr == nil)
         return nullptr;
 
-    return arr.values;
+    return arr.data;
 }
 
 inline NSUInteger CBGetHashCode(NSObject* obj)
