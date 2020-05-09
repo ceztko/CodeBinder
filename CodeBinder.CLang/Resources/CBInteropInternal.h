@@ -1,3 +1,4 @@
+/* This file was generated. DO NOT EDIT! */
 #ifndef CODE_BINDER_INTEROP_INTERNAL_HEADER
 #define CODE_BINDER_INTEROP_INTERNAL_HEADER
 #pragma once
@@ -6,9 +7,10 @@
 #include <cstddef>
 #include <cstring>
 #include <string>
+#include <string_view>
 #include <codecvt>
 #include <new>
-#include <StringIntl.h>
+#include <codecvt>
 
 #ifdef WIN32
 extern "C" __declspec(dllimport) void* __stdcall CoTaskMemAlloc(size_t cb);
@@ -25,6 +27,12 @@ extern "C" __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags,
 
 namespace cb
 {
+    namespace internal
+    {
+        inline std::string U16ToU8(const std::u16string_view& view);
+        inline std::u16string U8ToU16(const std::string_view& view);
+    }
+
     inline cbstring_t CopyString(const cbchar_t* str, size_t len)
     {
         // Allocate also the space of the termination character
@@ -41,63 +49,56 @@ namespace cb
         return newstr;
     }
 
-    inline cbstring_t MarshalString(const char* str_, size_t len_)
+    inline cbstring_t MarshalString(const std::string_view& view)
     {
-        if (str_ == nullptr)
-            return nullptr;
-
 #ifdef CBSTRING_UTF8
-        auto str = str_;
-        size_t len = len_;
+        auto str = view.data();
+        size_t len = view.length();
 #else
-        auto u16str = usr::_U8ToU16(str_, len_);
+        auto u16str = internal::U8ToU16(view);
         auto str = u16str.c_str();
         size_t len = u16str.length();
 #endif
-
         return CopyString(str, len);
     }
 
     inline cbstring_t MarshalString(const char* str)
     {
-        return MarshalString(str, std::char_traits<char>::length(str));
+        return MarshalString(std::string_view(str));
     }
 
     inline cbstring_t MarshalString(const std::string& str)
     {
-        return MarshalString(str.c_str(), str.length());
+        return MarshalString(std::string_view(str.c_str(), str.length()));
     }
 
-    inline cbstring_t MarshalString(const char16_t* str_, size_t len_)
+    inline cbstring_t MarshalString(const std::u16string_view& view)
     {
-        if (str_ == nullptr)
-            return nullptr;
-
 #ifdef CBSTRING_UTF8
-        auto u8str = usr::_U16ToU8(str_, len_);
+        auto u8str = internal::U16ToU8(view);
         auto str = u8str.c_str();
         size_t len = u8str.length();
 #else
-        auto str = str_;
-        size_t len = len_;
+        auto str = view.data();
+        size_t len = view.length();
 #endif
         return CopyString(str, len);
     }
 
     inline cbstring_t MarshalString(const char16_t* str)
     {
-        return MarshalString(str, std::char_traits<char16_t>::length(str));
+        return MarshalString(std::u16string_view(str));
     }
 
     inline cbstring_t MarshalString(const std::u16string& str)
     {
-        return MarshalString(str.c_str(), str.length());
+        return MarshalString(std::u16string_view(str.c_str(), str.length()));
     }
 
 #ifdef WIN32
-    inline cbstring_t MarshalString(const wchar_t* str, size_t len)
+    inline cbstring_t MarshalString(const std::wstring_view& view)
     {
-        return MarshalString(reinterpret_cast<const char16_t*>(str), len);
+        return MarshalString(reinterpret_cast<const std::wstring_view&>(view));
     }
 
     inline cbstring_t MarshalString(const wchar_t* str)
@@ -124,6 +125,36 @@ namespace cb
             throw std::bad_alloc();
 
         return ret;
+    }
+
+    std::string internal::U16ToU8(const std::u16string_view& view)
+    {
+        if (view.length() == 0)
+            return std::string();
+
+#if defined(_MSC_VER) && _MSC_VER < 1922 // Before MSVC 16.2
+        // https://developercommunity.visualstudio.com/content/problem/539181/stdwstring-convert-char16-t-cant-work-in-vs2017.html
+        static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert;
+        return convert.to_bytes((wchar_t*)str, (wchar_t*)str + len);
+#else
+        static std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+        return convert.to_bytes(view.data(), view.data() + view.length());
+#endif
+    }
+
+    std::u16string internal::U8ToU16(const std::string_view& view)
+    {
+        if (view.length() == 0)
+            return std::u16string();
+
+#if defined(_MSC_VER) && _MSC_VER < 1922 // Before MSVC 16.2
+        // https://developercommunity.visualstudio.com/content/problem/539181/stdwstring-convert-char16-t-cant-work-in-vs2017.html
+        static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert;
+        return reinterpret_cast<std::u16string&>(convert.from_bytes(str, str + len));
+#else
+        static std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
+        return convert.from_bytes(view.data(), view.data() + view.length());
+#endif
     }
 }
 #endif // CODE_BINDER_INTEROP_INTERNAL_HEADER

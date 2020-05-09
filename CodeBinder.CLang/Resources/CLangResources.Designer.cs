@@ -125,7 +125,8 @@ namespace CodeBinder.CLang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #ifndef CODE_BINDER_INTEROP_INTERNAL_HEADER
+        ///   Looks up a localized string similar to /* This file was generated. DO NOT EDIT! */
+        ///#ifndef CODE_BINDER_INTEROP_INTERNAL_HEADER
         ///#define CODE_BINDER_INTEROP_INTERNAL_HEADER
         ///#pragma once
         ///
@@ -133,16 +134,15 @@ namespace CodeBinder.CLang {
         ///#include &lt;cstddef&gt;
         ///#include &lt;cstring&gt;
         ///#include &lt;string&gt;
+        ///#include &lt;string_view&gt;
         ///#include &lt;codecvt&gt;
         ///#include &lt;new&gt;
-        ///#include &lt;StringIntl.h&gt;
+        ///#include &lt;codecvt&gt;
         ///
         ///#ifdef WIN32
         ///extern &quot;C&quot; __declspec(dllimport) void* __stdcall CoTaskMemAlloc(size_t cb);
         ///extern &quot;C&quot; __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
-        ///#endif // WIN32
-        ///
-        ///// _CBU: Narrow to platform specific codebinder u [rest of string was truncated]&quot;;.
+        ///#end [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBInteropInternal_h {
             get {
