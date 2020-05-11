@@ -135,7 +135,7 @@ namespace cb
 #if defined(_MSC_VER) && _MSC_VER < 1922 // Before MSVC 16.2
         // https://developercommunity.visualstudio.com/content/problem/539181/stdwstring-convert-char16-t-cant-work-in-vs2017.html
         static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert;
-        return convert.to_bytes((wchar_t*)str, (wchar_t*)str + len);
+        return convert.to_bytes((wchar_t*)view.data(), (wchar_t*)view.data() + view.length());
 #else
         static std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
         return convert.to_bytes(view.data(), view.data() + view.length());
@@ -150,7 +150,7 @@ namespace cb
 #if defined(_MSC_VER) && _MSC_VER < 1922 // Before MSVC 16.2
         // https://developercommunity.visualstudio.com/content/problem/539181/stdwstring-convert-char16-t-cant-work-in-vs2017.html
         static std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> convert;
-        return reinterpret_cast<std::u16string&>(convert.from_bytes(str, str + len));
+        return reinterpret_cast<std::u16string&>(convert.from_bytes(view.data(), view.data() + view.length()));
 #else
         static std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> convert;
         return convert.from_bytes(view.data(), view.data() + view.length());
