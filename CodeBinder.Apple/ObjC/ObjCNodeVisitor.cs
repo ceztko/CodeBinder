@@ -10,25 +10,19 @@ using System.Text;
 
 namespace CodeBinder.Apple
 {
-    class ObjCNodeVisitor : CSharpNodeVisitor<ObjCSyntaxTreeContext>
+    // CHECK-ME Evaluate if it's possible to have an ObjCBaseTypeContext that inheirts CSharpBaseTypeContext
+    // and it's a base type for all ObjC types
+    class ObjCNodeVisitor : CSharpNodeVisitor<ObjCCompilationContext, CSharpBaseTypeContext, ConversionCSharpToObjC>
     {
         static Dictionary<string, List<IMethodSymbol>> _uniqueMethodNames;
 
-        // FIX-ME: Try to remove SyntaxTreeContext by putting root types in CompilationContext and have CompilationContext create a single visitor
         static ObjCNodeVisitor()
         {
             _uniqueMethodNames = new Dictionary<string, List<IMethodSymbol>>();
         }
 
-        public new ObjCSyntaxTreeContext TreeContext { get; private set; }
-
-        public ObjCNodeVisitor(ObjCSyntaxTreeContext treeContext)
-        {
-            TreeContext = treeContext;
-
-        }
-
-        protected override ObjCSyntaxTreeContext GetCSharpSyntaxTreeContext() => TreeContext;
+        public ObjCNodeVisitor(ObjCCompilationContext compilation)
+            : base(compilation) { }
 
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
@@ -138,7 +132,5 @@ namespace CodeBinder.Apple
 
             Compilation.AddMethodBinding(methodSymbol, bindedName);
         }
-
-        public new ObjCCompilationContext Compilation => TreeContext.Compilation;
     }
 }

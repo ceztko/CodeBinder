@@ -10,27 +10,21 @@ using System.Diagnostics;
 
 namespace CodeBinder.Shared.CSharp
 {
-
     /// <summary>
-    /// CSharp node visitor
+    /// Inherit this class if you need a default CSharpCompilationContext
     /// </summary>
-    /// <remarks>Inherit this class to extend the visitor behavior</remarks>
-    public abstract class CSharpNodeVisitor<TSyntaxTreeContext> : CSharpNodeVisitor
-        where TSyntaxTreeContext: CSharpSyntaxTreeContext
+    public class CSharpNodeVisitor<TCompilationContext, TTypeContext, TLanguageConversion> : CSharpNodeVisitorBase<TCompilationContext, CSharpBaseTypeContext, CSharpLanguageConversion>
+        where TCompilationContext : CSharpCompilationContext
+        where TTypeContext : CSharpBaseTypeContext
+        where TLanguageConversion : CSharpLanguageConversion
     {
-        protected CSharpNodeVisitor() { }
+        Dictionary<string, List<CSharpTypeContext>> _types;
+        Stack<CSharpBaseTypeContext> _parents;
 
-        protected abstract TSyntaxTreeContext GetCSharpSyntaxTreeContext();
-
-        protected sealed override CSharpSyntaxTreeContext GetSyntaxTreeContext() => GetCSharpSyntaxTreeContext();
-    }
-
-    public abstract class CSharpNodeVisitor : CSharpNodeVisitor<CSharpCompilationContext, CSharpSyntaxTreeContext, CSharpBaseTypeContext, CSharpLanguageConversion>
-    {
-        private Stack<CSharpBaseTypeContext> _parents;
-
-        internal CSharpNodeVisitor()
+        protected CSharpNodeVisitor(TCompilationContext context)
+            : base(context)
         {
+            _types = new Dictionary<string, List<CSharpTypeContext>>();
             _parents = new Stack<CSharpBaseTypeContext>();
         }
 
@@ -89,13 +83,8 @@ namespace CodeBinder.Shared.CSharp
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
             var type = Compilation.CreateContext(node);
-            TreeContext.AddType(type, CurrentParent);
+            Compilation.AddType(type, CurrentParent);
             DefaultVisit(node);
-        }
-
-        void addType(CSharpTypeContext type, bool isPartial)
-        {
-            Compilation.AddType(type);
         }
 
         public override void Visit(SyntaxNode node)
@@ -191,6 +180,47 @@ namespace CodeBinder.Shared.CSharp
         }
 
         #endregion Supported types
+
+        void addType(CSharpTypeContext type, bool isPartial)
+        {
+            string fullName = type.Node.GetFullName(this);
+            if (!_types.TryGetValue(fullName, out var types))
+            {
+                types = new List<CSharpTypeContext>();
+                _types.Add(fullName, types);
+            }
+
+            // If the type is the main declaration, put it first, otherwise just put back
+            if (type.Node.BaseList == null)
+                types.Add(type);
+            else
+                types.Insert(0, type);
+        }
+
+        protected override void afterVisit()
+        {
+            var mainTypesMap = new Dictionary<ITypeSymbol, CSharpTypeContext>();
+            foreach (var types in _types.Values)
+            {
+                var main = types[0];
+                var symbol = main.Node.GetDeclaredSymbol<ITypeSymbol>(this);
+                Compilation.AddNamespace(symbol.GetContainingNamespace());
+                for (int i = 0; i < types.Count; i++)
+                    main.AddPartialDeclaration(types[i]);
+
+                mainTypesMap[symbol] = main;
+            }
+
+            foreach (var type in mainTypesMap.Values)
+            {
+                var symbol = type.Node.GetDeclaredSymbol<ITypeSymbol>(this);
+                if (symbol.ContainingType == null)
+                    Compilation.AddType(type, null);
+                else
+                    // We assume partial types are contained in partial types, see visitor
+                    Compilation.AddType(type, mainTypesMap[symbol.ContainingType]);
+            }
+        }
 
         #region Unsupported syntax
 
@@ -543,17 +573,20 @@ namespace CodeBinder.Shared.CSharp
         #endregion // Unsupported syntax
     }
 
-    public abstract class CSharpNodeVisitor<TCompilationContext, TSyntaxTreeContext, TTypeContext, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor, ICompilationContextProvider
+    /// <summary>
+    /// Inherit this class if you don't need a default CSharpCompilationContext
+    /// </summary>
+    public abstract class CSharpNodeVisitorBase<TCompilationContext, TTypeContext, TLanguageConversion> : CSharpSyntaxWalker, INodeVisitor, ICompilationContextProvider
         where TCompilationContext : CompilationContext<TTypeContext>
-        where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree<TCompilationContext>
         where TTypeContext : TypeContext<TTypeContext>
         where TLanguageConversion : LanguageConversion
     {
         List<string> _errors;
 
-        public CSharpNodeVisitor()
+        public CSharpNodeVisitorBase(TCompilationContext context)
         {
             _errors = new List<string>();
+            Compilation = context;
         }
 
         public void Visit(SyntaxTree context)
@@ -566,29 +599,31 @@ namespace CodeBinder.Shared.CSharp
             _errors.Add(error);
         }
 
-        public TSyntaxTreeContext TreeContext => GetSyntaxTreeContext();
+        public TCompilationContext Compilation { get; private set; }
 
-        public TCompilationContext Compilation => TreeContext.Compilation;
+        protected virtual void afterVisit()
+        {
+            // Do nothing
+        }
 
-        protected abstract TSyntaxTreeContext GetSyntaxTreeContext();
+        void INodeVisitor.AfterVisit()
+        {
+            afterVisit();
+        }
 
         CompilationContext ICompilationContextProvider.Compilation
         {
-            get { return TreeContext.Compilation; }
+            get { return Compilation; }
         }
 
         public IReadOnlyList<string> Errors => _errors;
     }
 
-    sealed class CSharpNodeVisitorImpl : CSharpNodeVisitor
+    class CSharpNodeVisitorImpl : CSharpNodeVisitor<CSharpCompilationContext, CSharpBaseTypeContext, CSharpLanguageConversion>
     {
-        public new CSharpSyntaxTreeContext TreeContext { get; private set; }
-
-        public CSharpNodeVisitorImpl(CSharpSyntaxTreeContext treeContext)
+        public CSharpNodeVisitorImpl(CSharpCompilationContext context)
+            : base(context)
         {
-            TreeContext = treeContext;
         }
-
-        protected override CSharpSyntaxTreeContext GetSyntaxTreeContext() => TreeContext;
     }
 }

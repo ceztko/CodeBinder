@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CodeBinder.Apple
 {
-    public class ObjCCompilationContext : CSharpCompilationContext<ObjCSyntaxTreeContext>
+    public class ObjCCompilationContext : CSharpCompilationContext
     {
         Dictionary<string, EnumDeclarationSyntax> _enums;
         Dictionary<string, BaseTypeDeclarationSyntax> _classes;
@@ -136,9 +136,9 @@ namespace CodeBinder.Apple
 
         protected override CSharpLanguageConversion getLanguageConversion() => Conversion;
 
-        protected override ObjCSyntaxTreeContext CreateCSharpSyntaxTreeContext()
+        protected override INodeVisitor CreateVisitor()
         {
-            return new ObjCSyntaxTreeContext(this);
+            return new ObjCNodeVisitor(this);
         }
     }
 }

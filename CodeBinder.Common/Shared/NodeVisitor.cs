@@ -11,6 +11,8 @@ namespace CodeBinder.Shared
     {
         void Visit(SyntaxTree context);
 
+        void AfterVisit();
+
         IReadOnlyList<string> Errors
         {
             get;

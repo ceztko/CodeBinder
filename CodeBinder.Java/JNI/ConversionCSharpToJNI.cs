@@ -10,7 +10,7 @@ using CodeBinder.Util;
 namespace CodeBinder.JNI
 {
     [ConversionLanguageName("JNI")]
-    public class ConversionCSharpToJNI : LanguageConversion<JNICompilationContext, JNISyntaxTreeContext, JNIModuleContext>
+    public class ConversionCSharpToJNI : LanguageConversion<JNICompilationContext, JNIModuleContext>
     {
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 

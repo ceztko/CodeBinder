@@ -15,7 +15,7 @@ namespace CodeBinder.CLang
     /// <remarks>Inherit this class to provide custom contexts</remarks>
     [ConversionLanguageName(LanguageName)]
     [ConfigurationSwitch("publiciface", "Only output public interface (CLang)")]
-    public class ConversionCSharpToCLang : LanguageConversion<CLangCompilationContext, CLangSyntaxTreeContext, CLangModuleContext>
+    public class ConversionCSharpToCLang : LanguageConversion<CLangCompilationContext, CLangModuleContext>
     {
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
         public const string LanguageName = "C";

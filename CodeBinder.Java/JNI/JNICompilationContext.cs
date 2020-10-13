@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CodeBinder.JNI
 {
-    public class JNICompilationContext : CompilationContext<JNIModuleContext, JNISyntaxTreeContext, ConversionCSharpToJNI>
+    public class JNICompilationContext : CompilationContext<JNIModuleContext, ConversionCSharpToJNI>
     {
         Dictionary<string, JNIModuleContextParent> _modules;
 
@@ -35,12 +35,12 @@ namespace CodeBinder.JNI
             return _modules.TryGetValue(moduleName, out module);
         }
 
-        protected override JNISyntaxTreeContext createSyntaxTreeContext()
-        {
-            return new JNISyntaxTreeContext(this);
-        }
-
         protected override ConversionCSharpToJNI getLanguageConversion() => Conversion;
+
+        protected override INodeVisitor CreateVisitor()
+        {
+            return new JNINodeVisitor(this);
+        }
 
         public IEnumerable<JNIModuleContextParent> Modules
         {

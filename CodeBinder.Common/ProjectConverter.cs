@@ -54,17 +54,20 @@ namespace CodeBinder
             var syntaxTrees = solutionDir == null ? compilation.SyntaxTrees.ToArray() : compilation.SyntaxTrees.Where(tree => tree.FilePath.StartsWith(solutionDir)).ToArray();
             var compilationContext = Converter.Conversion.GetCompilationContext(compilation);
 
-            var syntaxTreeContextTypes = getSyntaxTreeContextTypes(compilationContext, syntaxTrees);
-            foreach (var pair in syntaxTreeContextTypes)
-            {
-                foreach (var type in pair.Value)
-                {
-                    foreach (var conversion in type.Conversions)
-                        yield return new ConversionDelegate(pair.Key, conversion);
-                }
-            }
+            var visitor = compilationContext.CreateVisitor();
+            var errorBuilder = new StringBuilder();
+            // Visit trees and create contexts
+            foreach (var tree in syntaxTrees)
+                visitor.Visit(tree);
 
-            // Convert also non-syntax tree types
+            foreach (var error in visitor.Errors)
+                errorBuilder.AppendLine(error);
+
+            if (errorBuilder.Length != 0)
+                throw new Exception(errorBuilder.ToString());
+
+            visitor.AfterVisit();
+
             foreach (var type in compilationContext.RootTypes)
             {
                 foreach (var conversion in type.Conversions)
@@ -74,50 +77,6 @@ namespace CodeBinder
             // Emit also out of context items
             foreach (var defaultConversion in compilationContext.ConversionDelegates)
                 yield return defaultConversion;
-        }
-
-        private Dictionary<string, List<TypeContext>> getSyntaxTreeContextTypes(CompilationContext compilation, IEnumerable<SyntaxTree> syntaxTrees)
-        {
-            var syntaxTreeContexts = new Dictionary<string, SyntaxTreeContext>();
-
-            var errorBuilder = new StringBuilder();
-            // Visit trees and create contexts
-            foreach (var tree in syntaxTrees)
-            {
-                var context = compilation.CreateSyntaxTreeContext();
-                var visitor = context.CreateVisitor();
-                context.SyntaxTree = tree;
-                visitor.Visit(tree);
-                foreach (var error in visitor.Errors)
-                    errorBuilder.AppendLine(error);
-
-                var treeFilePath = tree.FilePath ?? "";
-                syntaxTreeContexts.Add(treeFilePath, context);
-            }
-
-            if (errorBuilder.Length != 0)
-                throw new Exception(errorBuilder.ToString());
-
-            // FIX-ME: Remove me, adn move to the visitor a similar mechanism
-            compilation.AfterVisit();
-
-            var ret = new Dictionary<string, List<TypeContext>>();
-            foreach (var pair in syntaxTreeContexts)
-            {
-                foreach (var type in pair.Value.RootTypes)
-                {
-                    List<TypeContext>? types;
-                    if (!ret.TryGetValue(pair.Key, out types))
-                    {
-                        types = new List<TypeContext>();
-                        ret.Add(pair.Key, types);
-                    }
-
-                    types.Add(type);
-                }
-            }
-
-            return ret;
         }
     }
 }

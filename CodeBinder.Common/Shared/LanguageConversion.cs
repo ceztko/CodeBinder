@@ -13,9 +13,8 @@ namespace CodeBinder.Shared
     /// Basic language conversion
     /// </summary>
     /// <remarks>Inherit this class to provide custom contexts</remarks>
-    public abstract class LanguageConversion<TCompilationContext, TSyntaxTreeContext, TTypeContext> : LanguageConversion
+    public abstract class LanguageConversion<TCompilationContext, TTypeContext> : LanguageConversion
         where TCompilationContext : CompilationContext<TTypeContext>
-        where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
         where TTypeContext : TypeContext<TTypeContext>
     {
         public LanguageConversion() { }

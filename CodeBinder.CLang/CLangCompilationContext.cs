@@ -10,7 +10,7 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    public abstract class CLangCompilationContext : CompilationContext<CLangModuleContext, CLangSyntaxTreeContext, ConversionCSharpToCLang>
+    public abstract class CLangCompilationContext : CompilationContext<CLangModuleContext, ConversionCSharpToCLang>
     {
         Dictionary<string, CLangModuleContextParent> _modules;
         List<EnumDeclarationSyntax> _enums;
@@ -56,9 +56,9 @@ namespace CodeBinder.CLang
             _types.Add(type);
         }
 
-        protected override CLangSyntaxTreeContext createSyntaxTreeContext()
+        protected override INodeVisitor CreateVisitor()
         {
-            return new CLangSyntaxTreeContext(this);
+            return new CLangNodeVisitor(this);
         }
 
         public IEnumerable<CLangModuleContextParent> Modules

@@ -10,13 +10,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.JNI
 {
-    public class JNINodeVisitor : CSharpNodeVisitor<JNICompilationContext, JNISyntaxTreeContext, JNIModuleContext, ConversionCSharpToJNI>
+    public class JNINodeVisitor : CSharpNodeVisitorBase<JNICompilationContext, JNIModuleContext, ConversionCSharpToJNI>
     {
-        public new JNISyntaxTreeContext TreeContext { get; private set; }
-
-        public JNINodeVisitor(JNISyntaxTreeContext treeContext)
+        public JNINodeVisitor(JNICompilationContext compilation)
+            : base(compilation)
         {
-            TreeContext = treeContext;
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
@@ -84,7 +82,5 @@ namespace CodeBinder.JNI
             moduleName = null;
             return false;
         }
-
-        protected override JNISyntaxTreeContext GetSyntaxTreeContext() => TreeContext;
     }
 }

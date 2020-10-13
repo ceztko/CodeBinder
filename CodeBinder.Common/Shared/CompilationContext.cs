@@ -12,9 +12,8 @@ namespace CodeBinder.Shared
     /// Context built around a CodeAnalysis.Compilation
     /// </summary>
     /// <remarks>Inherit this class to add contextualized info to CompilationContext</remarks>
-    public abstract class CompilationContext<TTypeContext, TSyntaxTreeContext, TLanguageConversion> : CompilationContext<TTypeContext>
+    public abstract class CompilationContext<TTypeContext, TLanguageConversion> : CompilationContext<TTypeContext>
         where TTypeContext : TypeContext<TTypeContext>
-        where TSyntaxTreeContext : CompilationContext<TTypeContext>.SyntaxTree
         where TLanguageConversion : LanguageConversion
     {
         protected CompilationContext() { }
@@ -24,10 +23,6 @@ namespace CodeBinder.Shared
         protected sealed override LanguageConversion GetLanguageConversion() => getLanguageConversion();
 
         protected abstract TLanguageConversion getLanguageConversion();
-
-        internal sealed override SyntaxTreeContext CreateSyntaxTreeContext() => createSyntaxTreeContext();
-
-        protected abstract TSyntaxTreeContext createSyntaxTreeContext();
     }
 
     public abstract class CompilationContext<TTypeContext> : CompilationContext
@@ -40,7 +35,7 @@ namespace CodeBinder.Shared
             _types = new HashSet<TTypeContext>();
         }
 
-        protected void AddType(TTypeContext type, TTypeContext? parent)
+        protected internal void AddType(TTypeContext type, TTypeContext? parent)
         {
             if (type.Parent != null)
                 throw new Exception("Can't re-add root type");
@@ -74,87 +69,11 @@ namespace CodeBinder.Shared
                 }
             }
         }
-
-        #region SyntaxTreeContext
-
-        /// <summary>
-        /// CSharp syntax context built around a CodeAnalysis.SyntaxTree
-        /// </summary>
-        /// <remarks>Inherit this class to add contextualized info to SyntaxTree</remarks>
-        public abstract class SyntaxTree<TCompilationContext, TNodeVisitor> : SyntaxTree<TCompilationContext>
-            where TCompilationContext : CompilationContext<TTypeContext>
-            where TNodeVisitor : INodeVisitor
-        {
-            protected SyntaxTree() { }
-
-            internal override INodeVisitor CreateVisitor() => createVisitor();
-
-            protected abstract TNodeVisitor createVisitor();
-        }
-
-
-        public abstract class SyntaxTree<TCompilationContext> : SyntaxTree
-            where TCompilationContext : CompilationContext<TTypeContext>
-        {
-            internal SyntaxTree() { }
-
-            public new TCompilationContext Compilation => getCompilationContext();
-
-            protected abstract TCompilationContext getCompilationContext();
-
-            protected sealed override CompilationContext GetCompilationContext()
-            {
-                return getCompilationContext();
-            }
-        }
-
-        public abstract class SyntaxTree : SyntaxTreeContext
-        {
-            HashSet<TTypeContext> _types;
-
-            internal SyntaxTree()
-            {
-                _types = new HashSet<TTypeContext>();
-            }
-
-            public void AddType(TTypeContext type, TTypeContext? parent)
-            {
-                if (type.Parent != null)
-                    throw new Exception("Can't re-add root type");
-
-                if (type == parent)
-                    throw new Exception("The parent can't be same reference as the given type");
-
-                if (!_types.Add(type))
-                    throw new Exception("Can't reinsert the same type");
-
-                if (parent != null)
-                {
-                    type.Parent = parent;
-                    parent.AddChild(type);
-                }
-            }
-
-            public new IEnumerable<TypeContext> RootTypes
-            {
-                get
-                {
-                    foreach (var type in _types)
-                    {
-                        if (type.Parent == null)
-                            yield return type;
-                    }
-                }
-            }
-
-            protected override IEnumerable<TypeContext> GetRootTypes() => RootTypes;
-        }
-
-        #endregion
     }
 
     public abstract class CompilationContext : ICompilationContextProvider
     {
+        HashSet<string> _Namespaces;
         private Dictionary<SyntaxTree, SemanticModel> _modelCache;
         private Compilation _compilation = null!;
 
@@ -163,6 +82,7 @@ namespace CodeBinder.Shared
         internal CompilationContext()
         {
             _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
+            _Namespaces = new HashSet<string>();
         }
 
         public event EventHandler? CompilationSet;
@@ -179,7 +99,14 @@ namespace CodeBinder.Shared
             return model;
         }
 
+        protected internal void AddNamespace(string ns)
+        {
+            _Namespaces.Add(ns);
+        }
+
         public LanguageConversion Conversion => GetLanguageConversion();
+
+        public IReadOnlyCollection<string> Namespaces => _Namespaces;
 
         public Compilation Compilation
         {
@@ -200,12 +127,9 @@ namespace CodeBinder.Shared
             }
         }
 
-        // REMOVE-ME: Remove SyntaxTreeContext
-        protected internal virtual void AfterVisit() { } 
+        internal protected abstract INodeVisitor CreateVisitor();
 
         protected abstract LanguageConversion GetLanguageConversion();
-
-        internal abstract SyntaxTreeContext CreateSyntaxTreeContext();
 
         protected abstract IEnumerable<TypeContext> GetRootTypes();
 
