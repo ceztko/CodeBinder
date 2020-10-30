@@ -117,6 +117,14 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax syntax, JavaCodeConversionContext context)
         {
+            var symbol = syntax.Type.GetTypeSymbol(context);
+            if (symbol.TypeKind == TypeKind.Enum)
+            {
+                // Handle enum cast
+                builder.Append(syntax.Type, context).Dot().Append("fromValue").Parenthesized().Append(syntax.Expression, context);
+                return builder;
+            }
+
             builder.Parenthesized().Append(syntax.Type, context).Close().Append(syntax.Expression, context);
             return builder;
         }
