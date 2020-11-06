@@ -1,4 +1,6 @@
-﻿using CodeBinder.Shared.CSharp;
+﻿// Copyright(c) 2020 Francesco Pretto
+// This file is subject to the MIT license
+using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
 using System;
 using System.Collections.Generic;

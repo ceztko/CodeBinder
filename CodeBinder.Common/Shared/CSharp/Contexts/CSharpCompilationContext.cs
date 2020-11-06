@@ -1,4 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿// Copyright(c) 2020 Francesco Pretto
+// This file is subject to the MIT license
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;

@@ -1,4 +1,6 @@
-﻿using CodeBinder.Shared.CSharp;
+﻿// Copyright(c) 2020 Francesco Pretto
+// This file is subject to the MIT license
+using CodeBinder.Shared.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeBinder.Apple

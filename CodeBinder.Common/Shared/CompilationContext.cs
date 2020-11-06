@@ -1,4 +1,6 @@
-﻿using CodeBinder.Attributes;
+﻿// Copyright(c) 2020 Francesco Pretto
+// This file is subject to the MIT license
+using CodeBinder.Attributes;
 using CodeBinder.Util;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

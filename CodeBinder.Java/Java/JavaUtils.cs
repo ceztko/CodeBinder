@@ -1,4 +1,6 @@
-﻿using CodeBinder.Java.Shared;
+﻿// Copyright(c) 2020 Francesco Pretto
+// This file is subject to the MIT license
+using CodeBinder.Java.Shared;
 using CodeBinder.Util;
 using Microsoft.CodeAnalysis.CSharp;
 using System;

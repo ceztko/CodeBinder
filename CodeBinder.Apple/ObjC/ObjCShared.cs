@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright(c) 2020 Francesco Pretto
+// This file is subject to the MIT license
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
