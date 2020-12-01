@@ -1,40 +1,35 @@
-/* This file was generated. DO NOT EDIT! */
 #ifndef CODE_BINDER_INTEROP_HEADER
 #define CODE_BINDER_INTEROP_HEADER
 #pragma once
 
-#include <cstdlib>
-#include <exception>
-#include <string>
 #include "CBBaseTypes.h"
 
+#ifdef __cplusplus
+#include <cstring>
+#else // __cplusplus
+#include <string.h>
+#endif // __cplusplus
+
+extern "C"
+{
 #ifdef WIN32
-extern "C" __declspec(dllimport) void __stdcall CoTaskMemFree(void* pv);
-extern "C" __declspec(dllimport) void __stdcall LocalFree(void* pv);
+    __declspec(dllimport) void __stdcall LocalFree(void* pv);
+    __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
 #endif // WIN32
 
-namespace cb
-{
-    /// <summary>
-    /// This exception can be used just to unwind the stack,
-    /// for example in Java interop scenario when returning
-    /// from callbacks. It should be catched in outer C functions
-    /// and just return from them
-    /// </summary>
-    class StackUnwinder : public ::std::exception
-    {
-    };
-
-    inline void FreeString(cbstring_t str)
+    inline void* CBAllocMemory(size_t size)
     {
 #ifdef WIN32
-        CoTaskMemFree(str);
+#ifndef LMEM_FIXED
+        const unsigned int LMEM_FIXED = 0x0000;
+#endif // LMEM_FIXED
+        return LocalAlloc(LMEM_FIXED, size);
 #else
-        std::free(str);
+        return malloc(size);
 #endif
     }
 
-    inline void FreeMemory(void* ptr)
+    inline void CBFreeMemory(void* ptr)
     {
 #ifdef WIN32
         LocalFree(ptr);
@@ -42,5 +37,30 @@ namespace cb
         free(ptr);
 #endif
     }
+
+    // TODO: CBCreateString, CBCreateStringLen
+    inline cbstring CBCreateStringView(const char* str)
+    {
+        cbstring ret = { str, str == nullptr ? 0 : strlen(str), 0 };
+        return ret;
+    }
+
+    inline cbstring CBCreateStringViewLen(const char* str, size_t len)
+    {
+        cbstring ret = { str, len, 0 };
+        return ret;
+    }
+
+    inline void CBFreeString(cbstring* str)
+    {
+        if (str->ownsdata)
+        {
+            CBFreeMemory((char*)str->data);
+            str->data = nullptr;
+            str->length = 0;
+            str->ownsdata = 0;
+        }
+    }
 }
+
 #endif // CODE_BINDER_INTEROP_HEADER

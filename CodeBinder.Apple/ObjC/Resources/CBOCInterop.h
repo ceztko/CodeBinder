@@ -4,63 +4,65 @@
 
 #import <Foundation/Foundation.h>
 #include <CBInterop.h>
+#include <string>
+#include <utility>
 
 class SN2OC
 {
 private:
     bool m_handled;
-    cbstring_t m_cstr;
-	NSString * __strong * m_ocstr;	
-public:
-    SN2OC(NSString * __strong * str)
-	{
-		m_handled = true;
-		m_cstr = nullptr;
-		m_ocstr = str;	
-	}
+    cbstring m_cstr;
+    NSString* __strong* m_ocstr;
 
-    SN2OC(const cbstring_t str)
-	{
-		m_handled = false;		
-		m_cstr = (cbstring_t)str;
-		m_ocstr = nullptr;
-	}
-	
-    SN2OC(cbstring_t &&str)
-	{
-		m_handled = true;		
-		m_cstr = str;
-		m_ocstr = nullptr;
-	}
-	
+public:
+    SN2OC(NSString* str)
+        : m_handled(false), m_cstr{ }, m_ocstr(nil)
+    {
+        if (str != nil)
+        {
+            m_cstr.data = [str UTF8String];
+            m_cstr.length = std::char_traits<char>::length(m_cstr.data);
+        }
+    }
+
+    SN2OC(NSString* __strong* str)
+        : m_handled(true), m_cstr{ }, m_ocstr(str) { }
+
+    SN2OC(const cbstring& str)
+        : m_handled(false), m_cstr(str), m_ocstr(nil) { }
+
+    SN2OC(cbstring&& str)
+        : m_handled(true), m_cstr(str), m_ocstr(nil) { }
+
     ~SN2OC()
-	{
-		if (m_handled)
-		{
-			if (m_ocstr != nullptr)
-			{
-				if (m_cstr == nullptr)
-					*m_ocstr = nil;
-				else
-					*m_ocstr = [[NSString alloc]initWithUTF8String:m_cstr];
-			}
-				
-			cb::FreeString(m_cstr);
-		}
-	}
-public:
-    operator NSString *() const
-	{
-		if (m_cstr == nullptr)
-			return nil;
+    {
+        if (m_handled)
+        {
+            if (m_ocstr != nullptr)
+            {
+                if (m_cstr.data == nullptr)
+                    *m_ocstr = nil;
+                else
+                    *m_ocstr = [[NSString alloc]initWithBytes:m_cstr.data length:m_cstr.length encoding:NSUTF8StringEncoding];
+            }
 
-		return [[NSString alloc]initWithUTF8String:m_cstr];
-	}
-	
-    operator cbstring_t *()
-	{
-		return &m_cstr;
-	}	
+            CBFreeString(&m_cstr);
+        }
+    }
+
+public:
+    operator NSString* () const
+    {
+        if (m_cstr.data == nullptr)
+            return nil;
+
+        return [[NSString alloc]initWithBytes:m_cstr.data length:m_cstr.length encoding:NSUTF8StringEncoding];
+    }
+
+    operator cbstring()
+    {
+        return m_cstr;
+    }
 };
 
 #endif // CBOCINTEROP_HEADER

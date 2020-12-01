@@ -153,14 +153,6 @@ namespace CodeBinder.Attributes
     }
 
     /// <summary>
-    /// Set the parameter non const
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public sealed class MutableAttribute : CodeBinderAttribute
-    {
-    }
-
-    /// <summary>
     /// This attribute rapresents a stem that is used during the generation.
     ///
     /// Currently used for enums as a prefix for items or max value infix

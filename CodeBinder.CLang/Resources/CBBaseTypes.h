@@ -1,18 +1,19 @@
 ﻿#ifndef CODE_BINDER_BASE_TYPES
 #define CODE_BINDER_BASE_TYPES
+#pragma once
 
 #ifdef __cplusplus
 #include <cstdint>
+#include <cstdlib>
+#include <climits>
 #else // __cplusplus
 #include <stdint.h>
-#ifndef __APPLE__
-#include <uchar.h>
-#endif // __APPLE__
+#include <stdlib.h>
+#include <limits.h>
 #endif // __cplusplus
 
 #ifdef __APPLE__
 #include <objc/objc.h>
-#define CBSTRING_UTF8
 #endif
 
 #if defined(__cplusplus) && defined(_MSC_VER)
@@ -24,14 +25,15 @@ typedef BOOL CBBool;
 typedef signed char CBBool;
 #endif
 
-#ifdef CBSTRING_UTF8
-typedef char cbchar_t;
-#define CB_NULL_TERMINATION '\0'
-#else // CBSTRING_UTF8
-typedef char16_t cbchar_t;
-#define CB_NULL_TERMINATION u'\0'
-#endif // CBSTRING_UTF8
+// TODO: Should be fixed for big endian, with ownsdata being first
+typedef struct
+{
+    const char* data;
+    size_t length : sizeof(uintptr_t)* CHAR_BIT - 1;
+    unsigned ownsdata : 1;
+} cbstring;
 
-#define cbstring_t cbchar_t *
+#define cbstringp cbstring
+#define cbstringr cbstring
 
 #endif // CODE_BINDER_BASE_TYPES

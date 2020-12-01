@@ -17,6 +17,9 @@ namespace CodeBinder.CLang
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
+            builder.AppendLine("#include \"CBInterop.h\"");
+            builder.AppendLine();
+            builder.AppendLine("// Modules");
             foreach (var module in Compilation.Modules)
                 builder.Append("#include \"").Append(module.Name).AppendLine(".h\"");
         }

@@ -253,14 +253,24 @@ namespace CodeBinder.Java
                 switch (symbol.TypeKind)
                 {
                     case TypeKind.Struct:
+                    {
                         if (isByRef && !symbol.IsCLRPrimitiveType())
-                            return "long";
+                        {
+                            if (symbol.GetFullName() == "CodeBinder.cbstring")
+                                return "StringBox";
+                            else
+                                return "long";
+                        }
+
                         break;
+                    }
                     case TypeKind.Enum:
+                    {
                         if (isByRef)
                             return "IntegerBox"; // TODO: Box for enums on non native methods
                         else
                             return "int";
+                    }
                 }
             }
 
@@ -809,6 +819,9 @@ namespace CodeBinder.Java
                         return true;
                     case "System.Object":
                         knownJavaType = "Object";
+                        return true;
+                    case "CodeBinder.cbstring":
+                        knownJavaType = "String";
                         return true;
                     case "System.String":
                         knownJavaType = "String";

@@ -63,27 +63,27 @@ namespace CodeBinder.CLang {
         /// <summary>
         ///   Looks up a localized string similar to #ifndef CODE_BINDER_BASE_TYPES
         ///#define CODE_BINDER_BASE_TYPES
+        ///#pragma once
         ///
         ///#ifdef __cplusplus
         ///#include &lt;cstdint&gt;
+        ///#include &lt;cstdlib&gt;
+        ///#include &lt;climits&gt;
         ///#else // __cplusplus
         ///#include &lt;stdint.h&gt;
-        ///#ifndef __APPLE__
-        ///#include &lt;uchar.h&gt;
-        ///#endif // __APPLE__
+        ///#include &lt;stdlib.h&gt;
+        ///#include &lt;limits.h&gt;
         ///#endif // __cplusplus
         ///
         ///#ifdef __APPLE__
         ///#include &lt;objc/objc.h&gt;
-        ///#define CBSTRING_UTF8
         ///#endif
         ///
         ///#if defined(__cplusplus) &amp;&amp; defined(_MSC_VER)
         ///// In MSVC bool is guaranteed to be 1 byte, with true == 1 and false == 0
         ///typedef bool CBBool;
         ///#elif defined(__APPLE__)
-        ///typedef BOOL CBBool;
-        ///#else // Ot [rest of string was truncated]&quot;;.
+        ///typedef BOOL CBBool; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBBaseTypes_h {
             get {
@@ -96,27 +96,26 @@ namespace CodeBinder.CLang {
         ///#define CODE_BINDER_INTEROP_HEADER
         ///#pragma once
         ///
-        ///#include &lt;cstdlib&gt;
-        ///#include &lt;string&gt;
         ///#include &quot;CBBaseTypes.h&quot;
         ///
+        ///#ifdef __cplusplus
+        ///#include &lt;cstring&gt;
+        ///#else // __cplusplus
+        ///#include &lt;string.h&gt;
+        ///#endif // __cplusplus
+        ///
+        ///extern &quot;C&quot;
+        ///{
         ///#ifdef WIN32
-        ///extern &quot;C&quot; __declspec(dllimport) void __stdcall CoTaskMemFree(void* pv);
-        ///extern &quot;C&quot; __declspec(dllimport) void __stdcall LocalFree(void* pv);
+        ///    __declspec(dllimport) void __stdcall LocalFree(void* pv);
+        ///    __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
         ///#endif // WIN32
         ///
-        ///namespace cb
-        ///{
-        ///    inline void FreeString(cbstring_t str)
+        ///    inline void* CBAllocMemory(size_t size)
         ///    {
         ///#ifdef WIN32
-        ///        CoTaskMemFree(str);
-        ///#else
-        ///        std::free(str);
-        ///#endif
-        ///    }
-        ///
-        ///    inline void Free [rest of string was truncated]&quot;;.
+        ///#ifndef LMEM_FIXED
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBInterop_h {
             get {
@@ -125,28 +124,31 @@ namespace CodeBinder.CLang {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /* This file was generated. DO NOT EDIT! */
-        ///#ifndef CODE_BINDER_INTEROP_INTERNAL_HEADER
-        ///#define CODE_BINDER_INTEROP_INTERNAL_HEADER
+        ///   Looks up a localized string similar to #ifndef CODE_BINDER_INTEROP_CPP_HEADER
+        ///#define CODE_BINDER_INTEROP_CPP_HEADER
         ///#pragma once
         ///
-        ///#include &quot;../CBInterop.h&quot;
-        ///#include &lt;cstddef&gt;
+        ///#include &quot;CBInterop.h&quot;
         ///#include &lt;cstring&gt;
         ///#include &lt;string&gt;
         ///#include &lt;string_view&gt;
-        ///#include &lt;codecvt&gt;
         ///#include &lt;new&gt;
-        ///#include &lt;codecvt&gt;
+        ///#include &lt;stdexcept&gt;
         ///
-        ///#ifdef WIN32
-        ///extern &quot;C&quot; __declspec(dllimport) void* __stdcall CoTaskMemAlloc(size_t cb);
-        ///extern &quot;C&quot; __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
-        ///#end [rest of string was truncated]&quot;;.
+        ///#undef cbstringp
+        ///#undef cbstringr
+        ///
+        ///namespace cb
+        ///{
+        ///    /// &lt;summary&gt;
+        ///    /// This exception can be used just to unwind the stack,
+        ///    /// for example in Java interop scenario when returning
+        ///    /// from callbacks. It should be catched in outer C functions
+        ///    /// and just return f [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string CBInteropInternal_h {
+        internal static string CBInterop_hpp {
             get {
-                return ResourceManager.GetString("CBInteropInternal_h", resourceCulture);
+                return ResourceManager.GetString("CBInterop_hpp", resourceCulture);
             }
         }
     }

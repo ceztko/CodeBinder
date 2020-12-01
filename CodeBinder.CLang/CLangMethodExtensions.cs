@@ -24,7 +24,8 @@ namespace CodeBinder.CLang
             Return
         }
 
-        public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter, ICompilationContextProvider provider)
+        public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter,
+            ICompilationContextProvider provider)
         {
             bool isByRef = parameter.IsRef() || parameter.IsOut();
             var symbol = parameter.Type!.GetTypeSymbol(provider);
@@ -68,7 +69,8 @@ namespace CodeBinder.CLang
                 return $"{type} {suffix}";
         }
 
-        private static string getCLangType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes, ParameterType type, out string? suffix)
+        private static string getCLangType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes,
+            ParameterType type, out string? suffix)
         {
             switch(symbol.TypeKind)
             {
@@ -131,17 +133,17 @@ namespace CodeBinder.CLang
             switch (type)
             {
                 case ParameterType.Regular:
-                    bindedType = getCLangType(typeName, attributes, false, ref constParameter);
+                    bindedType = getCLangType(typeName, false, attributes);
                     break;
                 case ParameterType.Return:
                     if (symbol.TypeKind == TypeKind.Array)
-                        bindedType = getCLangPointerType(typeName, attributes);
+                        bindedType = getCLangPointerType(typeName, true, attributes);
                     else
-                        bindedType = getCLangType(typeName, attributes, true, ref constParameter);
+                        bindedType = getCLangType(typeName, true, attributes);
 
                     break;
                 case ParameterType.ByRef:
-                    bindedType = getCLangPointerType(typeName, attributes);
+                    bindedType = getCLangPointerType(typeName, false, attributes);
                     break;
                 default:
                     throw new Exception();
@@ -153,24 +155,24 @@ namespace CodeBinder.CLang
                 return bindedType;
         }
 
-        static string getCLangType(string typeName, IEnumerable<AttributeData> attributes, bool returnType, ref bool constParameter)
+        static string getCLangType(string typeName, bool returnParameter, IEnumerable<AttributeData> attributes)
         {
             switch (typeName)
             {
                 case "System.Void":
                     return "void";
-                case "System.String":
-                    if (!returnType && !attributes.HasAttribute<MutableAttribute>())
-                        constParameter |= true;
-
-                    return "cbstring_t";
+                case "CodeBinder.cbstring":
+                    if (returnParameter)
+                        return "cbstring";
+                    else
+                        return "cbstringp";
                 case "System.Runtime.InteropServices.HandleRef":
                 case "System.IntPtr":
                     var binder = attributes.FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
                     if (binder != null)
-                        return $"{binder.AttributeClass.Name} *";
+                        return $"{binder.AttributeClass.Name}*";
 
-                    return "void *";
+                    return "void*";
                 case "System.Boolean":
                     // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
                     return "CBBool";
@@ -202,45 +204,48 @@ namespace CodeBinder.CLang
             }
         }
 
-        static string getCLangPointerType(string typeName, IEnumerable<AttributeData> attributes)
+        static string getCLangPointerType(string typeName, bool returnParameter, IEnumerable<AttributeData> attributes)
         {
             switch (typeName)
             {
-                case "System.String":
-                    return "cbstring_t *";
+                case "CodeBinder.cbstring":
+                    if (returnParameter)
+                        return "cbstring*";
+                    else
+                        return "cbstringp*";
                 case "System.Runtime.InteropServices.HandleRef":
                 case "System.IntPtr":
                     var binder = attributes.FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
                     if (binder != null)
-                        return $"{binder.AttributeClass.Name} **";
+                        return $"{binder.AttributeClass.Name}**";
 
-                    return "void **";
+                    return "void**";
                 case "System.Boolean":
                     // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
-                    return "CBBool *";
+                    return "CBBool*";
                 case "System.Char":
-                    return "cbchar_t *";
+                    return "cbchar_t*";
                 case "System.Byte":
-                    return "uint8_t *";
+                    return "uint8_t*";
                 case "System.SByte":
-                    return "int8_t *";
+                    return "int8_t*";
                 case "System.Int16":
-                    return "int16_t *";
+                    return "int16_t*";
                 case "System.UInt16":
-                    return "uint16_t *";
+                    return "uint16_t*";
                 case "System.Int32":
                     // TODO: Add CodeBinder.Attributes attribute to specify explicitly sized 32 bit signed integer
-                    return "int *";
+                    return "int*";
                 case "System.UInt32":
-                    return "uint32_t *";
+                    return "uint32_t*";
                 case "System.Int64":
-                    return "int64_t *";
+                    return "int64_t*";
                 case "System.UInt64":
-                    return "uint64_t *";
+                    return "uint64_t*";
                 case "System.Single":
-                    return "float *";
+                    return "float*";
                 case "System.Double":
-                    return "double *";
+                    return "double*";
                 default:
                     throw new Exception($"Unsupported by type {typeName}");
             }

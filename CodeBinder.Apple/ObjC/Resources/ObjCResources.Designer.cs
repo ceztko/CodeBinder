@@ -103,31 +103,24 @@ namespace CodeBinder.Apple {
         ///
         ///#import &lt;Foundation/Foundation.h&gt;
         ///#include &lt;CBInterop.h&gt;
+        ///#include &lt;string&gt;
+        ///#include &lt;utility&gt;
         ///
         ///class SN2OC
         ///{
         ///private:
         ///    bool m_handled;
-        ///    cbstring_t m_cstr;
-        ///	NSString * __strong * m_ocstr;	
-        ///public:
-        ///    SN2OC(NSString * __strong * str)
-        ///	{
-        ///		m_handled = true;
-        ///		m_cstr = nullptr;
-        ///		m_ocstr = str;	
-        ///	}
+        ///    cbstring m_cstr;
+        ///    NSString* __strong* m_ocstr;
         ///
-        ///    SN2OC(const cbstring_t str)
-        ///	{
-        ///		m_handled = false;		
-        ///		m_cstr = (cbstring_t)str;
-        ///		m_ocstr = nullptr;
-        ///	}
-        ///	
-        ///    SN2OC(cbstring_t &amp;&amp;str)
-        ///	{
-        ///		m_ [rest of string was truncated]&quot;;.
+        ///public:
+        ///    SN2OC(NSString* str)
+        ///        : m_handled(false), m_cstr{ }, m_ocstr(nil)
+        ///    {
+        ///        if (str != nil)
+        ///        {
+        ///            m_cstr.data = [str UTF8String];
+        ///            m_cstr.length = std::char_traits&lt;char&gt;::length( [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBOCInterop_h {
             get {

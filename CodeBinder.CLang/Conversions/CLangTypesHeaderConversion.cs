@@ -32,7 +32,7 @@ namespace CodeBinder.CLang
             builder.AppendLine("{");
             builder.AppendLine("#endif // __cplusplus");
             writeEnums(builder);
-            writeCallbacks(builder);
+            writeFunctionPointerDelegates(builder);
             builder.AppendLine();
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("}");
@@ -110,10 +110,10 @@ namespace CodeBinder.CLang
             }
         }
 
-        private void writeCallbacks(CodeBuilder builder)
+        private void writeFunctionPointerDelegates(CodeBuilder builder)
         {
-            // Callbacks
-            builder.AppendLine("// Callbacks");
+            // Function pointer delegates
+            builder.AppendLine("// Function pointer delegates");
             builder.AppendLine();
             foreach (var callback in Compilation.Callbacks)
             {

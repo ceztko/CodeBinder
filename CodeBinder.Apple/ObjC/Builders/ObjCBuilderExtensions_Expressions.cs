@@ -414,7 +414,7 @@ namespace CodeBinder.Apple
             {
                 if (methodSymbol.ReturnType.TypeKind == TypeKind.Enum)
                     builder.Parenthesized().Append(methodSymbol.ReturnType.GetObjCName(context)).Close();
-                else if (methodSymbol.ReturnType.GetFullName() == "System.String")
+                else if (methodSymbol.ReturnType.GetFullName() == "CodeBinder.cbstring")
                     builder.Parenthesized().Append("SN2OC").Close();
 
                 builder.Append(syntax.Expression, context).Parenthesized().Append(syntax.ArgumentList.Arguments, true, context).Close();
@@ -661,15 +661,11 @@ namespace CodeBinder.Apple
                                 builder.Append("CBGetNativeHandle").Parenthesized(appendExpression);
                                 break;
                             }
-                            case "System.String":
+                            case "CodeBinder.cbstring":
                             {
                                 if (arg.RefKindKeyword.Kind() == SyntaxKind.None)
                                 {
-                                    builder.Bracketed((builder) =>
-                                    {
-                                        appendExpression(builder);
-                                        builder.Space().Append("UTF8String");
-                                    });
+                                    builder.Append("SN2OC").Parenthesized((builder) => appendExpression(builder));
                                 }
                                 else
                                 {

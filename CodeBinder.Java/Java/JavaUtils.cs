@@ -77,7 +77,9 @@ namespace CodeBinder.Java
         {
             switch (typeName)
             {
-                case "CodeBinder.PString":
+                case "CodeBinder.cbstring":
+                    boxTypeName = "StringBox";
+                    return true;
                 case "System.String":
                     boxTypeName = "StringBox";
                     return true;

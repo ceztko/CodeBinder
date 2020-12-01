@@ -78,7 +78,7 @@ namespace CodeBinder.JNI
                     return "void";
                 case "System.Object":
                     return "jobject";
-                case "System.String":
+                case "CodeBinder.cbstring":
                     return "jstring";
                 case "System.Runtime.InteropServices.HandleRef":
                     return "jHandleRef";
@@ -148,7 +148,7 @@ namespace CodeBinder.JNI
                     return "jFloatBox";
                 case "System.Double":
                     return "jDoubleBox";
-                case "System.String":
+                case "CodeBinder.cbstring":
                     return "jStringBox";
                 default:
                 {

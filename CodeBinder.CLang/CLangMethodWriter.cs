@@ -74,8 +74,9 @@ namespace CodeBinder.CLang
     }
 
     class CLangParameterListWriter : CodeWriter<ParameterListSyntax, ICompilationContextProvider>
-    {
-        public CLangParameterListWriter(ParameterListSyntax list, ICompilationContextProvider module)
+    {    
+        public CLangParameterListWriter(ParameterListSyntax list,
+            ICompilationContextProvider module)
             : base(list, module) { }
 
         protected override void Write()

@@ -310,7 +310,7 @@ namespace CodeBinder.Shared.CSharp
                     switch (argType.TypeKind)
                     {
                         case TypeKind.Struct:
-                            if (!argType.IsCLRPrimitiveType())
+                            if (!argType.IsCLRPrimitiveType() && argType.GetFullName() != "CodeBinder.cbstring")
                             {
                                 switch (refKind)
                                 {
