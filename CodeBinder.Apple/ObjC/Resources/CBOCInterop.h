@@ -31,8 +31,12 @@ public:
     SN2OC(const cbstring& str)
         : m_handled(false), m_cstr(str), m_ocstr(nil) { }
 
+    // Move semantics
     SN2OC(cbstring&& str)
-        : m_handled(true), m_cstr(str), m_ocstr(nil) { }
+        : m_handled(true), m_cstr(str), m_ocstr(nil)
+    {
+        str.ownsdata = (unsigned)false;
+    }
 
     ~SN2OC()
     {
