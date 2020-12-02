@@ -54,13 +54,7 @@ protected:
     static cbstring init(const char* str, size_t len)
     {
         cbstring ret{ };
-        if (len == 0)
-        {
-            ret.data = nullptr;
-            ret.length = 0;
-            ret.ownsdata = (unsigned)false;
-        }
-        else
+        if (len != 0)
         {
             auto newstr = (char*)CBAllocMemory(len + 1);
             std::memcpy(newstr, str, len);

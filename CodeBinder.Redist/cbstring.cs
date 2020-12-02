@@ -10,7 +10,7 @@ namespace CodeBinder
 #pragma warning restore IDE1006 // Naming Styles
     {
         const uint OwnsDataFlags32 = 1u << 31;
-        const ulong OwnsDataFlags64 = 1u << 63;
+        const ulong OwnsDataFlags64 = 1ul << 63;
 
         IntPtr m_data;
         UIntPtr m_length;
