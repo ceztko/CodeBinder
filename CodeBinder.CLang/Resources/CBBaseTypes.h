@@ -33,6 +33,12 @@ typedef struct
     unsigned ownsdata : 1;
 } cbstring;
 
+#ifdef __cplusplus
+#define cbstringnull cbstring{ }
+#else // __cplusplus
+#define cbstringnull (const cbstring){ 0 }
+#endif // __cplusplus
+
 #define cbstringp cbstring
 #define cbstringr cbstring
 

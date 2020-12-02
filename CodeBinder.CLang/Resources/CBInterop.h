@@ -56,9 +56,7 @@ extern "C"
         if (str->ownsdata)
         {
             CBFreeMemory((char*)str->data);
-            str->data = nullptr;
-            str->length = 0;
-            str->ownsdata = 0;
+            *str = cbstringnull;
         }
     }
 }
