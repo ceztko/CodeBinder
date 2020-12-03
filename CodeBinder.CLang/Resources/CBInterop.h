@@ -66,13 +66,6 @@ extern "C"
             *str = cbstringnull;
         }
     }
-
-    inline cbstring CBMoveString(cbstring* str)
-    {
-        cbstring ret = *str;
-        *str = cbstringnull;
-        return ret;
-    }
 }
 
 #endif // CODE_BINDER_INTEROP_HEADER

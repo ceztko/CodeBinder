@@ -30,8 +30,9 @@ public:
 
     // Move semantics
     SN2OC(cbstring&& str)
-        : m_handled(true), m_cstr(CBMoveString(&str)), m_ocstr(nil)
+        : m_handled(true), m_cstr(str), m_ocstr(nil)
     {
+        str = { };
     }
 
     ~SN2OC()
