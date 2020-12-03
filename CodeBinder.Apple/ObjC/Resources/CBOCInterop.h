@@ -19,10 +19,7 @@ public:
         : m_handled(false), m_cstr{ }, m_ocstr(nil)
     {
         if (str != nil)
-        {
-            m_cstr.data = [str UTF8String];
-            m_cstr.length = std::char_traits<char>::length(m_cstr.data);
-        }
+            m_cstr = CBCreateStringView([str UTF8String]);
     }
 
     SN2OC(NSString* __strong* str)
@@ -46,7 +43,7 @@ public:
                 if (m_cstr.data == nullptr)
                     *m_ocstr = nil;
                 else
-                    *m_ocstr = [[NSString alloc]initWithBytes:m_cstr.data length:CBSLEN(m_cstr.length) encoding:NSUTF8StringEncoding];
+                    *m_ocstr = [[NSString alloc]initWithBytes:m_cstr.data length:CBSLEN(m_cstr) encoding:NSUTF8StringEncoding];
             }
 
             CBFreeString(&m_cstr);
@@ -59,7 +56,7 @@ public:
         if (m_cstr.data == nullptr)
             return nil;
 
-        return [[NSString alloc]initWithBytes:m_cstr.data length:CBSLEN(m_cstr.length) encoding:NSUTF8StringEncoding];
+        return [[NSString alloc]initWithBytes:m_cstr.data length:CBSLEN(m_cstr) encoding:NSUTF8StringEncoding];
     }
 
     operator cbstring()
