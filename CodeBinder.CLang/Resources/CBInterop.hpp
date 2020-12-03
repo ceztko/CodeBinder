@@ -46,7 +46,7 @@ class cbstringbase
 public:
     ~cbstringbase()
     {
-        if (m_str.ownsdata)
+        if ((m_str.opaque & CB_STRING_OWNSDATA_FLAG) != 0)
             CBFreeMemory((char*)m_str.data);
     }
 
@@ -60,8 +60,7 @@ protected:
             std::memcpy(newstr, str, len);
             newstr[len] = '\0';
             ret.data = newstr;
-            ret.length = len;
-            ret.ownsdata = (unsigned)true;
+            ret.opaque = len | CB_STRING_OWNSDATA_FLAG;
         }
         return ret;
     }
@@ -83,14 +82,14 @@ protected:
         : m_str{ }
     {
         m_str.data = str;
-        m_str.length = len;
+        m_str.opaque = len;
     }
 
 public:
     // Dereferencing cast to std::string_view without null check
     std::string_view operator*() const
     {
-        return std::string_view(m_str.data, m_str.length);
+        return std::string_view(m_str.data, CBSLEN(m_str));
     }
 
     operator std::string_view() const
@@ -98,7 +97,7 @@ public:
         if (m_str.data == nullptr)
             throw std::invalid_argument("Inner string is null");
 
-        return std::string_view(m_str.data, m_str.length);
+        return std::string_view(m_str.data, CBSLEN(m_str));
     }
 
     explicit operator std::string() const
@@ -106,7 +105,7 @@ public:
         if (m_str.data == nullptr)
             throw std::invalid_argument("Inner string is null");
 
-        return std::string(m_str.data, m_str.length);
+        return std::string(m_str.data, CBSLEN(m_str));
     }
 
     explicit operator const char* () const
@@ -118,7 +117,7 @@ public:
     operator cbstring()
     {
         auto ret = m_str;
-        m_str.ownsdata = (unsigned)false;
+        m_str.opaque = m_str.opaque & ~CB_STRING_OWNSDATA_FLAG;
         return ret;
     }
 

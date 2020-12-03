@@ -33,9 +33,8 @@ public:
 
     // Move semantics
     SN2OC(cbstring&& str)
-        : m_handled(true), m_cstr(str), m_ocstr(nil)
+        : m_handled(true), m_cstr(CBMoveString(&str)), m_ocstr(nil)
     {
-        str.ownsdata = (unsigned)false;
     }
 
     ~SN2OC()
@@ -47,7 +46,7 @@ public:
                 if (m_cstr.data == nullptr)
                     *m_ocstr = nil;
                 else
-                    *m_ocstr = [[NSString alloc]initWithBytes:m_cstr.data length:m_cstr.length encoding:NSUTF8StringEncoding];
+                    *m_ocstr = [[NSString alloc]initWithBytes:m_cstr.data length:CBSLEN(m_cstr.length) encoding:NSUTF8StringEncoding];
             }
 
             CBFreeString(&m_cstr);
@@ -60,7 +59,7 @@ public:
         if (m_cstr.data == nullptr)
             return nil;
 
-        return [[NSString alloc]initWithBytes:m_cstr.data length:m_cstr.length encoding:NSUTF8StringEncoding];
+        return [[NSString alloc]initWithBytes:m_cstr.data length:CBSLEN(m_cstr.length) encoding:NSUTF8StringEncoding];
     }
 
     operator cbstring()

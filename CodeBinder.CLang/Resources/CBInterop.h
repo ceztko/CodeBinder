@@ -10,6 +10,8 @@
 #include <string.h>
 #endif // __cplusplus
 
+#define CBSLEN(str) (size_t)((str).opaque & ~CB_STRING_OWNSDATA_FLAG)
+
 extern "C"
 {
 #ifdef WIN32
@@ -38,26 +40,38 @@ extern "C"
 #endif
     }
 
+    inline size_t CBStringGetLength(const cbstring* str)
+    {
+        return CBSLEN(*str);
+    }
+
     // TODO: CBCreateString, CBCreateStringLen
     inline cbstring CBCreateStringView(const char* str)
     {
-        cbstring ret = { str, str == nullptr ? 0 : strlen(str), 0 };
+        cbstring ret = { str, str == nullptr ? 0 : strlen(str) };
         return ret;
     }
 
     inline cbstring CBCreateStringViewLen(const char* str, size_t len)
     {
-        cbstring ret = { str, len, 0 };
+        cbstring ret = { str, len };
         return ret;
     }
 
     inline void CBFreeString(cbstring* str)
     {
-        if (str->ownsdata)
+        if ((str->opaque & CB_STRING_OWNSDATA_FLAG) != 0)
         {
             CBFreeMemory((char*)str->data);
             *str = cbstringnull;
         }
+    }
+
+    inline cbstring CBMoveString(cbstring* str)
+    {
+        cbstring ret = *str;
+        *str = cbstringnull;
+        return ret;
     }
 }
 
