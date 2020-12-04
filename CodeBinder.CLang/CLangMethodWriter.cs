@@ -116,6 +116,18 @@ namespace CodeBinder.CLang
 
         protected override void WriteBody()
         {
+            // Write string reference local wrapper first, to avoid "C++ initial
+            // value of reference to non-const must be an lvalue" error
+            foreach (var param in Item.ParameterList.Parameters)
+            {
+                var symbol = param.GetDeclaredSymbol<IParameterSymbol>(Context);
+                if (symbol.Type.GetFullName() == "CodeBinder.cbstring" && symbol.RefKind != RefKind.None)
+                {
+                    Builder.Append("cbstringpr").Space().Append(param.Identifier.Text)
+                        .Append("_(").Append(param.Identifier.Text).Append(")").EndOfLine();
+                }
+            }
+
             if (Item.ReturnType.GetTypeSymbol(Context).SpecialType != SpecialType.System_Void)
                 Builder.Append("return").Space();
 
@@ -132,9 +144,14 @@ namespace CodeBinder.CLang
                     if (symbol.Type.GetFullName() == "CodeBinder.cbstring")
                     {
                         if (symbol.RefKind == RefKind.None)
+                        {
                             Builder.Append("std::move(").Append(param.Identifier.Text).Append(")");
+                        }
                         else
-                            Builder.Append("cbstringpr(").Append(param.Identifier.Text).Append(")");
+                        {
+                            // Write local variable wrapper instead
+                            Builder.Append(param.Identifier.Text).Append("_");
+                        }
                     }
                     else
                     {
