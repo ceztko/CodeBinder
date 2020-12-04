@@ -132,7 +132,7 @@ namespace CodeBinder.CLang
                     if (symbol.Type.GetFullName() == "CodeBinder.cbstring")
                     {
                         if (symbol.RefKind == RefKind.None)
-                            Builder.Append("(cbstringp)std::move(").Append(param.Identifier.Text).Append(")");
+                            Builder.Append("std::move(").Append(param.Identifier.Text).Append(")");
                         else
                             Builder.Append("cbstringpr(").Append(param.Identifier.Text).Append(")");
                     }
