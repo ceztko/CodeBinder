@@ -26,7 +26,7 @@ namespace CodeBinder.CLang
 
         public override bool NeedNamespaceMapping => false;
 
-        public bool OnlyPublicInterface { get; set; }
+        public bool PublicInterfaceOnly { get; set; }
 
         public override IReadOnlyCollection<string> SupportedPolicies => new[] { Policies.Delegates };
 
@@ -47,7 +47,7 @@ namespace CodeBinder.CLang
             // Try parse --publiciface switch
             if (args.Count == 1 && args[0] == "publiciface")
             {
-                OnlyPublicInterface = true;
+                PublicInterfaceOnly = true;
                 return true;
             }
 
@@ -60,7 +60,8 @@ namespace CodeBinder.CLang
             {
                 yield return new StringConversionWriter(BaseTypesHeader, () => CLangResources.CBBaseTypes_h) { GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter("CBInterop.h", () => CLangResources.CBInterop_h) { GeneratedPreamble = SourcePreamble };
-                yield return new StringConversionWriter("CBInterop.hpp", () => CLangResources.CBInterop_hpp) { GeneratedPreamble = SourcePreamble };
+                if (!PublicInterfaceOnly)
+                    yield return new StringConversionWriter("CBInterop.hpp", () => CLangResources.CBInterop_hpp) { GeneratedPreamble = SourcePreamble };
             }
         }
     }

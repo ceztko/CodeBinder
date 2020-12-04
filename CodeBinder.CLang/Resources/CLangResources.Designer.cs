@@ -81,9 +81,9 @@ namespace CodeBinder.CLang {
         ///
         ///#if defined(__cplusplus) &amp;&amp; defined(_MSC_VER)
         ///// In MSVC bool is guaranteed to be 1 byte, with true == 1 and false == 0
-        ///typedef bool CBBool;
+        ///typedef bool cbbool;
         ///#elif defined(__APPLE__)
-        ///typedef BOOL CBBool; [rest of string was truncated]&quot;;.
+        ///typedef BOOL cbbool; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBBaseTypes_h {
             get {
@@ -104,18 +104,17 @@ namespace CodeBinder.CLang {
         ///#include &lt;string.h&gt;
         ///#endif // __cplusplus
         ///
-        ///extern &quot;C&quot;
-        ///{
-        ///#ifdef WIN32
-        ///    __declspec(dllimport) void __stdcall LocalFree(void* pv);
-        ///    __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
-        ///#endif // WIN32
+        ///#if UINTPTR_MAX == UINT32_MAX
+        ///#define CB_STRING_OWNSDATA_FLAG (1u &lt;&lt; 31)
+        ///#elif UINTPTR_MAX == UINT64_MAX
+        ///#define CB_STRING_OWNSDATA_FLAG (1ull &lt;&lt; 63)
+        ///#else
+        ///#error &quot;Environment not 32 or 64-bit.&quot;
+        ///#endif
         ///
-        ///    inline void* CBAllocMemory(size_t size)
-        ///    {
-        ///#ifdef WIN32
-        ///#ifndef LMEM_FIXED
-        /// [rest of string was truncated]&quot;;.
+        ///#define CBSLEN(str) (size_t)((str).opaque &amp; ~CB_STRING_OWNSDATA_FLAG)
+        ///
+        ///exte [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBInterop_h {
             get {
@@ -132,11 +131,9 @@ namespace CodeBinder.CLang {
         ///#include &lt;cstring&gt;
         ///#include &lt;string&gt;
         ///#include &lt;string_view&gt;
+        ///#include &lt;utility&gt;
         ///#include &lt;new&gt;
         ///#include &lt;stdexcept&gt;
-        ///
-        ///#undef cbstringp
-        ///#undef cbstringr
         ///
         ///namespace cb
         ///{
@@ -144,7 +141,8 @@ namespace CodeBinder.CLang {
         ///    /// This exception can be used just to unwind the stack,
         ///    /// for example in Java interop scenario when returning
         ///    /// from callbacks. It should be catched in outer C functions
-        ///    /// and just return f [rest of string was truncated]&quot;;.
+        ///    /// and just return from them
+        ///    ///  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBInterop_hpp {
             get {

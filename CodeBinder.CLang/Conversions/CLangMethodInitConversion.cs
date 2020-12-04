@@ -22,17 +22,11 @@ namespace CodeBinder.CLang
             builder.AppendLine("static void* funcs[] = {");
             using (builder.Indent())
             {
-                void writeMethods(bool widechar)
+                foreach (var module in Compilation.Modules)
                 {
-                    foreach (var module in Compilation.Modules)
-                    {
-                        foreach (var method in module.Methods)
-                            builder.Append("(void *)").Append(method.GetCLangMethodName(widechar)).AppendLine(",");
-                    }
+                    foreach (var method in module.Methods)
+                        builder.Append("(void *)").Append(method.GetCLangMethodName()).AppendLine(",");
                 }
-
-                //writeMethods(true);
-                writeMethods(false);
             }
 
             builder.Append("}").EndOfLine();

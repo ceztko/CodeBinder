@@ -10,6 +10,14 @@
 #include <string.h>
 #endif // __cplusplus
 
+#if UINTPTR_MAX == UINT32_MAX
+#define CB_STRING_OWNSDATA_FLAG (1u << 31)
+#elif UINTPTR_MAX == UINT64_MAX
+#define CB_STRING_OWNSDATA_FLAG (1ull << 63)
+#else
+#error "Environment not 32 or 64-bit."
+#endif
+
 #define CBSLEN(str) (size_t)((str).opaque & ~CB_STRING_OWNSDATA_FLAG)
 
 extern "C"

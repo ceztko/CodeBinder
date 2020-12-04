@@ -6,11 +6,9 @@
 #include <cstring>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <new>
 #include <stdexcept>
-
-#undef cbstringp
-#undef cbstringr
 
 namespace cb
 {
@@ -85,6 +83,15 @@ protected:
         m_str.opaque = len;
     }
 
+    const cbstring& str() const { return m_str; }
+
+    cbstring release()
+    {
+        auto ret = m_str;
+        m_str = { };
+        return ret;
+    }
+
 public:
     // Dereferencing cast to std::string_view without null check
     std::string_view operator*() const
@@ -113,19 +120,6 @@ public:
         return m_str.data;
     }
 
-    // Cast to cbstring& with a move semantics
-    operator cbstring()
-    {
-        auto ret = m_str;
-        m_str.opaque = m_str.opaque & ~CB_STRING_OWNSDATA_FLAG;
-        return ret;
-    }
-
-    operator const cbstring& () const
-    {
-        return m_str;
-    }
-
     bool operator==(std::nullptr_t nullpointer) const
     {
         return m_str.data == nullptr;
@@ -141,13 +135,20 @@ private:
 };
 
 // cbstringv constructor by default doesn't allocate, assignment does
-class cbstringp : public cbstringbase
+class cbstringp final : public cbstringbase
 {
+    friend class cbstringpr;
     void* operator new (size_t) = delete;
     void operator delete(void*) = delete;
 
 public:
     cbstringp() { }
+
+    cbstringp(cbstring&& str)
+        : cbstringbase(str)
+    {
+        str = { };
+    }
 
     cbstringp(std::nullptr_t) { }
 
@@ -177,17 +178,64 @@ public:
     {
         cbstringbase::operator=(init(str, str == nullptr ? 0 : std::char_traits<char>::length(str)));
     }
+
+    operator const cbstring& () const
+    {
+        return str();
+    }
+};
+
+// Used to wrap ref parameters
+class cbstringpr final
+{
+public:
+    explicit cbstringpr(cbstring* pstr)
+        : m_cstr(pstr), m_str(pstr == nullptr ? cbstring() : *pstr) { }
+
+    ~cbstringpr()
+    {
+        if (m_cstr != nullptr)
+            *m_cstr = m_str.release();
+    }
+
+    /// <summary>
+    /// Dereference cbstringpr built from null cbstring is undefined behavior
+    /// </summary>
+    cbstringp& operator*()
+    {
+        return m_str;
+    }
+
+    bool operator==(std::nullptr_t nullpointer) const
+    {
+        return m_cstr == nullptr;
+    }
+
+    bool operator!=(std::nullptr_t nullpointer) const
+    {
+        return m_cstr != nullptr;
+    }
+
+private:
+    cbstring* m_cstr;
+    cbstringp m_str;
 };
 
 /// <summary>
 /// cbstringr constructor by default allocates
 /// </summary>
-class cbstringr : public cbstringbase
+class cbstringr final : public cbstringbase
 {
     void* operator new (size_t) = delete;
     void operator delete(void*) = delete;
 
 public:
+    cbstringr(cbstring&& str)
+        : cbstringbase(str)
+    {
+        str = { };
+    }
+
     cbstringr() { }
 
     cbstringr(std::nullptr_t) { }
@@ -203,6 +251,12 @@ public:
 
     cbstringr(const std::string& str)
         : cbstringbase(init(str.data(), str.length())) { }
+
+    // Cast to cbstring with a move semantics
+    operator cbstring() &&
+    {
+        return release();
+    }
 };
 
 #endif // CODE_BINDER_INTEROP_CPP_HEADER

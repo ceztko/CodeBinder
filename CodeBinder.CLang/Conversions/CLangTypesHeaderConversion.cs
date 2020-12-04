@@ -126,8 +126,8 @@ namespace CodeBinder.CLang
 
                 builder.Append("typedef").Space().Append(callback.GetCLangReturnType(Compilation))
                     .Append("(*").Append(name).Append(")")
-                    .Append("(").Append(new CLangParameterListWriter(callback.ParameterList, Compilation)).Append(")")
-                    .EndOfLine();
+                    .Append("(").Append(new CLangParameterListWriter(callback.ParameterList, false, Compilation))
+                    .Append(")").EndOfLine();
             }
         }
 

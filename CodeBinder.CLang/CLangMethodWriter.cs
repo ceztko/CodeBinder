@@ -13,25 +13,40 @@ namespace CodeBinder.CLang
 {
     abstract class CLangMethodWriter : CodeWriter<MethodDeclarationSyntax, CLangModuleConversion>
     {
-        protected CLangMethodWriter(MethodDeclarationSyntax method, CLangModuleConversion context)
-            : base(method, context) { }
+        public bool CppMethod { get; private set; }
 
-        public static CLangMethodWriter Create(MethodDeclarationSyntax method, bool widechar,
-            CLangModuleConversion context)
+        protected CLangMethodWriter(MethodDeclarationSyntax method, bool cppMethod, CLangModuleConversion context)
+            : base(method, context)
         {
-            return new SyntaxSignatureMethodWriter(method, widechar, context);
+            CppMethod = cppMethod;
         }
 
         protected override void Write()
         {
-            Builder.Append(Context.Compilation.LibraryName.ToUpper()).Append("_SHARED_API").Space();
-            Builder.Append(ReturnType).Space();
+            if (CppMethod)
+                Builder.Append("inline");
+            else
+                Builder.Append(Context.Compilation.LibraryName.ToUpper()).Append("_SHARED_API");
+
+            Builder.Space().Append(ReturnType).Space();
             Builder.Append(MethodName).AppendLine("(");
             using (Builder.Indent())
             {
                 WriteParameters();
-                Builder.Append(")").EndOfLine();
+                Builder.Append(")");
             }
+
+            if (HasBody)
+            {
+                Builder.AppendLine();
+                using (Builder.Block())
+                    WriteBody();
+            }
+            else
+            {
+                Builder.EndOfLine();
+            }    
+
         }
 
         public abstract string MethodName
@@ -43,41 +58,106 @@ namespace CodeBinder.CLang
         {
             get;
         }
+        public abstract bool HasBody
+        {
+            get;
+        }
+
+        protected virtual void WriteBody()
+        {
+            /* Do Nothing */
+        }
 
         protected abstract void WriteParameters();
+    }
 
-        class SyntaxSignatureMethodWriter : CLangMethodWriter
+    class CLangMethodDeclarationWriter : CLangMethodWriter
+    {
+        public CLangMethodDeclarationWriter(MethodDeclarationSyntax method, bool cppMethod, CLangModuleConversion context)
+            : base(method, cppMethod, context) { }
+
+        protected override void WriteParameters()
         {
-            public bool WideChar { get; private set; }
-
-            public SyntaxSignatureMethodWriter(MethodDeclarationSyntax method, bool widechar, CLangModuleConversion context)
-                : base(method, context)
-            {
-                WideChar = widechar;
-            }
-
-            protected override void WriteParameters()
-            {
-                Builder.Append(new CLangParameterListWriter(Item.ParameterList, Context));
-            }
-
-            public override string ReturnType
-            {
-                get { return Item.GetCLangReturnType(Context); }
-            }
-
-            public override string MethodName
-            {
-                get { return Item.GetCLangMethodName(WideChar); }
-            }
+            Builder.Append(new CLangParameterListWriter(Item.ParameterList, CppMethod, Context));
         }
+
+        public override string ReturnType
+        {
+            get { return Item.GetCLangReturnType(CppMethod, Context); }
+        }
+
+        public override string MethodName
+        {
+            get { return Item.GetCLangMethodName(); }
+        }
+
+        public override bool HasBody => false;
+    }
+
+    class CLangMethodTrampolineWriter : CLangMethodWriter
+    {
+        public CLangMethodTrampolineWriter(MethodDeclarationSyntax method, CLangModuleConversion context)
+            : base(method, false, context) { }
+
+        protected override void WriteParameters()
+        {
+            Builder.Append(new CLangParameterListWriter(Item.ParameterList, false, Context));
+        }
+
+        public override string ReturnType
+        {
+            get { return Item.GetCLangReturnType(false, Context); }
+        }
+
+        public override string MethodName
+        {
+            get { return Item.GetCLangMethodName(); }
+        }
+
+        protected override void WriteBody()
+        {
+            if (Item.ReturnType.GetTypeSymbol(Context).SpecialType != SpecialType.System_Void)
+                Builder.Append("return").Space();
+
+            Builder.Append(Context.Compilation.LibraryName.ToLower()).Append("::")
+                .Append(Item.GetCLangMethodName());
+
+            using (Builder.ParameterList())
+            {
+                bool first = true;
+                foreach (var param in Item.ParameterList.Parameters)
+                {
+                    Builder.CommaSeparator(ref first);
+                    var symbol = param.GetDeclaredSymbol<IParameterSymbol>(Context);
+                    if (symbol.Type.GetFullName() == "CodeBinder.cbstring")
+                    {
+                        if (symbol.RefKind == RefKind.None)
+                            Builder.Append("(cbstringp)std::move(").Append(param.Identifier.Text).Append(")");
+                        else
+                            Builder.Append("cbstringpr(").Append(param.Identifier.Text).Append(")");
+                    }
+                    else
+                    {
+                        Builder.Append(param.Identifier.Text);
+                    }
+                }
+            }
+            Builder.EndOfLine();
+        }
+
+        public override bool HasBody => true;
     }
 
     class CLangParameterListWriter : CodeWriter<ParameterListSyntax, ICompilationContextProvider>
-    {    
-        public CLangParameterListWriter(ParameterListSyntax list,
+    {
+        public bool CppMethod { get; private set; }
+
+        public CLangParameterListWriter(ParameterListSyntax list, bool cppMethod,
             ICompilationContextProvider module)
-            : base(list, module) { }
+            : base(list, module)
+        {
+            CppMethod = cppMethod;
+        }
 
         protected override void Write()
         {
@@ -89,7 +169,7 @@ namespace CodeBinder.CLang
                 else
                     Builder.CommaSeparator();
 
-                Builder.Append(parameter, Context);
+                Builder.Append(parameter, CppMethod, Context);
             }
         }
     }

@@ -37,7 +37,9 @@ namespace CodeBinder.CLang
 
         protected override IEnumerable<TypeConversion<CLangModuleContext>> getConversions()
         {
-            yield return new CLangModuleConversion(this, Compilation.Conversion);
+            yield return new CLangModuleConversion(this, ModuleConversionType.CHeader, Compilation.Conversion);
+            if (!Compilation.Conversion.PublicInterfaceOnly)
+                yield return new CLangModuleConversion(this, ModuleConversionType.CppTrampoline, Compilation.Conversion);
         }
 
         public override IEnumerable<MethodDeclarationSyntax> Methods

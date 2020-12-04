@@ -15,10 +15,15 @@ namespace CodeBinder.CLang
 {
     public class CLangModuleConversion : TypeConversion<CLangModuleContext, CLangCompilationContext, ConversionCSharpToCLang>
     {
-        public CLangModuleConversion(CLangModuleContext context, ConversionCSharpToCLang conversion)
-            : base(context, conversion) { }
+        public ModuleConversionType ConversionType { get; private set; }
 
-        protected override string GetFileName() => ModuleName + ".h";
+        public CLangModuleConversion(CLangModuleContext context, ModuleConversionType conversionType, ConversionCSharpToCLang conversion)
+            : base(context, conversion)
+        {
+            ConversionType = conversionType;
+        }
+
+        protected override string GetFileName() => $"{ModuleName}.{FileExtension}";
 
         public string ModuleName
         {
@@ -26,6 +31,21 @@ namespace CodeBinder.CLang
         }
 
         protected sealed override void write(CodeBuilder builder)
+        {
+            switch (ConversionType)
+            {
+                case ModuleConversionType.CHeader:
+                    WriteCHeader(builder);
+                    break;
+                case ModuleConversionType.CppTrampoline:
+                    WriteCppTrampoline(builder);
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        void WriteCHeader(CodeBuilder builder)
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
@@ -37,25 +57,53 @@ namespace CodeBinder.CLang
             builder.AppendLine("{");
             builder.AppendLine("#endif");
             builder.AppendLine();
-            WriteMethods(builder);
+            WriteClangMethods(builder, false);
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("}");
             builder.AppendLine("#endif");
         }
 
-        private void WriteMethods(CodeBuilder builder)
+        void WriteCppTrampoline(CodeBuilder builder)
         {
-            void writeMethods(bool widechar)
-            {
-                foreach (var method in Context.Methods)
-                {
-                    builder.Append(CLangMethodWriter.Create(method, widechar, this));
-                    builder.AppendLine();
-                }
-            }
+            builder.AppendLine($"#include \"{ModuleName}.h\"");
+            builder.AppendLine("#include \"CBInterop.hpp\"");
+            builder.AppendLine();
+            builder.AppendLine("// Cpp implementations declarations");
+            builder.AppendLine($"namespace {Context.Compilation.LibraryName.ToLower()}");
+            builder.AppendLine("{");
+            builder.AppendLine();
+            WriteCppMethodDeclarations(builder);
+            builder.AppendLine("}");
+            builder.AppendLine("// C trampolines");
+            builder.AppendLine("extern \"C\"");
+            builder.AppendLine("{");
+            builder.AppendLine();
+            WriteClangMethods(builder, true);
+            builder.AppendLine("}");
+            builder.AppendLine();
+            builder.AppendLine();
+        }
 
-            //writeMethods(true);
-            writeMethods(false);
+        private void WriteClangMethods(CodeBuilder builder, bool writeBody)
+        {
+            foreach (var method in Context.Methods)
+            {
+                if (writeBody)
+                    builder.Append(new CLangMethodTrampolineWriter(method, this));
+                else
+                    builder.Append(new CLangMethodDeclarationWriter(method, false, this));
+
+                builder.AppendLine();
+            }
+        }
+
+        private void WriteCppMethodDeclarations(CodeBuilder builder)
+        {
+            foreach (var method in Context.Methods)
+            {
+                builder.Append(new CLangMethodDeclarationWriter(method, true, this));
+                builder.AppendLine();
+            }
         }
 
         protected override string GetGeneratedPreamble() => ConversionCSharpToCLang.SourcePreamble;
@@ -64,5 +112,27 @@ namespace CodeBinder.CLang
         {
             get { return Context.Compilation; }
         }
+
+        string FileExtension
+        {
+            get
+            {
+                switch(ConversionType)
+                {
+                    case ModuleConversionType.CHeader:
+                        return "h";
+                    case ModuleConversionType.CppTrampoline:
+                        return "ipp";
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+        }
+    }
+
+    public enum ModuleConversionType
+    {
+        CHeader,
+        CppTrampoline
     }
 }

@@ -25,13 +25,13 @@ namespace CodeBinder.CLang
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter,
-            ICompilationContextProvider provider)
+            bool cppMethod, ICompilationContextProvider provider)
         {
             bool isByRef = parameter.IsRef() || parameter.IsOut();
             var symbol = parameter.Type!.GetTypeSymbol(provider);
             string? suffix;
             string type = getCLangType(symbol, parameter.GetAttributes(provider),
-                isByRef ? ParameterType.ByRef : ParameterType.Regular, out suffix);
+                isByRef ? ParameterType.ByRef : ParameterType.Regular, cppMethod, out suffix);
             builder.Append(type).Space().Append(parameter.Identifier.Text);
             if (suffix != null)
                 builder.Append(suffix);
@@ -39,30 +39,30 @@ namespace CodeBinder.CLang
             return builder;
         }
 
-        public static string GetCLangMethodName(this MethodDeclarationSyntax method, bool widechar)
+        public static string GetCLangMethodName(this MethodDeclarationSyntax method)
         {
-            if (widechar)
-                return $"{method.GetName()}W";
-            else
-                return method.GetName();
+            return method.GetName();
         }
 
-        public static string GetCLangReturnType(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+        public static string GetCLangReturnType(this MethodDeclarationSyntax method, bool cppMethod, ICompilationContextProvider provider)
         {
             var symbol = method.GetDeclaredSymbol<IMethodSymbol>(provider);
-            return getCLangReturnType(symbol);
+            return getCLangReturnType(cppMethod, symbol);
         }
 
         public static string GetCLangReturnType(this DelegateDeclarationSyntax dlg, ICompilationContextProvider provider)
         {
+            // TODO: Should be possible to prpare static cpp trampolines also for delegates.
+            // Maybe not so easy
             var symbol = dlg.GetDeclaredSymbol<INamedTypeSymbol>(provider);
-            return getCLangReturnType(symbol.DelegateInvokeMethod!);
+            return getCLangReturnType(false, symbol.DelegateInvokeMethod!);
         }
 
-        private static string getCLangReturnType(IMethodSymbol method)
+        private static string getCLangReturnType(bool cppMethod, IMethodSymbol method)
         {
             string? suffix;
-            string type = getCLangType(method.ReturnType, method.GetReturnTypeAttributes(), ParameterType.Return, out suffix);
+            string type = getCLangType(method.ReturnType, method.GetReturnTypeAttributes(),
+                ParameterType.Return, cppMethod, out suffix);
             if (suffix == null)
                 return type;
             else
@@ -70,7 +70,7 @@ namespace CodeBinder.CLang
         }
 
         private static string getCLangType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes,
-            ParameterType type, out string? suffix)
+            ParameterType type, bool cppMethod, out string? suffix)
         {
             switch(symbol.TypeKind)
             {
@@ -129,24 +129,67 @@ namespace CodeBinder.CLang
                 typeName = symbol.GetFullName();
             }
 
+            // TODO: Optmize CLR types with ITypeSymbol.SpecialType, handling of constParameter,
+            // CHECK-ME evaluate supporting string arrays
             string bindedType;
-            switch (type)
+            if (typeName == "CodeBinder.cbstring")
             {
-                case ParameterType.Regular:
-                    bindedType = getCLangType(typeName, false, attributes);
-                    break;
-                case ParameterType.Return:
-                    if (symbol.TypeKind == TypeKind.Array)
-                        bindedType = getCLangPointerType(typeName, true, attributes);
-                    else
-                        bindedType = getCLangType(typeName, true, attributes);
+                switch (type)
+                {
+                    case ParameterType.Regular:
+                    {
+                        if (cppMethod)
+                        {
+                            constParameter |= true;
+                            bindedType = "cbstringp&";
+                        }
+                        else
+                        {
+                            bindedType = "cbstring";
+                        }
 
-                    break;
-                case ParameterType.ByRef:
-                    bindedType = getCLangPointerType(typeName, false, attributes);
-                    break;
-                default:
-                    throw new Exception();
+                        break;
+                    }
+                    case ParameterType.Return:
+                    {
+                        if (cppMethod)
+                            bindedType= "cbstringr";
+                        else
+                            bindedType= "cbstring";
+                        break;
+                    }
+                    case ParameterType.ByRef:
+                    {
+                        if (cppMethod)
+                            bindedType = "cbstringpr&";
+                        else
+                            bindedType = "cbstring*";
+                        break;
+                    }
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+            else
+            {
+                switch (type)
+                {
+                    case ParameterType.Regular:
+                        bindedType = getCLangType(typeName, attributes);
+                        break;
+                    case ParameterType.Return:
+                        if (symbol.TypeKind == TypeKind.Array)
+                            bindedType = getCLangPointerType(typeName, attributes);
+                        else
+                            bindedType = getCLangType(typeName, attributes);
+
+                        break;
+                    case ParameterType.ByRef:
+                        bindedType = getCLangPointerType(typeName, attributes);
+                        break;
+                    default:
+                        throw new NotSupportedException();
+                }
             }
 
             if (constParameter)
@@ -155,27 +198,24 @@ namespace CodeBinder.CLang
                 return bindedType;
         }
 
-        static string getCLangType(string typeName, bool returnParameter, IEnumerable<AttributeData> attributes)
+        static string getCLangType(string typeName, IEnumerable<AttributeData> attributes)
         {
             switch (typeName)
             {
                 case "System.Void":
                     return "void";
-                case "CodeBinder.cbstring":
-                    if (returnParameter)
-                        return "cbstring";
-                    else
-                        return "cbstringp";
                 case "System.Runtime.InteropServices.HandleRef":
                 case "System.IntPtr":
+                {
                     var binder = attributes.FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
                     if (binder != null)
                         return $"{binder.AttributeClass.Name}*";
 
                     return "void*";
+                }
                 case "System.Boolean":
                     // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
-                    return "CBBool";
+                    return "cbbool";
                 case "System.Char":
                     return "cbchar_t";
                 case "System.Byte":
@@ -204,25 +244,22 @@ namespace CodeBinder.CLang
             }
         }
 
-        static string getCLangPointerType(string typeName, bool returnParameter, IEnumerable<AttributeData> attributes)
+        static string getCLangPointerType(string typeName, IEnumerable<AttributeData> attributes)
         {
             switch (typeName)
             {
-                case "CodeBinder.cbstring":
-                    if (returnParameter)
-                        return "cbstring*";
-                    else
-                        return "cbstringp*";
                 case "System.Runtime.InteropServices.HandleRef":
                 case "System.IntPtr":
+                {
                     var binder = attributes.FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
                     if (binder != null)
                         return $"{binder.AttributeClass.Name}**";
 
                     return "void**";
+                }
                 case "System.Boolean":
                     // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
-                    return "CBBool*";
+                    return "cbbool*";
                 case "System.Char":
                     return "cbchar_t*";
                 case "System.Byte":
@@ -249,32 +286,6 @@ namespace CodeBinder.CLang
                 default:
                     throw new Exception($"Unsupported by type {typeName}");
             }
-        }
-
-        public static CodeBuilder EndOfLine(this CodeBuilder builder)
-        {
-            return builder.AppendLine(";");
-        }
-
-        public static CodeBuilder Space(this CodeBuilder builder)
-        {
-            return builder.Append(" ");
-        }
-
-        public static CodeBuilder Comma(this CodeBuilder builder)
-        {
-            return builder.Append(",");
-        }
-
-        public static CodeBuilder CommaSeparator(this CodeBuilder builder)
-        {
-            return builder.Append(", ");
-        }
-
-        public static CodeBuilder TypeBlock(this CodeBuilder builder, bool appendLine = true)
-        {
-            builder.AppendLine("{");
-            return builder.Indent("}", appendLine);
         }
     }
 }
