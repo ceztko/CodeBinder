@@ -1,4 +1,4 @@
-﻿#include <jni.h>
+﻿#include "JNITypes.h"
 
 extern "C"
 {
