@@ -63,13 +63,9 @@ namespace CodeBinder.CLang
                 var attributes = enm.GetAttributes(Compilation);
                 string enumName = attributes.GetAttribute<NativeBindingAttribute>().GetConstructorArgument<string>(0);
                 string stem = attributes.GetAttribute<NativeStemAttribute>().GetConstructorArgument<string>(0);
-                Regex? substitutionRegex = null;
-                string? substitutionPattern = null;
+                (Regex Regex, string Pattern)? substitution = null;
                 if (attributes.TryGetAttribute<NativeSubstitutionAttribute>(out var substitutionAttr))
-                {
-                    substitutionRegex = new Regex(substitutionAttr.GetConstructorArgument<string>(0));
-                    substitutionPattern = substitutionAttr.GetConstructorArgument<string>(1);
-                }
+                    substitution = (new Regex(substitutionAttr.GetConstructorArgument<string>(0)), substitutionAttr.GetConstructorArgument<string>(1));
 
                 builder.Append("typedef").Space().Append("enum").AppendLine();
                 var splitted = enm.GetName().SplitCamelCase();
@@ -89,10 +85,10 @@ namespace CodeBinder.CLang
                         }
                         else
                         {
-                            if (substitutionRegex == null)
+                            if (substitution == null)
                                 splitted = item.GetName().SplitCamelCase();
                             else
-                                splitted = new string[] { substitutionRegex.Replace(item.GetName(), substitutionPattern) };
+                                splitted = new string[] { substitution.Value.Regex.Replace(item.GetName(), substitution.Value.Pattern) };
 
                             bindedItemName = getCLangSplittedIdentifier(tmpbuilder, stem, splitted);
                         }
@@ -137,7 +133,7 @@ namespace CodeBinder.CLang
             if (prefix != null)
             {
                 builder.Append(prefix);
-                builder.Append("_");
+                builder.Append('_');
             }
 
             bool first = true;
@@ -146,7 +142,7 @@ namespace CodeBinder.CLang
                 if (first)
                     first = false;
                 else
-                    builder.Append("_");
+                    builder.Append('_');
                 builder.Append(str.ToUpperInvariant());
             }
 

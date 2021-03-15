@@ -89,8 +89,11 @@ namespace CodeBinder.Shared.CSharp
             DefaultVisit(node);
         }
 
-        public override void Visit(SyntaxNode node)
+        public override void Visit(SyntaxNode? node)
         {
+            if (node == null)
+                throw new ArgumentNullException(nameof(node));
+
             if (node.ShouldDiscard(Compilation))
                 return;
 
@@ -555,14 +558,15 @@ namespace CodeBinder.Shared.CSharp
             isPartial = type.IsPartial();
             if (isPartial)
             {
-                var parentKind = type.Parent!.Kind();
+                var parent = type.Parent!;
+                var parentKind = parent.Kind();
                 switch (parentKind)
                 {
                     case SyntaxKind.ClassDeclaration:
                     case SyntaxKind.InterfaceDeclaration:
                     case SyntaxKind.StructDeclaration:
                     {
-                        var parentType = (TypeDeclarationSyntax)type.Parent;
+                        var parentType = (TypeDeclarationSyntax)parent;
                         if (!parentType.Modifiers.Any(SyntaxKind.PartialKeyword))
                             Unsupported(type, "Nested partial types must have partial parent");
 

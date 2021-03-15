@@ -209,7 +209,7 @@ namespace CodeBinder.CLang
                 {
                     var binder = attributes.FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
                     if (binder != null)
-                        return $"{binder.AttributeClass.Name}*";
+                        return $"{binder.AttributeClass!.Name}*";
 
                     return "void*";
                 }
@@ -253,7 +253,7 @@ namespace CodeBinder.CLang
                 {
                     var binder = attributes.FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
                     if (binder != null)
-                        return $"{binder.AttributeClass.Name}**";
+                        return $"{binder.AttributeClass!.Name}**";
 
                     return "void**";
                 }

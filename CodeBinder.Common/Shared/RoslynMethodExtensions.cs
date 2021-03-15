@@ -125,7 +125,7 @@ namespace CodeBinder.Shared
         public static bool IsAttribute<TAttribute>(this AttributeData attribute)
             where TAttribute : Attribute
         {
-            return attribute.AttributeClass.GetFullName() == typeof(TAttribute).FullName;
+            return attribute.AttributeClass!.GetFullName() == typeof(TAttribute).FullName;
         }
 
         public static TypeInfo GetTypeInfo(this SyntaxNode node, ICompilationContextProvider provider)
@@ -192,7 +192,7 @@ namespace CodeBinder.Shared
         public static bool Inherits<T>(this AttributeData data)
             where T : Attribute
         {
-            return data.AttributeClass.Inherits<T>();
+            return data.AttributeClass!.Inherits<T>();
         }
 
         public static bool Inherits<T>(this ITypeSymbol symbol)
@@ -224,11 +224,11 @@ namespace CodeBinder.Shared
 
         public static T GetConstructorArgument<T>(this AttributeData data, int index)
         {
-            T ret;
+            T? ret;
             if (!TryGetConstructorArgument(data, index, out ret))
                 throw new IndexOutOfRangeException();
 
-            return ret;
+            return ret!;
         }
 
         public static T[] GetConstructorArgumentArray<T>(this AttributeData data, int index)
@@ -278,11 +278,11 @@ namespace CodeBinder.Shared
 
         public static T GetConstructorArgumentOrDefault<T>(this AttributeData data, int index, T def)
         {
-            T ret;
-            if (TryGetConstructorArgument(data, index, out ret))
-                return ret;
+            T? ret;
+            if (!TryGetConstructorArgument(data, index, out ret))
+                return def;
 
-            return def;
+            return ret!;
         }
 
         public static T GetNamedArgument<T>(this AttributeData data, string name)
@@ -485,16 +485,16 @@ namespace CodeBinder.Shared
             return false;
         }
 
-        public static object GetValue(this SyntaxNode node, ICompilationContextProvider provider)
+        public static object? GetValue(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = provider.GetSemanticModel(node.SyntaxTree);
             return model.GetConstantValue(node).Value;
         }
 
-        public static T GetValue<T>(this SyntaxNode node, ICompilationContextProvider provider)
+        public static T? GetValue<T>(this SyntaxNode node, ICompilationContextProvider provider)
         {
             var model = provider.GetSemanticModel(node.SyntaxTree);
-            return (T)model.GetConstantValue(node).Value;
+            return (T?)model.GetConstantValue(node).Value;
         }
 
         public static bool HasAccessibility(this ISymbol symbol, Accessibility accessibility)
@@ -603,7 +603,7 @@ namespace CodeBinder.Shared
             {
                 var arg = data.ConstructorArguments[i];
 
-                var type = Type.GetType(arg.Type.GetAssemblyQualifiedName()) ??
+                var type = Type.GetType(arg.Type!.GetAssemblyQualifiedName()) ??
                     throw new NullReferenceException($"Unable to find CLR type for {arg.Type}");
                 types[i] = type;
                 objects[i] = arg.Value;

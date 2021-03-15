@@ -17,13 +17,13 @@ namespace CodeBinder.Shared.CSharp
 
     public class CSharpTypeParameter
     {
-        public CSharpTypeParameter(TypeParameterSyntax type, TypeParameterConstraintClauseSyntax constraints)
+        public CSharpTypeParameter(TypeParameterSyntax type, TypeParameterConstraintClauseSyntax? constraints)
         {
             Type = type;
             Constraints = constraints;
         }
 
         public TypeParameterSyntax Type { get; private set; }
-        public TypeParameterConstraintClauseSyntax Constraints { get; private set; }
+        public TypeParameterConstraintClauseSyntax? Constraints { get; private set; }
     }
 }
