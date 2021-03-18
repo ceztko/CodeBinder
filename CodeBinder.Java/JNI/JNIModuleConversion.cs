@@ -77,7 +77,7 @@ namespace CodeBinder.JNI
             {
                 if (method.TryGetAttribute<VerbatimConversionAttribute>(Context, out var attribute)
                     && (attribute.ConstructorArguments.Length == 1 ||
-                        attribute.GetConstructorArgument<ConversionType>(0) == ConversionType.Implementation))
+                        attribute.GetConstructorArgument<ConversionType>(0) == conversionType))
                 {
                     // Use the verbatim conversion instead
                     string verbatimStr = attribute.ConstructorArguments.Length == 1
