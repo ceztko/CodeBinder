@@ -132,7 +132,14 @@ namespace CodeBinder.CLang
 
     public enum ModuleConversionType
     {
+        /// <summary>
+        /// Regular header with C signatures
+        /// </summary>
         CHeader,
+
+        /// <summary>
+        /// Cpp method trampolines, that cares about special string types
+        /// </summary>
         CppTrampoline
     }
 }

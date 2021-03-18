@@ -23,3 +23,8 @@
 #define jDoubleBox jobject
 #define jStringBox jobject
 #define jHandleRef jobject
+
+// Support class for array of pointers
+class _jptrArray : public _jlongArray {};
+typedef _jptrArray* jptrArray;
+typedef jlong jptr;

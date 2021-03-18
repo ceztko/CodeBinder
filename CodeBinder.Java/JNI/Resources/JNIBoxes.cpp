@@ -39,3 +39,8 @@ BJ2NImpl<_jDoubleBox> BJ2N(JNIEnv * env, jDoubleBox box, bool commit)
 {
     return BJ2NImpl<_jDoubleBox>(env, box, commit);
 }
+
+SBJ2N BJ2N(JNIEnv* env, jStringBox box, bool commit)
+{
+    return SBJ2N(env, box, commit);
+}

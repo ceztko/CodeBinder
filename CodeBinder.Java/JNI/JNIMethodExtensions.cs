@@ -82,8 +82,9 @@ namespace CodeBinder.JNI
                     return "jstring";
                 case "System.Runtime.InteropServices.HandleRef":
                     return "jHandleRef";
+                case "System.UIntPtr":
                 case "System.IntPtr":
-                    return "jlong";
+                    return "jptr";
                 case "System.Boolean":
                     return "jboolean";
                 case "System.Char":
@@ -173,6 +174,56 @@ namespace CodeBinder.JNI
         public static CodeBuilder CommaSeparator(this CodeBuilder builder)
         {
             return builder.Append(", ");
+        }
+
+        public static CodeBuilder CommaSeparator(this CodeBuilder builder, ref bool first)
+        {
+            if (first)
+                first = false;
+            else
+                return builder.CommaSeparator();
+
+            return builder;
+        }
+
+        public static CodeBuilder Block(this CodeBuilder builder, bool appendLine = true)
+        {
+            builder.AppendLine("{");
+            return builder.Indent("}", appendLine);
+        }
+
+        public static CodeBuilder ParameterList(this CodeBuilder builder, bool multiLine = false)
+        {
+            if (multiLine)
+            {
+                builder.AppendLine("(");
+                return builder.Indent(")");
+            }
+            else
+            {
+                builder.Append("(");
+                return builder.Using(")");
+            }
+        }
+
+        /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
+        public static CodeBuilder Parenthesized(this CodeBuilder builder, bool childIstance = true)
+        {
+            builder.Append("(");
+            if (childIstance)
+                return builder.UsingChild(")");
+            else
+                return builder.Using(")");
+        }
+
+        /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
+        public static CodeBuilder AngleBracketed(this CodeBuilder builder, bool childIstance = true)
+        {
+            builder.Append("<");
+            if (childIstance)
+                return builder.UsingChild(">");
+            else
+                return builder.Using(">");
         }
     }
 }

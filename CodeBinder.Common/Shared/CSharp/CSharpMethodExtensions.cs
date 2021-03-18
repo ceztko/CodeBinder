@@ -838,6 +838,11 @@ namespace CodeBinder.Shared.CSharp
             return isPartial;
         }
 
+        public static bool IsRefLike(this IParameterSymbol parameter)
+        {
+            return parameter.RefKind != RefKind.None;
+        }
+
         public static bool IsPartial(this TypeDeclarationSyntax declaration)
         {
             return declaration.Modifiers.Any(SyntaxKind.PartialKeyword);

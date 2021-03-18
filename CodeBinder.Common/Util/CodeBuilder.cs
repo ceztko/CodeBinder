@@ -171,6 +171,20 @@ namespace CodeBinder.Util
             return _parent ?? this;
         }
 
+        /// <summary>
+        /// This method is different from Close, allowing just to remove last indent-like operation
+        /// </summary>
+        public void CloseUsing()
+        {
+            // NOTE: we don't do close() here by purpose to allow using
+            // statements to just remove last indent operation
+            if (_disposeContexts.Count == 0)
+                throw new Exception("Unbalanced dispose operation. Ensure "
+                    + "to not spawn children inside using statements");
+
+            disposeContext(_disposeContexts.Count - 1);
+        }
+
         public override string ToString()
         {
             closeChild();
@@ -248,13 +262,7 @@ namespace CodeBinder.Util
 
         void IDisposable.Dispose()
         {
-            // NOTE: we don't do close() here by purpose to allow using
-            // statements to just remove last indent operation
-            if (_disposeContexts.Count == 0)
-                throw new Exception("Unbalanced dispose operation. Ensure "
-                    + "to not spawn children inside using statements");
-
-            disposeContext(_disposeContexts.Count - 1);
+            CloseUsing();
         }
 
         void disposeContext(int contextIndex)

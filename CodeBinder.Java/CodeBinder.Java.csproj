@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CodeBinder.CLang\CodeBinder.CLang.csproj" />
     <ProjectReference Include="..\CodeBinder.Common\CodeBinder.Common.csproj" />
   </ItemGroup>
   <ItemGroup>

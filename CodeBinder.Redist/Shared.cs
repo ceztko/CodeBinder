@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Apple
+namespace CodeBinder
 {
     public enum ConversionType
     {

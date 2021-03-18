@@ -4,24 +4,29 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
 using CodeBinder.Shared;
 using CodeBinder.Attributes;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.CLang
 {
-    static class CLangMethodExtensions
+    public static class CLangMethodExtensions
     {
         enum ParameterType
         {
             Regular,
             ByRef,
             Return
+        }
+
+        public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter,
+            ICompilationContextProvider provider)
+        {
+            return Append(builder, parameter, false, provider);
         }
 
         public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter,
@@ -39,12 +44,88 @@ namespace CodeBinder.CLang
             return builder;
         }
 
+        public static bool TryGetCLangBinder(this ParameterSyntax parameter, ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        {
+            return TryGetCLangBinder(parameter, false, provider, out binderStr);
+        }
+
+        public static bool TryGetCLangBinder(this ParameterSyntax parameter, bool pointerType, ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        {
+            var symbol = parameter.Type!.GetTypeSymbol(provider);
+            if (symbol.TypeKind == TypeKind.Enum)
+            {
+                var attributes = symbol.GetAttributes();
+                binderStr = attributes.GetAttribute<NativeBindingAttribute>().GetConstructorArgument<string>(0);
+                return true;
+            }
+
+            var binder = parameter.GetAttributes(provider).FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
+            if (binder == null)
+            {
+                binderStr = null;
+                return false;
+            }
+
+            if (pointerType)
+                binderStr = $"{binder.AttributeClass!.Name}*";
+            else
+                binderStr = $"{binder.AttributeClass!.Name}";
+            return true;
+        }
+
+        public static string GetCLangType(this ParameterSyntax parameter, ICompilationContextProvider provider)
+        {
+            var symbol = parameter.Type!.GetTypeSymbol(provider);
+            return getCLangType(symbol, parameter.GetAttributes(provider), ParameterType.Regular, false, out _);
+        }
+
+        public static string GetCLangType(this SpecialType type)
+        {
+            switch(type)
+            {
+                case SpecialType.System_Boolean:
+                    return "cbbool";
+                case SpecialType.System_Byte:
+                    return "uint8_t";
+                case SpecialType.System_SByte:
+                    return "int8_t";
+                case SpecialType.System_UInt16:
+                    return "uint16_t";
+                case SpecialType.System_Int16:
+                    return "int16_t";
+                case SpecialType.System_UInt32:
+                    return "uint32_t";
+                case SpecialType.System_Int32:
+                    return "int32_t";
+                case SpecialType.System_UInt64:
+                    return "uint64_t";
+                case SpecialType.System_Int64:
+                    return "int64_t";
+                case SpecialType.System_Single:
+                    return "float";
+                case SpecialType.System_Double:
+                    return "double";
+                case SpecialType.System_IntPtr:
+                    return "void*";
+                case SpecialType.System_UIntPtr:
+                    return "void*";
+                default:
+                    throw new Exception($"Unsupported by type {type}");
+            }
+        }
+
         public static string GetCLangMethodName(this MethodDeclarationSyntax method)
         {
             return method.GetName();
         }
 
-        public static string GetCLangReturnType(this MethodDeclarationSyntax method, bool cppMethod, ICompilationContextProvider provider)
+        internal static string GetCLangReturnType(this MethodDeclarationSyntax method,
+            ICompilationContextProvider provider)
+        {
+            return GetCLangReturnType(method, false, provider);
+        }
+
+        internal static string GetCLangReturnType(this MethodDeclarationSyntax method, bool cppMethod, ICompilationContextProvider provider)
         {
             var symbol = method.GetDeclaredSymbol<IMethodSymbol>(provider);
             return getCLangReturnType(cppMethod, symbol);

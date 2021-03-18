@@ -38,8 +38,9 @@ namespace CodeBinder.JNI
                 yield return new StringConversionWriter("JNITypes.h", () => JNIResources.JNITypes_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter("JNIBoxes.cpp", () => JNIResources.JNIBoxes_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter("JNIBoxes.h", () => JNIResources.JNIBoxes_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
-                yield return new StringConversionWriter("JNIBoxesTemplate.h", () => JNIResources.JNIBoxesTemplate_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter("JNIBinderUtils.cpp", () => JNIResources.JNIBinderUtils_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter("JNICommon.h", () => JNIResources.JNICommon_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter("JNICommon.cpp", () => JNIResources.JNICommon_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
             }
         }
     }

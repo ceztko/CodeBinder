@@ -1,5 +1,6 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
+using CodeBinder.Attributes;
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
@@ -15,18 +16,36 @@ namespace CodeBinder.JNI
 {
     public class JNIModuleConversion : TypeConversion<JNIModuleContext, JNICompilationContext, ConversionCSharpToJNI>
     {
-        public JNIModuleConversion(JNIModuleContext module, ConversionCSharpToJNI conversion)
+        public ConversionType ConversionType { get; private set; }
+
+        public JNIModuleConversion(JNIModuleContext module, ConversionType conversionType, ConversionCSharpToJNI conversion)
             : base(module, conversion)
         {
+            ConversionType = conversionType;
         }
 
         public string JNIModuleName => $"JNI{Context.Name}";
 
-        protected override string GetFileName() => $"{JNIModuleName}.h";
+        protected override string GetFileName() => $"{JNIModuleName}.{FileExtension}";
 
         protected override string GetGeneratedPreamble() => ConversionCSharpToJNI.SourcePreamble;
 
         protected sealed override void write(CodeBuilder builder)
+        {
+            switch (ConversionType)
+            {
+                case ConversionType.Header:
+                    writeHeader(builder);
+                    break;
+                case ConversionType.Implementation:
+                    writeImplementation(builder);
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        void writeHeader(CodeBuilder builder)
         {
             builder.AppendLine("#pragma once");
             builder.AppendLine();
@@ -37,17 +56,40 @@ namespace CodeBinder.JNI
             builder.AppendLine("{");
             builder.AppendLine("#endif");
             builder.AppendLine();
-            WriteMethods(builder);
+            WriteMethods(builder, ConversionType.Header);
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("}");
             builder.AppendLine("#endif");
         }
 
-        private void WriteMethods(CodeBuilder builder)
+        void writeImplementation(CodeBuilder builder)
+        {
+            builder.AppendLine("#include \"Internal/JNICommon.h\"");
+            builder.AppendLine($"#include \"{JNIModuleName}.h\"");
+            builder.AppendLine($"#include <{Context.Name}.h>");
+            builder.AppendLine();
+            WriteMethods(builder, ConversionType.Implementation);
+        }
+
+        private void WriteMethods(CodeBuilder builder, ConversionType conversionType)
         {
             foreach (var method in Context.Methods)
             {
-                builder.Append(MethodWriter.Create(method, this));
+                if (method.TryGetAttribute<VerbatimConversionAttribute>(Context, out var attribute)
+                    && (attribute.ConstructorArguments.Length == 1 ||
+                        attribute.GetConstructorArgument<ConversionType>(0) == ConversionType.Implementation))
+                {
+                    // Use the verbatim conversion instead
+                    string verbatimStr = attribute.ConstructorArguments.Length == 1
+                        ? attribute.GetConstructorArgument<string>(0)
+                        : attribute.GetConstructorArgument<string>(1);
+                    builder.AppendLine(verbatimStr);
+                }
+                else
+                {
+                    builder.Append(new JNITrampolineMethodWriter(method, this, conversionType));
+                }
+
                 builder.AppendLine();
             }
         }
@@ -55,6 +97,19 @@ namespace CodeBinder.JNI
         public override JNICompilationContext Compilation
         {
             get { return Context.Compilation; }
+        }
+
+        string FileExtension
+        {
+            get
+            {
+                return ConversionType switch
+                {
+                    ConversionType.Header => "h",
+                    ConversionType.Implementation => "cpp",
+                    _ => throw new NotSupportedException()
+                };
+            }
         }
     }
 }

@@ -37,7 +37,8 @@ namespace CodeBinder.JNI
 
         protected override IEnumerable<TypeConversion<JNIModuleContext>> getConversions()
         {
-            yield return new JNIModuleConversion(this, Compilation.Conversion);
+            yield return new JNIModuleConversion(this, ConversionType.Header, Compilation.Conversion);
+            yield return new JNIModuleConversion(this, ConversionType.Implementation, Compilation.Conversion);
         }
 
         public override IEnumerable<MethodDeclarationSyntax> Methods

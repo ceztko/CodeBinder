@@ -182,6 +182,26 @@ namespace CodeBinder.Attributes
         public string Name { get; private set; }
     }
 
+    /// <summary>
+    /// Verbatim conversion writing
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, AllowMultiple = false)]
+    public sealed class VerbatimConversionAttribute : CodeBinderAttribute
+    {
+        public ConversionType ConversionType { get; private set; }
+
+        public string Verbatim { get; private set; }
+
+        public VerbatimConversionAttribute(string verbatim)
+           : this(ConversionType.Implementation, verbatim) { }
+
+        public VerbatimConversionAttribute(ConversionType type, string verbatim)
+        {
+            ConversionType = type;
+            Verbatim = verbatim;
+        }
+    }
+
     public static class Policies
     {
         public const string Delegates = "{0CA8BB17-A589-41A9-A97C-0E1870837AB4}";

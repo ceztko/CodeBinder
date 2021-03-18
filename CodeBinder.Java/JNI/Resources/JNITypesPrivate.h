@@ -24,9 +24,7 @@ private:
     jfieldID getFieldId(JNIEnv *env) const;
 };
 
-////////////////////
-// Base box types //
-////////////////////
+// Base box types
 
 // Forward declarations for box type classes
 class _jBooleanBox;
