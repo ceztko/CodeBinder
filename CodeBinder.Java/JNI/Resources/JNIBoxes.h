@@ -4,114 +4,101 @@
 #include "JNITypesPrivate.h"
 #include <CBBaseTypes.h>
 
-// Wraps custom java box type
-template <typename TJBox, typename TN = typename TJBox::ValueType>
+// Wraps java numerical box type
+template <typename TJBox, typename TNative = typename TJBox::ValueType>
 class BJ2NImpl
 {
 public:
-    BJ2NImpl(JNIEnv* env, typename TJBox::BoxPtr box, bool commit)
+    BJ2NImpl(JNIEnv* env, typename TJBox::BoxPtr box)
     {
         m_env = env;
         m_box = box;
-        m_commit = commit;
-        Value = (TN)box->GetValue(env);
+        m_value = (TNative)box->GetValue(env);
     }
     ~BJ2NImpl()
     {
-        if (m_commit)
-            m_box->SetValue(m_env, (typename TJBox::ValueType)Value);
+        m_box->SetValue(m_env, (typename TJBox::ValueType)m_value);
     }
 public:
-    inline TN* ptr() { return &Value; }
-    inline TN& ref() { return Value; }
-    inline operator TN* () { return &Value; }
-    inline operator TN& () { return Value; }
+    inline operator TNative* () { return &m_value; }
 public:
-    TN Value;
-private:
+    TNative m_value;
     JNIEnv* m_env;
     typename TJBox::BoxPtr m_box;
-    bool m_commit;
 };
 
+// Wraps java string box type
 class SBJ2N
 {
 public:
-    SBJ2N(JNIEnv* env, jStringBox box, bool commit)
-    {
-        m_env = env;
-        m_box = box;
-        m_commit = commit;
-        // TODO
-    }
-    ~SBJ2N()
-    {
-        // TODO
-    }
+    SBJ2N(JNIEnv* env, jStringBox box);
+    ~SBJ2N();
 
 public:
-    inline operator cbstring* () { return &Value; }
+    inline operator cbstring* () { return &m_value; }
 private:
-    cbstring Value;
     JNIEnv* m_env;
     jStringBox m_box;
-    bool m_commit;
+    jstring m_jstring;
+    const char* m_chars;
+    jboolean m_isCopy;
+    cbstring m_value;
 };
 
-BJ2NImpl<_jBooleanBox> BJ2N(JNIEnv* env, jBooleanBox box, bool commit = true);
-BJ2NImpl<_jCharacterBox> BJ2N(JNIEnv* env, jCharacterBox box, bool commit = true);
-BJ2NImpl<_jByteBox> BJ2N(JNIEnv* env, jByteBox box, bool commit = true);
-BJ2NImpl<_jShortBox> BJ2N(JNIEnv* env, jShortBox box, bool commit = true);
-BJ2NImpl<_jIntegerBox> BJ2N(JNIEnv* env, jIntegerBox box, bool commit = true);
-BJ2NImpl<_jLongBox> BJ2N(JNIEnv* env, jLongBox box, bool commit = true);
-BJ2NImpl<_jFloatBox> BJ2N(JNIEnv* env, jFloatBox box, bool commit = true);
-BJ2NImpl<_jDoubleBox> BJ2N(JNIEnv* env, jDoubleBox box, bool commit = true);
-SBJ2N BJ2N(JNIEnv* env, jStringBox box, bool commit = true);
+BJ2NImpl<_jBooleanBox> BJ2N(JNIEnv* env, jBooleanBox box);
+BJ2NImpl<_jCharacterBox> BJ2N(JNIEnv* env, jCharacterBox box);
+BJ2NImpl<_jByteBox> BJ2N(JNIEnv* env, jByteBox box);
+BJ2NImpl<_jShortBox> BJ2N(JNIEnv* env, jShortBox box);
+BJ2NImpl<_jIntegerBox> BJ2N(JNIEnv* env, jIntegerBox box);
+BJ2NImpl<_jLongBox> BJ2N(JNIEnv* env, jLongBox box);
+BJ2NImpl<_jFloatBox> BJ2N(JNIEnv* env, jFloatBox box);
+BJ2NImpl<_jDoubleBox> BJ2N(JNIEnv* env, jDoubleBox box);
+SBJ2N BJ2N(JNIEnv* env, jStringBox box);
 
-template <typename TN>
-BJ2NImpl<_jBooleanBox, TN> BJ2N(JNIEnv* env, jBooleanBox box, bool commit = true)
+template <typename TNative>
+BJ2NImpl<_jBooleanBox, TNative> BJ2N(JNIEnv* env, jBooleanBox box)
 {
-    return BJ2NImpl<_jBooleanBox, TN>(env, box, commit);
+    return BJ2NImpl<_jBooleanBox, TNative>(env, box);
 }
 
-template <typename TN>
-BJ2NImpl<_jCharacterBox, TN> BJ2N(JNIEnv* env, jCharacterBox box, bool commit = true)
+template <typename TNative>
+BJ2NImpl<_jCharacterBox, TNative> BJ2N(JNIEnv* env, jCharacterBox box)
 {
-    return BJ2NImpl<_jCharacterBox, TN>(env, box, commit);
+    return BJ2NImpl<_jCharacterBox, TNative>(env, box);
 }
 
-template <typename TN>
-BJ2NImpl<_jByteBox, TN> BJ2N(JNIEnv* env, jByteBox box, bool commit = true)
+template <typename TNative>
+BJ2NImpl<_jByteBox, TNative> BJ2N(JNIEnv* env, jByteBox box)
 {
-    return BJ2NImpl<_jByteBox, TN>(env, box, commit);
+    return BJ2NImpl<_jByteBox, TNative>(env, box);
 }
 
-template <typename TN>
-BJ2NImpl<_jShortBox, TN> BJ2N(JNIEnv* env, jShortBox box, bool commit = true)
+template <typename TNative>
+BJ2NImpl<_jShortBox, TNative> BJ2N(JNIEnv* env, jShortBox box)
 {
-    return BJ2NImpl<_jShortBox, TN>(env, box, commit);
+    return BJ2NImpl<_jShortBox, TNative>(env, box);
 }
 
-template <typename TN>
-BJ2NImpl<_jIntegerBox, TN> BJ2N(JNIEnv* env, jIntegerBox box, bool commit = true)
+template <typename TNative>
+BJ2NImpl<_jIntegerBox, TNative> BJ2N(JNIEnv* env, jIntegerBox box)
 {
-    return BJ2NImpl<_jIntegerBox, TN>(env, box, commit);
+    return BJ2NImpl<_jIntegerBox, TNative>(env, box);
 }
 
-template <typename TN>
-BJ2NImpl<_jLongBox, TN> BJ2N(JNIEnv* env, jLongBox box, bool commit = true)
+template <typename TNative>
+BJ2NImpl<_jLongBox, TNative> BJ2N(JNIEnv* env, jLongBox box)
 {
-    return BJ2NImpl<_jLongBox, TN>(env, box, commit);
+    return BJ2NImpl<_jLongBox, TNative>(env, box);
 }
 
-template <typename TN>
-BJ2NImpl<_jFloatBox, TN> BJ2N(JNIEnv* env, jFloatBox box, bool commit = true)
+template <typename TNative>
+BJ2NImpl<_jFloatBox, TNative> BJ2N(JNIEnv* env, jFloatBox box)
 {
-    return BJ2NImpl<_jFloatBox, TN>(env, box, commit);
+    return BJ2NImpl<_jFloatBox, TNative>(env, box);
 }
 
-template <typename TN>
-BJ2NImpl<_jDoubleBox, TN> BJ2N(JNIEnv* env, jDoubleBox box, bool commit = true)
+template <typename TNative>
+BJ2NImpl<_jDoubleBox, TNative> BJ2N(JNIEnv* env, jDoubleBox box)
 {
-    return BJ2NImpl<_jDoubleBox, TN>(env, box, commit);
+    return BJ2NImpl<_jDoubleBox, TNative>(env, box);
 }

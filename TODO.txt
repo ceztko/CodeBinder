@@ -19,9 +19,6 @@ General
 Example, calling a method instead of a field
 - Check to not allow Explicit Interface Implementation;
 
-Internals JNI:
-- Add AJ2N e AN2J, do like box types (stop using template specialization)
-
 Possible support:
 - Box for enums on non native methods (look getJavaType() in JavaExtensions_Types.cs)
 - structs:
