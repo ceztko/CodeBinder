@@ -15,6 +15,7 @@ using System.IO;
 using CodeBinder.CLang;
 using CodeBinder.Shared;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace CodeBinder
 {
@@ -22,6 +23,9 @@ namespace CodeBinder
     {
         static int Main(string[] args)
         {
+            // Registering MSBuild defaults is necessary otherwise projects will not compile
+            MSBuildLocator.RegisterDefaults();
+
             try
             {
                 main(args);
@@ -42,20 +46,23 @@ namespace CodeBinder
             return 0;
         }
 
+        // Move work to separate not inline method as suggested:
+        // https://github.com/microsoft/MSBuildLocator/issues/104#issuecomment-790226981
+        [MethodImpl(MethodImplOptions.NoInlining)]
         static void main(string[] cmdArgs)
         {
-            string? projectPath = null;
+            HashSet<string> projects = new();
             string? solutionPath = null;
             string? targetRootPath = null;
             string? language = null;
-            var definitionsToAdd = new List<string>();
-            var definitionsToRemove = new List<string>();
-            var namespaceMappings = new List<string>();
+            List<string> definitionsToAdd = new();
+            List<string> definitionsToRemove = new();
+            List<string> namespaceMappings = new();
             bool shouldShowHelp = false;
             var conversions = GetConverterInfos();
 
             var options = new OptionSet {
-                { "p|project=", "The project to be converted", p => projectPath = p },
+                { "p|project=", "The project to be converted", p => projects.Add(p) },
                 { "s|solution=", "The solution to be converted", s => solutionPath = s },
                 { "d|def=", "Preprocessor definition to be added during conversion", d => definitionsToAdd.Add(d) },
                 { "n|nodef=", "Preprocessor definition to be removed during conversion", d => definitionsToRemove.Add(d) },
@@ -82,7 +89,7 @@ namespace CodeBinder
             Converter converter;
             try
             {
-                if (projectPath == null && solutionPath == null)
+                if (projects.Count == 0 && solutionPath == null)
                     throw new Exception("A project or a solution must be specified");
 
                 if (targetRootPath == null)
@@ -134,22 +141,29 @@ namespace CodeBinder
             GeneratorOptions genargs = new GeneratorOptions();
             genargs.TargetRootPath = targetRootPath;
 
-            // Registering MSBuild defaults is necessary otherwise projects will not compile
-            MSBuildLocator.RegisterDefaults();
             MSBuildWorkspace workspace = MSBuildWorkspace.Create();
 
-            if (projectPath != null)
-            {
-                var project = workspace.OpenProjectAsync(projectPath).Result;
-                converter.ConvertAndWrite(project, genargs);
-            }
-            else if (solutionPath != null)
+            // TODO: Handle multiple projects
+            if (solutionPath != null)
             {
                 var solution = workspace.OpenSolutionAsync(solutionPath).Result;
-                converter.ConvertAndWrite(solution, genargs);
+                if (projects.Count == 0)
+                {
+                    converter.ConvertAndWrite(solution, genargs);
+                }
+                else
+                {
+                    var filtered = solution.Projects.Where((project) => projects.Contains(project.Name)).ToList();
+                    converter.ConvertAndWrite(filtered, genargs);
+                }
+            }
+            else if (projects.Count != 0)
+            {
+                var project = workspace.OpenProjectAsync(projects.First()).Result;
+                converter.ConvertAndWrite(project, genargs);
             }
             else
-                throw new Exception();
+                throw new NotSupportedException();
         }
 
         static IReadOnlyList<ConversionInfo> GetConverterInfos()

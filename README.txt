@@ -14,7 +14,7 @@ Options:
                                ns2
   -l, --language=VALUE       The target language for the conversion
   -r, --rootpath=VALUE       The target root path for the conversion
-      --publiciface          Only output public interface (CLang)
+      --interface-only       Only output public interface (CLang)
   -h, --help                 Show this message and exit
 
 Example:

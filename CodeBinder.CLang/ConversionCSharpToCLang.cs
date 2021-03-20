@@ -14,7 +14,7 @@ namespace CodeBinder.CLang
     /// </summary>
     /// <remarks>Inherit this class to provide custom contexts</remarks>
     [ConversionLanguageName(LanguageName)]
-    [ConfigurationSwitch("publiciface", "Only output public interface (CLang)")]
+    [ConfigurationSwitch("interface-only", "Only output public interface (CLang)")]
     public class ConversionCSharpToCLang : LanguageConversion<CLangCompilationContext, CLangModuleContext>
     {
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
@@ -44,8 +44,8 @@ namespace CodeBinder.CLang
 
         public override bool TryParseExtraArgs(List<string> args)
         {
-            // Try parse --publiciface switch
-            if (args.Count == 1 && args[0] == "publiciface")
+            // Try parse --interface-only switch
+            if (args.Count == 1 && args[0] == "interface-only")
             {
                 PublicInterfaceOnly = true;
                 return true;
