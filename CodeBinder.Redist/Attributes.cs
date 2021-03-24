@@ -30,7 +30,7 @@ namespace CodeBinder.Attributes
     /// <summary>
     /// Describe an additional import for the target language
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
     public sealed class ImportAttribute : CodeBinderAttribute
     {
         public ImportAttribute(string name)
@@ -42,7 +42,7 @@ namespace CodeBinder.Attributes
     }
 
     [Conditional(ConditionString)]
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     public sealed class OrderAttribute : CodeBinderAttribute
     {
         public int Order { get; private set; }
@@ -85,7 +85,7 @@ namespace CodeBinder.Attributes
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
     public sealed class OverloadSuffixAttribute : CodeBinderAttribute
     {
         public string Name { get; private set; }
@@ -99,7 +99,7 @@ namespace CodeBinder.Attributes
     /// <summary>
     /// This attribute tells that the method, parameter or return value that should map to a native counterpart
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.ReturnValue, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Parameter | AttributeTargets.ReturnValue)]
     public sealed class NativeAttribute : CodeBinderAttribute
     {
         public NativeAttribute()
@@ -185,7 +185,7 @@ namespace CodeBinder.Attributes
     /// <summary>
     /// Verbatim conversion writing
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method)]
     public sealed class VerbatimConversionAttribute : CodeBinderAttribute
     {
         public ConversionType ConversionType { get; private set; }
