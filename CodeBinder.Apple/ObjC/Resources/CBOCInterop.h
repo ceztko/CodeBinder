@@ -16,7 +16,7 @@ private:
 
 public:
     SN2OC(NSString* str)
-        : m_handled(false), m_cstr{ }, m_ocstr(nil)
+        : m_handled(false), m_cstr{ }, m_ocstr((NSString* __strong*)nil)
     {
         if (str != nil)
             m_cstr = CBCreateStringView([str UTF8String]);
@@ -26,11 +26,11 @@ public:
         : m_handled(true), m_cstr{ }, m_ocstr(str) { }
 
     SN2OC(const cbstring& str)
-        : m_handled(false), m_cstr(str), m_ocstr(nil) { }
+        : m_handled(false), m_cstr(str), m_ocstr((NSString* __strong*)nil) { }
 
     // Move semantics
     SN2OC(cbstring&& str)
-        : m_handled(true), m_cstr(str), m_ocstr(nil)
+        : m_handled(true), m_cstr(str), m_ocstr((NSString* __strong*)nil)
     {
         str = { };
     }
