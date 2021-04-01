@@ -185,7 +185,7 @@ namespace CodeBinder.Attributes
     /// <summary>
     /// Verbatim conversion writing
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, AllowMultiple = true)]
     public sealed class VerbatimConversionAttribute : CodeBinderAttribute
     {
         public ConversionType ConversionType { get; private set; }
