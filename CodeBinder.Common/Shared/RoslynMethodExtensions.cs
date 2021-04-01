@@ -144,6 +144,19 @@ namespace CodeBinder.Shared
             return ret;
         }
 
+        public static IReadOnlyList<AttributeData> GetAttributes<TAttribute>(this IEnumerable<AttributeData> attributes)
+            where TAttribute : Attribute
+        {
+            var list = new List<AttributeData>();
+            foreach (var attrib in attributes)
+            {
+                if (attrib.IsAttribute<TAttribute>())
+                    list.Add(attrib);
+            }
+
+            return list;
+        }
+
         public static bool TryGetAttribute<TAttribute>(this IEnumerable<AttributeData> attributes, [NotNullWhen(true)]out AttributeData? attribute)
             where TAttribute : Attribute
         {
@@ -187,6 +200,12 @@ namespace CodeBinder.Shared
             where TAttribute : Attribute
         {
             return symbol.GetAttributes().GetAttribute<TAttribute>();
+        }
+
+        public static IReadOnlyList<AttributeData> GetAttributes<TAttribute>(this ISymbol symbol)
+            where TAttribute : Attribute
+        {
+            return symbol.GetAttributes().GetAttributes<TAttribute>();
         }
 
         public static bool Inherits<T>(this AttributeData data)

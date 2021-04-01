@@ -270,6 +270,21 @@ namespace CodeBinder.Apple
             }
         }
 
+        public static bool IsConversionType(this ObjCFileType filetype, ConversionType conversionType)
+        {
+            switch (filetype)
+            {
+                case ObjCFileType.PublicHeader:
+                case ObjCFileType.InternalHeader:
+                case ObjCFileType.InternalOnlyHeader:
+                    return conversionType == ConversionType.Header;
+                case ObjCFileType.Implementation:
+                    return conversionType == ConversionType.Implementation;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
         public static bool IsImplementation(this ObjCFileType filetype)
         {
             return filetype == ObjCFileType.Implementation;

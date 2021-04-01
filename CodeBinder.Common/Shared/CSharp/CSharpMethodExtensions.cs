@@ -768,6 +768,16 @@ namespace CodeBinder.Shared.CSharp
             return ret!;
         }
 
+        public static IReadOnlyList<AttributeData> GetAttributes<TAttribute>(this CSharpSyntaxNode node, ICompilationContextProvider provider)
+           where TAttribute : Attribute
+        {
+            var symbol = GetDeclaredSymbol(node, provider);
+            if (symbol == null)
+                return new AttributeData[0];
+
+            return symbol.GetAttributes<TAttribute>();
+        }
+
         public static TSymbol GetDeclaredSymbol<TSymbol>(this CSharpSyntaxNode node, ICompilationContextProvider provider)
             where TSymbol : class, ISymbol
         {

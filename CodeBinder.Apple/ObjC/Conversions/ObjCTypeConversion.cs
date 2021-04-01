@@ -7,6 +7,7 @@ using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace CodeBinder.Apple
@@ -20,14 +21,16 @@ namespace CodeBinder.Apple
 
         protected override void write(CodeBuilder builder)
         {
-            if (Context.Node.TryGetAttribute<VerbatimConversionAttribute>(Context, out var attribute)
-                && (attribute.ConstructorArguments.Length == 1 && ConversionType == ConversionType.Implementation
-                    || attribute.GetConstructorArgument<ConversionType>(0) == ConversionType))
+            var verbatimConversions = Context.Node.GetAttributes<VerbatimConversionAttribute>(Context);
+            var conversion = verbatimConversions.FirstOrDefault((attrib)=>
+                attrib.ConstructorArguments.Length == 1 && ConversionType == ConversionType.Implementation
+                    || attrib.GetConstructorArgument<ConversionType>(0) == ConversionType);
+            if (conversion != null)
             {
                 // Use the verbatim conversion instead
-                string verbatimStr = attribute.ConstructorArguments.Length == 1
-                    ? attribute.GetConstructorArgument<string>(0)
-                    : attribute.GetConstructorArgument<string>(1);
+                string verbatimStr = conversion.ConstructorArguments.Length == 1
+                    ? conversion.GetConstructorArgument<string>(0)
+                    : conversion.GetConstructorArgument<string>(1);
                 builder.Append(verbatimStr);
                 return;
             }

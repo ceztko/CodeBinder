@@ -7,6 +7,7 @@ using CodeBinder.Shared.CSharp;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 using System;
+using System.Linq;
 using CodeBinder.Attributes;
 using CodeBinder.Util;
 using CodeBinder.Apple.Attributes;
@@ -27,6 +28,38 @@ namespace CodeBinder.Apple
         }
 
         protected override void Write()
+        {
+            // TODO: Move it ObjCBaseTypeWriter.WriteTypeMembers
+            var verbatimConversions = Item.GetAttributes<VerbatimConversionAttribute>(Context);
+            var conversion = verbatimConversions.FirstOrDefault((attrib) =>
+            {
+                if (attrib.ConstructorArguments.Length == 1)
+                {
+                    if (FileType.IsImplementation())
+                        return true;
+                    else
+                        return false;
+                }
+                else
+                {
+                    return FileType.IsConversionType(attrib.GetConstructorArgument<ConversionType>(0));
+                }
+            });
+            if (conversion != null)
+            {
+                // Use the verbatim conversion instead
+                string verbatimStr = conversion.ConstructorArguments.Length == 1
+                    ? conversion.GetConstructorArgument<string>(0)
+                    : conversion.GetConstructorArgument<string>(1);
+                Builder.AppendLine(verbatimStr);
+            }
+            else
+            {
+                write();
+            }
+        }
+
+        void write()
         {
             WriteModifiers();
             WriteReturnType();
@@ -88,23 +121,10 @@ namespace CodeBinder.Apple
                     }
                     else
                     {
-                        if (Item.TryGetAttribute<VerbatimConversionAttribute>(Context, out var attribute)
-                            && (attribute.ConstructorArguments.Length == 1 ||
-                                attribute.GetConstructorArgument<ConversionType>(0) == ConversionType.Implementation))
-                        {
-                            // Use the verbatim conversion instead
-                            string verbatimStr = attribute.ConstructorArguments.Length == 1
-                                ? attribute.GetConstructorArgument<string>(0)
-                                : attribute.GetConstructorArgument<string>(1);
-                            Builder.AppendLine(verbatimStr);
-                        }
-                        else
-                        {
-                            WriteMethodBodyPrefixInternal();
-                            if (DoWriteMethodBody && !Context.Conversion.SkipBody)
-                                Builder.Append(Item.Body, Context, true).AppendLine();
-                            WriteMethodBodyPostfixInternal();
-                        }
+                        WriteMethodBodyPrefixInternal();
+                        if (DoWriteMethodBody && !Context.Conversion.SkipBody)
+                            Builder.Append(Item.Body, Context, true).AppendLine();
+                        WriteMethodBodyPostfixInternal();
                     }
                 }
             }
