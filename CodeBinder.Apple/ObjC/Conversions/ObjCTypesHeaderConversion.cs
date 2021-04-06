@@ -89,7 +89,6 @@ namespace CodeBinder.Apple
             // Enums
             builder.AppendLine("// Enums");
             builder.AppendLine();
-            var tmpbuilder = new StringBuilder();
             foreach (var enm in Compilation.Enums)
             {
                 if (ShouldSkipType(enm))

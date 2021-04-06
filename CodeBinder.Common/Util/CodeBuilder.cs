@@ -75,7 +75,9 @@ namespace CodeBinder.Util
             doChecks();
             _instanceIndentedCount = 0;
             appendIndent(str, true);
-            _writer.WriteLine(str);
+            _writer.Write(str);
+            // Write invariant newline
+            _writer.Write("\r\n");
             _doIndent = true;
             return this;
         }
