@@ -1,4 +1,4 @@
-#include "JNITypesPrivate.h"
+﻿#include "JNITypesPrivate.h"
 
 #include "JNIShared.h"
 

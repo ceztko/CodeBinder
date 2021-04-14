@@ -13,7 +13,7 @@ extern "C"
     {
         env->DeleteGlobalRef((jobject)globalref);
     }
-	
+
 	JNIEXPORT jlong JNICALL Java_CodeBinder_BinderUtils_newGlobalWeakRef(
 		JNIEnv *env, jclass, jobject obj)
 	{
