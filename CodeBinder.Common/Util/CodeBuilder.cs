@@ -33,6 +33,8 @@ namespace CodeBinder.Util
         private CodeBuilder(CodeBuilder? parent, TextWriter writer, uint instanceIndentedCount,
             bool doIndent, uint indentSpaces, uint currentIndentLevel)
         {
+            // Write invariant newline
+            writer.NewLine = "\r\n";
             _parent = parent;
             _writer = writer;
             _instanceIndentedCount = instanceIndentedCount;
@@ -75,9 +77,7 @@ namespace CodeBinder.Util
             doChecks();
             _instanceIndentedCount = 0;
             appendIndent(str, true);
-            _writer.Write(str);
-            // Write invariant newline
-            _writer.Write("\r\n");
+            _writer.WriteLine(str);
             _doIndent = true;
             return this;
         }
