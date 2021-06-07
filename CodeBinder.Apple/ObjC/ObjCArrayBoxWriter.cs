@@ -121,45 +121,10 @@ namespace CodeBinder.Apple
                 builder.AppendLine();
                 using (builder.Block())
                 {
-                    builder.Append("self = [self initWithConstArray:arr :length :NO]").EndOfStatement();
+                    builder.Append("self = [self init:length]").EndOfStatement();
                     builder.Append("if (self == nil)").AppendLine();
                     builder.Append("    return nil").EndOfStatement();
-                    builder.Append("return self").EndOfStatement();
-                }
-            }
-            builder.AppendLine();
-
-            builder.Append("-(id)initWithConstArray").Colon().Append($"({ConstArrayTypeDeclaration})arr")
-                .Space().Colon().Append("(NSUInteger)length").Space().Colon().Append("(BOOL)pinned");
-            if (IsHeader)
-            {
-                builder.EndOfStatement();
-            }
-            else
-            {
-                builder.AppendLine();
-                using (builder.Block())
-                {
-                    builder.AppendLine("if (pinned)");
-                    using(builder.Block())
-                    {
-                        builder.Append("self = [super init]").EndOfStatement();
-                        builder.Append("if (self == nil)").AppendLine();
-                        builder.Append("    return nil").EndOfStatement();
-                        builder.Append($"_data = ({ArrayTypeDeclaration})arr").EndOfStatement();
-                        builder.Append("_length = length").EndOfStatement();
-                        builder.Append("_handled = NO").EndOfStatement();
-                        builder.Append("_immutable = YES").EndOfStatement();
-                    }
-                    builder.Append("else").AppendLine();
-                    using (builder.Block())
-                    {
-                        builder.Append("self = [self init:length]").EndOfStatement();
-                        builder.Append("if (self == nil)").AppendLine();
-                        builder.Append("    return nil").EndOfStatement();
-                        builder.Append("memcpy(_data, arr, length)").EndOfStatement();
-                    }
-
+                    builder.Append("memcpy(_data, arr, length)").EndOfStatement();
                     builder.Append("return self").EndOfStatement();
                 }
             }
@@ -185,7 +150,7 @@ namespace CodeBinder.Apple
             builder.AppendLine();
 
             builder.Append("-(id)initWithArray").Colon().Append($"({ArrayTypeDeclaration})arr")
-                .Space().Colon().Append("(NSUInteger)length").Space().Colon().Append("(BOOL)handled");
+                .Space().Colon().Append("(NSUInteger)length").Space().Colon().Append("(BOOL)copy");
             if (IsHeader)
             {
                 builder.EndOfStatement();
@@ -195,12 +160,21 @@ namespace CodeBinder.Apple
                 builder.AppendLine();
                 using (builder.Block())
                 {
-                    builder.Append("self = [super init]").EndOfStatement();
+                    builder.AppendLine("if (copy)");
+                    using (builder.Block())
+                    {
+                        builder.Append("self = [self initWithConstArray:arr :length]").EndOfStatement();
+                    }
+                    builder.AppendLine("else");
+                    using (builder.Block())
+                    {
+                        builder.Append("self = [super init]").EndOfStatement();
+                        builder.Append("_data = arr").EndOfStatement();
+                        builder.Append("_length = length").EndOfStatement();
+                        builder.Append("_handled = false").EndOfStatement();
+                    }
                     builder.Append("if (self == nil)").AppendLine();
                     builder.Append("    return nil").EndOfStatement();
-                    builder.Append("_data = arr").EndOfStatement();
-                    builder.Append("_length = length").EndOfStatement();
-                    builder.Append("_handled = handled").EndOfStatement();
                     builder.Append("return self").EndOfStatement();
                 }
             }
