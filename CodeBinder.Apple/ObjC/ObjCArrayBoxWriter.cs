@@ -53,7 +53,6 @@ namespace CodeBinder.Apple
                     builder.Append(ArrayTypeDeclaration).Space().Append("_data").EndOfStatement();
                     builder.Append("NSUInteger").Space().Append("_length").EndOfStatement();
                     builder.Append("BOOL").Space().Append("_handled").EndOfStatement();
-                    builder.Append("BOOL").Space().Append("_immutable").EndOfStatement();
                 }
             }
             else
@@ -79,7 +78,6 @@ namespace CodeBinder.Apple
                     builder.Append("_data = ").Append($"({ArrayTypeDeclaration})").Append($"calloc(length, sizeof({PrimitiveType.ToTypeName()}))").EndOfStatement();
                     builder.Append("_length = length").EndOfStatement();
                     builder.Append("_handled = YES").EndOfStatement();
-                    builder.Append("_immutable = NO").EndOfStatement();
                     builder.Append("return self").EndOfStatement();
                 }
             }
@@ -208,8 +206,6 @@ namespace CodeBinder.Apple
                 builder.AppendLine();
                 using (builder.Block())
                 {
-                    builder.AppendLine("if (_immutable)");
-                    builder.Append("    @throw [NSException exceptionWithName:@\"UnsupportedOperationException\" reason:@\"Can't modify an immutable array.\" userInfo:nil]").EndOfStatement();
                     builder.AppendLine("if (idx >= _length)");
                     builder.Append("    @throw [NSException exceptionWithName:@\"IndexOutofRange\" reason:@\"Index was outside the bounds of the array.\" userInfo:nil]").EndOfStatement();
                     builder.Append("_data[idx] = value").EndOfStatement();
@@ -220,7 +216,6 @@ namespace CodeBinder.Apple
             if (IsHeader)
             {
                 builder.Append("@property (readonly,nonatomic)").Space().Append($"{ArrayTypeDeclaration}").Space().Append("data").EndOfStatement();
-                builder.Append("@property (readonly,nonatomic)").Space().Append($"{ConstArrayTypeDeclaration}").Space().Append("constData").EndOfStatement();
                 builder.Append("@property (readonly,nonatomic)").Space().Append("NSUInteger length").EndOfStatement();
                 builder.AppendLine();
             }
@@ -241,21 +236,6 @@ namespace CodeBinder.Apple
             }
             builder.AppendLine();
 
-            builder.Append($"-({ConstArrayTypeDeclaration})constData");
-            if (IsHeader)
-            {
-                builder.EndOfStatement();
-            }
-            else
-            {
-                builder.AppendLine();
-                using (builder.Block())
-                {
-                    builder.Append("return _data").EndOfStatement();
-                }
-            }
-            builder.AppendLine();
-
             builder.Append($"-({ArrayTypeDeclaration})data");
             if (IsHeader)
             {
@@ -266,8 +246,6 @@ namespace CodeBinder.Apple
                 builder.AppendLine();
                 using (builder.Block())
                 {
-                    builder.AppendLine("if (_immutable)");
-                    builder.Append("    @throw [NSException exceptionWithName:@\"UnsupportedOperationException\" reason:@\"Can't modify an immutable array.\" userInfo:nil]").EndOfStatement();
                     builder.Append("return _data").EndOfStatement();
                 }
             }
