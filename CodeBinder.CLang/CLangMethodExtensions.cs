@@ -44,6 +44,28 @@ namespace CodeBinder.CLang
             return builder;
         }
 
+        public static bool TryGetCLangBinder(this BaseTypeDeclarationSyntax typeSyntax,
+            ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        {
+            return TryGetCLangBinder(typeSyntax, false, provider, out binderStr);
+        }
+
+        public static bool TryGetCLangBinder(this BaseTypeDeclarationSyntax typeSyntax, bool pointerType,
+            ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        {
+            var symbol = typeSyntax.GetDeclaredSymbol<ITypeSymbol>(provider);
+            if (!tryGetCLangBinder(symbol, out binderStr))
+            {
+                binderStr = null;
+                return false;
+            }
+
+            if (pointerType)
+                binderStr = $"{binderStr}*";
+
+            return true;
+        }
+
         public static bool TryGetCLangBinder(this ParameterSyntax parameter,
             ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
         {
@@ -54,21 +76,28 @@ namespace CodeBinder.CLang
             ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
         {
             var symbol = parameter.Type!.GetTypeSymbol(provider);
-            if (symbol.TypeKind == TypeKind.Enum)
-                return tryGetCLangBinder(symbol, out binderStr);
-
-            var binder = parameter.GetAttributes(provider).FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
-            if (binder == null)
+            if (tryGetCLangBinder(symbol, out binderStr))
             {
-                binderStr = null;
-                return false;
-            }
+                if (pointerType)
+                    binderStr = $"{binderStr}*";
 
-            if (pointerType)
-                binderStr = $"{binder.AttributeClass!.Name}*";
+                return true;
+            }
             else
-                binderStr = $"{binder.AttributeClass!.Name}";
-            return true;
+            {
+                var binder = parameter.GetAttributes(provider).FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
+                if (binder == null)
+                {
+                    binderStr = null;
+                    return false;
+                }
+
+                if (pointerType)
+                    binderStr = $"{binder.AttributeClass!.Name}*";
+                else
+                    binderStr = $"{binder.AttributeClass!.Name}";
+                return true;
+            }
         }
 
         static bool tryGetCLangBinder(ITypeSymbol symbol, [NotNullWhen(true)]out string? binderStr)

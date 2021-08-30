@@ -35,6 +35,9 @@ namespace CodeBinder.CLang
 
         public override void VisitStructDeclaration(StructDeclarationSyntax node)
         {
+            if (node.HasAttribute<NativeBindingAttribute>(this))
+                Compilation.AddType(node);
+
             visitType(node);
         }
 

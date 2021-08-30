@@ -46,7 +46,11 @@ namespace CodeBinder.CLang
             builder.AppendLine();
             foreach (var type in Compilation.Types)
             {
-                builder.Append("#define").Space().Append(type.Identifier.Text).Space().Append("void").AppendLine();
+                string? typeStr;
+                if (!type.TryGetCLangBinder(Compilation, out typeStr))
+                    typeStr = type.Identifier.Text;
+
+                builder.Append("#define").Space().Append(typeStr).Space().Append("void").AppendLine();
             }
 
             builder.AppendLine();

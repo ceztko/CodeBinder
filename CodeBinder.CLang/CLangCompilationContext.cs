@@ -16,14 +16,14 @@ namespace CodeBinder.CLang
     {
         Dictionary<string, CLangModuleContextParent> _modules;
         List<EnumDeclarationSyntax> _enums;
-        List<ClassDeclarationSyntax> _types;
+        List<TypeDeclarationSyntax> _types;
         List<DelegateDeclarationSyntax> _callbacks;
 
         protected CLangCompilationContext()
         {
             _modules = new Dictionary<string, CLangModuleContextParent>();
             _enums = new List<EnumDeclarationSyntax>();
-            _types = new List<ClassDeclarationSyntax>();
+            _types = new List<TypeDeclarationSyntax>();
             _callbacks = new List<DelegateDeclarationSyntax>();
         }
 
@@ -58,6 +58,11 @@ namespace CodeBinder.CLang
             _types.Add(type);
         }
 
+        public void AddType(StructDeclarationSyntax type)
+        {
+            _types.Add(type);
+        }
+
         protected override INodeVisitor CreateVisitor()
         {
             return new CLangNodeVisitor(this);
@@ -73,7 +78,7 @@ namespace CodeBinder.CLang
             get { return _enums; }
         }
 
-        public IEnumerable<ClassDeclarationSyntax> Types
+        public IEnumerable<TypeDeclarationSyntax> Types
         {
             get { return _types; }
         }
