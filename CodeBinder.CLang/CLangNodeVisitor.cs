@@ -75,9 +75,6 @@ namespace CodeBinder.CLang
                     case SyntaxKind.StructDeclaration:
                         visitType((StructDeclarationSyntax)member);
                         break;
-                    case SyntaxKind.EnumDeclaration:
-                        visitType((StructDeclarationSyntax)member);
-                        break;
                     case SyntaxKind.DelegateDeclaration:
                         visitType((DelegateDeclarationSyntax)member);
                         break;

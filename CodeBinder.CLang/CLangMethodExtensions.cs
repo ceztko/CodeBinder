@@ -44,20 +44,18 @@ namespace CodeBinder.CLang
             return builder;
         }
 
-        public static bool TryGetCLangBinder(this ParameterSyntax parameter, ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        public static bool TryGetCLangBinder(this ParameterSyntax parameter,
+            ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
         {
             return TryGetCLangBinder(parameter, false, provider, out binderStr);
         }
 
-        public static bool TryGetCLangBinder(this ParameterSyntax parameter, bool pointerType, ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        public static bool TryGetCLangBinder(this ParameterSyntax parameter, bool pointerType,
+            ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
         {
             var symbol = parameter.Type!.GetTypeSymbol(provider);
             if (symbol.TypeKind == TypeKind.Enum)
-            {
-                var attributes = symbol.GetAttributes();
-                binderStr = attributes.GetAttribute<NativeBindingAttribute>().GetConstructorArgument<string>(0);
-                return true;
-            }
+                return tryGetCLangBinder(symbol, out binderStr);
 
             var binder = parameter.GetAttributes(provider).FirstOrDefault((item) => item.Inherits<NativeTypeBinder>());
             if (binder == null)
@@ -70,6 +68,19 @@ namespace CodeBinder.CLang
                 binderStr = $"{binder.AttributeClass!.Name}*";
             else
                 binderStr = $"{binder.AttributeClass!.Name}";
+            return true;
+        }
+
+        static bool tryGetCLangBinder(ITypeSymbol symbol, [NotNullWhen(true)]out string? binderStr)
+        {
+            var attributes = symbol.GetAttributes();
+            if (!attributes.TryGetAttribute<NativeBindingAttribute>(out var attribute))
+            {
+                binderStr = null;
+                return false;
+            }
+
+            binderStr = attribute.GetConstructorArgument<string>(0);
             return true;
         }
 
@@ -153,14 +164,18 @@ namespace CodeBinder.CLang
         private static string getCLangType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes,
             ParameterType type, bool cppMethod, out string? suffix)
         {
-            switch(symbol.TypeKind)
+            bool constParameter = false;
+            string? bindedType;
+            switch (symbol.TypeKind)
             {
                 // Handle some special types first
                 case TypeKind.Enum:
                 {
                     suffix = null;
-                    var bindingAttr = symbol.GetAttribute<NativeBindingAttribute>();
-                    string binded = bindingAttr.GetConstructorArgument<string>(0);
+                    string? binded;
+                    if (!tryGetCLangBinder(symbol, out binded))
+                        throw new Exception("Could not find the binder for the parameter");
+
                     if (type == ParameterType.ByRef)
                         return $"{binded} *";
                     else
@@ -169,107 +184,127 @@ namespace CodeBinder.CLang
                 case TypeKind.Delegate:
                 {
                     suffix = null;
-                    var bindingAttr = symbol.GetAttribute<NativeBindingAttribute>();
-                    return bindingAttr.GetConstructorArgument<string>(0);
+                    string? binded;
+                    if (!tryGetCLangBinder(symbol, out binded))
+                        throw new Exception("Could not find the binder for the parameter");
+
+                    return binded;
                 }
-            }
-
-            string typeName;
-            bool constParameter = false;
-            if (symbol.TypeKind == TypeKind.Array)
-            {
-                var arrayType = (IArrayTypeSymbol)symbol;
-                typeName = arrayType.ElementType.GetFullName();
-
-                if (type == ParameterType.Return)
+                case TypeKind.Array:
                 {
-                    suffix = null;
-                    if (attributes.HasAttribute<ConstAttribute>())
-                        constParameter = true;
-                }
-                else
-                {
-                    if (!attributes.HasAttribute<OutAttribute>())
-                        constParameter = true;
-
-                    int fixedSizeArray;
-                    if (attributes.TryGetAttribute<MarshalAsAttribute>(out var marshalAsAttr) &&
-                        marshalAsAttr.TryGetNamedArgument("SizeConst", out fixedSizeArray))
+                    if (type == ParameterType.Return)
                     {
-                        suffix = $"[{fixedSizeArray}]";
+                        suffix = null;
+                        if (attributes.HasAttribute<ConstAttribute>())
+                            constParameter = true;
                     }
                     else
                     {
-                        suffix = "[]";
-                    }
-                }
-            }
-            else
-            {
-                suffix = null;
-                typeName = symbol.GetFullName();
-            }
+                        if (!attributes.HasAttribute<OutAttribute>())
+                            constParameter = true;
 
-            // TODO: Optmize CLR types with ITypeSymbol.SpecialType, handling of constParameter,
-            // CHECK-ME evaluate supporting string arrays
-            string bindedType;
-            if (typeName == "CodeBinder.cbstring")
-            {
-                switch (type)
-                {
-                    case ParameterType.Regular:
-                    {
-                        if (cppMethod)
+                        int fixedSizeArray;
+                        if (attributes.TryGetAttribute<MarshalAsAttribute>(out var marshalAsAttr) &&
+                            marshalAsAttr.TryGetNamedArgument("SizeConst", out fixedSizeArray))
                         {
-                            constParameter |= true;
-                            bindedType = "cbstringp&";
+                            suffix = $"[{fixedSizeArray}]";
                         }
                         else
                         {
-                            bindedType = "cbstring";
+                            suffix = "[]";
                         }
+                    }
 
-                        break;
-                    }
-                    case ParameterType.Return:
+                    var arrayType = (IArrayTypeSymbol)symbol;
+                    if (!tryGetCLangBinder(arrayType.ElementType, out bindedType))
                     {
-                        if (cppMethod)
-                            bindedType= "cbstringr";
-                        else
-                            bindedType= "cbstring";
-                        break;
+                        string typeName = arrayType.ElementType.GetFullName();
+                        switch (type)
+                        {
+                            case ParameterType.Regular:
+                                bindedType = getCLangType(typeName, attributes);
+                                break;
+                            case ParameterType.Return:
+                                bindedType = getCLangPointerType(typeName, attributes);
+                                break;
+                            default:
+                                throw new NotSupportedException();
+                        }
                     }
-                    case ParameterType.ByRef:
-                    {
-                        if (cppMethod)
-                            bindedType = "cbstringpr&";
-                        else
-                            bindedType = "cbstring*";
-                        break;
-                    }
-                    default:
-                        throw new NotSupportedException();
+
+                    break;
                 }
-            }
-            else
-            {
-                switch (type)
+                default:
                 {
-                    case ParameterType.Regular:
-                        bindedType = getCLangType(typeName, attributes);
-                        break;
-                    case ParameterType.Return:
-                        if (symbol.TypeKind == TypeKind.Array)
-                            bindedType = getCLangPointerType(typeName, attributes);
-                        else
-                            bindedType = getCLangType(typeName, attributes);
+                    suffix = null;
+                    string typeName = symbol.GetFullName();
 
-                        break;
-                    case ParameterType.ByRef:
-                        bindedType = getCLangPointerType(typeName, attributes);
-                        break;
-                    default:
-                        throw new NotSupportedException();
+                    // TODO: Optmize CLR types with ITypeSymbol.SpecialType, handling of constParameter,
+                    // CHECK-ME evaluate supporting string arrays
+                    if (typeName == "CodeBinder.cbstring")
+                    {
+                        switch (type)
+                        {
+                            case ParameterType.Regular:
+                            {
+                                if (cppMethod)
+                                {
+                                    constParameter |= true;
+                                    bindedType = "cbstringp&";
+                                }
+                                else
+                                {
+                                    bindedType = "cbstring";
+                                }
+
+                                break;
+                            }
+                            case ParameterType.Return:
+                            {
+                                if (cppMethod)
+                                    bindedType = "cbstringr";
+                                else
+                                    bindedType = "cbstring";
+                                break;
+                            }
+                            case ParameterType.ByRef:
+                            {
+                                if (cppMethod)
+                                    bindedType = "cbstringpr&";
+                                else
+                                    bindedType = "cbstring*";
+                                break;
+                            }
+                            default:
+                                throw new NotSupportedException();
+                        }
+                    }
+                    else
+                    {
+                        if (tryGetCLangBinder(symbol, out bindedType))
+                        {
+                            if (type == ParameterType.ByRef)
+                                bindedType = $"{bindedType}*";
+                        }
+                        else
+                        {
+                            switch (type)
+                            {
+                                case ParameterType.Regular:
+                                    bindedType = getCLangType(typeName, attributes);
+                                    break;
+                                case ParameterType.Return:
+                                    bindedType = getCLangType(typeName, attributes);
+                                    break;
+                                case ParameterType.ByRef:
+                                    bindedType = getCLangPointerType(typeName, attributes);
+                                    break;
+                                default:
+                                    throw new NotSupportedException();
+                            }
+                        }
+                    }
+                    break;
                 }
             }
 
