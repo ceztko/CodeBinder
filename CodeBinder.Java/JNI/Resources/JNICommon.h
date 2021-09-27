@@ -96,7 +96,7 @@ struct AJNIShim<jbyteArray, jbyte>
 
     static void FreeNativeArray(JNIEnv* env, jbyteArray jarray, jbyte* narray, bool commit)
     {
-        env->ReleaseByteArrayElements(jarray, narray, commit ? JNI_COMMIT : JNI_ABORT);
+        env->ReleaseByteArrayElements(jarray, narray, commit ? 0 : JNI_ABORT);
     }
 };
 
@@ -110,7 +110,7 @@ struct AJNIShim<jintArray, jint>
 
     static void FreeNativeArray(JNIEnv* env, jintArray jarray, jint* narray, bool commit)
     {
-        env->ReleaseIntArrayElements(jarray, narray, commit ? JNI_COMMIT : JNI_ABORT);
+        env->ReleaseIntArrayElements(jarray, narray, commit ? 0 : JNI_ABORT);
     }
 };
 
@@ -124,7 +124,7 @@ struct AJNIShim<jlongArray, jlong>
 
     static void FreeNativeArray(JNIEnv* env, jlongArray jarray, jlong* narray, bool commit)
     {
-        env->ReleaseLongArrayElements(jarray, narray, commit ? JNI_COMMIT : JNI_ABORT);
+        env->ReleaseLongArrayElements(jarray, narray, commit ? 0 : JNI_ABORT);
     }
 };
 
@@ -138,7 +138,7 @@ struct AJNIShim<jfloatArray, jfloat>
 
     static void FreeNativeArray(JNIEnv* env, jfloatArray jarray, jfloat* narray, bool commit)
     {
-        env->ReleaseFloatArrayElements(jarray, narray, commit ? JNI_COMMIT : JNI_ABORT);
+        env->ReleaseFloatArrayElements(jarray, narray, commit ? 0 : JNI_ABORT);
     }
 };
 
@@ -152,7 +152,7 @@ struct AJNIShim<jdoubleArray, jdouble>
 
     static void FreeNativeArray(JNIEnv* env, jdoubleArray jarray, jdouble* narray, bool commit)
     {
-        env->ReleaseDoubleArrayElements(jarray, narray, commit ? JNI_COMMIT : JNI_ABORT);
+        env->ReleaseDoubleArrayElements(jarray, narray, commit ? 0 : JNI_ABORT);
     }
 };
 
@@ -172,7 +172,7 @@ struct AJNIShim<jptrArray, void*>
     static void FreeNativeArray(JNIEnv* env, jptrArray jarray, void** narray, bool commit)
     {
 #if __LP64__ || _WIN64
-        env->ReleaseLongArrayElements(jarray, (jlong*)narray, commit ? JNI_COMMIT : JNI_ABORT);
+        env->ReleaseLongArrayElements(jarray, (jlong*)narray, commit ? 0 : JNI_ABORT);
 #else
         if (commit)
         {
@@ -180,7 +180,7 @@ struct AJNIShim<jptrArray, void*>
             auto nLongArray = env->GetLongArrayElements(jarray, nullptr);
             for (int i = 0; i < size; i++)
                 nLongArray[i] = (jlong)narray[i];
-            env->ReleaseLongArrayElements(jarray, nLongArray, JNI_COMMIT);
+            env->ReleaseLongArrayElements(jarray, nLongArray, 0);
         }
 
         delete[] narray;
