@@ -25,7 +25,9 @@ namespace CodeBinder.Apple
 
         public ConversionCSharpToObjC()
         {
-            _policies = new List<string>() { BinderPolicies.PassByRef, BinderPolicies.Delegates, BinderPolicies.ExplicitInterfaceImplementation };
+            // NOTE: Delegates are not yet fully supported
+            // _policies = new List<string>() { BinderPolicies.PassByRef, BinderPolicies.Delegates, BinderPolicies.ExplicitInterfaceImplementation };
+            _policies = new List<string>() { BinderPolicies.PassByRef, BinderPolicies.ExplicitInterfaceImplementation };
             MethodsLowerCase = true;
         }
 
