@@ -191,7 +191,13 @@ namespace CodeBinder.Java
                         if (i < _optionalIndex)
                             Builder.Append(parameter.Identifier.Text);
                         else
+                        {
+                            var paramTypeSymbol = parameter.GetDeclaredSymbol<IParameterSymbol>(Context);
+                            if (paramTypeSymbol.Type.TypeKind == TypeKind.Class)
+                                Builder.Parenthesized().Append(paramTypeSymbol.Type.Name).Close();
+
                             Builder.Append(parameter.Default!.Value, Context);
+                        }
                     }
                 }
 

@@ -44,14 +44,35 @@ namespace CodeBinder.Java
 
         private void WriteEnumMembers()
         {
-            bool first = true;
+            var members = new List<EnumMemberDeclarationSyntax>();
+            var aliases = new List<(string Identifier, string Value)>();
             foreach (var member in Item.Members)
+            {
+                EnumMemberDeclarationSyntax? found;
+                if (member.EqualsValue == null
+                    || (found = members.Find((m) => m.GetEnumValue(Context) == member.GetEnumValue(Context))) == null)
+                {
+                    members.Add(member);
+                }
+                else
+                {
+                    aliases.Add(( member.GetName(), found.GetName()));
+                }
+            }
+
+            bool first = true;
+            foreach (var member in members)
             {
                 Builder.CommaAppendLine(ref first);
                 WriteMember(member);
             }
-
             Builder.EndOfStatement();
+
+            foreach (var alias in aliases)
+            {
+                Builder.Append("static final").Space().Append(TypeName).Space().Append(alias.Identifier)
+                    .Space().Append("=").Space().Append(alias.Value).EndOfStatement();
+            }
         }
 
         private void WriteMember(EnumMemberDeclarationSyntax member)

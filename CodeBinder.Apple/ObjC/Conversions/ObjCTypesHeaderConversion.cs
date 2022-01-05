@@ -101,7 +101,7 @@ namespace CodeBinder.Apple
                 builder.Append("typedef").Space().Append(isflag ? "NS_OPTIONS" : "NS_ENUM").Parenthesized()
                     .Append(underlyingType).CommaSeparator().Append(enumName).Close().AppendLine();
 
-                var members = getMemberNames(enm);
+                var members = getEnumMembers(enm);
                 using (builder.EnumBlock())
                 {
                     foreach (var member in members)
@@ -117,7 +117,7 @@ namespace CodeBinder.Apple
                 foreach (var enm in Compilation.Enums)
                 {
                     string enumName = enm.GetObjCName(Compilation);
-                    var members = getMemberNames(enm);
+                    var members = getEnumMembers(enm, true);
                     writeCBToStringMethod(builder, enumName, enm.IsFlag(Compilation), members);
                     builder.AppendLine();
                 }
@@ -145,17 +145,20 @@ namespace CodeBinder.Apple
             }
         }
 
-        List<EnumMember> getMemberNames(EnumDeclarationSyntax enm)
+        List<EnumMember> getEnumMembers(EnumDeclarationSyntax enm, bool skipAliases = false)
         {
-            var ret = new List<EnumMember>(enm.Members.Count);
+            var enums = new List<EnumMember>(enm.Members.Count);
             foreach (var item in enm.Members)
             {
-                string name = item.GetObjCName(Compilation);
                 long value = item.GetEnumValue(Compilation);
-                ret.Add(new EnumMember() { Name = name, Value = value });
+                if (skipAliases && enums.Any((enm) => enm.Value == value))
+                    continue;
+
+                string name = item.GetObjCName(Compilation);
+                enums.Add(new EnumMember() { Name = name, Value = value });
             }
 
-            return ret;
+            return enums;
         }
 
         private void writeCallbacks(CodeBuilder builder)
