@@ -10,6 +10,7 @@ using CodeBinder.Shared.CSharp;
 using CodeBinder.Attributes;
 using Microsoft.CodeAnalysis;
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeBinder.CLang
 {
@@ -33,6 +34,7 @@ namespace CodeBinder.CLang
             builder.AppendLine("#endif // __cplusplus");
             writeEnums(builder);
             writeFunctionPointerDelegates(builder);
+            writeStructTypes(builder);
             builder.AppendLine();
             builder.AppendLine("#ifdef __cplusplus");
             builder.AppendLine("}");
@@ -41,10 +43,12 @@ namespace CodeBinder.CLang
 
         void writeOpaqueTypes(CodeBuilder builder)
         {
-            // Opaque types
+            if (Compilation.OpaqueTypes.Count == 0)
+                return;
+
             builder.AppendLine("// Opaque types");
             builder.AppendLine();
-            foreach (var type in Compilation.Types)
+            foreach (var type in Compilation.OpaqueTypes)
             {
                 string? typeStr;
                 if (!type.TryGetCLangBinder(Compilation, out typeStr))
@@ -54,6 +58,29 @@ namespace CodeBinder.CLang
             }
 
             builder.AppendLine();
+        }
+
+        private void writeStructTypes(CodeBuilder builder)
+        {
+            if (Compilation.StructTypes.Count == 0)
+                return;
+
+            builder.AppendLine("// Struct types");
+            builder.AppendLine();
+            foreach (var type in Compilation.StructTypes)
+            {
+                string? typeStr;
+                if (!type.TryGetCLangBinder(Compilation, out typeStr))
+                    typeStr = type.Identifier.Text;
+
+                builder.Append("struct").Space().AppendLine(typeStr);
+                using (builder.TypeBlock())
+                {
+                    writeStructMembers(builder, type);
+                }
+
+                builder.AppendLine();
+            }
         }
 
         private void writeEnums(CodeBuilder builder)
@@ -73,7 +100,7 @@ namespace CodeBinder.CLang
 
                 builder.Append("typedef").Space().Append("enum").AppendLine();
                 var splitted = enm.GetName().SplitCamelCase();
-                using (builder.TypeBlock(false))
+                using (builder.TypeBlock(enumName))
                 {
                     foreach (var item in enm.Members)
                     {
@@ -105,7 +132,6 @@ namespace CodeBinder.CLang
                     builder.AppendLine($"__{stem}__ = 0xFFFFFFFF,");
                 }
 
-                builder.Space().Append(enumName).EndOfLine();
                 builder.AppendLine();
             }
         }
@@ -128,6 +154,16 @@ namespace CodeBinder.CLang
                     .Append("(*").Append(name).Append(")")
                     .Append("(").Append(new CLangParameterListWriter(callback.ParameterList, false, Compilation))
                     .Append(")").EndOfLine();
+            }
+        }
+
+        private void writeStructMembers(CodeBuilder builder, StructDeclarationSyntax str)
+        {
+            foreach (var member in str.Members)
+            {
+                var field = (member as FieldDeclarationSyntax)!;
+                builder.Append(field.Declaration.GetCLangType(Compilation)).Space()
+                    .Append(field.Declaration.Variables[0].Identifier.Text).EndOfLine();
             }
         }
 

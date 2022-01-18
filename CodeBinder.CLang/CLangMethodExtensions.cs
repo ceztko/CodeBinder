@@ -44,17 +44,10 @@ namespace CodeBinder.CLang
             return builder;
         }
 
-        public static bool TryGetCLangBinder(this BaseTypeDeclarationSyntax typeSyntax,
-            ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        static bool tryGetCLangBinder(this ITypeSymbol typeSymbol, bool pointerType,
+            [NotNullWhen(true)] out string? binderStr)
         {
-            return TryGetCLangBinder(typeSyntax, false, provider, out binderStr);
-        }
-
-        public static bool TryGetCLangBinder(this BaseTypeDeclarationSyntax typeSyntax, bool pointerType,
-            ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
-        {
-            var symbol = typeSyntax.GetDeclaredSymbol<ITypeSymbol>(provider);
-            if (!tryGetCLangBinder(symbol, out binderStr))
+            if (!tryGetCLangBinder(typeSymbol, out binderStr))
             {
                 binderStr = null;
                 return false;
@@ -64,6 +57,19 @@ namespace CodeBinder.CLang
                 binderStr = $"{binderStr}*";
 
             return true;
+        }
+
+        public static bool TryGetCLangBinder(this BaseTypeDeclarationSyntax typeSyntax,
+            ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        {
+            return TryGetCLangBinder(typeSyntax, false, provider, out binderStr);
+        }
+
+        public static bool TryGetCLangBinder(this BaseTypeDeclarationSyntax typeSyntax, bool pointerType,
+            ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        {
+            var symbol = typeSyntax.GetTypeSymbol(provider);
+            return tryGetCLangBinder(symbol, pointerType, out binderStr);
         }
 
         public static bool TryGetCLangBinder(this ParameterSyntax parameter,
@@ -76,11 +82,8 @@ namespace CodeBinder.CLang
             ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
         {
             var symbol = parameter.Type!.GetTypeSymbol(provider);
-            if (tryGetCLangBinder(symbol, out binderStr))
+            if (tryGetCLangBinder(symbol, pointerType, out binderStr))
             {
-                if (pointerType)
-                    binderStr = $"{binderStr}*";
-
                 return true;
             }
             else
@@ -96,11 +99,12 @@ namespace CodeBinder.CLang
                     binderStr = $"{binder.AttributeClass!.Name}*";
                 else
                     binderStr = $"{binder.AttributeClass!.Name}";
+
                 return true;
             }
         }
 
-        static bool tryGetCLangBinder(ITypeSymbol symbol, [NotNullWhen(true)]out string? binderStr)
+        static bool tryGetCLangBinder(ITypeSymbol symbol, [NotNullWhen(true)] out string? binderStr)
         {
             var attributes = symbol.GetAttributes();
             if (!attributes.TryGetAttribute<NativeBindingAttribute>(out var attribute))
@@ -111,6 +115,12 @@ namespace CodeBinder.CLang
 
             binderStr = attribute.GetConstructorArgument<string>(0);
             return true;
+        }
+
+        public static string GetCLangType(this VariableDeclarationSyntax declaration, ICompilationContextProvider provider)
+        {
+            var symbol = declaration.Type.GetTypeSymbol(provider);
+            return getCLangType(symbol, declaration.Variables[0].GetAttributes(provider), ParameterType.Regular, false, out _);
         }
 
         public static string GetCLangType(this ParameterSyntax parameter, ICompilationContextProvider provider)

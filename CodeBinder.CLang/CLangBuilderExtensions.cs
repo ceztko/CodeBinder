@@ -37,10 +37,10 @@ namespace CodeBinder.CLang
             return builder;
         }
 
-        public static CodeBuilder TypeBlock(this CodeBuilder builder, bool appendLine = true)
+        public static CodeBuilder TypeBlock(this CodeBuilder builder, string? postIdentifier = null)
         {
             builder.AppendLine("{");
-            return builder.Indent("}", appendLine);
+            return builder.Indent(string.IsNullOrEmpty(postIdentifier) ? "};" : $"}} {postIdentifier};", true);
         }
 
         public static CodeBuilder Block(this CodeBuilder builder, bool appendLine = true)

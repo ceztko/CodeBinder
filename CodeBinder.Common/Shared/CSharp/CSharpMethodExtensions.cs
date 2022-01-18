@@ -653,6 +653,11 @@ namespace CodeBinder.Shared.CSharp
             return info.ConvertedType!;
         }
 
+        public static ITypeSymbol GetTypeSymbol(this BaseTypeDeclarationSyntax node, ICompilationContextProvider provider)
+        {
+            return node.GetDeclaredSymbol<ITypeSymbol>(provider);
+        }
+
         public static CSharpTypeParameters GetTypeParameters(this MethodDeclarationSyntax syntax, ICompilationContextProvider provider)
         {
             var symbol = syntax.GetDeclaredSymbol<IMethodSymbol>(provider);
