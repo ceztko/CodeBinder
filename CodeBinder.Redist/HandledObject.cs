@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace CodeBinder.Experimental
+namespace CodeBinder
 {
     public class HandledObject<BaseT> : HandledObject
         where BaseT : HandledObject<BaseT>
@@ -55,11 +55,12 @@ namespace CodeBinder.Experimental
     {
         IntPtr _handle;
 
-        internal HandledObject()
+        protected HandledObject()
         {
             _handle = IntPtr.Zero;
         }
-        internal HandledObject(IntPtr handle)
+
+        protected HandledObject(IntPtr handle)
         {
             _handle = handle;
         }
