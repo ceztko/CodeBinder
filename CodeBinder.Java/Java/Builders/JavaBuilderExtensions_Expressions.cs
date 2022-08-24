@@ -194,7 +194,7 @@ namespace CodeBinder.Java
 
         public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, JavaCodeConversionContext context)
         {
-            if (syntax.Token.Kind() == SyntaxKind.StringLiteralToken && syntax.Token.Text.StartsWith("@"))
+            if (syntax.Token.IsKind(SyntaxKind.StringLiteralToken) && syntax.Token.Text.StartsWith("@"))
                 builder.Append(syntax.Token.Text.Replace("\"", "\"\"")); // Handle verbatim strings
             else
                 builder.Append(syntax.Token.Text);

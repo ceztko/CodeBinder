@@ -453,7 +453,7 @@ namespace CodeBinder.Apple
                 }
                 case SyntaxKind.StringLiteralExpression:
                 {
-                    if (syntax.Token.Kind() == SyntaxKind.StringLiteralToken && syntax.Token.Text.StartsWith("@"))
+                    if (syntax.Token.IsKind(SyntaxKind.StringLiteralToken) && syntax.Token.Text.StartsWith("@"))
                         return builder.Append($"@{syntax.Token.Text.Replace("\"", "\"\"")}"); // Handle verbatim strings
                     else
                         return builder.Append($"@{syntax.Token.Text}");
@@ -663,7 +663,7 @@ namespace CodeBinder.Apple
                             }
                             case "CodeBinder.cbstring":
                             {
-                                if (arg.RefKindKeyword.Kind() == SyntaxKind.None)
+                                if (arg.RefKindKeyword.IsKind(SyntaxKind.None))
                                 {
                                     builder.Append("SN2OC").Parenthesized((builder) => appendExpression(builder));
                                 }

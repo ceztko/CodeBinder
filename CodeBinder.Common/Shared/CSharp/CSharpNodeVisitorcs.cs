@@ -204,7 +204,7 @@ namespace CodeBinder.Shared.CSharp
 
         protected override void afterVisit()
         {
-            var mainTypesMap = new Dictionary<ITypeSymbol, CSharpTypeContext>();
+            var mainTypesMap = new Dictionary<ITypeSymbol, CSharpTypeContext>(SymbolEqualityComparer.Default);
             foreach (var types in _types.Values)
             {
                 var main = types[0];
@@ -492,7 +492,7 @@ namespace CodeBinder.Shared.CSharp
             var current = node.Parent;
             while (current != null)
             {
-                if (current.Kind() == SyntaxKind.Attribute)
+                if (current.IsKind(SyntaxKind.Attribute))
                 {
                     // NOTE: If an ancestor is attribute, just ignore the node
                     return;
@@ -514,7 +514,7 @@ namespace CodeBinder.Shared.CSharp
 
         public override void VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
         {
-            if (node.Modifiers.Any((token) => token.Kind() != SyntaxKind.ConstKeyword))
+            if (node.Modifiers.Any((token) => !token.IsKind(SyntaxKind.ConstKeyword)))
                 Unsupported(node, "Variable declaration with unsupported modifiers");
 
             DefaultVisit(node);

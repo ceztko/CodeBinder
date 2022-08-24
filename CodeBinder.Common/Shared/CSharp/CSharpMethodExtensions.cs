@@ -36,7 +36,7 @@ namespace CodeBinder.Shared.CSharp
             foreach (var reference in method.DeclaringSyntaxReferences)
             {
                 var syntax = reference.GetSyntax();
-                if (syntax.Kind() == SyntaxKind.MethodDeclaration)
+                if (syntax.IsKind(SyntaxKind.MethodDeclaration))
                     return (MethodDeclarationSyntax)syntax;
             }
 
@@ -67,7 +67,7 @@ namespace CodeBinder.Shared.CSharp
             foreach (var reference in method.DeclaringSyntaxReferences)
             {
                 var syntax = reference.GetSyntax();
-                if (syntax.Kind() != SyntaxKind.MethodDeclaration)
+                if (!syntax.IsKind(SyntaxKind.MethodDeclaration))
                     continue;
 
                 var node = (MethodDeclarationSyntax)syntax;
@@ -693,12 +693,12 @@ namespace CodeBinder.Shared.CSharp
 
         public static bool IsRefLike(this ArgumentSyntax argument)
         {
-            return argument.RefKindKeyword.Kind() != SyntaxKind.None;
+            return !argument.RefKindKeyword.IsKind(SyntaxKind.None);
         }
 
         public static bool IsNone(this SyntaxToken token)
         {
-            return token.Kind() == SyntaxKind.None;
+            return token.IsKind(SyntaxKind.None);
         }
 
         /// <summary>

@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.Java
 {
@@ -41,7 +42,7 @@ namespace CodeBinder.Java
                 }
             }
 
-            _isParentInterface = Item.Parent!.Kind() == SyntaxKind.InterfaceDeclaration;
+            _isParentInterface = Item.Parent!.IsKind(SyntaxKind.InterfaceDeclaration);
         }
 
         protected override void Write()
