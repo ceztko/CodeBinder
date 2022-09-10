@@ -62,6 +62,8 @@ namespace CodeBinder.Java
             {
                 yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.BinderUtils), JavaClasses.BinderUtils);
                 yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandleRef), JavaClasses.HandleRef);
+                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandledObjectBase), JavaClasses.HandledObjectBase);
+                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandledObject), JavaClasses.HandledObject);
                 yield return new JavaInteropBoxWriter(JavaInteropType.Boolean, this);
                 yield return new JavaInteropBoxWriter(JavaInteropType.Character, this);
                 yield return new JavaInteropBoxWriter(JavaInteropType.Byte, this);

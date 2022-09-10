@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace CodeBinder
 {
-    public class HandledObject<BaseT> : HandledObject
+    public class HandledObject<BaseT> : HandledObjectBase
         where BaseT : HandledObject<BaseT>
     {
         protected HandledObject() { }
@@ -51,21 +51,21 @@ namespace CodeBinder
         }
     }
 
-    public class HandledObject
+    public class HandledObjectBase
     {
         IntPtr _handle;
 
-        protected HandledObject()
+        protected HandledObjectBase()
         {
             _handle = IntPtr.Zero;
         }
 
-        protected HandledObject(IntPtr handle)
+        protected HandledObjectBase(IntPtr handle)
         {
             _handle = handle;
         }
 
-        ~HandledObject()
+        ~HandledObjectBase()
         {
             if (Managed)
                 FreeHandle(_handle);
@@ -113,10 +113,10 @@ namespace CodeBinder
 
         public override bool Equals(object? obj)
         {
-            return Equals(obj as HandledObject);
+            return Equals(obj as HandledObjectBase);
         }
 
-        public bool Equals(HandledObject? obj)
+        public bool Equals(HandledObjectBase? obj)
         {
             if (obj == null)
                 return false;

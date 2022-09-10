@@ -62,5 +62,104 @@ public class HandleRef
         this.handle = handle;
     }
 }";
+        public const string HandledObjectBase =
+@"import java.util.*;
+
+public class HandledObjectBase
+{
+    long _handle;
+
+    protected HandledObjectBase()
+    {
+        _handle = 0;
+    }
+
+    protected HandledObjectBase(long handle)
+    {
+        _handle = handle;
+    }
+
+    protected void finalize() throws Throwable
+    {
+        if (getManaged())
+            freeHandle(_handle);
+        super.finalize();
+    }
+
+    protected void setHandle(long handle)
+    {
+        if (handle == 0)
+            throw new RuntimeException(""Handle must be non null"");
+        if (_handle != 0)
+            throw new RuntimeException(""Handle is already set"");
+        _handle = handle;
+    }
+
+    protected void freeHandle(long handle)
+    {
+        throw new UnsupportedOperationException();
+    }
+
+    public long getUnsafeHandle()
+    {
+        return _handle;
+    }
+
+    public HandleRef getHandle()
+    {
+        return new HandleRef(this, _handle);
+    }
+
+    public boolean getManaged()
+    {
+        return true;
+    }
+    
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+            return false;
+        HandledObjectBase other = BinderUtils.as(obj, HandledObjectBase.class);
+        return this.getReferenceHandle() == other.getReferenceHandle();
+    }
+    
+    public boolean equals(HandledObjectBase obj)
+    {
+        if (obj == null)
+            return false;
+        
+        return this.getReferenceHandle() == obj.getReferenceHandle();
+    } 
+
+    public int hashCode()
+    {
+        return ((Long)getReferenceHandle()).hashCode();
+    }
+
+    protected long getReferenceHandle()
+    {
+        return getUnsafeHandle();
+    }
+}";
+
+        public const string HandledObject =
+@"import java.util.*;
+
+public class HandledObject <BaseT extends HandledObject<BaseT>> extends HandledObjectBase
+{
+    protected HandledObject()
+    {
+    }
+
+    protected HandledObject(long handle)
+    {
+        super(handle);
+    }
+
+    public boolean equals(BaseT other)
+    {
+        return super.equals(other);
+    }
+}";
     }
 }
