@@ -13,6 +13,7 @@ using CodeBinder.Attributes;
 using System.Diagnostics;
 using CodeBinder.CLang;
 using CodeBinder.Apple.Attributes;
+using System.Text.RegularExpressions;
 
 namespace CodeBinder.Apple
 {
@@ -520,13 +521,11 @@ namespace CodeBinder.Apple
 
         public static string ToObjCHeaderFilename(this string name, string? basePath, ObjCHeaderNameUse use = ObjCHeaderNameUse.Normal)
         {
-            const string extension = "_h";
-            string headerName;
+            // Ignore "_h" and "_Internal" suffixes
+            var regex = new Regex("^(?<filename>.*?)(?<int>_Internal)?(?<ext>_h)?$");
             basePath = basePath == null ? null : $"{basePath}/";
-            if (name.EndsWith(extension))
-                headerName = $"{basePath}{name.Substring(0, name.Length - extension.Length)}.{ConversionCSharpToObjC.HeaderExtension}";
-            else
-                headerName = $"{basePath}{name}.{ConversionCSharpToObjC.HeaderExtension}";
+            var result = regex.Match(name);
+            string headerName = $"{basePath}{result.Groups["filename"].Value}.{ConversionCSharpToObjC.HeaderExtension}";
 
             switch (use)
             {

@@ -1,4 +1,4 @@
-#ifndef CBOCINTEROP_HEADER
+﻿#ifndef CBOCINTEROP_HEADER
 #define CBOCINTEROP_HEADER
 #pragma once
 
@@ -6,6 +6,8 @@
 #include <CBInterop.h>
 #include <string>
 #include <utility>
+
+#import "CBHandledObject.h"
 
 class SN2OC
 {

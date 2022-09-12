@@ -649,11 +649,28 @@ namespace CodeBinder.Apple
         static bool IsKnowSimpleObjCType(string fullTypeName, SymbolKind typekind,
             [NotNullWhen(true)]out string? knownObjCType, [NotNullWhen(true)]out ObjCTypeKind? objcTypeKind)
         {
-            if (fullTypeName == "System.Void")
+            switch (fullTypeName)
             {
-                objcTypeKind = ObjCTypeKind.Void;
-                knownObjCType = "void";
-                return true;
+                case "System.Void":
+                {
+                    objcTypeKind = ObjCTypeKind.Void;
+                    knownObjCType = "void";
+                    return true;
+
+                }
+                case "CodeBinder.HandledObjectBase":
+                {
+                    objcTypeKind = ObjCTypeKind.Class;
+                    knownObjCType = "CBHandledObjectBase";
+                    return true;
+                }
+
+                case "CodeBinder.HandledObject<BaseT>":
+                {
+                    objcTypeKind = ObjCTypeKind.Class;
+                    knownObjCType = "CBHandledObject";
+                    return true;
+                }
             }
 
             switch (typekind)

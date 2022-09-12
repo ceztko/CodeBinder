@@ -19,7 +19,7 @@ namespace CodeBinder.Apple {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ObjCResources {
@@ -57,6 +57,104 @@ namespace CodeBinder.Apple {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #ifndef CBHANDLEDOBJECT_HEADER
+        ///#define CBHANDLEDOBJECT_HEADER
+        ///#pragma once
+        ///
+        ///#import &quot;cboclibdefs.h&quot;
+        ///#import &lt;Foundation/Foundation.h&gt;
+        ///
+        ///OBJC_CODEBINDER_API @interface CBHandledObjectBase : NSObject
+        ///{
+        ///    @private void * _handle;
+        ///}
+        ///    - (BOOL)isEqualTo:(NSObject *)obj;
+        ///
+        ///    - (NSUInteger)hash;
+        ///
+        ///    @property(nonatomic,readonly) void * unsafeHandle;
+        ///    - (void *)unsafeHandle;
+        ///
+        ///    @property(nonatomic,readonly) CBHandleRef * handle;
+        ///    - (CBHandleRef *)handle;
+        ///
+        ///    @property(nonatomic,re [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CBHandledObject_h {
+            get {
+                return ResourceManager.GetString("CBHandledObject_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #ifndef CBHANDLEDOBJECT_INTERNAL_HEADER
+        ///#define CBHANDLEDOBJECT_INTERNAL_HEADER
+        ///#pragma once
+        ///
+        ///@interface CBHandledObjectBase ()
+        ///    - (id)init;
+        ///
+        ///    - (id)init:(void *)handle;
+        ///
+        ///    - (void)dealloc;
+        ///
+        ///    - (void)setHandle:(void *)handle;
+        ///
+        ///    - (void)freeHandle:(void *)handle;
+        ///
+        ///    @property(nonatomic,readonly) void * referenceHandle;
+        ///    - (void *)referenceHandle;
+        ///@end
+        ///
+        ///@interface CBHandledObject ()
+        ///    - (id)init;
+        ///
+        ///    - (id)init:(void *)handle;
+        ///@end
+        ///
+        ///#endif // CBHANDLEDOBJECT_INTE [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CBHandledObject_Internal_h {
+            get {
+                return ResourceManager.GetString("CBHandledObject_Internal_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #import &quot;CBHandledObject.h&quot;
+        ///#import &quot;../Internal/CBHandledObject.h&quot;
+        ///
+        ///@implementation CBHandledObjectBase
+        ///    - (id)init
+        ///    {
+        ///        self = [super init];
+        ///        if (self == nil)
+        ///            return nil;
+        ///        _handle = NULL;
+        ///        return self;
+        ///    }
+        ///
+        ///    - (id)init:(void *)handle
+        ///    {
+        ///        self = [super init];
+        ///        if (self == nil)
+        ///            return nil;
+        ///        _handle = handle;
+        ///        return self;
+        ///    }
+        ///
+        ///    - (void)dealloc
+        ///    {
+        ///        if (self.managed)
+        ///            [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string CBHandledObject_mm {
+            get {
+                return ResourceManager.GetString("CBHandledObject_mm", resourceCulture);
             }
         }
         
@@ -106,6 +204,8 @@ namespace CodeBinder.Apple {
         ///#include &lt;string&gt;
         ///#include &lt;utility&gt;
         ///
+        ///#import &quot;CBHandledObject.h&quot;
+        ///
         ///class SN2OC
         ///{
         ///private:
@@ -115,12 +215,11 @@ namespace CodeBinder.Apple {
         ///
         ///public:
         ///    SN2OC(NSString* str)
-        ///        : m_handled(false), m_cstr{ }, m_ocstr(nil)
+        ///        : m_handled(false), m_cstr{ }, m_ocstr((NSString* __strong*)nil)
         ///    {
         ///        if (str != nil)
-        ///        {
-        ///            m_cstr.data = [str UTF8String];
-        ///            m_cstr.length = std::char_traits&lt;char&gt;::length( [rest of string was truncated]&quot;;.
+        ///            m_cstr = CBCreateStringView([str UTF8String]);
+        ///    [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBOCInterop_h {
             get {

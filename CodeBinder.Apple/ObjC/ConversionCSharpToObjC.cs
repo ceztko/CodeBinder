@@ -59,6 +59,9 @@ namespace CodeBinder.Apple
             get
             {
                 yield return new ObjCBaseTypesHeaderConversion();
+                yield return new StringConversionWriter(nameof(ObjCResources.CBHandledObject_Internal_h).ToObjCHeaderFilename(), () => ObjCResources.CBHandledObject_Internal_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter(nameof(ObjCResources.CBHandledObject_h).ToObjCHeaderFilename(), () => ObjCResources.CBHandledObject_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
+                yield return new StringConversionWriter(nameof(ObjCResources.CBHandledObject_mm).ToObjCImplementationFilename(), () => ObjCResources.CBHandledObject_mm) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter(nameof(ObjCResources.CBOCInterop_h).ToObjCHeaderFilename(), () => ObjCResources.CBOCInterop_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter(nameof(ObjCResources.CBOCBinderUtils_h).ToObjCHeaderFilename(), () => ObjCResources.CBOCBinderUtils_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
                 yield return new StringConversionWriter(nameof(ObjCResources.cboclibdefs_h).ToObjCHeaderFilename(), () => ObjCResources.cboclibdefs_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };

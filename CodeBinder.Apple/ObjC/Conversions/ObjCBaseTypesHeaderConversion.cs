@@ -48,6 +48,7 @@ namespace CodeBinder.Apple
             builder.AppendLine($"#import {nameof(ObjCClasses.CBIDisposable_h).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");
             builder.AppendLine($"#import {nameof(ObjCClasses.CBKeyValuePair_h).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");
             builder.AppendLine($"#import {nameof(ObjCClasses.CBHandleRef_h).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");
+            builder.AppendLine($"#import {nameof(ObjCResources.CBHandledObject_h).ToObjCHeaderFilename(ConversionCSharpToObjC.SupportBasePath, ObjCHeaderNameUse.IncludeRelativeFirst)}");
             builder.AppendLine();
             EndHeaderGuard(builder);
         }
