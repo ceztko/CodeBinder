@@ -16,7 +16,7 @@ namespace CodeBinder.Attributes
     /// <summary>
     /// Describe a module useful for native code generation and others (eg. JNI)
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
     public sealed class ModuleAttribute : CodeBinderAttribute
     {
         public ModuleAttribute(string name)
