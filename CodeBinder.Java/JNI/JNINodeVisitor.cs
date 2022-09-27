@@ -71,13 +71,17 @@ namespace CodeBinder.JNI
 
         bool TryGetModuleName(TypeDeclarationSyntax type, [NotNullWhen(true)]out string? moduleName)
         {
-            var attributes = type.GetAttributes(this);
-            foreach (var attribute in attributes)
+            // To support partial calsses, iterate syntax attributes,
+            // don't infer them from context
+            foreach (var attributeList in type.AttributeLists)
             {
-                if (attribute.IsAttribute<ModuleAttribute>())
+                foreach (var attribute in attributeList.GetAttributes(this))
                 {
-                    moduleName = attribute.GetConstructorArgument<string>(0);
-                    return true;
+                    if (attribute.IsAttribute<ModuleAttribute>())
+                    {
+                        moduleName = attribute.GetConstructorArgument<string>(0);
+                        return true;
+                    }
                 }
             }
 

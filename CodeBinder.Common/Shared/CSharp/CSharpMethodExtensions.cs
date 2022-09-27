@@ -12,6 +12,7 @@ using CodeBinder.Attributes;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Diagnostics.CodeAnalysis;
+using System.Xml.Linq;
 
 namespace CodeBinder.Shared.CSharp
 {
@@ -781,6 +782,26 @@ namespace CodeBinder.Shared.CSharp
                 return new AttributeData[0];
 
             return symbol.GetAttributes<TAttribute>();
+        }
+
+        public static IReadOnlyList<AttributeData> GetAttributes(this AttributeListSyntax attributes, ICompilationContextProvider provider)
+        {
+            // Collect pertinent syntax trees from these attributes
+            var acceptedTrees = new HashSet<SyntaxTree>();
+            foreach (var attribute in attributes.Attributes)
+                acceptedTrees.Add(attribute.SyntaxTree);
+
+            // https://stackoverflow.com/questions/28947456/how-do-i-get-attributedata-from-attributesyntax-in-roslyn
+            var parentSymbol = attributes.Parent!.GetDeclaredSymbol(provider)!;
+            var parentAttributes = parentSymbol.GetAttributes();
+            var ret = new List<AttributeData>();
+            foreach (var attribute in parentAttributes)
+            {
+                if (acceptedTrees.Contains(attribute.ApplicationSyntaxReference!.SyntaxTree))
+                    ret.Add(attribute);
+            }
+
+            return ret;
         }
 
         public static TSymbol GetDeclaredSymbol<TSymbol>(this CSharpSyntaxNode node, ICompilationContextProvider provider)
