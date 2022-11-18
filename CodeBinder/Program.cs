@@ -3,16 +3,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CodeBinder;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.MSBuild;
 using Mono.Options;
 using System.Reflection;
 using System.IO;
-using CodeBinder.CLang;
 using CodeBinder.Shared;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -141,12 +136,10 @@ namespace CodeBinder
             GeneratorOptions genargs = new GeneratorOptions();
             genargs.TargetRootPath = targetRootPath;
 
-            MSBuildWorkspace workspace = MSBuildWorkspace.Create();
-
             // TODO: Handle multiple projects
             if (solutionPath != null)
             {
-                var solution = workspace.OpenSolutionAsync(solutionPath).Result;
+                var solution = Solution.Open(solutionPath);
                 if (projects.Count == 0)
                 {
                     converter.ConvertAndWrite(solution, genargs);
@@ -159,7 +152,7 @@ namespace CodeBinder
             }
             else if (projects.Count != 0)
             {
-                var project = workspace.OpenProjectAsync(projects.First()).Result;
+                var project = Project.Open(projects.First());
                 converter.ConvertAndWrite(project, genargs);
             }
             else

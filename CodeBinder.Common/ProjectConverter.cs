@@ -2,31 +2,29 @@
 // Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using CodeBinder.Shared;
 using CodeBinder.Util;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
 
 namespace CodeBinder
 {
-    class ProjectConverter : ConverterActual
+    class ProjectConverter
     {
-        public Project Project { get; private set; }
+        public Microsoft.CodeAnalysis.Project Project { get; private set; }
 
-        internal ProjectConverter(Converter converter, Project project)
-            : base(converter)
+        public Converter Converter { get; private set; }
+
+        public ProjectConverter(Converter converter, Microsoft.CodeAnalysis.Project project)
         {
             Project = project;
+            Converter = converter;
         }
 
-        override internal protected IEnumerable<ConversionDelegate> GetConversionDelegates()
+        public IEnumerable<ConversionDelegate> GetConversionDelegates()
         {
             // Add some language specific preprocessor options
             var options = (CSharpParseOptions)Project.ParseOptions!;

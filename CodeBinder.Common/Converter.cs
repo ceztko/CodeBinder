@@ -2,8 +2,10 @@
 // This file is subject to the MIT license
 using CodeBinder.Shared;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.MSBuild;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -30,6 +32,8 @@ namespace CodeBinder
 
     public abstract class Converter
     {
+        const string DefineConstantsName = "DefineConstants";
+
         public ConverterOptions Options { get; private set; }
 
         internal Converter()
@@ -45,24 +49,66 @@ namespace CodeBinder
 
         public void ConvertAndWrite(Project project, GeneratorOptions args, IProgress<string>? progress = null)
         {
-            ConvertAndWrite(new ProjectConverter(this, project), args);
+            if (args.TargetRootPath == null)
+                throw new ArgumentNullException("args.TargtetRootPath");
+
+            Microsoft.CodeAnalysis.Project caproject;
+            var workspace = createWorkspace();
+            if (project.Solution == null)
+            {
+                caproject = workspace.OpenProjectAsync(project.FilePath).Result;
+            }
+            else
+            {
+                var casolution = workspace.OpenSolutionAsync(project.Solution.FilePath).Result;
+                caproject = casolution.Projects.First((proj) => proj.Id.Id == project.Id);
+            }
+            
+            convertAndWrite(new ProjectConverter(this, caproject), args);
         }
 
         public void ConvertAndWrite(Solution solution, GeneratorOptions args, IProgress<string>? progress = null)
         {
-            ConvertAndWrite(new SolutionConverter(this, solution, solution.Projects, progress), args);
+            if (args.TargetRootPath == null)
+                throw new ArgumentNullException("args.TargtetRootPath");
+
+            convertAndWrite(solution, solution.Projects, args);
         }
 
         public void ConvertAndWrite(IEnumerable<Project> projectsToConvert, GeneratorOptions args, IProgress<string>? progress = null)
         {
-            ConvertAndWrite(new SolutionConverter(this, projectsToConvert.First().Solution, projectsToConvert, progress), args);
-        }
-
-        void ConvertAndWrite(ConverterActual converter, GeneratorOptions args)
-        {
             if (args.TargetRootPath == null)
                 throw new ArgumentNullException("args.TargtetRootPath");
 
+            Solution? solution = null;
+            foreach (var project in projectsToConvert)
+            {
+                if (solution == null)
+                    solution = project.Solution;
+                else if (solution != project.Solution)
+                    throw new Exception("Projects must be afferent to the same solution");
+            }
+
+            if (solution == null)
+                throw new Exception("Projects must be afferent to a solution");
+
+            convertAndWrite(solution, projectsToConvert, args);
+        }
+
+        void convertAndWrite(Solution solution, IEnumerable<Project> projectsToConvert, GeneratorOptions args)
+        {
+            var workspace = createWorkspace();
+            var casolution = workspace.OpenSolutionAsync(solution.FilePath).Result;
+            foreach (var project in projectsToConvert)
+            {
+                var newproject = casolution.Projects.First((proj) => proj.Id.Id == project.Id);
+                convertAndWrite(new ProjectConverter(this, newproject), args);
+            }
+        }
+
+        void convertAndWrite(ProjectConverter converter, GeneratorOptions args)
+        {
+            Debug.Assert(args.TargetRootPath != null);
             foreach (var conversion in converter.GetConversionDelegates().Concat(Conversion.DefaultConversionDelegates))
             {
                 if (conversion.Skip)
@@ -86,6 +132,31 @@ namespace CodeBinder
                 }
             }
         }
+
+        MSBuildWorkspace createWorkspace()
+        {
+            if (Options.PreprocessorDefinitionsAdded?.Count != 0)
+            {
+                var builder = new StringBuilder();
+                bool first = true;
+                foreach (var definition in Options.PreprocessorDefinitionsAdded!)
+                {
+                    if (first)
+                        first = false;
+                    else
+                        builder.Append(";");
+
+                    builder.Append(definition);
+                }
+
+                return MSBuildWorkspace.Create(new Dictionary<string, string>() { { DefineConstantsName, builder.ToString() } });
+            }
+            else
+            {
+                return MSBuildWorkspace.Create();
+            }
+        }
+
         public LanguageConversion Conversion
         {
             get { return GetConversion(); }
@@ -108,20 +179,5 @@ namespace CodeBinder
         {
             return Conversion;
         }
-    }
-
-    internal abstract class ConverterActual
-    {
-        public Converter Converter { get; private set; }
-
-        public ConverterActual(Converter converter)
-        {
-            Converter = converter;
-        }
-
-        /// <summary>
-        /// Get delegates to be iterated to write conversions
-        /// </summary>
-        internal protected abstract IEnumerable<ConversionDelegate> GetConversionDelegates();
     }
 }
