@@ -32,15 +32,9 @@ namespace CodeBinder
             if (Converter.Options.PreprocessorDefinitionsRemoved != null)
                 preprocessorSymbols = preprocessorSymbols.Except(Converter.Options.PreprocessorDefinitionsRemoved).ToArray();
 
-            options = options.WithPreprocessorSymbols(preprocessorSymbols
-                .Concat(new[] { "CODE_BINDER" })
-                .Concat(Converter.Conversion.PreprocessorDefinitions)
-                .Concat(Converter.Options.PreprocessorDefinitionsAdded ?? new string[0]));
-            var project = Project.WithParseOptions(options);
-
-            var solutionFilePath = project.Solution.FilePath;
+            var solutionFilePath = Project.Solution.FilePath;
             var solutionDir = Path.GetDirectoryName(solutionFilePath);
-            var compilation = project.GetCompilationAsync().Result!;
+            var compilation = Project.GetCompilationAsync().Result!;
             if (!Converter.Options.IgnoreCompilationErrors)
             {
                 string? errors = CompilationOuput.ErrorsForCompilation(compilation, "source");

@@ -135,26 +135,28 @@ namespace CodeBinder
 
         MSBuildWorkspace createWorkspace()
         {
-            if (Options.PreprocessorDefinitionsAdded?.Count != 0)
-            {
-                var builder = new StringBuilder();
-                bool first = true;
-                foreach (var definition in Options.PreprocessorDefinitionsAdded!)
-                {
-                    if (first)
-                        first = false;
-                    else
-                        builder.Append(";");
+            var builder = new StringBuilder();
+            builder.Append("CODE_BINDER");
 
+            if (Conversion.PreprocessorDefinitions.Count != 0)
+            {
+                foreach (var definition in Conversion.PreprocessorDefinitions!)
+                {
+                    builder.Append(";");
                     builder.Append(definition);
                 }
+            }
 
-                return MSBuildWorkspace.Create(new Dictionary<string, string>() { { DefineConstantsName, builder.ToString() } });
-            }
-            else
+            if (Options.PreprocessorDefinitionsAdded?.Count != 0)
             {
-                return MSBuildWorkspace.Create();
+                foreach (var definition in Options.PreprocessorDefinitionsAdded!)
+                {
+                    builder.Append(";");
+                    builder.Append(definition);
+                }
             }
+
+            return MSBuildWorkspace.Create(new Dictionary<string, string>() { { DefineConstantsName, builder.ToString() } });
         }
 
         public LanguageConversion Conversion
