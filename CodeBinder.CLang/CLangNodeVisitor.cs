@@ -93,26 +93,6 @@ namespace CodeBinder.CLang
             Compilation.AddCallback(node);
         }
 
-        bool TryGetModuleName(TypeDeclarationSyntax type, [NotNullWhen(true)]out string? moduleName)
-        {
-            // To support partial calsses, iterate syntax attributes,
-            // don't infer them from context
-            foreach (var attributeList in type.AttributeLists)
-            {
-                foreach (var attribute in attributeList.GetAttributes(this))
-                {
-                    if (attribute.IsAttribute<ModuleAttribute>())
-                    {
-                        moduleName = attribute.GetConstructorArgument<string>(0);
-                        return true;
-                    }
-                }
-            }
-
-            moduleName = null;
-            return false;
-        }
-
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
             if (!node.GetAttributes(this).HasAttribute<NativeBindingAttribute>())

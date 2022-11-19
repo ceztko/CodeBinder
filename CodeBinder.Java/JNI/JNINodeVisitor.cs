@@ -40,6 +40,13 @@ namespace CodeBinder.JNI
                 {
                     parent = new JNIModuleContextParent(moduleName, Compilation);
                     Compilation.AddModule(Compilation, parent);
+
+                    foreach (var attribute in type.GetAttributes<ImportAttribute>(this))
+                    {
+                        var include = new ImportAttribute(attribute.GetConstructorArgument<string>(0)) {
+                            Condition = attribute.GetNamedArgument<string?>("Condition") };
+                        parent.AddInclude(include);
+                    }
                 }
 
                 module = new JNIModuleContextChild(Compilation);
@@ -67,26 +74,6 @@ namespace CodeBinder.JNI
                         break;
                 }
             }
-        }
-
-        bool TryGetModuleName(TypeDeclarationSyntax type, [NotNullWhen(true)]out string? moduleName)
-        {
-            // To support partial calsses, iterate syntax attributes,
-            // don't infer them from context
-            foreach (var attributeList in type.AttributeLists)
-            {
-                foreach (var attribute in attributeList.GetAttributes(this))
-                {
-                    if (attribute.IsAttribute<ModuleAttribute>())
-                    {
-                        moduleName = attribute.GetConstructorArgument<string>(0);
-                        return true;
-                    }
-                }
-            }
-
-            moduleName = null;
-            return false;
         }
     }
 }

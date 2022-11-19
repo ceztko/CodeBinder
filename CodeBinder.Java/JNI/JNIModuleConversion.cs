@@ -1,6 +1,7 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
 using CodeBinder.Attributes;
+using CodeBinder.Java;
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
@@ -66,7 +67,23 @@ namespace CodeBinder.JNI
         {
             builder.AppendLine("#include \"Internal/JNICommon.h\"");
             builder.AppendLine($"#include \"{JNIModuleName}.h\"");
+
+            foreach (var include in Context.Includes)
+            {
+                if (string.IsNullOrEmpty(include.Condition))
+                {
+                    builder.Append("#include").Space().AppendLine(include.Name);
+                }
+                else
+                {
+                    builder.Append("#ifdef").Space().AppendLine(include.Condition);
+                    builder.Append("#include").Space().AppendLine(include.Name);
+                    builder.Append("#endif //").Space().AppendLine(include.Condition);
+                }
+            }
+
             builder.AppendLine($"#include <{Context.Name}.h>");
+
             builder.AppendLine();
             WriteMethods(builder, ConversionType.Implementation);
         }
@@ -75,6 +92,13 @@ namespace CodeBinder.JNI
         {
             foreach (var method in Context.Methods)
             {
+                string? condition = null;
+                if (method.TryGetAttribute<ConditionAttribute>(this, out var attr))
+                {
+                    condition = attr.GetConstructorArgument<string>(0);
+                    builder.Append("#ifdef").Space().Append(condition).AppendLine();
+                }
+
                 if (method.TryGetAttribute<VerbatimConversionAttribute>(Context, out var attribute)
                     && (attribute.ConstructorArguments.Length == 1 ||
                         attribute.GetConstructorArgument<ConversionType>(0) == conversionType))
@@ -88,6 +112,12 @@ namespace CodeBinder.JNI
                 else
                 {
                     builder.Append(new JNITrampolineMethodWriter(method, this, conversionType));
+                }
+
+                if (condition != null)
+                {
+                    builder.AppendLine();
+                    builder.Append("#endif //").Space().Append(condition).AppendLine();
                 }
 
                 builder.AppendLine();

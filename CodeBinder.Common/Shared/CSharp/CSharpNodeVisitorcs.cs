@@ -9,6 +9,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace CodeBinder.Shared.CSharp
 {
@@ -603,6 +604,33 @@ namespace CodeBinder.Shared.CSharp
         protected void AddError(string error)
         {
             _errors.Add(error);
+        }
+
+        protected bool TryGetModuleName(TypeDeclarationSyntax type, [NotNullWhen(true)] out string? moduleName)
+        {
+            // To support partial calsses, iterate syntax attributes,
+            // don't infer them from context
+            foreach (var attributeList in type.AttributeLists)
+            {
+                foreach (var attribute in attributeList.GetAttributes(this))
+                {
+                    if (attribute.IsAttribute<ModuleAttribute>())
+                    {
+                        moduleName = attribute.GetConstructorArgument<string>(0);
+                        return true;
+                    }
+                }
+            }
+
+            // As a last resort ask for all the symbol attributes
+            if (type.TryGetAttribute<ModuleAttribute>(this, out var attr))
+            {
+                moduleName = attr.GetConstructorArgument<string>(0);
+                return true;
+            }
+
+            moduleName = null;
+            return false;
         }
 
         public TCompilationContext Compilation { get; private set; }

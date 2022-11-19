@@ -33,12 +33,26 @@ namespace CodeBinder.Attributes
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
     public sealed class ImportAttribute : CodeBinderAttribute
     {
+        public string Name { get; private set; }
+
+        public string? Condition { get; set; }
+
         public ImportAttribute(string name)
         {
             Name = name;
         }
+    }
 
-        public string Name { get; private set; }
+    [Conditional(ConditionString)]
+    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
+    public sealed class ConditionAttribute : CodeBinderAttribute
+    {
+        public string Condition { get; private set; }
+
+        public ConditionAttribute(string condition)
+        {
+            Condition = condition;
+        }
     }
 
     [Conditional(ConditionString)]

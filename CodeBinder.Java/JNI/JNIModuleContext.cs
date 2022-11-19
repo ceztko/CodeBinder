@@ -1,5 +1,6 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
+using CodeBinder.Attributes;
 using CodeBinder.Shared;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -22,17 +23,29 @@ namespace CodeBinder.JNI
             get;
         }
 
+        public abstract IEnumerable<ImportAttribute> Includes
+        {
+            get;
+        }
+
         protected override JNICompilationContext getCompilationContext() => Context;
     }
 
     public class JNIModuleContextParent : JNIModuleContext
     {
-        private string _Name;
+        string _Name;
+        List<ImportAttribute> _includes;
 
         public JNIModuleContextParent(string name, JNICompilationContext context)
             : base(context)
         {
             _Name = name;
+            _includes = new List<ImportAttribute>();
+        }
+
+        public void AddInclude(ImportAttribute include)
+        {
+            _includes.Add(include);
         }
 
         protected override IEnumerable<TypeConversion<JNIModuleContext>> getConversions()
@@ -57,11 +70,13 @@ namespace CodeBinder.JNI
         {
             get { return _Name; }
         }
+
+        public override IEnumerable<ImportAttribute> Includes => _includes;
     }
 
     public class JNIModuleContextChild : JNIModuleContext
     {
-        private List<MethodDeclarationSyntax> _methods;
+        List<MethodDeclarationSyntax> _methods;
 
         public JNIModuleContextChild(JNICompilationContext context)
             : base(context)
@@ -87,6 +102,11 @@ namespace CodeBinder.JNI
         public override string Name
         {
             get { return Parent!.Name; }
+        }
+
+        public override IEnumerable<ImportAttribute> Includes
+        {
+            get { yield break; }
         }
     }
 }

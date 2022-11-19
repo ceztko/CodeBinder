@@ -147,7 +147,7 @@ namespace CodeBinder
                 }
             }
 
-            if (Options.PreprocessorDefinitionsAdded?.Count != 0)
+            if (Options.PreprocessorDefinitionsAdded != null)
             {
                 foreach (var definition in Options.PreprocessorDefinitionsAdded!)
                 {

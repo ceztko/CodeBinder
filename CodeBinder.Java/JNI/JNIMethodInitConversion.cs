@@ -1,5 +1,6 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
+using CodeBinder.Attributes;
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
 using CodeBinder.Util;
@@ -30,7 +31,17 @@ namespace CodeBinder.JNI
                 foreach (var module in _compilation.Modules)
                 {
                     foreach (var method in module.Methods)
+                    {
+                        string? condition = null;
+                        if (method.TryGetAttribute<ConditionAttribute>(_compilation, out var attr))
+                        {
+                            condition = attr.GetConstructorArgument<string>(0);
+                            builder.Append("#ifdef").Space().Append(condition).AppendLine();
+                        }
                         builder.Append("(void *)").Append(method.GetJNIMethodName(module)).AppendLine(",");
+                        if (condition != null)
+                            builder.Append("#endif //").Space().Append(condition).AppendLine();
+                    }    
                 }
             }
 
