@@ -48,7 +48,7 @@ namespace CodeBinder.Java
 
         public override IReadOnlyList<string> PreprocessorDefinitions
         {
-            get { return new string[] { "JAVA" }; }
+            get { return new string[] { "JAVA", "JVM" }; }
         }
 
         public override bool UseUTF8Bom

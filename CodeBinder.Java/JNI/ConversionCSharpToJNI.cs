@@ -23,7 +23,7 @@ namespace CodeBinder.JNI
 
         public override IReadOnlyList<string> PreprocessorDefinitions
         {
-            get { return new string[] { "JAVA", "JNI" }; }
+            get { return new string[] { "JNI", "JVM" }; }
         }
 
         public override IEnumerable<IConversionWriter> DefaultConversions
