@@ -101,7 +101,7 @@ namespace CodeBinder
             var casolution = workspace.OpenSolutionAsync(solution.FilePath).Result;
             foreach (var project in projectsToConvert)
             {
-                var newproject = casolution.Projects.First((proj) => proj.Id.Id == project.Id);
+                var newproject = casolution.Projects.First((proj) => proj.FilePath == project.FilePath);
                 convertAndWrite(new ProjectConverter(this, newproject), args);
             }
         }
