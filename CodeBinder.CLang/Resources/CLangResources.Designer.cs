@@ -114,7 +114,7 @@ namespace CodeBinder.CLang {
         ///
         ///#define CBSLEN(str) (size_t)((str).opaque &amp; ~CB_STRING_OWNSDATA_FLAG)
         ///
-        ///exte [rest of string was truncated]&quot;;.
+        ///#ifd [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBInterop_h {
             get {

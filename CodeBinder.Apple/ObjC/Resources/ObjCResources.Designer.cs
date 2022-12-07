@@ -67,6 +67,7 @@ namespace CodeBinder.Apple {
         ///
         ///#import &quot;cboclibdefs.h&quot;
         ///#import &lt;Foundation/Foundation.h&gt;
+        ///#import &quot;CBHandleRef.h&quot;
         ///
         ///OBJC_CODEBINDER_API @interface CBHandledObjectBase : NSObject
         ///{
@@ -82,7 +83,7 @@ namespace CodeBinder.Apple {
         ///    @property(nonatomic,readonly) CBHandleRef * handle;
         ///    - (CBHandleRef *)handle;
         ///
-        ///    @property(nonatomic,re [rest of string was truncated]&quot;;.
+        ///  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBHandledObject_h {
             get {
@@ -127,6 +128,8 @@ namespace CodeBinder.Apple {
         /// <summary>
         ///   Looks up a localized string similar to #import &quot;CBHandledObject.h&quot;
         ///#import &quot;../Internal/CBHandledObject.h&quot;
+        ///#import &quot;../Internal/CBOCBinderUtils.h&quot;
+        ///#import &quot;CBException.h&quot;
         ///
         ///@implementation CBHandledObjectBase
         ///    - (id)init
@@ -147,10 +150,7 @@ namespace CodeBinder.Apple {
         ///        return self;
         ///    }
         ///
-        ///    - (void)dealloc
-        ///    {
-        ///        if (self.managed)
-        ///            [rest of string was truncated]&quot;;.
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBHandledObject_mm {
             get {

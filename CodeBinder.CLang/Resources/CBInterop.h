@@ -20,8 +20,11 @@
 
 #define CBSLEN(str) (size_t)((str).opaque & ~CB_STRING_OWNSDATA_FLAG)
 
+#ifdef __cplusplus
 extern "C"
 {
+#endif // __cplusplus
+
 #ifdef WIN32
     __declspec(dllimport) void __stdcall LocalFree(void* pv);
     __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
@@ -56,7 +59,7 @@ extern "C"
     // TODO: CBCreateString, CBCreateStringLen
     inline cbstring CBCreateStringView(const char* str)
     {
-        cbstring ret = { str, str == nullptr ? 0 : strlen(str) };
+        cbstring ret = { str, str == NULL ? 0 : strlen(str) };
         return ret;
     }
 
@@ -74,6 +77,9 @@ extern "C"
             *str = cbstringnull;
         }
     }
+
+#ifdef __cplusplus
 }
+#endif // __cplusplus
 
 #endif // CODE_BINDER_INTEROP_HEADER

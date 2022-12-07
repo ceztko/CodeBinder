@@ -26,7 +26,7 @@ OBJC_CODEBINDER_API @interface CBHandledObjectBase : NSObject
 
 @class CBHandledObject;
 
-OBJC_CODEBINDER_API @interface CBHandledObject <BaseT : CBHandledObject *> : CBHandledObjectBase
+OBJC_CODEBINDER_API @interface CBHandledObject <BaseT : CBHandledObjectBase *> : CBHandledObjectBase
 @end
 
 #endif // CBHANDLEDOBJECT_HEADER
