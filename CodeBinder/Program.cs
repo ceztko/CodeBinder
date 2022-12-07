@@ -34,7 +34,8 @@ namespace CodeBinder
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine(ex.Message);
+                Console.Write("ERROR: ");
+                Console.Error.WriteLine(ex);
                 return -1;
             }
 
