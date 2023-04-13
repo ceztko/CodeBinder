@@ -65,19 +65,19 @@ namespace CodeBinder.JNI.Resources {
         ///
         ///extern &quot;C&quot;
         ///{
-        ///    JNIEXPORT jlong JNICALL Java_CodeBinder_BinderUtils_newGlobalRef(
+        ///    JNIEXPORT jlong JNICALL Java_CodeBinder_Java_BinderUtils_newGlobalRef(
         ///        JNIEnv *env, jclass, jobject obj)
         ///    {
         ///        return (jlong)env-&gt;NewGlobalRef(obj);
         ///    }
         ///
-        ///    JNIEXPORT void JNICALL Java_CodeBinder_BinderUtils_deleteGlobalRef(
+        ///    JNIEXPORT void JNICALL Java_CodeBinder_Java_BinderUtils_deleteGlobalRef(
         ///        JNIEnv *env, jclass, jlong globalref)
         ///    {
         ///        env-&gt;DeleteGlobalRef((jobject)globalref);
         ///    }
         ///	
-        ///	JNIEXPORT jlong JNICALL Java_CodeBinder_BinderUtils_newGlobalWeakRef(
+        ///	JNIEXPORT jlong JNICALL Java_CodeBinder_Java_BinderUtils_newGlobalWeakRef(
         ///		JNIEnv *env, jclass, jobject obj) [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBinderUtils_cpp {
