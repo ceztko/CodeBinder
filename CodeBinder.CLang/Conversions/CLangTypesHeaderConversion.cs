@@ -11,6 +11,7 @@ using CodeBinder.Attributes;
 using Microsoft.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace CodeBinder.CLang
 {
@@ -161,6 +162,9 @@ namespace CodeBinder.CLang
         {
             foreach (var member in str.Members)
             {
+                if (member.Kind() != SyntaxKind.FieldDeclaration)
+                    continue;
+
                 var field = (member as FieldDeclarationSyntax)!;
                 builder.Append(field.Declaration.GetCLangType(Compilation)).Space()
                     .Append(field.Declaration.Variables[0].Identifier.Text).EndOfLine();
