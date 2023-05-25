@@ -1,7 +1,7 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
 using CodeBinder.Shared;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -74,9 +74,6 @@ namespace CodeBinder.Apple
                 case "System.Boolean":
                     accessProperty = "boolValue";
                     return true;
-                case "System.Char":
-                    accessProperty = "charValue";
-                    return true;
                 case "System.Byte":
                     accessProperty = "unsignedCharValue";
                     return true;
@@ -144,9 +141,6 @@ namespace CodeBinder.Apple
                     return true;
                 case "System.Boolean":
                     accessProperty = "numberWithBool";
-                    return true;
-                case "System.Char":
-                    accessProperty = "numberWithChar";
                     return true;
                 case "System.Byte":
                     accessProperty = "numberWithUnsignedChar";
@@ -236,9 +230,6 @@ namespace CodeBinder.Apple
                 case "System.Boolean":
                     typeName = "BOOL";
                     return true;
-                case "System.Char":
-                    typeName = "char";
-                    return true;
                 case "System.Byte":
                     typeName = "uint8_t";
                     return true;
@@ -284,7 +275,6 @@ namespace CodeBinder.Apple
                 case "System.UIntPtr":
                 case "System.IntPtr":
                 case "System.Boolean":
-                case "System.Char":
                 case "System.Byte":
                 case "System.SByte":
                 case "System.Int16":
@@ -321,9 +311,6 @@ namespace CodeBinder.Apple
                     return true;
                 case "System.Boolean":
                     boxTypeName = "CBBoolArray";
-                    return true;
-                case "System.Char":
-                    boxTypeName = "CBCharArray";
                     return true;
                 case "System.Byte":
                     boxTypeName = "CBUInt8Array";

@@ -1,7 +1,7 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
 using CodeBinder.Java.Shared;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
@@ -32,9 +32,6 @@ namespace CodeBinder.Java
                     return true;
                 case "System.Boolean":
                     boxTypeName = "Boolean";
-                    return true;
-                case "System.Char":
-                    boxTypeName = "Character";
                     return true;
                 case "System.Byte":
                 case "System.SByte":
@@ -88,9 +85,6 @@ namespace CodeBinder.Java
                     return true;
                 case "System.Boolean":
                     boxTypeName = "BooleanBox";
-                    return true;
-                case "System.Char":
-                    boxTypeName = "CharacterBox";
                     return true;
                 case "System.Byte":
                 case "System.SByte":
@@ -309,8 +303,6 @@ namespace CodeBinder.Java
             {
                 case JavaInteropType.Boolean:
                     return "boolean";
-                case JavaInteropType.Character:
-                    return "char";
                 case JavaInteropType.Byte:
                     return "byte";
                 case JavaInteropType.Short:
@@ -336,8 +328,6 @@ namespace CodeBinder.Java
             {
                 case "boolean":
                     return JavaInteropType.Boolean;
-                case "char":
-                    return JavaInteropType.Character;
                 case "byte":
                     return JavaInteropType.Byte;
                 case "short":

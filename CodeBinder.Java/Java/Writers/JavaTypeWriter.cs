@@ -3,7 +3,7 @@
 using CodeBinder.Attributes;
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,7 +24,7 @@ namespace CodeBinder.Java
         protected override void Write()
         {
             var modifiers = Item.GetJavaModifiersString();
-            if (!string.IsNullOrEmpty(modifiers))
+            if (!modifiers.IsNullOrEmpty())
                 Builder.Append(modifiers).Space();
 
             if (NeedStaticKeyword)

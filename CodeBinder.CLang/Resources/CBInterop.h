@@ -25,7 +25,7 @@ extern "C"
 {
 #endif // __cplusplus
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(_WINBASE_)
     __declspec(dllimport) void __stdcall LocalFree(void* pv);
     __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
 #endif // WIN32
@@ -56,7 +56,57 @@ extern "C"
         return CBSLEN(*str);
     }
 
-    // TODO: CBCreateString, CBCreateStringLen
+    inline cbstring CBCreateString(const char* str)
+    {
+        size_t len = strlen(str);
+        char* newstr = (char*)CBAllocMemory(len + 1);
+        if (newstr == NULL)
+        {
+            cbstring ret = { NULL, 0 };
+            return ret;
+        }
+        else
+        {
+            cbstring ret = { newstr, len };
+            memcpy(newstr, str, len);
+            newstr[len] = '\0';
+            return ret;
+        }
+    }
+
+    inline cbstring CBCreateStringLen(const char* str, size_t len)
+    {
+        char* newstr = (char*)CBAllocMemory(len + 1);
+        if (newstr == NULL)
+        {
+            cbstring ret = { NULL, 0 };
+            return ret;
+        }
+        else
+        {
+            cbstring ret = { newstr, len };
+            memcpy(newstr, str, len);
+            newstr[len] = '\0';
+            return ret;
+        }
+    }
+
+    inline cbstring CBCreateStringFixed(size_t len)
+    {
+        char* newstr = (char*)CBAllocMemory(len + 1);
+        if (newstr == NULL)
+        {
+            cbstring ret = { NULL, 0 };
+            return ret;
+        }
+        else
+        {
+            cbstring ret = { newstr, len };
+            newstr[0] = '\0';
+            return ret;
+        }
+    }
+
     inline cbstring CBCreateStringView(const char* str)
     {
         cbstring ret = { str, str == NULL ? 0 : strlen(str) };

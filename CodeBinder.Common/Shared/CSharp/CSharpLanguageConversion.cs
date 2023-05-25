@@ -40,13 +40,18 @@ namespace CodeBinder.Shared.CSharp
         {
             yield break;
         }
+
+        public override IEnumerable<TypeConversion<CSharpDelegateTypeContext>> GetConversions(CSharpDelegateTypeContext dlg)
+        {
+            yield break;
+        }
     }
 
     /// <summary>
     /// CSharp specific language conversion
     /// </summary>
     /// <remarks>Inherit this class if you don't need custom contexts/visitor</remarks>
-    public abstract class CSharpLanguageConversion : LanguageConversion<CSharpCompilationContext, CSharpBaseTypeContext>
+    public abstract class CSharpLanguageConversion : LanguageConversion<CSharpCompilationContext, CSharpMemberTypeContext>
     {
         protected sealed override CSharpCompilationContext createCompilationContext()
         {
@@ -65,5 +70,7 @@ namespace CodeBinder.Shared.CSharp
         public abstract IEnumerable<TypeConversion<CSharpStructTypeContext>> GetConversions(CSharpStructTypeContext str);
 
         public abstract IEnumerable<TypeConversion<CSharpEnumTypeContext>> GetConversions(CSharpEnumTypeContext enm);
+
+        public abstract IEnumerable<TypeConversion<CSharpDelegateTypeContext>> GetConversions(CSharpDelegateTypeContext dlg);
     }
 }

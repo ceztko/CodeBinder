@@ -1,6 +1,7 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
 using CodeBinder.Attributes;
+using CodeBinder.CLang;
 using CodeBinder.Shared;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -11,11 +12,13 @@ namespace CodeBinder.JNI
 {
     public abstract class JNIModuleContext : TypeContext<JNIModuleContext, JNICompilationContext>
     {
-        public JNICompilationContext Context { get; private set; }
+        JNICompilationContext _Compilation;
+
+        public override JNICompilationContext Compilation => _Compilation;
 
         protected JNIModuleContext(JNICompilationContext context)
         {
-            Context = context;
+            _Compilation = context;
         }
 
         public abstract IEnumerable<MethodDeclarationSyntax> Methods
@@ -27,8 +30,6 @@ namespace CodeBinder.JNI
         {
             get;
         }
-
-        protected override JNICompilationContext getCompilationContext() => Context;
     }
 
     public class JNIModuleContextParent : JNIModuleContext
@@ -48,7 +49,7 @@ namespace CodeBinder.JNI
             _includes.Add(include);
         }
 
-        protected override IEnumerable<TypeConversion<JNIModuleContext>> getConversions()
+        protected override IEnumerable<TypeConversion<JNIModuleContext>> GetConversions()
         {
             yield return new JNIModuleConversion(this, ConversionType.Header, Compilation.Conversion);
             yield return new JNIModuleConversion(this, ConversionType.Implementation, Compilation.Conversion);
@@ -89,7 +90,7 @@ namespace CodeBinder.JNI
             _methods.Add(method);
         }
 
-        protected override IEnumerable<TypeConversion<JNIModuleContext>> getConversions()
+        protected override IEnumerable<TypeConversion<JNIModuleContext>> GetConversions()
         {
             throw new NotImplementedException();
         }

@@ -10,28 +10,29 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 
 namespace CodeBinder.Shared.CSharp
 {
     /// <summary>
     /// Inherit this class if you need a default CSharpCompilationContext
     /// </summary>
-    public class CSharpNodeVisitor<TCompilationContext, TTypeContext, TLanguageConversion> : CSharpNodeVisitorBase<TCompilationContext, CSharpBaseTypeContext, CSharpLanguageConversion>
+    public class CSharpNodeVisitor<TCompilationContext, TTypeContext, TLanguageConversion> : CSharpNodeVisitorBase<TCompilationContext, CSharpMemberTypeContext, CSharpLanguageConversion>
         where TCompilationContext : CSharpCompilationContext
-        where TTypeContext : CSharpBaseTypeContext
+        where TTypeContext : CSharpMemberTypeContext
         where TLanguageConversion : CSharpLanguageConversion
     {
         Dictionary<string, List<CSharpTypeContext>> _types;
-        Stack<CSharpBaseTypeContext> _parents;
+        Stack<CSharpMemberTypeContext> _parents;
 
         protected CSharpNodeVisitor(TCompilationContext context)
             : base(context)
         {
             _types = new Dictionary<string, List<CSharpTypeContext>>();
-            _parents = new Stack<CSharpBaseTypeContext>();
+            _parents = new Stack<CSharpMemberTypeContext>();
         }
 
-        public CSharpBaseTypeContext? CurrentParent
+        public CSharpMemberTypeContext? CurrentParent
         {
             get
             {
@@ -52,41 +53,54 @@ namespace CodeBinder.Shared.CSharp
 
         #region Supported types
 
-        public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
-        {
-            bool isPartial;
-            checkTypeDeclaration(node, out isPartial);
-            var type = Compilation.CreateContext(node);
-            addType(type, isPartial);
-            DefaultVisit(node);
-        }
-
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            bool isPartial;
-            checkTypeDeclaration(node, out isPartial);
-            var type = Compilation.CreateContext(node);
-            addType(type, isPartial);
-            _parents.Push(type);
+            checkTypeDeclaration(node, out _);
+            var typeCtx = Compilation.CreateContext(node);
+            typeCtx.Init();
+            addTypeContext(typeCtx);
+            _parents.Push(typeCtx);
+            Compilation.AddClass(typeCtx);
             DefaultVisit(node);
             _parents.Pop();
         }
 
         public override void VisitStructDeclaration(StructDeclarationSyntax node)
         {
-            bool isPartial;
-            checkTypeDeclaration(node, out isPartial);
-            var type = Compilation.CreateContext(node);
-            addType(type, isPartial);
-            _parents.Push(type);
+            checkTypeDeclaration(node, out _);
+            var typeCtx = Compilation.CreateContext(node);
+            typeCtx.Init();
+            addTypeContext(typeCtx);
+            _parents.Push(typeCtx);
+            Compilation.AddStruct(typeCtx);
             DefaultVisit(node);
             _parents.Pop();
         }
 
+        public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
+        {
+            checkTypeDeclaration(node, out _);
+            var typeCtx = Compilation.CreateContext(node);
+            typeCtx.Init();
+            addTypeContext(typeCtx);
+            Compilation.AddInterface(typeCtx);
+            DefaultVisit(node);
+        }
+
         public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
         {
-            var type = Compilation.CreateContext(node);
-            Compilation.AddType(type, CurrentParent);
+            var typeCtx = Compilation.CreateContext(node);
+            typeCtx.Init();
+            Compilation.AddTypeContext(typeCtx, CurrentParent);
+            Compilation.AddEnum(typeCtx);
+            DefaultVisit(node);
+        }
+
+        public override void VisitDelegateDeclaration(DelegateDeclarationSyntax node)
+        {
+            var typeCtx = Compilation.CreateContext(node);
+            typeCtx.Init();
+            Compilation.AddDelegate(typeCtx);
             DefaultVisit(node);
         }
 
@@ -187,7 +201,7 @@ namespace CodeBinder.Shared.CSharp
 
         #endregion Supported types
 
-        void addType(CSharpTypeContext type, bool isPartial)
+        void addTypeContext(CSharpTypeContext type)
         {
             string fullName = type.Node.GetFullName(this);
             if (!_types.TryGetValue(fullName, out var types))
@@ -221,10 +235,10 @@ namespace CodeBinder.Shared.CSharp
             {
                 var symbol = type.Node.GetDeclaredSymbol<ITypeSymbol>(this);
                 if (symbol.ContainingType == null)
-                    Compilation.AddType(type, null);
+                    Compilation.AddTypeContext(type, null);
                 else
                     // We assume partial types are contained in partial types, see visitor
-                    Compilation.AddType(type, mainTypesMap[symbol.ContainingType]);
+                    Compilation.AddTypeContext(type, mainTypesMap[symbol.ContainingType]);
             }
         }
 
@@ -294,6 +308,9 @@ namespace CodeBinder.Shared.CSharp
                             break;
                         case SymbolKind.Parameter:
                             argType = (argSymbol as IParameterSymbol)!.Type;
+                            break;
+                        case SymbolKind.Field:
+                            argType = (argSymbol as IFieldSymbol)!.Type;
                             break;
                         default:
                             Unsupported(node, "ref like keyword keyword in non local/parameter expression");
@@ -405,14 +422,6 @@ namespace CodeBinder.Shared.CSharp
             DefaultVisit(node);
         }
 
-        public override void VisitParameter(ParameterSyntax node)
-        {
-            if (node.Default != null && !node.Parent!.Parent!.IsKind(SyntaxKind.MethodDeclaration))
-                Unsupported(node, "Optional parameter in unsopperted context");
-
-            DefaultVisit(node);
-        }
-
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             if (!node.OperatorToken.IsKind(SyntaxKind.DotToken))
@@ -450,7 +459,6 @@ namespace CodeBinder.Shared.CSharp
             {
                 // Types that are boxable
                 case "System.Boolean":
-                case "System.Char":
                 case "System.Byte":
                 case "System.SByte":
                 case "System.Int16":
@@ -589,11 +597,27 @@ namespace CodeBinder.Shared.CSharp
         where TLanguageConversion : LanguageConversion
     {
         List<string> _errors;
+        Dictionary<string, List<IMethodSymbol>> _uniqueMethodNames;
+        HashSet<ITypeSymbol> _typeWithRegularCostructor;
+        bool _checkMethodOverloads;
 
         public CSharpNodeVisitorBase(TCompilationContext context)
         {
-            _errors = new List<string>();
             Compilation = context;
+            _errors = new List<string>();
+            _checkMethodOverloads = (Compilation.Conversion?.OverloadFeatures is OverloadFeature value)
+                ? value != OverloadFeature.FullSupport : false;
+            if (_checkMethodOverloads)
+            {
+                _uniqueMethodNames = new Dictionary<string, List<IMethodSymbol>>();
+                _typeWithRegularCostructor = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
+            }
+            else
+            {
+                // These shouldn't be used, flag them with null
+                _uniqueMethodNames = null!;
+                _typeWithRegularCostructor = null!;
+            }
         }
 
         public void Visit(SyntaxTree context)
@@ -604,6 +628,129 @@ namespace CodeBinder.Shared.CSharp
         protected void AddError(string error)
         {
             _errors.Add(error);
+        }
+
+        public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
+        {
+            if (!(node.IsPartialMethod(out var hasEmptyBody) && hasEmptyBody))
+                addSymbolBinding(node.GetDeclaredSymbol<IMethodSymbol>(this));
+
+            DefaultVisit(node);
+        }
+
+        public override void VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
+        {
+            var symbol = node.GetDeclaredSymbol<IMethodSymbol>(this);
+            if (_checkMethodOverloads && !symbol.IsStatic)
+            {
+                if (symbol.HasAttribute<OverloadBindingAttribute>())
+                {
+                    if (node.Initializer != null && node.Initializer.ThisOrBaseKeyword.IsKind(SyntaxKind.BaseConstructorInitializer))
+                        AddError("Unsupported constructor overload with base initializer");
+
+                    if (symbol.ContainingType.TypeKind != TypeKind.Struct
+                        && node.Body != null && node.Body.Statements.Count != 0)
+                    {
+                        AddError("Unsupported constructor overload with non null body");
+                    }
+                }
+                else
+                {
+                    if (symbol.ContainingType.TypeKind == TypeKind.Struct)
+                        AddError("Constructors in structs without [OverloadBinding] attributes are not allowed");
+                    else if (_typeWithRegularCostructor.Contains(symbol.ContainingType))
+                        AddError("Overloaded constructors without [OverloadBinding] attributes are not allowed");
+                    else
+                        _typeWithRegularCostructor.Add(symbol.ContainingType);
+                }
+            }
+
+            addSymbolBinding(symbol);
+            DefaultVisit(node);
+        }
+
+        public override void VisitDestructorDeclaration(DestructorDeclarationSyntax node)
+        {
+            if (!Compilation.Conversion.SupportedPolicies.Contains(Policies.InstanceFinalizers))
+            {
+                var symbol = node.GetDeclaredSymbol<IMethodSymbol>(this);
+                if (!symbol.ContainingType.Implements<IObjectFinalizer>())
+                {
+                    AddError("Unsupported destructor in a object not implementing IObjectFinalizer or in a"
+                        + " language conversion without Policies.InstanceFinalizers");
+                }
+            }
+
+            DefaultVisit(node);
+        }
+
+        // Construct a method binding to handle overloaded methods/constructors
+        void addSymbolBinding(IMethodSymbol methodSymbol)
+        {
+            string? stem = null;
+            var enableIfMissing = OverloadFeature.None;
+            if (methodSymbol.TryGetAttribute<OverloadBindingAttribute>(out var overloadAttrib))
+            {
+                stem = overloadAttrib.GetConstructorArgument<string>(0);
+                enableIfMissing = overloadAttrib.GetConstructorArgument<OverloadFeature>(1);
+            }
+
+            if (stem == null && methodSymbol.OverriddenMethod != null)
+            {
+                if (methodSymbol.OverriddenMethod.TryGetAttribute<OverloadBindingAttribute>(out overloadAttrib))
+                {
+                    stem = overloadAttrib.GetConstructorArgument<string>(0);
+                    enableIfMissing = overloadAttrib.GetConstructorArgument<OverloadFeature>(0);
+                }
+            }
+
+            string bindedName;
+            if (stem == null || (Compilation.Conversion.OverloadFeatures?.HasFlag(enableIfMissing) ?? true))
+            {
+                bindedName = GetMethodBaseName(methodSymbol);
+            }
+            else
+            {
+                if (methodSymbol.MethodKind == MethodKind.Constructor)
+                {
+                    bindedName = stem;
+                    handleMethodCasing(ref bindedName);
+                }
+                else
+                {
+                    bindedName = GetMethodBaseName(methodSymbol) + stem;
+                }
+            }
+
+            if (_checkMethodOverloads)
+            {
+                string qualifiedBindedName = $"{methodSymbol.ContainingType.GetFullName()}.{bindedName}";
+                List<IMethodSymbol>? bindedMethods;
+                if (_uniqueMethodNames.TryGetValue(qualifiedBindedName, out bindedMethods))
+                {
+                    bool doParameterOverlaps = false;
+                    foreach (var bindendMethodSymbol in bindedMethods)
+                    {
+                        doParameterOverlaps = methodSymbol.DoParameterCountOverlap(bindendMethodSymbol);
+                        if (doParameterOverlaps)
+                        {
+                            AddError("Method " + methodSymbol.GetDebugName()
+                                + " parameter count overlap with method " + bindendMethodSymbol.GetDebugName());
+                            break;
+                        }
+                    }
+
+                    if (!doParameterOverlaps)
+                        bindedMethods.Add(methodSymbol);
+                }
+                else
+                {
+                    bindedMethods = new List<IMethodSymbol> { methodSymbol };
+                    _uniqueMethodNames.Add(qualifiedBindedName, bindedMethods);
+                }
+            }
+
+            Compilation.AddMethodBinding(methodSymbol, bindedName);
         }
 
         protected bool TryGetModuleName(TypeDeclarationSyntax type, [NotNullWhen(true)] out string? moduleName)
@@ -633,6 +780,23 @@ namespace CodeBinder.Shared.CSharp
             return false;
         }
 
+        protected virtual string GetMethodBaseName(IMethodSymbol symbol)
+        {
+            string baseName;
+            if (symbol.ExplicitInterfaceImplementations.Length == 0)
+            {
+                baseName = symbol.Name;
+            }
+            else
+            {
+                // Get name of explicitly interface implemented method
+                baseName = symbol.ExplicitInterfaceImplementations[0].Name;
+            }
+
+            handleMethodCasing(ref baseName);
+            return baseName;
+        }
+
         public TCompilationContext Compilation { get; private set; }
 
         protected virtual void afterVisit()
@@ -651,9 +815,28 @@ namespace CodeBinder.Shared.CSharp
         }
 
         public IReadOnlyList<string> Errors => _errors;
+
+
+        void handleMethodCasing(ref string methodName)
+        {
+            switch (Compilation.Conversion.MethodCasing)
+            {
+                case MethodCasing.LowerCamelCase:
+                    methodName = methodNameToLowerCase(methodName);
+                    break;
+            }
+        }
+
+        static string methodNameToLowerCase(string methodName)
+        {
+            if (char.IsLower(methodName, 0))
+                return methodName;
+
+            return char.ToLowerInvariant(methodName[0]) + methodName.Substring(1);
+        }
     }
 
-    class CSharpNodeVisitorImpl : CSharpNodeVisitor<CSharpCompilationContext, CSharpBaseTypeContext, CSharpLanguageConversion>
+    class CSharpNodeVisitorImpl : CSharpNodeVisitor<CSharpCompilationContext, CSharpMemberTypeContext, CSharpLanguageConversion>
     {
         public CSharpNodeVisitorImpl(CSharpCompilationContext context)
             : base(context)

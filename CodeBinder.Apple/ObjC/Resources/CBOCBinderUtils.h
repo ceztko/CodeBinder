@@ -1,4 +1,4 @@
-#ifndef CB_BINDERUTILS
+﻿#ifndef CB_BINDERUTILS
 #define CB_BINDERUTILS
 #pragma once
 

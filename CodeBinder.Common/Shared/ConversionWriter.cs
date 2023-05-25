@@ -1,6 +1,6 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -32,7 +32,7 @@ namespace CodeBinder.Shared
         public void Write(CodeBuilder builder)
         {
             string? preamble = GetGeneratedPreamble();
-            if (!string.IsNullOrEmpty(preamble))
+            if (!preamble.IsNullOrEmpty())
                 builder.AppendLine(preamble);
 
             write(builder);

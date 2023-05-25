@@ -1,6 +1,6 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using CodeBinder.Shared;
 using System.Linq;
 using System;
@@ -166,8 +166,7 @@ namespace CodeBinder.CLang
                     continue;
 
                 var field = (member as FieldDeclarationSyntax)!;
-                builder.Append(field.Declaration.GetCLangType(Compilation)).Space()
-                    .Append(field.Declaration.Variables[0].Identifier.Text).EndOfLine();
+                builder.Append(field.Declaration.GetCLangDeclaration(Compilation)).EndOfLine();
             }
         }
 

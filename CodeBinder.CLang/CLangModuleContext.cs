@@ -10,19 +10,19 @@ namespace CodeBinder.CLang
 {
     public abstract class CLangModuleContext : TypeContext<CLangModuleContext, CLangCompilationContext>
     {
-        public new CLangCompilationContext Compilation { get; private set; }
+        CLangCompilationContext _Compilation;
+
+        public override CLangCompilationContext Compilation => _Compilation;
 
         protected CLangModuleContext(CLangCompilationContext context)
         {
-            Compilation = context;
+            _Compilation = context;
         }
 
         public abstract IEnumerable<MethodDeclarationSyntax> Methods
         {
             get;
         }
-
-        protected sealed override CLangCompilationContext getCompilationContext() => Compilation;
     }
 
     public class CLangModuleContextParent : CLangModuleContext
@@ -35,7 +35,7 @@ namespace CodeBinder.CLang
             _Name = name;
         }
 
-        protected override IEnumerable<TypeConversion<CLangModuleContext>> getConversions()
+        protected override IEnumerable<TypeConversion<CLangModuleContext>> GetConversions()
         {
             yield return new CLangModuleConversion(this, ModuleConversionType.CHeader, Compilation.Conversion);
             if (!Compilation.Conversion.PublicInterfaceOnly)
@@ -75,7 +75,7 @@ namespace CodeBinder.CLang
             _methods.Add(method);
         }
 
-        protected override IEnumerable<TypeConversion<CLangModuleContext>> getConversions()
+        protected override IEnumerable<TypeConversion<CLangModuleContext>> GetConversions()
         {
             throw new NotImplementedException();
         }

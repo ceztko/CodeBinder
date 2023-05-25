@@ -2,7 +2,7 @@
 // This file is subject to the MIT license
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using CodeBinder.CLang;
@@ -191,7 +191,6 @@ namespace CodeBinder.JNI
                                         Builder.Append("(cbbool)").Append(param.Identifier.Text);
                                     break;
                                 }
-                                case "System.Char":
                                 case "System.Byte":
                                 case "System.SByte":
                                 case "System.Int16":
@@ -233,11 +232,6 @@ namespace CodeBinder.JNI
             Builder.Append("BJ2N")
                 .AngleBracketed().Append(symbol.Type.SpecialType.GetCLangType()).Close()
                 .Parenthesized().Append("jenv").CommaSeparator().Append(param.Identifier.Text).Close();
-        }
-
-        void WriteTrampolineCall()
-        {
-
         }
 
         void WriteParameters()

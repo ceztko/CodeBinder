@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using CodeBinder.Shared;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics;
@@ -282,17 +282,6 @@ namespace CodeBinder.Java
         {
             var modifiers = node.GetCSharpModifiers();
             return JavaUtils.GetPropertyModifiersString(modifiers);
-        }
-
-        /// <summary>
-        /// Lowercase the first character of the identifier
-        /// </summary>
-        public static string ToJavaLowerCase(this string text)
-        {
-            if (string.IsNullOrEmpty(text) || char.IsLower(text, 0))
-                return text;
-
-            return char.ToLowerInvariant(text[0]) + text.Substring(1);
         }
     }
 }

@@ -14,7 +14,6 @@
 #endif
 
 #define jBooleanBox jobject
-#define jCharacterBox jobject
 #define jByteBox jobject
 #define jShortBox jobject
 #define jIntegerBox jobject

@@ -2,7 +2,7 @@
 // This file is subject to the MIT license
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -48,7 +48,7 @@ namespace CodeBinder.Apple
                 builder.AppendLine("#import \"OCTypes.h\"");
             }
             builder.AppendLine("// Protocols");
-            foreach (var iface in Compilation.Interfaces)
+            foreach (var iface in Compilation.Interfaces.Declarations)
             {
                 string? basepath;
                 if (ShouldIgnore(iface, out basepath))
@@ -58,7 +58,7 @@ namespace CodeBinder.Apple
             }
 
             builder.AppendLine("// Classes");
-            foreach (var cls in Compilation.Classes)
+            foreach (var cls in Compilation.StorageTypes.Declarations)
             {
                 if (ShouldIgnore(cls))
                     continue;
@@ -72,7 +72,7 @@ namespace CodeBinder.Apple
         bool ShouldIgnore(BaseTypeDeclarationSyntax syntax)
         {
             // Ignore basepath
-            return ShouldIgnore(syntax, out var basepath);
+            return ShouldIgnore(syntax, out _);
         }
 
         bool ShouldIgnore(BaseTypeDeclarationSyntax syntax, out string? basepath)

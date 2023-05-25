@@ -1,6 +1,6 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -18,23 +18,9 @@ namespace CodeBinder.Shared
         where TTypeContext : TypeContext
         where TCompilationContext : CompilationContext
     {
-        public new TCompilationContext Compilation => getCompilationContext();
+        public override abstract TCompilationContext Compilation { get; }
 
         protected TypeContext() { }
-
-        protected abstract TCompilationContext getCompilationContext();
-
-        protected sealed override CompilationContext GetCompilationContext()
-        {
-            return getCompilationContext();
-        }
-
-        protected override IEnumerable<TypeConversion> GetConversions()
-        {
-            return getConversions();
-        }
-
-        protected abstract IEnumerable<TypeConversion<TTypeContext>> getConversions();
     }
 
     /// <remarks>Inherited by CSharpBaseTypeContext together with ITypeContext</remarks>
@@ -43,7 +29,7 @@ namespace CodeBinder.Shared
     {
         private List<TTypeContext> _Children;
 
-        public TTypeContext? Parent { get; internal set; }
+        public new TTypeContext? Parent { get; internal set; }
 
         internal TypeContext()
         {
@@ -64,6 +50,11 @@ namespace CodeBinder.Shared
         {
             return _Children;
         }
+
+        protected override sealed TypeContext? GetParent()
+        {
+            return Parent;
+        }
     }
 
     [DebuggerDisplay("Name = {Name}")]
@@ -71,11 +62,9 @@ namespace CodeBinder.Shared
     {
         internal TypeContext() { }
 
-        public CompilationContext Compilation => GetCompilationContext();
+        public abstract CompilationContext Compilation { get; }
 
         public IEnumerable<TypeContext> Children => GetChildren();
-
-        protected abstract CompilationContext GetCompilationContext();
 
         /// <summary>
         /// Create a conversion for this type.
@@ -87,7 +76,13 @@ namespace CodeBinder.Shared
 
         protected abstract IEnumerable<TypeContext> GetChildren();
 
+        protected abstract TypeContext? GetParent();
+
         public abstract string Name { get; }
+
+        public virtual string FullName => Name;
+
+        public TypeContext? Parent => GetParent();
     }
 
     public interface ITypeContext<TCompilationContext>

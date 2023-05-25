@@ -3,43 +3,75 @@
 #import "../Internal/CBOCBinderUtils.h"
 #import "CBException.h"
 
-@implementation CBHandledObjectBase
+@implementation CBHandledObjectFinalizer
     - (id)init
     {
         self = [super init];
         if (self == nil)
             return nil;
-        _handle = NULL;
         return self;
     }
 
-    - (id)init:(void *)handle
+    -(void)dealloc
+    {
+        [self freeHandle:_handle];
+    }
+
+    - (void)freeHandle:(void*)handle
+    {
+        @throw [[CBException alloc]init];
+    }
+
+    -(long)handle
+    {
+        return _handle;
+    }
+
+    -(void)setHandle:(long)value
+    {
+        _handle = value;
+    }
+@end
+
+@implementation CBFinalizableObject
+    - (id)init
     {
         self = [super init];
         if (self == nil)
             return nil;
-        _handle = handle;
+
+        _finalizers = [[NSMutableArray alloc] init];
         return self;
     }
 
-    - (void)dealloc
-    {
-        if (self.managed)
-            [self freeHandle:_handle];
-    }
 
-    - (void)setHandle:(void *)handle
+    - (void)registerFinalizer :(IObjectFinalizer*)finalizer
     {
-        if (handle == NULL)
-            @throw [[CBException alloc]init:@"Handle must be non null"];
-        if (_handle != NULL)
-            @throw [[CBException alloc]init:@"Handle is already set"];
+        [_finalizers addObject:finalizer];
+    }
+@end
+
+@implementation CBHandledObjectBase
+    - (id)init:(void*)handle :(BOOL)handled
+    {
+        self = [super init];
+        if (self == nil)
+            return nil;
+
         _handle = handle;
+        if (handled)
+        {
+            CBHandledObjectFinalizer* finalizer = [self createFinalizer];
+            finalizer.handle = handle;
+            [self registerFinalizer:finalizer];
+        }
+
+        return self;
     }
 
-    - (void)freeHandle:(void *)handle
+    -(CBHandledObjectFinalizer*)createFinalizer
     {
-        @throw [[CBException alloc]init];
+        @throw[NSException exceptionWithName:@"Not implemented" reason:nil userInfo:nil];
     }
 
     - (void *)unsafeHandle
@@ -47,21 +79,16 @@
         return _handle;
     }
 
-    - (CBHandleRef *)handle
+    - (CBHandleRef*)handle
     {
         return [[CBHandleRef alloc]init:self :_handle];
     }
 
-    - (BOOL)managed
+    - (BOOL)isEqualTo:(NSObject*)obj
     {
-        return YES;
-    }
-
-    - (BOOL)isEqualTo:(NSObject *)obj
-    {
-        if (obj == (NSObject *)nil)
+        if (obj == (NSObject*)nil)
             return NO;
-        CBHandledObjectBase * other = CBAsOperator<CBHandledObjectBase>(obj);
+        CBHandledObjectBase* other = CBAsOperator<CBHandledObjectBase>(obj);
         return self.referenceHandle == other.referenceHandle;
     }
 
@@ -70,7 +97,7 @@
         return CBGetHashCode(self.referenceHandle);
     }
 
-    - (void *)referenceHandle
+    - (void*)referenceHandle
     {
         return self.unsafeHandle;
     }
@@ -86,9 +113,9 @@
         return self;
     }
 
-    - (id)init:(void *)handle
+    - (id)init:(void*)handle :(BOOL)handled
     {
-        self = [super init:handle];
+        self = [super init:handle :handled];
         if (self == nil)
             return nil;
 

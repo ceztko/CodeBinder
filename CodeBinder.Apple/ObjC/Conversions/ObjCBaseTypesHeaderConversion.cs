@@ -1,6 +1,6 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using CodeBinder.Shared;
 using System.Linq;
 using System;

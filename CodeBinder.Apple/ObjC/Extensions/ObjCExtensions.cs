@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using CodeBinder.Shared;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics.CodeAnalysis;
@@ -322,7 +322,7 @@ namespace CodeBinder.Apple
 
         public static string GetObjCName(this PropertyDeclarationSyntax node, ObjCCompilationContext context)
         {
-            return node.Identifier.Text.ToObjCCase();
+            return node.Identifier.Text.ToLowerCamelCase();
         }
 
         public static bool TryGetDistinctObjCName(this CaseSwitchLabelSyntax node,
@@ -338,7 +338,7 @@ namespace CodeBinder.Apple
             return false;
         }
 
-        public static string GetObjCName(this BaseTypeDeclarationSyntax node, ObjCCompilationContext context)
+        public static string GetObjCName(this MemberDeclarationSyntax node, ObjCCompilationContext context)
         {
             return getObjCName(node.GetDeclaredSymbol<ITypeSymbol>(context), context);
         }
@@ -356,6 +356,7 @@ namespace CodeBinder.Apple
 
         public static string GetObjCName(this IMethodSymbol method, ObjCSymbolUsage usage, ObjCCompilationContext context)
         {
+            // Try first look for replacements
             SymbolReplacement? replacement;
             if (method.HasObjCReplacement(usage, out replacement))
                 return replacement.Name;
@@ -370,15 +371,15 @@ namespace CodeBinder.Apple
             else
             {
                 if (method.MethodKind == MethodKind.Constructor)
-                    return "init";
+                    return "constructor";
 
-                return context.Conversion.MethodsLowerCase ? method.Name.ToObjCCase() : method.Name;
+                return context.Conversion.MethodCasing == MethodCasing.LowerCamelCase ? method.Name.ToLowerCamelCase() : method.Name;
             }
         }
 
         public static string GetObjCName(this IPropertySymbol property, ObjCCompilationContext context)
         {
-            return property.Name.ToObjCCase();
+            return property.Name.ToLowerCamelCase();
         }
 
         /// <summary>Handle fields with distinct Objective-C name, like enum members</summary>
@@ -441,7 +442,7 @@ namespace CodeBinder.Apple
 
         static string getObjCName(ITypeSymbol symbol, ObjCCompilationContext context)
         {
-            if (context.IsCompilationDefinedType(symbol) && !symbol.HasAttribute<IgnoreAttribute>())
+            if (context.IsCompilationDefined(symbol) && !symbol.HasAttribute<IgnoreAttribute>())
                 return $"{ConversionCSharpToObjC.ConversionPrefix}{symbol.Name}";
             else
             {
@@ -490,28 +491,6 @@ namespace CodeBinder.Apple
         {
             var modifiers = node.GetCSharpModifiers();
             return ObjCUtils.GetPropertyModifiersString(modifiers);
-        }
-
-        /// <summary>
-        /// Lowercase the first character of the identifier
-        /// </summary>
-        public static string ToObjCCase(this string text)
-        {
-            if (string.IsNullOrEmpty(text) || char.IsLower(text, 0))
-                return text;
-
-            return char.ToLowerInvariant(text[0]) + text.Substring(1);
-        }
-
-        /// <summary>
-        /// Uppercase the first character of the identifier
-        /// </summary>
-        public static string ToObjCCaseCapitalized(this string text)
-        {
-            if (string.IsNullOrEmpty(text) || char.IsUpper(text, 0))
-                return text;
-
-            return char.ToUpperInvariant(text[0]) + text.Substring(1);
         }
 
         public static string ToObjCHeaderFilename(this string name, ObjCHeaderNameUse use = ObjCHeaderNameUse.Normal)

@@ -2,7 +2,7 @@
 // This file is subject to the MIT license
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -277,7 +277,7 @@ namespace CodeBinder.Apple
 
         public override string PropertyNameCapitalized
         {
-            get { return Item.GetObjCName(Context).ToObjCCaseCapitalized(); }
+            get { return Item.GetObjCName(Context).ToUpperCamelCase(); }
         }
     }
 

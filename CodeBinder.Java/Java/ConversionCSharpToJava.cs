@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
 using CodeBinder.Java.Shared;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
+using CodeBinder.Attributes;
 
 namespace CodeBinder.Java
 {
@@ -15,16 +16,17 @@ namespace CodeBinder.Java
     {
         internal const string CodeBinderNamespace = "CodeBinder";
 
-        public bool SkipBody { get; set; }
-
-        public bool MethodsLowerCase { get; set; }
-
         internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 
         public ConversionCSharpToJava()
         {
-            MethodsLowerCase = true;
         }
+
+        public bool SkipBody { get; set; }
+
+        public override MethodCasing MethodCasing => MethodCasing.LowerCamelCase;
+
+        public override IReadOnlyCollection<string> SupportedPolicies => new string[] { Policies.GarbageCollection, Policies.InstanceFinalizers };
 
         public override IEnumerable<TypeConversion<CSharpClassTypeContext>> GetConversions(CSharpClassTypeContext cls)
         {
@@ -46,6 +48,11 @@ namespace CodeBinder.Java
             yield return new JavaEnumConversion(enm, this);
         }
 
+        public override IEnumerable<TypeConversion<CSharpDelegateTypeContext>> GetConversions(CSharpDelegateTypeContext dlg)
+        {
+            yield break;
+        }
+
         public override IReadOnlyList<string> PreprocessorDefinitions
         {
             get { return new string[] { "JAVA", "JVM" }; }
@@ -62,10 +69,13 @@ namespace CodeBinder.Java
             {
                 yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.BinderUtils), JavaClasses.BinderUtils, "CodeBinder.Java");
                 yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandleRef), JavaClasses.HandleRef);
+                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.NativeHandle), JavaClasses.NativeHandle);
+                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.FinalizableObject), JavaClasses.FinalizableObject);
                 yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandledObjectBase), JavaClasses.HandledObjectBase);
                 yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandledObject), JavaClasses.HandledObject);
+                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandledObjectFinalizer), JavaClasses.HandledObjectFinalizer);
+                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.IObjectFinalizer), JavaClasses.IObjectFinalizer);
                 yield return new JavaInteropBoxWriter(JavaInteropType.Boolean, this);
-                yield return new JavaInteropBoxWriter(JavaInteropType.Character, this);
                 yield return new JavaInteropBoxWriter(JavaInteropType.Byte, this);
                 yield return new JavaInteropBoxWriter(JavaInteropType.Short, this);
                 yield return new JavaInteropBoxWriter(JavaInteropType.Integer, this);

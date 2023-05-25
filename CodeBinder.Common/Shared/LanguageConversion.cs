@@ -4,7 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using CodeBinder.Util;
+using CodeBinder.Attributes;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.Shared
@@ -43,6 +44,11 @@ namespace CodeBinder.Shared
         }
 
         /// <summary>
+        /// Supported overload features
+        /// </summary>
+        public virtual OverloadFeature? OverloadFeatures => null;
+
+        /// <summary>
         /// True for native conversions (eg. CLang)
         /// </summary>
         public virtual bool IsNative => false;
@@ -58,6 +64,11 @@ namespace CodeBinder.Shared
         public virtual bool NeedNamespaceMapping => true;
 
         public virtual bool UseUTF8Bom => true;
+
+        /// <summary>
+        /// Method name casing
+        /// </summary>
+        public virtual MethodCasing MethodCasing => MethodCasing.Undefinied;
 
         /// <summary>
         /// Namespace mapping store
@@ -106,5 +117,11 @@ namespace CodeBinder.Shared
         }
 
         internal abstract CompilationContext CreateCompilationContext();
+    }
+
+    public enum MethodCasing
+    {
+        Undefinied = 0,
+        LowerCamelCase
     }
 }

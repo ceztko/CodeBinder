@@ -1,11 +1,12 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
 using CodeBinder.Attributes;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace CodeBinder.Shared
@@ -18,26 +19,49 @@ namespace CodeBinder.Shared
         where TTypeContext : TypeContext<TTypeContext>
         where TLanguageConversion : LanguageConversion
     {
-        protected CompilationContext() { }
+        List<TTypeContext> _Types;
+        TLanguageConversion _Conversion;
 
-        public new TLanguageConversion Conversion => getLanguageConversion();
+        protected CompilationContext(TLanguageConversion conversion)
+        {
+            _Conversion = conversion;
+            _Types = new List<TTypeContext>();
+        }
 
-        protected sealed override LanguageConversion GetLanguageConversion() => getLanguageConversion();
+        public override TLanguageConversion Conversion => _Conversion;
 
-        protected abstract TLanguageConversion getLanguageConversion();
+        internal override void addTypeContext(TTypeContext type)
+        {
+            _Types.Add(type);
+        }
+
+        protected override sealed IEnumerable<TTypeContext> GetTypes() => _Types;
     }
 
     public abstract class CompilationContext<TTypeContext> : CompilationContext
         where TTypeContext : TypeContext<TTypeContext>
     {
-        HashSet<TTypeContext> _types;
+        Dictionary<ISymbol, string> _bindedMethodNames;
 
         internal CompilationContext()
         {
-            _types = new HashSet<TTypeContext>();
+            _bindedMethodNames = new Dictionary<ISymbol, string>(SymbolEqualityComparer.Default);
         }
 
-        protected internal void AddType(TTypeContext type, TTypeContext? parent)
+        public bool TryGetBindedName(IMethodSymbol symbol, [NotNullWhen(true)] out string? name)
+        {
+            if (_bindedMethodNames.TryGetValue(symbol, out name))
+                return true;
+
+            return false;
+        }
+
+        internal void AddMethodBinding(IMethodSymbol symbol, string bindedName)
+        {
+            _bindedMethodNames.Add(symbol, bindedName);
+        }
+
+        protected internal void AddTypeContext(TTypeContext type, TTypeContext? parent)
         {
             if (type.Parent != null)
                 throw new Exception("Can't re-add root type");
@@ -45,32 +69,16 @@ namespace CodeBinder.Shared
             if (type == parent)
                 throw new Exception("The parent can't be same reference as the given type");
 
-            if (!_types.Add(type))
-                throw new Exception("Can't reinsert the same type");
-
             if (parent != null)
             {
                 type.Parent = parent;
                 parent.AddChild(type);
             }
+
+            addTypeContext(type);
         }
 
-        protected override IEnumerable<TypeContext> GetRootTypes()
-        {
-            return RootTypes;
-        }
-
-        public new IEnumerable<TTypeContext> RootTypes
-        {
-            get
-            {
-                foreach (var type in _types)
-                {
-                    if (type.Parent == null)
-                        yield return type;
-                }
-            }
-        }
+        internal abstract void addTypeContext(TTypeContext type);
     }
 
     public abstract class CompilationContext : ICompilationContextProvider
@@ -106,7 +114,7 @@ namespace CodeBinder.Shared
             _Namespaces.Add(ns);
         }
 
-        public LanguageConversion Conversion => GetLanguageConversion();
+        public abstract LanguageConversion Conversion { get; }
 
         public IReadOnlyCollection<string> Namespaces => _Namespaces;
 
@@ -131,9 +139,7 @@ namespace CodeBinder.Shared
 
         internal protected abstract INodeVisitor CreateVisitor();
 
-        protected abstract LanguageConversion GetLanguageConversion();
-
-        protected abstract IEnumerable<TypeContext> GetRootTypes();
+        protected abstract IEnumerable<TypeContext> GetTypes();
 
         internal IEnumerable<ConversionDelegate> ConversionDelegates
         {
@@ -150,9 +156,18 @@ namespace CodeBinder.Shared
             get { yield break; }
         }
 
+        public IEnumerable<TypeContext> Types => GetTypes();
+
         public IEnumerable<TypeContext> RootTypes
         {
-            get { return GetRootTypes(); }
+            get
+            {
+                foreach (var type in GetTypes())
+                {
+                    if (type.Parent == null)
+                        yield return type;
+                }
+            }
         }
 
         CompilationContext ICompilationContextProvider.Compilation

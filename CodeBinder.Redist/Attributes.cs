@@ -91,23 +91,38 @@ namespace CodeBinder.Attributes
         | AttributeTargets.Enum | AttributeTargets.Field | AttributeTargets.Property)]
     public sealed class RequiresAttribute : CodeBinderAttribute
     {
-        private string[] _policies;
+        public string[] Policies { get; private set; }
 
         public RequiresAttribute(params string[] policies)
         {
-            _policies = policies;
+            Policies = policies;
         }
     }
 
-    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    public sealed class OverloadSuffixAttribute : CodeBinderAttribute
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor, Inherited = false)]
+    public sealed class OverloadBindingAttribute : CodeBinderAttribute
     {
-        public string Name { get; private set; }
+        /// <summary>
+        /// Suffix for methods, static method name for constructors
+        /// </summary>
+        public string Stem { get; private set; }
 
-        public OverloadSuffixAttribute(string name)
+        public OverloadFeature EnableIfMissing { get; private set; }
+
+        public OverloadBindingAttribute(string name, OverloadFeature enableIfMissing)
         {
-            Name = name;
+            Stem = name;
+            EnableIfMissing = enableIfMissing;
         }
+    }
+
+    [Flags]
+    public enum OverloadFeature
+    {
+        None = 0,
+        TypeMatch = 1,
+        ParameterArity = 2,
+        FullSupport = TypeMatch | ParameterArity
     }
 
     /// <summary>
@@ -222,6 +237,8 @@ namespace CodeBinder.Attributes
         public const string OperatorOverloading = "{B19FE437-C7FE-41A5-841F-D9170CCEEBA1}";
         public const string ReifiedGenerics = "{E3D821B4-562B-4C9F-8753-1E9C6F4D93A1}";
         public const string YieldReturn = "{6D4647AE-CA4C-49F0-8BE6-138512992E21}";
+        public const string InstanceFinalizers = "{E3645336-1AE0-4D1A-9CCB-D371B8759D1A}";
+        public const string GarbageCollection = "{A7FB6B87-B687-40B4-BD70-F7289401D4A4}";
         /// <summary>
         /// Represent functionalities tipically present in all .NET base libraries
         /// </summary>

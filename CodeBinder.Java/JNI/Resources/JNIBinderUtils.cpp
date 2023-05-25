@@ -25,4 +25,16 @@ extern "C"
 	{
         env->DeleteWeakGlobalRef((jobject)globalref);
 	}
+
+    JNIEXPORT jobject JNICALL Java_CodeBinder_Java_BinderUtils_getGlobalRefTarget(
+        JNIEnv* env, jclass, jlong globalref)
+    {
+        return (jobject)globalref;
+    }
+
+    JNIEXPORT jobject JNICALL Java_CodeBinder_Java_BinderUtils_getGlobalWeakRefTarget(
+        JNIEnv* env, jclass, jlong weakRef)
+    {
+        return (jobject)env->NewLocalRef((jobject)weakRef);
+    }
 }

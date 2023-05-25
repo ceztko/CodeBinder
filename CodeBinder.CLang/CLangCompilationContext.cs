@@ -2,7 +2,7 @@
 // This file is subject to the MIT license
 using CodeBinder.Attributes;
 using CodeBinder.Shared;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -12,7 +12,7 @@ using System.Text;
 
 namespace CodeBinder.CLang
 {
-    public abstract class CLangCompilationContext : CompilationContext<CLangModuleContext, ConversionCSharpToCLang>
+    public class CLangCompilationContext : CompilationContext<CLangModuleContext, ConversionCSharpToCLang>
     {
         Dictionary<string, CLangModuleContextParent> _Modules;
         List<EnumDeclarationSyntax> _Enums;
@@ -20,7 +20,8 @@ namespace CodeBinder.CLang
         List<StructDeclarationSyntax> _StructTypes;
         List<DelegateDeclarationSyntax> _Callbacks;
 
-        protected CLangCompilationContext()
+        internal CLangCompilationContext(ConversionCSharpToCLang conversion)
+            : base(conversion)
         {
             _Modules = new Dictionary<string, CLangModuleContextParent>();
             _Enums = new List<EnumDeclarationSyntax>();
@@ -29,15 +30,15 @@ namespace CodeBinder.CLang
             _Callbacks = new List<DelegateDeclarationSyntax>();
         }
 
-        public void AddModule(CompilationContext compilation, CLangModuleContextParent module)
+        public void AddModule(CLangModuleContextParent module)
         {
             _Modules.Add(module.Name, module);
-            AddType(module, null);
+            AddTypeContext(module, null);
         }
 
-        public void AddModuleChild(CompilationContext compilation, CLangModuleContextChild module, CLangModuleContextParent parent)
+        public void AddModuleChild(CLangModuleContextChild module, CLangModuleContextParent parent)
         {
-            AddType(module, parent);
+            AddTypeContext(module, parent);
         }
 
         public bool TryGetModule(string moduleName, [NotNullWhen(true)]out CLangModuleContextParent? module)
@@ -105,17 +106,5 @@ namespace CodeBinder.CLang
                 yield return new CLangMethodInitConversion(this);
             }
         }
-    }
-
-    class CLangCompilationContextImpl : CLangCompilationContext
-    {
-        public new ConversionCSharpToCLang Conversion { get; private set; }
-
-        public CLangCompilationContextImpl(ConversionCSharpToCLang conversion)
-        {
-            Conversion = conversion;
-        }
-
-        protected override ConversionCSharpToCLang getLanguageConversion() => Conversion;
     }
 }

@@ -2,7 +2,7 @@
 // This file is subject to the MIT license
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -208,8 +208,13 @@ namespace CodeBinder.Java
                             type = (symbol as IParameterSymbol)!.Type;
                             break;
                         }
+                        case SymbolKind.Field:
+                        {
+                            type = (symbol as IFieldSymbol)!.Type;
+                            break;
+                        }
                         default:
-                            throw new Exception();
+                            throw new NotSupportedException();
                     }
 
                     ret.Add(new RefArgument() { Argument = arg, Symbol = symbol, Type = type });

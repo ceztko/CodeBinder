@@ -9,8 +9,45 @@ namespace CodeBinder.Java
     static class JavaClasses
     {
         public const string BinderUtils =
-@"public class BinderUtils
+@"import java.lang.reflect.*;
+
+public class BinderUtils
 {
+    static Object _cleaner;
+    static Method _register;
+
+    static
+    {
+        String versionStr = System.getProperty(""java.specification.version"");
+        int version = Integer.parseInt(versionStr);
+        if (version >= 9)
+        {
+            try
+            {
+                Class cleanerClass = Class.forName(""java.lang.ref.Cleaner"");
+                Method create = cleanerClass.getMethod(""create"");
+                _register = cleanerClass.getDeclaredMethod(""register"", Object.class, Runnable.class);
+                _cleaner = create.invoke(null);
+            }
+            catch (ClassNotFoundException ex)
+            {
+                // There shouldn't such exception
+            }
+            catch (InvocationTargetException ex)
+            {
+                // There shouldn't such exception
+            }
+            catch (IllegalAccessException ex)
+            {
+                // There shouldn't such exception
+            }
+            catch (NoSuchMethodException ex)
+            {
+                // There shouldn't such exception
+            }
+        }
+    }
+
     // Simulates as operator https://stackoverflow.com/a/148949/213871
     public static <T> T as(Object obj, Class<T> clazz)
     {
@@ -35,12 +72,51 @@ namespace CodeBinder.Java
         }
     }
 
-    // TODO: Consider moving this methods to generation of exising .NET class BinderUtils.
-    // See CodeBinder.Redist
-    public static native long newGlobalRef(Object obj);
-    public static native void deleteGlobalRef(long globalref);
-    public static native long newGlobalWeakRef(Object obj);
-    public static native void deleteGlobalWeakRef(long globalref);
+    public static boolean isCleanerAvaiable()
+    {
+        return _cleaner != null;
+    }
+
+    public static NativeHandle createNativeHandle(Object obj)
+    {
+        return new NativeHandle(newGlobalRef(obj), false);
+    }
+
+    public static NativeHandle createWeakNativeHandle(Object obj)
+    {
+        return new NativeHandle(newGlobalWeakRef(obj), true);
+    }
+
+    public static void freeNativeHandle(NativeHandle nativeHandle)
+    {
+        if (nativeHandle.weak)
+            deleteGlobalWeakRef(nativeHandle.handle);
+        else
+            deleteGlobalRef(nativeHandle.handle);
+    }
+
+    static void registerForFinalization(Object obj, IObjectFinalizer finalizer)
+    {
+        try
+        {
+            _register.invoke(_cleaner, obj, finalizer);
+        }
+        catch (InvocationTargetException ex)
+        {
+            // There shouldn't such exception
+        }
+        catch (IllegalAccessException ex)
+        {
+            // There shouldn't such exception
+        }
+    }
+
+    static native long newGlobalRef(Object obj);
+    static native void deleteGlobalRef(long globalref);
+    static native long newGlobalWeakRef(Object obj);
+    static native void deleteGlobalWeakRef(long globalref);
+    static native Object getGlobalRefTarget(long handle);
+    static native Object getGlobalWeakRefTarget(long handle);
 }";
         // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
         public const string HandleRef =
@@ -62,42 +138,77 @@ public class HandleRef
         this.handle = handle;
     }
 }";
+
+        public const string NativeHandle = """
+public class NativeHandle
+{
+    long handle;
+    boolean weak;
+
+    NativeHandle(long handle, boolean weak)
+    {
+        this.handle = handle;
+        this.weak = weak;
+    }
+
+    public long getAddress()
+    {
+        return handle;
+    }
+
+    public Object getTarget()
+    {
+        if (weak)
+            return BinderUtils.getGlobalWeakRefTarget(handle);
+        else
+            return BinderUtils.getGlobalRefTarget(handle);
+    }
+}
+""";
+
+        public const string FinalizableObject = @"import java.util.*;
+
+public abstract class FinalizableObject
+{
+    ArrayList<IObjectFinalizer> _finalizers;
+
+    protected FinalizableObject()
+    {
+        if (!BinderUtils.isCleanerAvaiable())
+            _finalizers = new ArrayList<IObjectFinalizer>();
+    }
+
+    protected void registerFinalizer(IObjectFinalizer finalizer)
+    {
+        if (_finalizers == null)
+            BinderUtils.registerForFinalization(this, finalizer);
+        else
+            _finalizers.add(finalizer);
+    }
+}
+";
+
         public const string HandledObjectBase =
 @"import java.util.*;
 
-public class HandledObjectBase
+public class HandledObjectBase extends FinalizableObject
 {
     long _handle;
 
-    protected HandledObjectBase()
-    {
-        _handle = 0;
-    }
-
-    protected HandledObjectBase(long handle)
+    protected HandledObjectBase(long handle, boolean handled)
     {
         _handle = handle;
+        if (handled)
+        {
+            HandledObjectFinalizer finalizer = createFinalizer();
+            finalizer.handle = handle;
+            registerFinalizer(finalizer);
+        }
     }
 
-    protected void finalize() throws Throwable
+    protected HandledObjectFinalizer createFinalizer()
     {
-        if (getManaged())
-            freeHandle(_handle);
-        super.finalize();
-    }
-
-    protected void setHandle(long handle)
-    {
-        if (handle == 0)
-            throw new RuntimeException(""Handle must be non null"");
-        if (_handle != 0)
-            throw new RuntimeException(""Handle is already set"");
-        _handle = handle;
-    }
-
-    protected void freeHandle(long handle)
-    {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(""The finalizer must be supplied"");
     }
 
     public long getUnsafeHandle()
@@ -110,11 +221,6 @@ public class HandledObjectBase
         return new HandleRef(this, _handle);
     }
 
-    public boolean getManaged()
-    {
-        return true;
-    }
-    
     public boolean equals(Object obj)
     {
         if (obj == null)
@@ -147,13 +253,9 @@ public class HandledObjectBase
 
 public class HandledObject <BaseT extends HandledObject<BaseT>> extends HandledObjectBase
 {
-    protected HandledObject()
+    protected HandledObject(long handle, boolean handled)
     {
-    }
-
-    protected HandledObject(long handle)
-    {
-        super(handle);
+        super(handle, handled);
     }
 
     public boolean equals(BaseT other)
@@ -161,5 +263,38 @@ public class HandledObject <BaseT extends HandledObject<BaseT>> extends HandledO
         return super.equals(other);
     }
 }";
+
+
+        //// TODO: alternatively generate finalize() or run()
+        public const string HandledObjectFinalizer = """
+import java.util.*;
+
+public abstract class HandledObjectFinalizer implements IObjectFinalizer
+{
+    long handle;
+
+    // For retrocompatibility
+    protected void finalize() throws Throwable
+    {
+        freeHandle(handle);
+    }
+
+    public void run()
+    {
+        freeHandle(handle);
+    }
+
+    public abstract void freeHandle(long handle);
+}
+""";
+
+        //// TODO: alternatively inherits Runnable or not
+        public const string IObjectFinalizer = """
+import java.util.*;
+
+public interface IObjectFinalizer extends Runnable
+{
+}
+""";
     }
 }

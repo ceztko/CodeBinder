@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-namespace CodeBinder.Util
+namespace CodeBinder.Utils
 {
     // TODO: Add function to disable trim trailing whitespace
     /// <summary>
@@ -18,8 +18,10 @@ namespace CodeBinder.Util
         bool _closed;
         uint _instanceIndentedCount;
         TextWriter _writer;
+        // Determines if we are at the the line beginning
+        // and we can do indent content
+        bool _atLineBeginning;
         uint _currentIndentLevel;
-        bool _doIndent;
         List<DisposeContext> _disposeContexts;
 
         public uint IndentSpaces { get; set; }
@@ -31,16 +33,16 @@ namespace CodeBinder.Util
             : this(null, writer, 0, true, 4, 0) { }
 
         private CodeBuilder(CodeBuilder? parent, TextWriter writer, uint instanceIndentedCount,
-            bool doIndent, uint indentSpaces, uint currentIndentLevel)
+            bool atLineBeginning, uint indentSpaces, uint currentIndentLevel)
         {
             // Write invariant newline
             writer.NewLine = "\r\n";
             _parent = parent;
             _writer = writer;
             _instanceIndentedCount = instanceIndentedCount;
-            _doIndent = doIndent;
-            IndentSpaces = indentSpaces;
+            _atLineBeginning = atLineBeginning;
             _currentIndentLevel = currentIndentLevel;
+            IndentSpaces = indentSpaces;
             _disposeContexts = new List<DisposeContext>();
         }
 
@@ -68,7 +70,14 @@ namespace CodeBinder.Util
             if (str == string.Empty)
                 return this;
 
-            append(str);
+            bool endsWithNewLine;
+            var tokens = processLines(str, _atLineBeginning, out endsWithNewLine);
+            foreach (var token in tokens)
+                _writer.Write(token);
+
+            // If the last line was a newline, then we are
+            // now technically at line begin
+            _atLineBeginning = endsWithNewLine;
             return this;
         }
 
@@ -76,9 +85,15 @@ namespace CodeBinder.Util
         {
             doChecks();
             _instanceIndentedCount = 0;
-            appendIndent(str, true);
-            _writer.WriteLine(str);
-            _doIndent = true;
+            if (str != string.Empty)
+            {
+                var tokens = processLines(str, _atLineBeginning, out _);
+                foreach (var token in tokens)
+                    _writer.Write(token);
+            }
+
+            _writer.WriteLine();
+            _atLineBeginning = true;
             return this;
         }
 
@@ -195,29 +210,68 @@ namespace CodeBinder.Util
 
         #endregion // Public methods
 
-        // TODO: Support custom newline neding
-        private void append(string str)
+        // Split string into lines and add indentation if required
+        private IReadOnlyList<string> processLines(string str, bool atLineBegin, out bool endsWithNewLine)
         {
-            appendIndent(str, false);
-            _writer.Write(str);
-            if (str.EndsWith(Environment.NewLine))
-                _doIndent = true;
-        }
-
-        private void appendIndent(string str, bool appendLine)
-        {
-            if (!_doIndent)
-                return;
-
-            _doIndent = false;
-            if (str.StartsWith(Environment.NewLine) ||
-                appendLine && str == string.Empty)
+            bool isNewLineSequence(string str)
             {
-                // Trim trailing whitespace
-                return;
+                // We assume that the sequence is a newline
+                // if it contains any newline character
+                switch (str[0])
+                {
+                    case '\n':
+                    case '\r':
+                        return true;
+                    default:
+                        return false;
+                }
             }
 
-            _writer.Write(new string(' ', (int)(_currentIndentLevel * IndentSpaces)));
+            var lines = splitString(str);
+            Debug.Assert(lines.Count > 0);
+            if (_currentIndentLevel == 0)
+            {
+                // We are not in a indent context, just exit
+                endsWithNewLine = isNewLineSequence(lines[^1]);
+                return lines;
+            }
+
+            var newLines = new List<string>();
+            int i;
+            if (atLineBegin)
+            {
+                i = 0;
+            }
+            else
+            {
+                // If we are not at line beginning we
+                // don't indent the first line
+                newLines.Add(lines[0]);
+                i = 1;
+            }
+
+            var intentStr = new string(' ', (int)(_currentIndentLevel * IndentSpaces));
+            bool lastNewLine = false;
+            for (; i < lines.Count; i++)
+            {
+                 var line = lines[i];
+                if (isNewLineSequence(line))
+                {
+                    // Trim trailing whitespace: add the current
+                    // newline sequence and continue to next line
+                    newLines.Add(line);
+                    lastNewLine = true;
+                    continue;
+                }
+
+                // Add the indentation and the current string
+                newLines.Add(intentStr);
+                newLines.Add(line);
+                lastNewLine = false;
+            }
+
+            endsWithNewLine = lastNewLine;
+            return newLines;
         }
 
         CodeBuilder newChild(uint indentCount)
@@ -225,7 +279,7 @@ namespace CodeBinder.Util
             if (Child != null)
                 throw new Exception("A child is already active");
 
-            Child = new CodeBuilder(this, _writer, indentCount, _doIndent, IndentSpaces, _currentIndentLevel + indentCount);
+            Child = new CodeBuilder(this, _writer, indentCount, _atLineBeginning, IndentSpaces, _currentIndentLevel + indentCount);
             return Child;
         }
 
@@ -279,6 +333,64 @@ namespace CodeBinder.Util
 
             _disposeContexts.RemoveAt(contextIndex);
         }
+
+        // Split strings by new lines, preserving them as separate
+        // entries. It tries to handle multiple \r or \n new line
+        // formats and normalize them in the output
+        IReadOnlyList<string> splitString(string str)
+        {
+            Debug.Assert(str != string.Empty);
+
+            var ret = new List<string>();
+            int prevStrIndex = 0;
+            int i = 0;
+            void pushSubString()
+            {
+                var substr = str.Substring(prevStrIndex, i - prevStrIndex);
+                if (substr.Length != 0)
+                    ret.Add(substr);
+
+                prevStrIndex = i + 1;
+            }
+
+            bool prevCrlf = false;
+            for (; i < str.Length; i++)
+            {
+                switch (str[i])
+                {
+                    case '\r':
+                    {
+                        prevCrlf = true;
+                        pushSubString();
+                        ret.Add(_writer.NewLine);
+                        break;
+                    }
+                    case '\n':
+                    {
+                        if (prevCrlf)
+                        {
+                            prevCrlf = false;
+                            prevStrIndex++;
+                            continue;
+                        }
+
+                        prevCrlf = false;
+                        pushSubString();
+                        ret.Add(_writer.NewLine);
+                        break;
+                    }
+                    default:
+                    {
+                        prevCrlf = false;
+                        break;
+                    }
+                }
+            }
+
+            pushSubString();
+            return ret;
+        }
+
 
         #region Support
 

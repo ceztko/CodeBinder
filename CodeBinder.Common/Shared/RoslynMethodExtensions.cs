@@ -215,6 +215,9 @@ namespace CodeBinder.Shared
             return data.AttributeClass!.Inherits<T>();
         }
 
+        /// <summary>
+        /// Determines if the symbol inherits the given class type
+        /// </summary>
         public static bool Inherits<T>(this ITypeSymbol symbol)
             where T : class
         {
@@ -225,6 +228,25 @@ namespace CodeBinder.Shared
                     return true;
 
                 baseType = baseType.BaseType;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines if the symbol implements the given interface type
+        /// </summary>
+        public static bool Implements<T>(this ITypeSymbol symbol)
+            where T : class
+        {
+            if (!typeof(T).IsInterface)
+                throw new Exception("They type should be an interface");
+
+
+            foreach (var iface in symbol.AllInterfaces)
+            {
+                if (iface.GetFullName() == typeof(T).FullName)
+                    return true;
             }
 
             return false;
@@ -538,6 +560,29 @@ namespace CodeBinder.Shared
             else
             {
                 return false;
+            }
+        }
+
+        public static bool IsProtected(this Accessibility accessibility)
+        {
+            switch (accessibility)
+            {
+                case Accessibility.Protected:
+                case Accessibility.ProtectedAndInternal:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        public static bool IsInternal(this Accessibility accessibility)
+        {
+            switch (accessibility)
+            {
+                case Accessibility.Internal:
+                case Accessibility.ProtectedAndInternal:
+                    return true;
+                default:
+                    return false;
             }
         }
 

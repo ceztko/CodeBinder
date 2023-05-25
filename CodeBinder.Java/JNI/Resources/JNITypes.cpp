@@ -15,22 +15,7 @@ void _jBooleanBoxBase::setValue(JNIEnv * env, jfieldID field, ValueType value)
     env->SetBooleanField(this, field, value);
 }
 
-const char * _jCharacterBoxBase::getFieldIdSignature()
-{
-    return "C";
-}
-
-_jCharacterBoxBase::ValueType _jCharacterBoxBase::getValue(JNIEnv * env, jfieldID field) const
-{
-    return env->GetCharField((jobject)this, field);
-}
-
-void _jCharacterBoxBase::setValue(JNIEnv * env, jfieldID field, ValueType value)
-{
-    env->SetCharField(this, field, value);
-}
-
-const char * _jByteBoxBase::getFieldIdSignature()
+const char* _jByteBoxBase::getFieldIdSignature()
 {
     return "B";
 }

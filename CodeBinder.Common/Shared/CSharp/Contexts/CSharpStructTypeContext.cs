@@ -11,23 +11,19 @@ namespace CodeBinder.Shared.CSharp
     /// Struct syntax context
     /// </summary>
     /// <remarks>Inherit this class if needed to extend a struct context</remarks>
-    public abstract class CSharpStructTypeContext<TCompilationContext, TTypeContext>
-        : CSharpStructTypeContext, ITypeContext<TCompilationContext>
+    public abstract class CSharpStructTypeContext<TCompilationContext>
+            : CSharpStructTypeContext, ITypeContext<TCompilationContext>
         where TCompilationContext : CSharpCompilationContext
-        where TTypeContext : CSharpStructTypeContext
     {
-        public CSharpStructTypeContext(StructDeclarationSyntax node)
-            : base(node) { }
+        TCompilationContext _Compilation;
 
-        public new TCompilationContext Compilation => getCSharpCompilationContext();
+        public CSharpStructTypeContext(StructDeclarationSyntax node, TCompilationContext compilation)
+            : base(node)
+        {
+            _Compilation = compilation;
+        }
 
-        protected abstract TCompilationContext getCSharpCompilationContext();
-
-        protected override CSharpCompilationContext GetCSharpCompilationContext() => getCSharpCompilationContext();
-
-        protected abstract IEnumerable<TypeConversion<TTypeContext>> getConversions();
-
-        protected override IEnumerable<TypeConversion> GetConversions() => getConversions();
+        public override TCompilationContext Compilation => _Compilation;
     }
 
     public abstract class CSharpStructTypeContext : CSharpTypeContext<StructDeclarationSyntax>
@@ -43,14 +39,14 @@ namespace CodeBinder.Shared.CSharp
 
     public sealed class CSharpStructTypeContextImpl : CSharpStructTypeContext
     {
-        public new CSharpCompilationContext Compilation { get; private set; }
+        CSharpCompilationContext _Compilation;
+
+        public override CSharpCompilationContext Compilation => _Compilation;
 
         public CSharpStructTypeContextImpl(StructDeclarationSyntax node, CSharpCompilationContext compilation)
             : base(node)
         {
-            Compilation = compilation;
+            _Compilation = compilation;
         }
-
-        protected override CSharpCompilationContext GetCSharpCompilationContext() => Compilation;
     }
 }

@@ -7,45 +7,69 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Xml.Linq;
 
 namespace CodeBinder.Shared.CSharp
 {
-    public abstract class CSharpBaseTypeContext : TypeContext<CSharpBaseTypeContext>, ITypeContext<CSharpCompilationContext>
+    /// <summary>
+    /// CSharp base type contexts, namely classes, structs, interfaces, enums and delegates
+    /// </summary>
+    /// <remarks>We consider base types also delegates, differently from Microsoft.CodeAnalysis.CSharp hieararchy</remarks>
+    public abstract class CSharpMemberTypeContext : TypeContext<CSharpMemberTypeContext>, ITypeContext<CSharpCompilationContext>
     {
-        internal CSharpBaseTypeContext() { }
+        string _FullName;
 
-        public BaseTypeDeclarationSyntax Node
+        internal CSharpMemberTypeContext()
         {
-            get { return GetBaseType(); }
+            _FullName = null!;
         }
 
-        public override string Name => Node.Identifier.Text;
+        public override string FullName => _FullName;
 
-        public new CSharpCompilationContext Compilation => GetCSharpCompilationContext();
+        public INamedTypeSymbol Symbol { get; private set; } = null!;
 
-        protected abstract CSharpCompilationContext GetCSharpCompilationContext();
+        public abstract MemberDeclarationSyntax Node { get; }
 
-        protected abstract BaseTypeDeclarationSyntax GetBaseType();
+        public abstract override CSharpCompilationContext Compilation { get; }
+
+        /// <summary>
+        /// True if this is the main declaration
+        /// </summary>
+        public virtual bool IsMainDeclaration => true;
+
+        internal void Init()
+        {
+            Symbol = Node.GetDeclaredSymbol<INamedTypeSymbol>(Compilation);
+            _FullName = Symbol.GetFullName();
+        }
 
         protected internal virtual void FillMemberPartialDeclarations(
             Dictionary<TypeDeclarationSyntax, PartialDeclarationsTree> memberPartialDeclarations) { }
-
-        protected sealed override CompilationContext GetCompilationContext() => GetCSharpCompilationContext();
     }
 
+    public abstract class CSharpBaseTypeContext : CSharpMemberTypeContext
+    {
+        internal CSharpBaseTypeContext() { }
+
+        public override abstract BaseTypeDeclarationSyntax Node { get; }
+    }
+
+    /// <summary>
+    /// CSharp type contexts, namely classes, structs, interfaces
+    /// </summary>
     public abstract class CSharpTypeContext : CSharpBaseTypeContext
     {
-        List<CSharpTypeContext> _partialDeclarations;
+        List<CSharpTypeContext> _PartialDeclarations;
 
         internal CSharpTypeContext()
         {
-            _partialDeclarations = new List<CSharpTypeContext>();
+            _PartialDeclarations = new List<CSharpTypeContext>();
         }
 
         public PartialDeclarationsTree ComputePartialDeclarationsTree()
         {
             var rootPartialDeclarations = new List<TypeDeclarationSyntax>();
-            foreach (var partialDeclaration in _partialDeclarations)
+            foreach (var partialDeclaration in _PartialDeclarations)
                 rootPartialDeclarations.Add(partialDeclaration.Node);
 
             var childrenPartialDeclarations = new Dictionary<TypeDeclarationSyntax, PartialDeclarationsTree>();
@@ -57,19 +81,20 @@ namespace CodeBinder.Shared.CSharp
 
         internal void AddPartialDeclaration(CSharpTypeContext partialDeclaration)
         {
-            _partialDeclarations.Add(partialDeclaration);
+            _PartialDeclarations.Add(partialDeclaration);
         }
+
+        /// <summary>
+        /// True if this is the main declaration, with PartialDeclarations.Count != 0
+        /// </summary>
+        public override bool IsMainDeclaration => _PartialDeclarations.Count != 0;
+
+        public override abstract TypeDeclarationSyntax Node { get; }
 
         public IReadOnlyList<CSharpTypeContext> PartialDeclarations
         {
-            get { return _partialDeclarations; }
+            get { return _PartialDeclarations; }
         }
-
-        public new TypeDeclarationSyntax Node => GetSyntaxType();
-
-        protected override BaseTypeDeclarationSyntax GetBaseType() => GetSyntaxType();
-
-        protected abstract TypeDeclarationSyntax GetSyntaxType();
 
         protected internal override void FillMemberPartialDeclarations(Dictionary<TypeDeclarationSyntax, PartialDeclarationsTree> memberPartialDeclarations)
         {
@@ -78,29 +103,46 @@ namespace CodeBinder.Shared.CSharp
         }
     }
 
-    public abstract class CSharpBaseTypeContext<TNode, TTypeContext> : CSharpBaseTypeContext
+    public abstract class CSharpMemberTypeContext<TNode> : CSharpMemberTypeContext
+        where TNode : MemberDeclarationSyntax
+    {
+        TNode _Node;
+
+        internal CSharpMemberTypeContext(TNode node)
+        {
+            _Node = node;
+        }
+
+        public override TNode Node => _Node;
+    }
+
+    public abstract class CSharpBaseTypeContext<TNode> : CSharpBaseTypeContext
         where TNode : BaseTypeDeclarationSyntax
     {
-        public new TNode Node { get; private set; }
+        TNode _Node;
 
         internal CSharpBaseTypeContext(TNode node)
         {
-            Node = node;
+            _Node = node;
         }
 
-        protected override BaseTypeDeclarationSyntax GetBaseType() => Node;
+        public override TNode Node => _Node;
+
+        public override string Name => Node.Identifier.Text;
     }
 
     public abstract class CSharpTypeContext<TNode> : CSharpTypeContext
         where TNode : TypeDeclarationSyntax
     {
-        public new TNode Node { get; private set; }
+        TNode _Node;
 
         internal CSharpTypeContext(TNode node)
         {
-            Node = node;
+            _Node = node;
         }
 
-        protected override TypeDeclarationSyntax GetSyntaxType() => Node;
+        public override TNode Node => _Node;
+
+        public override string Name => Node.Identifier.Text;
     }
 }

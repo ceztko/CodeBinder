@@ -3,23 +3,35 @@
 using CodeBinder.Shared;
 using System;
 
-namespace CodeBinder.Util
+namespace CodeBinder.Utils
 {
     /// <summary>
     /// Util class to generate code of a generic item and append to a CodeBuilder with a context
     /// </summary>
     /// <typeparam name="TItem">Type of the item to write</typeparam>
     /// <typeparam name="TContext">Type of the contenxt</typeparam>
-    public abstract class CodeWriter<TItem, TContext> : CodeWriter
+    public abstract class CodeWriter<TItem, TContext> : CodeWriter<TItem>
     {
-        public TItem Item { get; private set; }
-
         public TContext Context { get; private set; }
 
         protected CodeWriter(TItem item, TContext context)
+            : base(item)
+        {
+            Context = context;
+        }
+    }
+
+    /// <summary>
+    /// Util class to generate code of a generic item and append to a CodeBuilder
+    /// </summary>
+    /// <typeparam name="TItem">Type of the item to write</typeparam>
+    public abstract class CodeWriter<TItem> : CodeWriter
+    {
+        public TItem Item { get; private set; }
+
+        protected CodeWriter(TItem item)
         {
             Item = item;
-            Context = context;
         }
     }
 
@@ -60,7 +72,7 @@ namespace CodeBinder.Util
 
             public NullCodeWriter(string? nullstr)
             {
-                if (string.IsNullOrEmpty(nullstr))
+                if (nullstr.IsNullOrEmpty())
                     nullstr = "NULL";
 
                 NullStr = nullstr;

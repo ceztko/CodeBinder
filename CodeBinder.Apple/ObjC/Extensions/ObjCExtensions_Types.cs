@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using CodeBinder.Shared;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics;
@@ -22,7 +22,7 @@ namespace CodeBinder.Apple
             var builder = new CodeBuilder();
             string? defaultLiteral = type.GetObjCDefaultLiteral(context);
             builder.Append("return");
-            if (!string.IsNullOrEmpty(defaultLiteral))
+            if (!defaultLiteral.IsNullOrEmpty())
                 builder.Space().Append(defaultLiteral);
 
             return builder.ToString();
@@ -48,8 +48,6 @@ namespace CodeBinder.Apple
                     return "nullptr";
                 case "System.Boolean":
                     return "NO";
-                case "System.Char":
-                    return "char()";
                 case "CodeBinder.Apple.NSUInteger":
                 case "CodeBinder.Apple.NSInteger":
                 case "System.Byte":
@@ -74,7 +72,6 @@ namespace CodeBinder.Apple
             switch (kind)
             {
                 case SyntaxKind.BoolKeyword:
-                case SyntaxKind.CharKeyword:
                 case SyntaxKind.SByteKeyword:
                 case SyntaxKind.ByteKeyword:
                 case SyntaxKind.ShortKeyword:
@@ -87,7 +84,7 @@ namespace CodeBinder.Apple
                 case SyntaxKind.DoubleKeyword:
                     return "NSNumber";
                 default:
-                    throw new Exception();
+                    throw new NotSupportedException();
             }
         }
 
@@ -104,8 +101,6 @@ namespace CodeBinder.Apple
                     return "NSString";
                 case SyntaxKind.BoolKeyword:
                     return "BOOL";
-                case SyntaxKind.CharKeyword:
-                    return "char";
                 case SyntaxKind.SByteKeyword:
                     return "int8_t";
                 case SyntaxKind.ByteKeyword:
@@ -127,7 +122,7 @@ namespace CodeBinder.Apple
                 case SyntaxKind.DoubleKeyword:
                     return "double";
                 default:
-                    throw new Exception();
+                    throw new NotSupportedException();
             }
         }
 
@@ -658,13 +653,18 @@ namespace CodeBinder.Apple
                     return true;
 
                 }
+                case "CodeBinder.HandledObjectFinalizer":
+                {
+                    objcTypeKind = ObjCTypeKind.Class;
+                    knownObjCType = "CBHandledObjectFinalizer";
+                    return true;
+                }
                 case "CodeBinder.HandledObjectBase":
                 {
                     objcTypeKind = ObjCTypeKind.Class;
                     knownObjCType = "CBHandledObjectBase";
                     return true;
                 }
-
                 case "CodeBinder.HandledObject<BaseT>":
                 {
                     objcTypeKind = ObjCTypeKind.Class;
@@ -763,7 +763,6 @@ namespace CodeBinder.Apple
                 case "System.UIntPtr":
                 case "System.IntPtr":
                 case "System.Boolean":
-                case "System.Char":
                 case "System.Byte":
                 case "System.SByte":
                 case "System.Int16":

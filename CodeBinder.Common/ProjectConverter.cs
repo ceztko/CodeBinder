@@ -6,7 +6,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using CodeBinder.Util;
+using CodeBinder.Shared;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -38,7 +39,7 @@ namespace CodeBinder
             if (!Converter.Options.IgnoreCompilationErrors)
             {
                 string? errors = CompilationOuput.ErrorsForCompilation(compilation, "source");
-                if (!string.IsNullOrEmpty(errors))
+                if (!errors.IsNullOrEmpty())
                     throw new Exception("Compilation errors: " + errors);
             }
 

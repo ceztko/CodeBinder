@@ -2,7 +2,7 @@
 // This file is subject to the MIT license
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -22,7 +22,7 @@ namespace CodeBinder.Java
             switch (kind)
             {
                 case SyntaxKind.ConstructorDeclaration:
-                    return new[] { new JavaConstructorWriter((ConstructorDeclarationSyntax)member, context) };
+                    return getConstructorWriters((ConstructorDeclarationSyntax)member, context);
                 case SyntaxKind.DestructorDeclaration:
                     return new[] { new JavaDestructorWriter((DestructorDeclarationSyntax)member, context) };
                 case SyntaxKind.MethodDeclaration:
@@ -64,6 +64,20 @@ namespace CodeBinder.Java
             }
 
             yield return new MethodWriter(method, -1, context);
+        }
+
+        static IEnumerable<CodeWriter> getConstructorWriters(ConstructorDeclarationSyntax method, JavaCodeConversionContext context)
+        {
+            for (int i = method.ParameterList.Parameters.Count - 1; i >= 0; i--)
+            {
+                var parameter = method.ParameterList.Parameters[i];
+                if (parameter.Default == null)
+                    break;
+
+                yield return new ConstructorWriter(method, i, context);
+            }
+
+            yield return new ConstructorWriter(method, -1, context);
         }
     }
 }

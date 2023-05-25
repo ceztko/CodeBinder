@@ -1,7 +1,7 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
 using CodeBinder.Shared;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using CodeBinder.Shared.CSharp;
@@ -63,8 +63,31 @@ namespace CodeBinder.Java
         protected virtual void WriteModifiers()
         {
             string modifiers = Item.GetJavaModifiersString();
-            if (!string.IsNullOrEmpty(modifiers))
+            if (!modifiers.IsNullOrEmpty())
                 Builder.Append(modifiers).Space();
+        }
+
+        protected void WriteOptionalParameters(SeparatedSyntaxList<ParameterSyntax> parameters, int optionalIndex)
+        {
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                var parameter = parameters[i];
+                if (i > 0)
+                    Builder.CommaSeparator();
+
+                if (i < optionalIndex)
+                {
+                    Builder.Append(parameter.Identifier.Text);
+                }
+                else
+                {
+                    var paramTypeSymbol = parameter.GetDeclaredSymbol<IParameterSymbol>(Context);
+                    if (paramTypeSymbol.Type.TypeKind == TypeKind.Class)
+                        Builder.Parenthesized().Append(paramTypeSymbol.Type.Name).Close();
+
+                    Builder.Append(parameter.Default!.Value, Context);
+                }
+            }
         }
 
         protected void WriteType(TypeSyntax type, JavaTypeFlags flags)
@@ -182,23 +205,7 @@ namespace CodeBinder.Java
 
                 using (Builder.Append(MethodName).ParameterList())
                 {
-                    for (int i = 0; i < Item.ParameterList.Parameters.Count; i++)
-                    {
-                        var parameter = Item.ParameterList.Parameters[i];
-                        if (i > 0)
-                            Builder.CommaSeparator();
-
-                        if (i < _optionalIndex)
-                            Builder.Append(parameter.Identifier.Text);
-                        else
-                        {
-                            var paramTypeSymbol = parameter.GetDeclaredSymbol<IParameterSymbol>(Context);
-                            if (paramTypeSymbol.Type.TypeKind == TypeKind.Class)
-                                Builder.Parenthesized().Append(paramTypeSymbol.Type.Name).Close();
-
-                            Builder.Append(parameter.Default!.Value, Context);
-                        }
-                    }
+                    WriteOptionalParameters(Item.ParameterList.Parameters, _optionalIndex);
                 }
 
                 Builder.EndOfStatement();
@@ -231,8 +238,8 @@ namespace CodeBinder.Java
                 }
                 else
                 {
-                    if (Context.Conversion.MethodsLowerCase)
-                        return methodName.ToJavaLowerCase();
+                    if (Context.Conversion.MethodCasing == MethodCasing.LowerCamelCase)
+                        return methodName.ToLowerCamelCase();
                     else
                         return methodName;
                 }
@@ -267,14 +274,17 @@ namespace CodeBinder.Java
         }
     }
 
-    class JavaConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
+    class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
     {
+        int _optionalIndex;
         bool _isStatic;
 
-        public JavaConstructorWriter(ConstructorDeclarationSyntax method, JavaCodeConversionContext context)
+
+        public ConstructorWriter(ConstructorDeclarationSyntax method, int optionalIndex, JavaCodeConversionContext context)
             : base(method, context)
         {
             _isStatic = Item.Modifiers.Any(SyntaxKind.StaticKeyword);
+            _optionalIndex = optionalIndex;
         }
 
         protected override void WriteModifiers()
@@ -291,8 +301,20 @@ namespace CodeBinder.Java
 
         protected override void WriteMethodBodyPrefixInternal()
         {
-            if (Item.Initializer != null)
-                Builder.Append(Item.Initializer, Context).EndOfStatement();
+            if (_optionalIndex >= 0)
+            {
+                using (Builder.Append("this").ParameterList())
+                {
+                    WriteOptionalParameters(Item.ParameterList.Parameters, _optionalIndex);
+                }
+
+                Builder.EndOfStatement();
+            }
+            else
+            {
+                if (Item.Initializer != null)
+                    Builder.Append(Item.Initializer, Context).EndOfStatement();
+            }
         }
 
         public override string MethodName
@@ -310,26 +332,50 @@ namespace CodeBinder.Java
         {
             get { return false; }
         }
+
+        public override bool WriteMethodBody
+        {
+            get { return _optionalIndex == -1; }
+        }
+
+        public override int ParameterCount
+        {
+            get
+            {
+                if (_optionalIndex == -1)
+                    return base.ParameterCount;
+
+                return _optionalIndex;
+            }
+        }
     }
 
     class JavaDestructorWriter : MethodWriter<DestructorDeclarationSyntax>
     {
+        bool _isFinalizer;
+
         public JavaDestructorWriter(DestructorDeclarationSyntax method, JavaCodeConversionContext context)
-            : base(method, context) { }
+            : base(method, context)
+        {
+            var symbol = method.GetDeclaredSymbol<IMethodSymbol>(context);
+            _isFinalizer = symbol.ContainingType.Implements<IObjectFinalizer>();
+        }
 
         protected override void WriteThrows()
         {
-            Builder.Space().Append("throws Throwable");
+            if (!_isFinalizer)
+                Builder.Space().Append("throws Throwable");
         }
 
         protected override void WriteMethodBodyPostfixInternal()
         {
-            Builder.Append("super.finalize()").EndOfStatement();
+            if (!_isFinalizer)
+                Builder.Append("super.finalize()").EndOfStatement();
         }
 
         protected override void WriteModifiers()
         {
-            Builder.Append("protected").Space();
+            Builder.Append(_isFinalizer ? "public" : "protected").Space();
         }
 
         protected override void WriteReturnType()
@@ -339,7 +385,7 @@ namespace CodeBinder.Java
 
         public override string MethodName
         {
-            get { return "finalize"; }
+            get { return _isFinalizer ? "run" : "finalize"; }
         }
 
         public override bool IsNative

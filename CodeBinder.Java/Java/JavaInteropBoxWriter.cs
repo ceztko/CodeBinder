@@ -2,7 +2,7 @@
 // This file is subject to the MIT license
 using CodeBinder.Shared;
 using CodeBinder.Java.Shared;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;

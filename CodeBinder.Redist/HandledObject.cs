@@ -6,10 +6,8 @@ namespace CodeBinder
     public class HandledObject<BaseT> : HandledObjectBase
         where BaseT : HandledObject<BaseT>
     {
-        protected HandledObject() { }
-
-        protected HandledObject(IntPtr handle)
-            : base(handle) { }
+        protected HandledObject(IntPtr handle, bool handled)
+            : base(handle, handled) { }
 
         protected static bool Equals(BaseT? lhs, BaseT? rhs)
         {
@@ -51,40 +49,25 @@ namespace CodeBinder
         }
     }
 
-    public class HandledObjectBase
+    public class HandledObjectBase : FinalizableObject
     {
         IntPtr _handle;
 
-        protected HandledObjectBase()
-        {
-            _handle = IntPtr.Zero;
-        }
-
-        protected HandledObjectBase(IntPtr handle)
+        protected HandledObjectBase(IntPtr handle, bool handled)
         {
             _handle = handle;
+
+            if (handled)
+            {
+                var finalizer = CreateFinalizer();
+                finalizer.Handle = handle;
+                RegisterFinalizer(finalizer);
+            }
         }
 
-        ~HandledObjectBase()
+        protected virtual HandledObjectFinalizer CreateFinalizer()
         {
-            if (Managed)
-                FreeHandle(_handle);
-        }
-
-        protected void SetHandle(IntPtr handle)
-        {
-            if (handle == IntPtr.Zero)
-                throw new Exception("Handle must be non null");
-
-            if (_handle != IntPtr.Zero)
-                throw new Exception("Handle is already set");
-
-            _handle = handle;
-        }
-
-        protected virtual void FreeHandle(IntPtr handle)
-        {
-            throw new NotImplementedException();
+            throw new NotImplementedException("The finalizer must be supplied");
         }
 
         /// <summary>
@@ -106,11 +89,6 @@ namespace CodeBinder
             get { return _handle; }
         }
 
-        public virtual bool Managed
-        {
-            get { return true; }
-        }
-
         public override bool Equals(object? obj)
         {
             return Equals(obj as HandledObjectBase);
@@ -128,5 +106,32 @@ namespace CodeBinder
         {
             return ReferenceHandle.GetHashCode();
         }
+    }
+
+    public abstract class FinalizableObject
+    {
+        protected FinalizableObject() { }
+
+        protected void RegisterFinalizer(IObjectFinalizer finalizer)
+        {
+            BinderUtils.RegisterForFinalization(this, finalizer);
+        }
+    }
+
+    public abstract class HandledObjectFinalizer : IObjectFinalizer
+    {
+        internal IntPtr Handle { get; set; }
+
+        ~HandledObjectFinalizer()
+        {
+            FreeHandle(Handle);
+        }
+
+        public abstract void FreeHandle(IntPtr handle);
+    }
+
+    public interface IObjectFinalizer
+    {
+
     }
 }

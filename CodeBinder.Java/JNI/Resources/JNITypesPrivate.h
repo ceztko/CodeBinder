@@ -3,7 +3,6 @@
 #include "JNITypes.h"
 
 #undef jBooleanBox
-#undef jCharacterBox
 #undef jByteBox
 #undef jShortBox
 #undef jIntegerBox
@@ -28,7 +27,6 @@ private:
 
 // Forward declarations for box type classes
 class _jBooleanBox;
-class _jCharacterBox;
 class _jByteBox;
 class _jShortBox;
 class _jIntegerBox;
@@ -40,7 +38,6 @@ class _jHandleRef;
 
 // Typedef for box type pointers
 typedef _jBooleanBox * jBooleanBox;
-typedef _jCharacterBox * jCharacterBox;
 typedef _jByteBox * jByteBox;
 typedef _jShortBox * jShortBox;
 typedef _jIntegerBox * jIntegerBox;
@@ -55,17 +52,6 @@ class _jBooleanBoxBase : public _jobject
 public:
     typedef jBooleanBox BoxPtr;
     typedef jboolean ValueType;
-protected:
-    static const char * getFieldIdSignature();
-    ValueType getValue(JNIEnv *env, jfieldID field) const;
-    void setValue(JNIEnv *env, jfieldID field, ValueType value);
-};
-
-class _jCharacterBoxBase : public _jobject
-{
-public:
-    typedef jCharacterBox BoxPtr;
-    typedef jchar ValueType;
 protected:
     static const char * getFieldIdSignature();
     ValueType getValue(JNIEnv *env, jfieldID field) const;
@@ -151,7 +137,6 @@ protected:
 
 // Typedef for box types
 class _jBooleanBox : public _jTypeBox<_jBooleanBoxBase> { };
-class _jCharacterBox : public _jTypeBox<_jCharacterBoxBase> { };
 class _jByteBox : public _jTypeBox<_jByteBoxBase> { };
 class _jShortBox : public _jTypeBox<_jShortBoxBase> { };
 class _jIntegerBox : public _jTypeBox<_jIntegerBoxBase> { };

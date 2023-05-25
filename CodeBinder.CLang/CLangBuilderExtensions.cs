@@ -1,4 +1,5 @@
-﻿using CodeBinder.Util;
+﻿using CodeBinder.Shared;
+using CodeBinder.Utils;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -40,7 +41,7 @@ namespace CodeBinder.CLang
         public static CodeBuilder TypeBlock(this CodeBuilder builder, string? postIdentifier = null)
         {
             builder.AppendLine("{");
-            return builder.Indent(string.IsNullOrEmpty(postIdentifier) ? "};" : $"}} {postIdentifier};", true);
+            return builder.Indent(postIdentifier.IsNullOrEmpty() ? "};" : $"}} {postIdentifier};", true);
         }
 
         public static CodeBuilder Block(this CodeBuilder builder, bool appendLine = true)

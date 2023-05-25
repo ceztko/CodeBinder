@@ -11,23 +11,19 @@ namespace CodeBinder.Shared.CSharp
     /// Interface syntax context
     /// </summary>
     /// <remarks>Inherit this class if needed to extend an interface context</remarks>
-    public abstract class CSharpInterfaceTypeContext<TCompilationContext, TTypeContext>
-        : CSharpInterfaceTypeContext, ITypeContext<TCompilationContext>
+    public abstract class CSharpInterfaceTypeContext<TCompilationContext>
+            : CSharpInterfaceTypeContext, ITypeContext<TCompilationContext>
         where TCompilationContext : CSharpCompilationContext
-        where TTypeContext : CSharpInterfaceTypeContext
     {
-        public CSharpInterfaceTypeContext(InterfaceDeclarationSyntax node)
-            : base(node) { }
+        TCompilationContext _Compilation;
 
-        public new TCompilationContext Compilation => getCSharpCompilationContext();
+        public CSharpInterfaceTypeContext(InterfaceDeclarationSyntax node, TCompilationContext compilation)
+            : base(node)
+        {
+            _Compilation = compilation;
+        }
 
-        protected abstract TCompilationContext getCSharpCompilationContext();
-
-        protected override CSharpCompilationContext GetCSharpCompilationContext() => getCSharpCompilationContext();
-
-        protected abstract IEnumerable<TypeConversion<TTypeContext>> getConversions();
-
-        protected override IEnumerable<TypeConversion> GetConversions() => getConversions();
+        public override TCompilationContext Compilation => _Compilation;
     }
 
     public abstract class CSharpInterfaceTypeContext : CSharpTypeContext<InterfaceDeclarationSyntax>
@@ -43,14 +39,14 @@ namespace CodeBinder.Shared.CSharp
 
     sealed class CSharpInterfaceTypeContextImpl : CSharpInterfaceTypeContext
     {
-        public new CSharpCompilationContext Compilation { get; private set; }
+        CSharpCompilationContext _Compilation;
+
+        public override CSharpCompilationContext Compilation => _Compilation;
 
         public CSharpInterfaceTypeContextImpl(InterfaceDeclarationSyntax node, CSharpCompilationContext compilation)
             : base(node)
         {
-            Compilation = compilation;
+            _Compilation = compilation;
         }
-
-        protected override CSharpCompilationContext GetCSharpCompilationContext() => Compilation;
     }
 }

@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
+using CodeBinder.Utils;
 
 namespace CodeBinder.Shared.CSharp
 {
@@ -20,13 +21,21 @@ namespace CodeBinder.Shared.CSharp
     {
         static Regex? _splitCamelCase;
 
-        public static string GetContainingNamespace(this BaseTypeDeclarationSyntax node, ICompilationContextProvider provider)
+        public static string GetMappedNamespaceName(this MemberDeclarationSyntax node, NamespaceMappingTree mapping,
+            ICompilationContextProvider provider)
         {
-            var symbol = node.GetDeclaredSymbol(provider)!;
-            return symbol.ContainingNamespace.GetFullName();
+            return mapping.GetMappedNamespace(
+                node.GetContainingNamespaceName(provider), NamespaceNormalization.None);
         }
 
-        public static string GetContainingNamespace(this MethodDeclarationSyntax node, ICompilationContextProvider provider)
+        public static string GetMappedNamespaceName(this MemberDeclarationSyntax node, NamespaceMappingTree mapping,
+            NamespaceNormalization normalization, ICompilationContextProvider provider)
+        {
+            return mapping.GetMappedNamespace(
+                node.GetContainingNamespaceName(provider), normalization);
+        }
+
+        public static string GetContainingNamespaceName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
         {
             var symbol = node.GetDeclaredSymbol(provider)!;
             return symbol.ContainingNamespace.GetFullName();
@@ -1206,6 +1215,11 @@ namespace CodeBinder.Shared.CSharp
         }
 
         public static string GetName(this EnumMemberDeclarationSyntax node)
+        {
+            return node.Identifier.Text;
+        }
+
+        public static string GetName(this DelegateDeclarationSyntax node)
         {
             return node.Identifier.Text;
         }

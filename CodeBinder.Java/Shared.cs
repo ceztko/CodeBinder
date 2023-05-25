@@ -23,7 +23,6 @@ namespace CodeBinder.Java.Shared
     public enum JavaInteropType
     {
         Boolean,
-        Character,
         Byte,
         Short,
         Integer,

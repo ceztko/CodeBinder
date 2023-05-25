@@ -41,11 +41,6 @@ BJ2NImpl<_jBooleanBox> BJ2N(JNIEnv * env, jBooleanBox box)
     return BJ2NImpl<_jBooleanBox>(env, box);
 }
 
-BJ2NImpl<_jCharacterBox> BJ2N(JNIEnv * env, jCharacterBox box)
-{
-    return BJ2NImpl<_jCharacterBox>(env, box);
-}
-
 BJ2NImpl<_jByteBox> BJ2N(JNIEnv * env, jByteBox box)
 {
     return BJ2NImpl<_jByteBox>(env, box);

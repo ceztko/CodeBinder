@@ -51,11 +51,11 @@ namespace CodeBinder.CLang
                 if (!Compilation.TryGetModule(moduleName, out parent))
                 {
                     parent = new CLangModuleContextParent(moduleName, Compilation);
-                    Compilation.AddModule(Compilation, parent);
+                    Compilation.AddModule(parent);
                 }
 
                 module = new CLangModuleContextChild(Compilation);
-                Compilation.AddModuleChild(Compilation, module, parent);
+                Compilation.AddModuleChild(module, parent);
             }
 
             foreach (var member in type.Members)

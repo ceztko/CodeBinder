@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CodeBinder.Shared;
 using CodeBinder.JNI.Resources;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 
 namespace CodeBinder.JNI
 {

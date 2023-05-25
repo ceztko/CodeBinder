@@ -3,7 +3,7 @@
 using CodeBinder.Attributes;
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,7 +17,7 @@ namespace CodeBinder.Java
 {
     abstract partial class JavaBaseTypeConversion<TTypeContext>
         : CSharpTypeConversion<TTypeContext, ConversionCSharpToJava>
-        where TTypeContext : CSharpBaseTypeContext
+        where TTypeContext : CSharpMemberTypeContext
     {
         protected JavaBaseTypeConversion(TTypeContext context, ConversionCSharpToJava conversion)
             : base(context, conversion) { }
@@ -26,16 +26,14 @@ namespace CodeBinder.Java
         {
             get
             {
-
-                return Conversion.NamespaceMapping.GetMappedNamespace(
-                    Context.Node.GetContainingNamespace(this),
-                        NamespaceNormalization.LowerCase);
+                return Context.Node.GetMappedNamespaceName(Conversion.NamespaceMapping,
+                    NamespaceNormalization.LowerCase, Context);
             }
         }
 
         protected override string? GetBasePath() => Namespace.Replace('.', Path.DirectorySeparatorChar);
 
-        protected override string GetFileName() => $"{Context.Node.GetName()}.java";
+        protected override string GetFileName() => $"{Context.Name}.java";
 
         protected override string GetGeneratedPreamble() => ConversionCSharpToJava.SourcePreamble;
 
@@ -91,16 +89,6 @@ namespace CodeBinder.Java
                 builder.AppendLine();
 
             builder.Append(GetTypeWriter());
-        }
-
-        protected IEnumerable<string> GetImports(SyntaxNode node)
-        {
-            var attributes = node.GetAttributes(this);
-            foreach (var attribute in attributes)
-            {
-                if (attribute.IsAttribute<ImportAttribute>())
-                    yield return attribute.GetConstructorArgument<string>(0);
-            }
         }
 
         protected abstract CodeWriter GetTypeWriter();

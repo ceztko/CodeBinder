@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using CodeBinder.Shared;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics;
@@ -39,8 +39,6 @@ namespace CodeBinder.Java
                     return "0";
                 case "System.Boolean":
                     return "false";
-                case "System.Char":
-                    return "'\0'";
                 case "System.Byte":
                 case "System.SByte":
                 case "System.Int16":
@@ -64,8 +62,6 @@ namespace CodeBinder.Java
             {
                 case SyntaxKind.BoolKeyword:
                     return "Boolean";
-                case SyntaxKind.CharKeyword:
-                    return "Character";
                 case SyntaxKind.SByteKeyword:
                     return "Byte";
                 case SyntaxKind.ByteKeyword:
@@ -104,8 +100,6 @@ namespace CodeBinder.Java
                     return "String";
                 case SyntaxKind.BoolKeyword:
                     return "boolean";
-                case SyntaxKind.CharKeyword:
-                    return "char";
                 case SyntaxKind.SByteKeyword:
                     return "byte";
                 case SyntaxKind.ByteKeyword:
@@ -296,7 +290,7 @@ namespace CodeBinder.Java
                 }
                 else
                 {
-                    javaMethodName = context.Conversion.MethodsLowerCase ? method.Name.ToJavaLowerCase() : method.Name;
+                    javaMethodName = context.Conversion.MethodCasing == MethodCasing.LowerCamelCase ? method.Name.ToLowerCamelCase() : method.Name;
                 }
             }
 
@@ -770,9 +764,6 @@ namespace CodeBinder.Java
                     case "System.Boolean":
                         knownJavaType = "Boolean";
                         return true;
-                    case "System.Char":
-                        knownJavaType = "Character";
-                        return true;
                     case "System.Byte":
                         knownJavaType = "Byte";
                         return true;
@@ -831,9 +822,6 @@ namespace CodeBinder.Java
                         return true;
                     case "System.Boolean":
                         knownJavaType = "boolean";
-                        return true;
-                    case "System.Char":
-                        knownJavaType = "char";
                         return true;
                     case "System.Byte":
                         knownJavaType = "byte";

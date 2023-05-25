@@ -19,7 +19,7 @@ namespace CodeBinder.JNI.Resources {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class JNIResources {
@@ -89,24 +89,27 @@ namespace CodeBinder.JNI.Resources {
         /// <summary>
         ///   Looks up a localized string similar to #include &quot;JNIBoxes.h&quot;
         ///
-        ///BJ2NImpl&lt;_jBooleanBox&gt; BJ2N(JNIEnv * env, jBooleanBox box, bool commit)
+        ///#include &lt;CBInterop.h&gt;
+        ///
+        ///SBJ2N::SBJ2N(JNIEnv* env, jStringBox box)
+        ///    : m_env(env), m_box(box)
         ///{
-        ///    return BJ2NImpl&lt;_jBooleanBox&gt;(env, box, commit);
+        ///    m_jstring = box-&gt;GetValue(env);
+        ///    if (m_jstring == nullptr)
+        ///    {
+        ///        m_chars = nullptr;
+        ///        m_isCopy = false;
+        ///        m_value = { };
+        ///    }
+        ///    else
+        ///    {
+        ///        m_chars = m_env-&gt;GetStringUTFChars(m_jstring, &amp;m_isCopy);
+        ///        jsize length = env-&gt;GetStringUTFLength(m_jstring);
+        ///        m_value = CBCreateStringViewLen(m_chars, (size_t)length);
+        ///    }
         ///}
         ///
-        ///BJ2NImpl&lt;_jCharacterBox&gt; BJ2N(JNIEnv * env, jCharacterBox box, bool commit)
-        ///{
-        ///    return BJ2NImpl&lt;_jCharacterBox&gt;(env, box, commit);
-        ///}
-        ///
-        ///BJ2NImpl&lt;_jByteBox&gt; BJ2N(JNIEnv * env, jByteBox box, bool commit)
-        ///{
-        ///    return BJ2NImpl&lt;_jByteBox&gt;(env, box, commit);
-        ///}
-        ///
-        ///BJ2NImpl&lt;_jShortBox&gt; BJ2N(JNIEnv * env, jShortBox box, bool commit)
-        ///{
-        ///    return BJ [rest of string was truncated]&quot;;.
+        ///S [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxes_cpp {
             get {
@@ -119,23 +122,23 @@ namespace CodeBinder.JNI.Resources {
         ///#pragma once
         ///
         ///#include &quot;JNITypesPrivate.h&quot;
+        ///#include &lt;CBBaseTypes.h&gt;
         ///
-        ///// Wraps custom java box type
-        ///template &lt;typename TJBox, typename TN = typename TJBox::ValueType&gt;
+        ///// Wraps java numerical box type
+        ///template &lt;typename TJBox, typename TNative = typename TJBox::ValueType&gt;
         ///class BJ2NImpl
         ///{
         ///public:
-        ///    BJ2NImpl(JNIEnv* env, typename TJBox::BoxPtr box, bool commit)
+        ///    BJ2NImpl(JNIEnv* env, typename TJBox::BoxPtr box)
         ///    {
         ///        m_env = env;
         ///        m_box = box;
-        ///        m_commit = commit;
-        ///        Value = (TN)box-&gt;GetValue(env);
+        ///        m_value = (TNative)box-&gt;GetValue(env);
         ///    }
         ///    ~BJ2NImpl()
         ///    {
-        ///        if (m_commit)
-        ///            m_box-&gt;SetValue(m_env, (typename TJBox [rest of string was truncated]&quot;;.
+        ///        m_box-&gt;SetValue(m_env, (typename TJBox::ValueType)m_value);
+        ///     [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxes_h {
             get {
@@ -173,13 +176,18 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #pragma once
+        ///   Looks up a localized string similar to /* This file was generated. DO NOT EDIT! */
+        ///#pragma once
         ///
         ///#include &lt;jni.h&gt;
         ///#include &lt;stdexcept&gt;
         ///#include &quot;JNIShared.h&quot;
         ///#include &quot;JNIBoxes.h&quot;
         ///#include &lt;CBBaseTypes.h&gt;
+        ///
+        ///// https://artificial-mind.net/blog/2020/10/03/always-false
+        ///template &lt;class... T&gt;
+        ///constexpr bool always_false = false;
         ///
         ///// Wraps jstring and convert to utf-16 chars
         ///class SJ2N
@@ -191,16 +199,7 @@ namespace CodeBinder.JNI.Resources {
         ///    operator cbstring() const;
         ///private:
         ///    JNIEnv* m_env;
-        ///    jstring m_string;
-        ///    const char* m_chars;
-        ///    jboolean m_isCopy;
-        ///};
-        ///
-        ///// Wraps utf-16 chars and convert to jstring
-        ///class SN2J
-        ///{
-        ///public:
-        ///    SN2J(JNIEnv* env, const cbstring&amp; st [rest of string was truncated]&quot;;.
+        ///    jstring m_string [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNICommon_h {
             get {
@@ -276,12 +275,12 @@ namespace CodeBinder.JNI.Resources {
         ///    env-&gt;SetBooleanField(this, field, value);
         ///}
         ///
-        ///const char * _jCharacterBoxBase::getFieldIdSignature()
+        ///const char* _jByteBoxBase::getFieldIdSignature()
         ///{
-        ///    return &quot;C&quot;;
+        ///    return &quot;B&quot;;
         ///}
         ///
-        ///_jCharacterBoxBase::ValueType [rest of string was truncated]&quot;;.
+        ///_jByteBoxBase::ValueType _jByteBoxB [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNITypes_cpp {
             get {
@@ -306,8 +305,9 @@ namespace CodeBinder.JNI.Resources {
         ///#endif
         ///
         ///#define jBooleanBox jobject
-        ///#define jCharacterBox jobject
-        ///#define jByteBox jobject        /// [rest of string was truncated]&quot;;.
+        ///#define jByteBox jobject
+        ///#define jShortBox jobject
+        ///#de [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNITypes_h {
             get {
@@ -338,7 +338,6 @@ namespace CodeBinder.JNI.Resources {
         ///#include &quot;JNITypes.h&quot;
         ///
         ///#undef jBooleanBox
-        ///#undef jCharacterBox
         ///#undef jByteBox
         ///#undef jShortBox
         ///#undef jIntegerBox
@@ -357,7 +356,9 @@ namespace CodeBinder.JNI.Resources {
         ///    void SetValue(JNIEnv *env, typename BaseT::ValueType value);
         ///private:
         ///    jfieldID getFieldId(JNIEnv *env) const;
-        ///} [rest of string was truncated]&quot;;.
+        ///};
+        ///
+        ///// Base box types [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNITypesPrivate_h {
             get {

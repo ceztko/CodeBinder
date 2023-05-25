@@ -1,9 +1,10 @@
 ﻿// Copyright(c) 2018 Francesco Pretto
 // This file is subject to the MIT license
 using System.Collections.Generic;
+using CodeBinder.Attributes;
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using BinderPolicies = CodeBinder.Attributes.Policies;
 
 namespace CodeBinder.Apple
@@ -21,25 +22,19 @@ namespace CodeBinder.Apple
         internal const string InternalBasePath = "Internal";
         internal const string SupportBasePath = "Support";
 
-        List<string> _policies;
-
-        public ConversionCSharpToObjC()
-        {
-            // NOTE: Delegates are not yet fully supported, PassByRef doesn't work perfectly as well
-            // _policies = new List<string>() { BinderPolicies.PassByRef, BinderPolicies.PassByRef, BinderPolicies.Delegates, BinderPolicies.ExplicitInterfaceImplementation };
-            _policies = new List<string>() { BinderPolicies.ExplicitInterfaceImplementation };
-            MethodsLowerCase = true;
-        }
+        public ConversionCSharpToObjC() { }
 
         protected override ObjCCompilationContext createCSharpCompilationContext()
         {
             return new ObjCCompilationContext(this);
         }
 
-        public override IReadOnlyCollection<string> SupportedPolicies
-        {
-            get { return _policies; }
-        }
+        // NOTE: Delegates are not yet fully supported, PassByRef doesn't work perfectly as well
+        // _policies = new List<string>() { BinderPolicies.PassByRef, BinderPolicies.PassByRef, BinderPolicies.Delegates, BinderPolicies.ExplicitInterfaceImplementation };
+        public override IReadOnlyCollection<string> SupportedPolicies =>
+            new string[] { BinderPolicies.ExplicitInterfaceImplementation, BinderPolicies.InstanceFinalizers};
+
+        public override OverloadFeature? OverloadFeatures => OverloadFeature.ParameterArity;
 
         public override bool NeedNamespaceMapping => false;
 
@@ -47,7 +42,7 @@ namespace CodeBinder.Apple
 
         public bool SkipBody { get; set; }
 
-        public bool MethodsLowerCase { get; set; }
+        public override MethodCasing MethodCasing => MethodCasing.LowerCamelCase;
 
         public override IReadOnlyList<string> PreprocessorDefinitions
         {

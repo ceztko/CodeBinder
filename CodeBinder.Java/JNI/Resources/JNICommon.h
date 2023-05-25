@@ -1,10 +1,15 @@
-﻿#pragma once
+﻿/* This file was generated. DO NOT EDIT! */
+#pragma once
 
 #include <jni.h>
 #include <stdexcept>
 #include "JNIShared.h"
 #include "JNIBoxes.h"
 #include <CBBaseTypes.h>
+
+// https://artificial-mind.net/blog/2020/10/03/always-false
+template <class... T>
+constexpr bool always_false = false;
 
 // Wraps jstring and convert to utf-16 chars
 class SJ2N
@@ -40,8 +45,21 @@ private:
 template <typename TJArray, typename TNArray>
 struct AJNIShim
 {
-    static TNArray* GetNativeArray(JNIEnv* env, TJArray jarray) { throw std::runtime_error("Not implemented"); }
-    static void FreeNativeArray(JNIEnv* env, TJArray jarray, TNArray* narray, bool commit) { throw std::runtime_error("Not implemented"); }
+    static TNArray* GetNativeArray(JNIEnv* env, TJArray jarray)
+    {
+        (void)env;
+        (void)jarray;
+        static_assert(always_false<TJArray, TNArray>, "Not implemented");
+        return nullptr;
+    }
+    static void FreeNativeArray(JNIEnv* env, TJArray jarray, TNArray* narray, bool commit)
+    {
+        (void)env;
+        (void)jarray;
+        (void)narray;
+        (void)commit;
+        static_assert(always_false<TJArray, TNArray>, "Not implemented");
+    }
 };
 
 template <typename TJArray, typename TNArray, typename... Args>
@@ -97,6 +115,20 @@ struct AJNIShim<jbyteArray, jbyte>
     static void FreeNativeArray(JNIEnv* env, jbyteArray jarray, jbyte* narray, bool commit)
     {
         env->ReleaseByteArrayElements(jarray, narray, commit ? 0 : JNI_ABORT);
+    }
+};
+
+template <>
+struct AJNIShim<jshortArray, jshort>
+{
+    static jshort* GetNativeArray(JNIEnv* env, jshortArray jarray)
+    {
+        return env->GetShortArrayElements(jarray, nullptr);
+    }
+
+    static void FreeNativeArray(JNIEnv* env, jshortArray jarray, jshort* narray, bool commit)
+    {
+        env->ReleaseShortArrayElements(jarray, narray, commit ? 0 : JNI_ABORT);
     }
 };
 

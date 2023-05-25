@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using CodeBinder.Shared;
 
 namespace CodeBinder.JNI
@@ -22,8 +22,8 @@ namespace CodeBinder.JNI
         {
             var parentType = method.Parent!.GetDeclaredSymbol(module)!;
             StringBuilder builder = new StringBuilder();
-            string mappedns = module.Compilation.Conversion.NamespaceMapping.GetMappedNamespace(method.GetContainingNamespace(module),
-                NamespaceNormalization.LowerCase);
+            string mappedns = method.GetMappedNamespaceName(module.Compilation.Conversion.NamespaceMapping,
+                NamespaceNormalization.LowerCase, module);
             builder.Append("Java_").Append(mappedns.Replace('.', '_')).Append("_")
                 .Append(parentType.GetQualifiedName().Replace('.', '_')).Append("_").Append(methodName);
             return builder.ToString();
@@ -87,8 +87,6 @@ namespace CodeBinder.JNI
                     return "jptr";
                 case "System.Boolean":
                     return "jboolean";
-                case "System.Char":
-                    return "jchar";
                 case "System.Byte":
                     return "jbyte";
                 case "System.SByte":
@@ -127,8 +125,6 @@ namespace CodeBinder.JNI
                     return "jLongBox";
                 case "System.Boolean":
                     return "jBooleanBox";
-                case "System.Char":
-                    return "jCharacterBox";
                 case "System.Byte":
                     return "jByteBox";
                 case "System.SByte":

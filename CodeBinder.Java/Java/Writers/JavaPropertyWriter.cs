@@ -2,7 +2,7 @@
 // This file is subject to the MIT license
 using CodeBinder.Shared;
 using CodeBinder.Shared.CSharp;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -193,7 +193,11 @@ namespace CodeBinder.Java
 
         public string UnderlyingFieldName
         {
-            get { return "__" + (Context.Conversion.MethodsLowerCase ? PropertyName.ToJavaLowerCase() : PropertyName); }
+            get
+            {
+                return $"__{(Context.Conversion.MethodCasing == MethodCasing.LowerCamelCase
+                ? PropertyName.ToLowerCamelCase() : PropertyName)}";
+            }
         }
 
         public virtual string GetterName

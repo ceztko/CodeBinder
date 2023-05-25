@@ -2,25 +2,37 @@
 #define CBHANDLEDOBJECT_INTERNAL_HEADER
 #pragma once
 
-@interface CBHandledObjectBase ()
+@interface CBHandledObjectFinalizer ()
     - (id)init;
 
-    - (id)init:(void *)handle;
+    -(void)dealloc;
 
-    - (void)dealloc;
+    -(void)freeHandle:(void*)handle;
 
-    - (void)setHandle:(void *)handle;
+    @property(nonatomic) long handle;
+    -(long)handle;
+    -(void)setHandle:(long)value;
+@end
 
-    - (void)freeHandle:(void *)handle;
+@interface CBFinalizableObject ()
+- (id)init;
 
-    @property(nonatomic,readonly) void * referenceHandle;
+- (void)registerFinalizer :(IObjectFinalizer*)finalizer;
+@end
+
+@interface CBHandledObjectBase ()
+    - (id)init:(void*)handle :(BOOL)handled;
+
+    -(CBHandledObjectFinalizer*)createFinalizer;
+
+    @property(nonatomic,readonly) void* referenceHandle;
     - (void *)referenceHandle;
 @end
 
 @interface CBHandledObject ()
     - (id)init;
 
-    - (id)init:(void *)handle;
+    - (id)init:(void*)handle :(BOOL)handled;
 @end
 
 #endif // CBHANDLEDOBJECT_INTERNAL_HEADER

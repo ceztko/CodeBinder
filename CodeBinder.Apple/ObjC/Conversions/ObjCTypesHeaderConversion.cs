@@ -1,6 +1,6 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using CodeBinder.Shared;
 using System.Linq;
 using System;
@@ -62,7 +62,7 @@ namespace CodeBinder.Apple
             // Forward declared classes
             builder.AppendLine("// Forward declared classes");
             builder.AppendLine();
-            foreach (var type in Compilation.Classes)
+            foreach (var type in Compilation.StorageTypes.Declarations)
             {
                 if (ShouldSkipType(type))
                     continue;
@@ -75,12 +75,12 @@ namespace CodeBinder.Apple
             // Forward declared interfaces
             builder.AppendLine("// Forward declared interfaces");
             builder.AppendLine();
-            foreach (var type in Compilation.Interfaces)
+            foreach (var iface in Compilation.Interfaces.Declarations)
             {
-                if (ShouldSkipType(type))
+                if (ShouldSkipType(iface))
                     continue;
 
-                builder.Append("@protocol").Space().Append(type.GetObjCName(Compilation)).EndOfStatement();
+                builder.Append("@protocol").Space().Append(iface.GetObjCName(Compilation)).EndOfStatement();
             }
         }
 
@@ -89,7 +89,7 @@ namespace CodeBinder.Apple
             // Enums
             builder.AppendLine("// Enums");
             builder.AppendLine();
-            foreach (var enm in Compilation.Enums)
+            foreach (var enm in Compilation.Enums.Declarations)
             {
                 if (ShouldSkipType(enm))
                     continue;
@@ -114,7 +114,7 @@ namespace CodeBinder.Apple
             if (IsInternalHeader)
             {
                 builder.AppendLine("// CBToString for enums");
-                foreach (var enm in Compilation.Enums)
+                foreach (var enm in Compilation.Enums.Declarations)
                 {
                     string enumName = enm.GetObjCName(Compilation);
                     var members = getEnumMembers(enm, true);
@@ -166,7 +166,7 @@ namespace CodeBinder.Apple
             // Callbacks
             builder.AppendLine("// Callbacks");
             builder.AppendLine();
-            foreach (var callback in Compilation.Callbacks)
+            foreach (var callback in Compilation.Delegates.Declarations)
             {
                 string name;
                 AttributeData? bidingAttrib;

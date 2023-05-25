@@ -2,7 +2,7 @@
 // This file is subject to the MIT license
 using CodeBinder.Shared.CSharp;
 using CodeBinder.Shared;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;

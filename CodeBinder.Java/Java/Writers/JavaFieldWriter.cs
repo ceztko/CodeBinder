@@ -1,7 +1,7 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
 using CodeBinder.Shared;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -18,7 +18,7 @@ namespace CodeBinder.Java
         protected override void Write()
         {
             string modifiers = Item.GetJavaModifiersString();
-            if (!string.IsNullOrEmpty(modifiers))
+            if (!modifiers.IsNullOrEmpty())
                 Builder.Append(modifiers).Space();
 
             Builder.Append(Item.Declaration, Context).EndOfStatement();

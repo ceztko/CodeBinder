@@ -13,26 +13,22 @@ namespace CodeBinder.Shared.CSharp
     /// Enum syntax context
     /// </summary>
     /// <remarks>Inherit this class if needed to extend an enum context</remarks>
-    public abstract class CSharpEnumTypeContext<TCompilationContext, TTypeContext>
-        : CSharpEnumTypeContext, ITypeContext<TCompilationContext>
+    public abstract class CSharpEnumTypeContext<TCompilationContext>
+            : CSharpEnumTypeContext, ITypeContext<TCompilationContext>
         where TCompilationContext : CSharpCompilationContext
-        where TTypeContext : CSharpEnumTypeContext
     {
-        public CSharpEnumTypeContext(EnumDeclarationSyntax node)
-            : base(node) { }
+        TCompilationContext _Compilation;
 
-        public new TCompilationContext Compilation => getCSharpCompilationContext();
+        public CSharpEnumTypeContext(EnumDeclarationSyntax node, TCompilationContext compilation)
+            : base(node)
+        {
+            _Compilation = compilation;
+        }
 
-        protected abstract TCompilationContext getCSharpCompilationContext();
-
-        protected override CSharpCompilationContext GetCSharpCompilationContext() => getCSharpCompilationContext();
-
-        protected abstract IEnumerable<TypeConversion<TTypeContext>> getConversions();
-
-        protected override IEnumerable<TypeConversion> GetConversions() => getConversions();
+        public override TCompilationContext Compilation => _Compilation;
     }
 
-    public abstract class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax, CSharpEnumTypeContext>
+    public abstract class CSharpEnumTypeContext : CSharpBaseTypeContext<EnumDeclarationSyntax>
     {
         internal CSharpEnumTypeContext(EnumDeclarationSyntax node)
             : base(node) { }
@@ -41,18 +37,21 @@ namespace CodeBinder.Shared.CSharp
         {
             return Compilation.Conversion.GetConversions(this);
         }
+
+        public override string Name => Node.Identifier.Text;
     }
+
 
     sealed class CSharpEnumTypeContextImpl : CSharpEnumTypeContext
     {
-        public new CSharpCompilationContext Compilation { get; private set; }
+        CSharpCompilationContext _Compilation;
+
+        public override CSharpCompilationContext Compilation => _Compilation;
 
         public CSharpEnumTypeContextImpl(EnumDeclarationSyntax node,  CSharpCompilationContext compilation)
             : base(node)
         {
-            Compilation = compilation;
+            _Compilation = compilation;
         }
-
-        protected override CSharpCompilationContext GetCSharpCompilationContext() => Compilation;
     }
 }

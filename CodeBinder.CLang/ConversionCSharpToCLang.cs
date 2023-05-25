@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CodeBinder.Attributes;
 using CodeBinder.Shared;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 
 namespace CodeBinder.CLang
 {
@@ -32,7 +32,7 @@ namespace CodeBinder.CLang
 
         protected override CLangCompilationContext createCompilationContext()
         {
-            return new CLangCompilationContextImpl(this);
+            return new CLangCompilationContext(this);
         }
 
         public override IReadOnlyList<string> PreprocessorDefinitions

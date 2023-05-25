@@ -9,7 +9,7 @@ using System.Diagnostics;
 using System;
 using System.Linq;
 using CodeBinder.Attributes;
-using CodeBinder.Util;
+using CodeBinder.Utils;
 using CodeBinder.Apple.Attributes;
 
 namespace CodeBinder.Apple
@@ -251,7 +251,6 @@ namespace CodeBinder.Apple
         {
             get
             {
-                // Try first look for replacements
                 var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
                 return methodSymbol.GetObjCName(ObjCSymbolUsage.Declaration, Context);
             }

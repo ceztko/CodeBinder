@@ -46,7 +46,6 @@ private:
 };
 
 BJ2NImpl<_jBooleanBox> BJ2N(JNIEnv* env, jBooleanBox box);
-BJ2NImpl<_jCharacterBox> BJ2N(JNIEnv* env, jCharacterBox box);
 BJ2NImpl<_jByteBox> BJ2N(JNIEnv* env, jByteBox box);
 BJ2NImpl<_jShortBox> BJ2N(JNIEnv* env, jShortBox box);
 BJ2NImpl<_jIntegerBox> BJ2N(JNIEnv* env, jIntegerBox box);
@@ -59,12 +58,6 @@ template <typename TNative>
 BJ2NImpl<_jBooleanBox, TNative> BJ2N(JNIEnv* env, jBooleanBox box)
 {
     return BJ2NImpl<_jBooleanBox, TNative>(env, box);
-}
-
-template <typename TNative>
-BJ2NImpl<_jCharacterBox, TNative> BJ2N(JNIEnv* env, jCharacterBox box)
-{
-    return BJ2NImpl<_jCharacterBox, TNative>(env, box);
 }
 
 template <typename TNative>

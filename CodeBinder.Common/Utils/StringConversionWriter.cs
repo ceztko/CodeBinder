@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Util
+namespace CodeBinder.Utils
 {
     public sealed class StringConversionWriter : ConversionWriter
     {

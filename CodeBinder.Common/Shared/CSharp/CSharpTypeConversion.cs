@@ -1,5 +1,7 @@
 ﻿// Copyright(c) 2020 Francesco Pretto
 // This file is subject to the MIT license
+using CodeBinder.Attributes;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,7 +13,7 @@ namespace CodeBinder.Shared.CSharp
     /// </summary>
     /// <remarks>Inherit this if needed to specialize the compilation context</remarks>
     public abstract class CSharpTypeConversion<TTypeContext, TCompilationContext, TLanguageConversion> : TypeConversion<TTypeContext, TCompilationContext, TLanguageConversion>
-        where TTypeContext : CSharpBaseTypeContext,ITypeContext<TCompilationContext>
+        where TTypeContext : CSharpMemberTypeContext,ITypeContext<TCompilationContext>
         where TCompilationContext : CSharpCompilationContext
         where TLanguageConversion: CSharpLanguageConversion
     {
@@ -19,6 +21,18 @@ namespace CodeBinder.Shared.CSharp
             : base(context, conversion) { }
 
         public override TCompilationContext Compilation => (Context as ITypeContext<TCompilationContext>).Compilation;
+
+        protected IReadOnlyList<string> GetImports(SyntaxNode node)
+        {
+            var ret = new List<string>();
+            var attributes = node.GetAttributes(this);
+            foreach (var attribute in attributes)
+            {
+                if (attribute.IsAttribute<ImportAttribute>())
+                    ret.Add(attribute.GetConstructorArgument<string>(0));
+            }
+            return ret;
+        }
     }
 
     /// <summary>
@@ -26,7 +40,7 @@ namespace CodeBinder.Shared.CSharp
     /// </summary>
     /// <remarks>Inherit this if not needed to specialize the compilation context</remarks>
     public abstract class CSharpTypeConversion<TTypeContext, TLanguageConversion> : CSharpTypeConversion<TTypeContext, CSharpCompilationContext, TLanguageConversion>
-        where TTypeContext : CSharpBaseTypeContext
+        where TTypeContext : CSharpMemberTypeContext
         where TLanguageConversion : CSharpLanguageConversion
     {
         protected CSharpTypeConversion(TTypeContext context, TLanguageConversion conversion)

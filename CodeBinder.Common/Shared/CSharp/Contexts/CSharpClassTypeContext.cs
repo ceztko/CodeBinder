@@ -11,23 +11,19 @@ namespace CodeBinder.Shared.CSharp
     /// Class syntax context
     /// </summary>
     /// <remarks>Inherit this class if needed to extend a class context</remarks>
-    public abstract class CSharpClassTypeContext<TCompilationContext, TTypeContext>
-        : CSharpClassTypeContext, ITypeContext<TCompilationContext>
+    public abstract class CSharpClassTypeContext<TCompilationContext>
+            : CSharpClassTypeContext, ITypeContext<TCompilationContext>
         where TCompilationContext : CSharpCompilationContext
-        where TTypeContext : CSharpClassTypeContext
     {
-        public CSharpClassTypeContext(ClassDeclarationSyntax node)
-            : base(node) { }
+        TCompilationContext _Compilation;
 
-        public new TCompilationContext Compilation => getCSharpCompilationContext();
+        public CSharpClassTypeContext(ClassDeclarationSyntax node, TCompilationContext compilation)
+            : base(node)
+        {
+            _Compilation = compilation;
+        }
 
-        protected abstract TCompilationContext getCSharpCompilationContext();
-
-        protected override CSharpCompilationContext GetCSharpCompilationContext() => getCSharpCompilationContext();
-
-        protected abstract IEnumerable<TypeConversion<TTypeContext>> getConversions();
-
-        protected override IEnumerable<TypeConversion> GetConversions() => getConversions();
+        public override TCompilationContext Compilation => _Compilation;
     }
 
     public abstract class CSharpClassTypeContext : CSharpTypeContext<ClassDeclarationSyntax>
@@ -43,14 +39,14 @@ namespace CodeBinder.Shared.CSharp
 
     sealed class CSharpClassTypeContextImpl : CSharpClassTypeContext
     {
-        public new CSharpCompilationContext Compilation { get; private set; }
+        CSharpCompilationContext _Compilation;
 
-        public CSharpClassTypeContextImpl(ClassDeclarationSyntax node, CSharpCompilationContext context)
+        public override CSharpCompilationContext Compilation => _Compilation;
+
+        public CSharpClassTypeContextImpl(ClassDeclarationSyntax node, CSharpCompilationContext compilation)
             : base(node)
         {
-            Compilation = context;
+            _Compilation = compilation;
         }
-
-        protected override CSharpCompilationContext GetCSharpCompilationContext() => Compilation;
     }
 }

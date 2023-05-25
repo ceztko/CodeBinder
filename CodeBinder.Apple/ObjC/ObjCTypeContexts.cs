@@ -10,19 +10,14 @@ using System.Text;
 
 namespace CodeBinder.Apple
 {
-    class ObjCClassContext : CSharpClassTypeContext<ObjCCompilationContext, ObjCClassContext>
+    class ObjCClassContext : CSharpClassTypeContext<ObjCCompilationContext>
     {
-        public new ObjCCompilationContext Compilation { get; private set; }
-
         public ObjCClassContext(ClassDeclarationSyntax node, ObjCCompilationContext compilation)
-            : base(node)
+            : base(node, compilation)
         {
-            Compilation = compilation;
         }
 
-        protected override ObjCCompilationContext getCSharpCompilationContext() => Compilation;
-
-        protected override IEnumerable<TypeConversion<ObjCClassContext>> getConversions()
+        protected override IEnumerable<TypeConversion<ObjCClassContext>> GetConversions()
         {
             if (Node.HasAccessibility(Accessibility.Public, Compilation))
             {
@@ -35,24 +30,17 @@ namespace CodeBinder.Apple
                 yield return new ObjCClassConversionHeader(this, Compilation.Conversion, ObjCHeaderType.InternalOnly);
                 yield return new ObjCClassConversionImplementation(this, Compilation.Conversion, ObjImplementationType.InternalType);
             }
-
-
         }
     }
 
-    class ObjCStructContext : CSharpStructTypeContext<ObjCCompilationContext, ObjCStructContext>
+    class ObjCStructContext : CSharpStructTypeContext<ObjCCompilationContext>
     {
-        public new ObjCCompilationContext Compilation { get; private set; }
-
         public ObjCStructContext(StructDeclarationSyntax node, ObjCCompilationContext compilation)
-            : base(node)
+            : base(node, compilation)
         {
-            Compilation = compilation;
         }
 
-        protected override ObjCCompilationContext getCSharpCompilationContext() => Compilation;
-
-        protected override IEnumerable<TypeConversion<ObjCStructContext>> getConversions()
+        protected override IEnumerable<TypeConversion<ObjCStructContext>> GetConversions()
         {
             if (Node.HasAccessibility(Accessibility.Public, Compilation))
             {
@@ -68,19 +56,14 @@ namespace CodeBinder.Apple
         }
     }
 
-    class ObjCInterfaceContext : CSharpInterfaceTypeContext<ObjCCompilationContext, ObjCInterfaceContext>
+    class ObjCInterfaceContext : CSharpInterfaceTypeContext<ObjCCompilationContext>
     {
-        public new ObjCCompilationContext Compilation { get; private set; }
-
         public ObjCInterfaceContext(InterfaceDeclarationSyntax node, ObjCCompilationContext compilation)
-            : base(node)
+            : base(node, compilation)
         {
-            Compilation = compilation;
         }
 
-        protected override ObjCCompilationContext getCSharpCompilationContext() => Compilation;
-
-        protected override IEnumerable<TypeConversion<ObjCInterfaceContext>> getConversions()
+        protected override IEnumerable<TypeConversion<ObjCInterfaceContext>> GetConversions()
         {
             yield return new ObjCInterfaceConversionHeader(this, Compilation.Conversion);
         }

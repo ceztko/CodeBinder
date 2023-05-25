@@ -7,7 +7,7 @@ using System.Linq;
 using CodeBinder.Shared;
 using Microsoft.CodeAnalysis;
 
-namespace CodeBinder.Util
+namespace CodeBinder.Utils
 {
     internal static class CompilationOuput
     {
