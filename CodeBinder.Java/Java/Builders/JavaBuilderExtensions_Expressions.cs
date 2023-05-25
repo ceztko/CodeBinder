@@ -76,7 +76,7 @@ namespace CodeBinder.Java
             {
                 case SyntaxKind.AsExpression:
                 {
-                    builder.Append("CodeBinder.Java.BinderUtils").Dot().Append("as").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context).Dot().Append("class");
+                    builder.Append("BinderUtils").Dot().Append("as").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context).Dot().Append("class");
                     return builder;
                 }
                 case SyntaxKind.EqualsExpression:

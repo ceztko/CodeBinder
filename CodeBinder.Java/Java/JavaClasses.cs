@@ -225,7 +225,8 @@ public class HandledObjectBase extends FinalizableObject
     {
         if (obj == null)
             return false;
-        HandledObjectBase other = CodeBinder.Java.BinderUtils.as(obj, HandledObjectBase.class);
+
+        HandledObjectBase other = BinderUtils.as(obj, HandledObjectBase.class);
         return this.getReferenceHandle() == other.getReferenceHandle();
     }
     
