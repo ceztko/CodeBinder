@@ -19,6 +19,9 @@ public class BinderUtils
     static
     {
         String versionStr = System.getProperty(""java.specification.version"");
+        if (versionStr.startsWith(""1.""))
+            versionStr = versionStr.substring(2);
+
         int version = Integer.parseInt(versionStr);
         if (version >= 9)
         {
