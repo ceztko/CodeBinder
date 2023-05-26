@@ -252,9 +252,9 @@ export class HandledObjectBase extends FinalizableObject
         this.#_handle = handle;
         if (handled)
         {
-            let finalizer = createFinalizer();
-            finalizer.handle = handle;
-            registerFinalizer(finalizer);
+            let finalizer = this.createFinalizer();
+            finalizer!.handle = handle;
+            super.registerFinalizer(finalizer!);
         }
     }
 
