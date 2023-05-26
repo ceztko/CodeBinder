@@ -65,7 +65,7 @@ namespace CodeBinder.Apple
             WriteReturnType();
             Builder.Append(MethodName);
             WriteParameters();
-            WriteMethodBody();
+            writeMethodBody();
         }
 
         protected virtual void WriteParameters()
@@ -103,7 +103,22 @@ namespace CodeBinder.Apple
             Builder.Append(type.GetObjCType(kind, Context));
         }
 
-        void WriteMethodBody()
+        protected void WriteOptionalParameters(int optionalIndex)
+        {
+            for (int i = 0; i < Item.ParameterList.Parameters.Count; i++)
+            {
+                var parameter = Item.ParameterList.Parameters[i];
+                if (i > 0)
+                    Builder.Space().Colon();
+
+                if (i < optionalIndex)
+                    Builder.Append(parameter.Identifier.Text);
+                else
+                    Builder.Append(parameter.Default!.Value, Context);
+            }
+        }
+
+        void writeMethodBody()
         {
             if (FileType.IsHeader())
             {
@@ -220,17 +235,7 @@ namespace CodeBinder.Apple
                 using (Builder.Bracketed(false))
                 {
                     Builder.Append("self").Space().Append(MethodName).Colon();
-                    for (int i = 0; i < Item.ParameterList.Parameters.Count; i++)
-                    {
-                        var parameter = Item.ParameterList.Parameters[i];
-                        if (i > 0)
-                            Builder.Space().Colon();
-
-                        if (i < _optionalIndex)
-                            Builder.Append(parameter.Identifier.Text);
-                        else
-                            Builder.Append(parameter.Default!.Value, Context);
-                    }
+                    WriteOptionalParameters(_optionalIndex);
                 }
 
                 Builder.EndOfStatement();
@@ -276,9 +281,14 @@ namespace CodeBinder.Apple
 
     class ObjCConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
     {
-        public ObjCConstructorWriter(ConstructorDeclarationSyntax method,
+        int _optionalIndex;
+
+        public ObjCConstructorWriter(ConstructorDeclarationSyntax method, int optionalIndex,
             ObjCCompilationContext context, ObjCFileType fileType)
-            : base(method, context, fileType) { }
+            : base(method, context, fileType)
+        {
+            _optionalIndex = optionalIndex;
+        }
 
         protected override void WriteParameters()
         {
@@ -305,42 +315,69 @@ namespace CodeBinder.Apple
             }
             else
             {
-                // https://stackoverflow.com/a/7185530/213871
-                Builder.Append("self = ");
-                if (Item.Initializer == null)
+                if (_optionalIndex >= 0)
                 {
-                    Builder.Append("[super init]").EndOfStatement();
+                    Builder.Append("return").Space();
+                    using (Builder.Bracketed(false))
+                    {
+                        Builder.Append("self").Space().Append("init").Colon();
+                        WriteOptionalParameters(_optionalIndex);
+                    }
+
+                    Builder.EndOfStatement();
                 }
                 else
                 {
-                    using (Builder.Bracketed(false))
+                    // https://stackoverflow.com/a/7185530/213871
+                    Builder.Append("self = ");
+                    if (Item.Initializer == null)
                     {
-                        string selfIdentifier;
-                        switch (Item.Initializer.ThisOrBaseKeyword.Kind())
-                        {
-                            case SyntaxKind.ThisKeyword:
-                                selfIdentifier = "self";
-                                break;
-                            case SyntaxKind.BaseKeyword:
-                                selfIdentifier = "super";
-                                break;
-                            default:
-                                throw new Exception();
-                        }
-
-                        Builder.Append(selfIdentifier).Space().Append("init").Append(Item.Initializer.ArgumentList.Arguments, false, Context);
+                        Builder.Append("[super init]").EndOfStatement();
                     }
-                    Builder.EndOfStatement();
+                    else
+                    {
+                        using (Builder.Bracketed(false))
+                        {
+                            string selfIdentifier;
+                            switch (Item.Initializer.ThisOrBaseKeyword.Kind())
+                            {
+                                case SyntaxKind.ThisKeyword:
+                                    selfIdentifier = "self";
+                                    break;
+                                case SyntaxKind.BaseKeyword:
+                                    selfIdentifier = "super";
+                                    break;
+                                default:
+                                    throw new Exception();
+                            }
+
+                            Builder.Append(selfIdentifier).Space().Append("init").Append(Item.Initializer.ArgumentList.Arguments, false, Context);
+                        }
+                        Builder.EndOfStatement();
+                    }
+                    Builder.Append("if (self == nil)").AppendLine()
+                        .IndentChild().Append("return nil").EndOfStatement().Close();
                 }
-                Builder.Append("if (self == nil)").AppendLine()
-                    .IndentChild().Append("return nil").EndOfStatement().Close();
             }
         }
 
         protected override void WriteMethodBodyPostfixInternal()
         {
-            if (!IsStatic)
+            if (!IsStatic && _optionalIndex == -1)
                 Builder.Append("return self").EndOfStatement();
+        }
+
+        public override bool DoWriteMethodBody => _optionalIndex == -1;
+
+        public override int ParameterCount
+        {
+            get
+            {
+                if (_optionalIndex == -1)
+                    return base.ParameterCount;
+
+                return _optionalIndex;
+            }
         }
 
         public override string MethodName

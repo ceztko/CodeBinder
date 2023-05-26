@@ -203,11 +203,11 @@ namespace CodeBinder.Apple
             switch (kind)
             {
                 case SyntaxKind.ConstructorDeclaration:
-                    return new[] { new ObjCConstructorWriter((ConstructorDeclarationSyntax)member, context, fileType) };
+                    return getConstructorWriters((ConstructorDeclarationSyntax)member, context, fileType);
                 case SyntaxKind.DestructorDeclaration:
                     return new[] { new ObjCDestructorWriter((DestructorDeclarationSyntax)member, context, fileType) };
                 case SyntaxKind.MethodDeclaration:
-                    return GetWriters((MethodDeclarationSyntax)member, context, fileType);
+                    return getMethodWriters((MethodDeclarationSyntax)member, context, fileType);
                 case SyntaxKind.PropertyDeclaration:
                     return GetWriters((PropertyDeclarationSyntax)member, context, fileType);
                 case SyntaxKind.IndexerDeclaration:
@@ -235,7 +235,7 @@ namespace CodeBinder.Apple
             return list;
         }
 
-        static IEnumerable<IObjCCodeWriter> GetWriters(MethodDeclarationSyntax method, ObjCCompilationContext context, ObjCFileType fileType)
+        static IEnumerable<IObjCCodeWriter> getMethodWriters(MethodDeclarationSyntax method, ObjCCompilationContext context, ObjCFileType fileType)
         {
             if (method.IsNative(context))
                 yield break;
@@ -253,6 +253,20 @@ namespace CodeBinder.Apple
             }
 
             yield return new MethodWriter(method, -1, context, fileType);
+        }
+
+        static IEnumerable<IObjCCodeWriter> getConstructorWriters(ConstructorDeclarationSyntax method, ObjCCompilationContext context, ObjCFileType fileType)
+        {
+            for (int i = method.ParameterList.Parameters.Count - 1; i >= 0; i--)
+            {
+                var parameter = method.ParameterList.Parameters[i];
+                if (parameter.Default == null)
+                    break;
+
+                yield return new ObjCConstructorWriter(method, i, context, fileType);
+            }
+
+            yield return new ObjCConstructorWriter(method, -1, context, fileType);
         }
 
         bool ShouldEmit(MemberDeclarationSyntax member)

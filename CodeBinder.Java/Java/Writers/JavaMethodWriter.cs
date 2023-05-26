@@ -279,7 +279,6 @@ namespace CodeBinder.Java
         int _optionalIndex;
         bool _isStatic;
 
-
         public ConstructorWriter(ConstructorDeclarationSyntax method, int optionalIndex, JavaCodeConversionContext context)
             : base(method, context)
         {
