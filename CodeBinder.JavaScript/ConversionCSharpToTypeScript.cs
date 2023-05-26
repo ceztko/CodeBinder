@@ -35,15 +35,46 @@ public class ConversionCSharpToTypeScript : CSharpLanguageConversion<TypeScriptC
         get { return false; }
     }
 
-    public override MethodCasing MethodCasing => MethodCasing.LowerCamelCase;
-
-    public override OverloadFeature? OverloadFeatures => OverloadFeature.None;
-
-    public override IEnumerable<IConversionWriter> DefaultConversions
+    internal string TypeScriptModuleLoadSuffix
     {
         get
         {
-            yield return new TypeScriptCodeBinderConversion();
+            if (GenerationFlags.HasFlag(TypeScriptGenerationFlags.CommonJSCompat))
+                return string.Empty;
+            else
+                return ".mjs";
         }
     }
+
+    internal string TypeScriptSourceExtension
+    {
+        get
+        {
+            if (GenerationFlags.HasFlag(TypeScriptGenerationFlags.CommonJSCompat))
+                return "ts";
+            else
+                return "mts";
+        }
+    }
+
+    public TypeScriptGenerationFlags GenerationFlags { get; set; }
+
+    public override MethodCasing MethodCasing => MethodCasing.LowerCamelCase;
+
+    public override OverloadFeature? OverloadFeatures => OverloadFeature.None;
+}
+
+[Flags]
+public enum TypeScriptGenerationFlags
+{
+    None = 0,
+    /// <summary>
+    /// Generate TypeScript code that can be safely transpiled to a CommonJS module
+    /// </summary>
+    /// <remarks>The code iteself will still use ES Module syntax, but it
+    /// will avoid use of constructs like "import.meta". Also it will
+    /// emit ".ts" files instead of ".mts", allowing to load modules
+    /// without extension in import directives
+    /// </remarks>
+    CommonJSCompat = 1,
 }

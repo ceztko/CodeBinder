@@ -1,28 +1,27 @@
 ﻿// SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 namespace CodeBinder.JavaScript.TypeScript;
 
 /// <summary>
 /// This class will write a small preamble with types to exported in a typescript namespace
 /// </summary>
-class TypeScriptCodeBinderConversion : TypeScriptConversionWriterBase
+class TypeScriptCodeBinderConversion : TypeScriptConversionWriter
 {
-    public TypeScriptCodeBinderConversion()
+    public TypeScriptCodeBinderConversion(TypeScriptCompilationContext context)
+        : base(context)
     {
     }
 
     protected override string GetFileName()
     {
-        return $"{ConversionCSharpToTypeScript.CodeBinderNamespace}.mts";
+        return $"{ConversionCSharpToTypeScript.CodeBinderNamespace}.{Context.Conversion.TypeScriptSourceExtension}";
     }
 
     protected override void write(CodeBuilder builder)
     {
-        builder.AppendLine($$"""
-import napi_ from './NAPIENLibPdf.mjs';
+        builder.AppendLine($"""
+import napi_ from './NAPIENLibPdf{Context.Conversion.TypeScriptModuleLoadSuffix}';
 let napi: any = napi_;
 """);
         builder.AppendLine();

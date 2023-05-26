@@ -5,11 +5,11 @@ namespace CodeBinder.JavaScript.TypeScript;
 
 abstract class TypeScriptConversionWriter : ConversionWriter
 {
-    public ConversionCSharpToTypeScript Conversion { get; private set; }
+    public TypeScriptCompilationContext Context { get; private set; }
 
-    public TypeScriptConversionWriter(ConversionCSharpToTypeScript conversion)
+    public TypeScriptConversionWriter(TypeScriptCompilationContext context)
     {
-        Conversion = conversion;
+        Context = context;
     }
 }
 

@@ -5,26 +5,24 @@ using System.Linq;
 
 namespace CodeBinder.JavaScript.TypeScript;
 
-class TypeScriptLibraryConversion : TypeScriptConversionWriterBase
+class TypeScriptLibraryConversion : TypeScriptConversionWriter
 {
-    public TypeScriptCompilationContext Context { get; private set; }
-
     public TypeScriptLibraryConversion(TypeScriptCompilationContext context)
+        : base(context)
     {
-        Context = context;
     }
 
     protected override string GetFileName()
     {
-        return $"{Context.LibraryName}.mts";
+        return $"{Context.LibraryName}.{Context.Conversion.TypeScriptSourceExtension}";
     }
 
     protected override void write(CodeBuilder builder)
     {
         builder.AppendLine();
         builder.AppendLine($$"""
-import { {{ string.Join(", ", TypeScriptCodeBinderClasses.Classes) }} } from './CodeBinder.mjs';
-import napi_ from './NAPIENLibPdf.mjs';
+import { {{ string.Join(", ", TypeScriptCodeBinderClasses.Classes) }} } from './CodeBinder{{ Context.Conversion.TypeScriptModuleLoadSuffix }}';
+import napi_ from './NAPIENLibPdf{{Context.Conversion.TypeScriptModuleLoadSuffix}}';
 let napi: any = napi_;
 """);
         builder.AppendLine();

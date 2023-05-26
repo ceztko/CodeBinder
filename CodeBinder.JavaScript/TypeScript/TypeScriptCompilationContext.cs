@@ -16,35 +16,8 @@ public class TypeScriptCompilationContext : CSharpCompilationContext<ConversionC
     {
         get
         {
-            yield return new TypeScriptVerbatimConversionWriter($"NAPI{LibraryName}.mts", null,
-$$"""
-import * as proc from 'node:process';
-import * as CodeBinder from './CodeBinder.mjs';
-
-import { fileURLToPath } from 'node:url';
-
-let shext = 'so';
-switch (proc.platform)
-{
-	case 'win32':
-	{
-		shext = 'dll'
-		break;
-	}
-	case 'darwin':
-	{
-		shext = 'dylib'
-		break;
-	}
-}
-
-const mod = { exports: {} };
-// https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/65252
-(proc as any).dlopen(mod, fileURLToPath(new URL(`{{LibraryName}}.${shext}`, import.meta.url)));
-let napi = (mod.exports as any)({{ConversionCSharpToTypeScript.CodeBinderNamespace}});
-export default napi;
-""");
-
+            yield return new TypeScriptCodeBinderConversion(this);
+            yield return new TypeScriptNAPIWrapperWriter(this);
             yield return new TypeScriptLibraryConversion(this);
         }
     }

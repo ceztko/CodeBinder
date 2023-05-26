@@ -258,7 +258,7 @@ export class HandledObjectBase extends FinalizableObject
         }
     }
 
-    protected createFinalizer(): HandledObjectFinalizer
+    protected createFinalizer(): HandledObjectFinalizer | null
     {
         throw new Error(`Not implemented`);
     }
