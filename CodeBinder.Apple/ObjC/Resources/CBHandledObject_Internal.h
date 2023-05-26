@@ -2,6 +2,8 @@
 #define CBHANDLEDOBJECT_INTERNAL_HEADER
 #pragma once
 
+#import "../Support/CBHandledObject.h"
+
 @interface CBHandledObjectFinalizer ()
     - (id)init;
 
@@ -9,15 +11,15 @@
 
     -(void)freeHandle:(void*)handle;
 
-    @property(nonatomic) long handle;
-    -(long)handle;
-    -(void)setHandle:(long)value;
+    @property(nonatomic) void* handle;
+    -(void*)handle;
+    -(void)setHandle:(void*)value;
 @end
 
 @interface CBFinalizableObject ()
 - (id)init;
 
-- (void)registerFinalizer :(IObjectFinalizer*)finalizer;
+- (void)registerFinalizer :(id<CBIObjectFinalizer>)finalizer;
 @end
 
 @interface CBHandledObjectBase ()

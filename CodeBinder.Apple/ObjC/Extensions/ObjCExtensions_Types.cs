@@ -593,6 +593,36 @@ namespace CodeBinder.Apple
                     objcTypeKind = ObjCTypeKind.Class;
                     return true;
                 }
+                case "CodeBinder.IObjectFinalizer":
+                {
+                    objcTypeKind = ObjCTypeKind.Protocol;
+                    knownObjCType = "CBIObjectFinalizer";
+                    return true;
+                }
+                case "CodeBinder.HandledObjectFinalizer":
+                {
+                    objcTypeKind = ObjCTypeKind.Class;
+                    knownObjCType = "CBHandledObjectFinalizer";
+                    return true;
+                }
+                case "CodeBinder.FinalizableObject":
+                {
+                    objcTypeKind = ObjCTypeKind.Class;
+                    knownObjCType = "CBFinalizableObject";
+                    return true;
+                }
+                case "CodeBinder.HandledObjectBase":
+                {
+                    objcTypeKind = ObjCTypeKind.Class;
+                    knownObjCType = "CBHandledObjectBase";
+                    return true;
+                }
+                case "CodeBinder.HandledObject<BaseT>":
+                {
+                    objcTypeKind = ObjCTypeKind.Class;
+                    knownObjCType = "CBHandledObject";
+                    return true;
+                }
                 case "System.IDisposable":
                 {
                     knownObjCType = "CBIDisposable";
@@ -652,24 +682,6 @@ namespace CodeBinder.Apple
                     knownObjCType = "void";
                     return true;
 
-                }
-                case "CodeBinder.HandledObjectFinalizer":
-                {
-                    objcTypeKind = ObjCTypeKind.Class;
-                    knownObjCType = "CBHandledObjectFinalizer";
-                    return true;
-                }
-                case "CodeBinder.HandledObjectBase":
-                {
-                    objcTypeKind = ObjCTypeKind.Class;
-                    knownObjCType = "CBHandledObjectBase";
-                    return true;
-                }
-                case "CodeBinder.HandledObject<BaseT>":
-                {
-                    objcTypeKind = ObjCTypeKind.Class;
-                    knownObjCType = "CBHandledObject";
-                    return true;
                 }
             }
 

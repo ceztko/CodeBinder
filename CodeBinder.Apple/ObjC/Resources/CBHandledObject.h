@@ -6,10 +6,10 @@
 #import <Foundation/Foundation.h>
 #import "CBHandleRef.h"
 
-OBJC_CODEBINDER_API @protocol IObjectFinalizer
+OBJC_CODEBINDER_API @protocol CBIObjectFinalizer
 @end
 
-OBJC_CODEBINDER_API @interface CBHandledObjectFinalizer : NSObject<IObjectFinalizer>
+OBJC_CODEBINDER_API @interface CBHandledObjectFinalizer : NSObject<CBIObjectFinalizer>
 {
     @private void* _handle;
 }

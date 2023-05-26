@@ -371,7 +371,7 @@ namespace CodeBinder.Apple
             else
             {
                 if (method.MethodKind == MethodKind.Constructor)
-                    return "constructor";
+                    return "init";
 
                 return context.Conversion.MethodCasing == MethodCasing.LowerCamelCase ? method.Name.ToLowerCamelCase() : method.Name;
             }

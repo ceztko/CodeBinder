@@ -22,12 +22,12 @@
         @throw [[CBException alloc]init];
     }
 
-    -(long)handle
+    -(void*)handle
     {
         return _handle;
     }
 
-    -(void)setHandle:(long)value
+    -(void)setHandle:(void*)value
     {
         _handle = value;
     }
@@ -45,7 +45,7 @@
     }
 
 
-    - (void)registerFinalizer :(IObjectFinalizer*)finalizer
+    - (void)registerFinalizer :(id<CBIObjectFinalizer>)finalizer
     {
         [_finalizers addObject:finalizer];
     }
