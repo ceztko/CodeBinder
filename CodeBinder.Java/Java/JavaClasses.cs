@@ -277,7 +277,8 @@ public abstract class HandledObjectFinalizer implements IObjectFinalizer
     // For retrocompatibility
     protected void finalize() throws Throwable
     {
-        freeHandle(handle);
+        if (!BinderUtils.isCleanerAvaiable())
+            freeHandle(handle);
     }
 
     public void run()
