@@ -6,7 +6,7 @@ namespace CodeBinder
 {
 #pragma warning disable IDE1006 // Naming Styles
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe ref struct cbstring
+    public unsafe struct cbstring
 #pragma warning restore IDE1006 // Naming Styles
     {
         const uint OwnsDataFlags32 = 1u << 31;

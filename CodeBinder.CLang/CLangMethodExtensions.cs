@@ -414,6 +414,8 @@ namespace CodeBinder.CLang
 
                     return "void*";
                 }
+                case "CodeBinder.cbstring":
+                    return "cbstring";
                 case "System.Boolean":
                     // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
                     return "cbbool";
