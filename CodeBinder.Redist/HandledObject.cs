@@ -52,22 +52,23 @@ namespace CodeBinder
     public class HandledObjectBase : FinalizableObject
     {
         IntPtr _handle;
+        bool _handled;
 
         protected HandledObjectBase(IntPtr handle, bool handled)
         {
             _handle = handle;
-
-            if (handled)
-            {
-                var finalizer = CreateFinalizer();
-                finalizer.Handle = handle;
-                RegisterFinalizer(finalizer);
-            }
+            _handled = handled;
         }
 
-        protected virtual HandledObjectFinalizer CreateFinalizer()
+        ~HandledObjectBase()
         {
-            throw new NotImplementedException("The finalizer must be supplied");
+            if (_handled)
+                FreeHandle(_handle);
+        }
+
+        protected virtual void FreeHandle(IntPtr handle)
+        {
+            throw new NotImplementedException();
         }
 
         /// <summary>
