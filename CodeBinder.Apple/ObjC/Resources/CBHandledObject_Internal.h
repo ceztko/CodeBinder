@@ -25,7 +25,9 @@
 @interface CBHandledObjectBase ()
     - (id)init:(void*)handle :(BOOL)handled;
 
-    -(CBHandledObjectFinalizer*)createFinalizer;
+    -(void)dealloc;
+
+    -(void)freeHandle:(void*)handle;
 
     @property(nonatomic,readonly) void* referenceHandle;
     - (void *)referenceHandle;

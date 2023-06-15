@@ -40,13 +40,14 @@
         if (self == nil)
             return nil;
 
-        _finalizers = [[NSMutableArray alloc] init];
         return self;
     }
 
-
     - (void)registerFinalizer :(id<CBIObjectFinalizer>)finalizer
     {
+        if (_finalizers == nil)
+            _finalizers = [[NSMutableArray alloc] init];
+
         [_finalizers addObject:finalizer];
     }
 @end
@@ -59,17 +60,17 @@
             return nil;
 
         _handle = handle;
-        if (handled)
-        {
-            CBHandledObjectFinalizer* finalizer = [self createFinalizer];
-            finalizer.handle = handle;
-            [self registerFinalizer:finalizer];
-        }
-
+        _handled = handled;
         return self;
     }
 
-    -(CBHandledObjectFinalizer*)createFinalizer
+    - (void)dealloc
+    {
+        if (_handled)
+            [self freeHandle:_handle];
+    }
+
+    - (void)freeHandle:(void *)handle
     {
         @throw[NSException exceptionWithName:@"Not implemented" reason:nil userInfo:nil];
     }

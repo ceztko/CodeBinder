@@ -24,6 +24,7 @@ OBJC_CODEBINDER_API @interface CBFinalizableObject : NSObject
 OBJC_CODEBINDER_API @interface CBHandledObjectBase : CBFinalizableObject
 {
     @private void* _handle;
+    @private BOOL _handled;
 }
     - (BOOL)isEqualTo:(NSObject*)obj;
 
