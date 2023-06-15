@@ -54,6 +54,18 @@ namespace CodeBinder.Java
             if (method.GetCSharpModifiers().Contains(SyntaxKind.PartialKeyword) && method.Body == null)
                 yield break;
 
+            IMethodSymbol symbol;
+            if (method.Identifier.Text == "FreeHandle")
+            {
+                symbol = method.GetDeclaredSymbol<IMethodSymbol>(context);
+                if (symbol.OverriddenMethod?.ContainingType.GetFullName() == "CodeBinder.HandledObjectBase")
+                {
+                    yield return new FinalizeMethodWriter(symbol.ContainingType);
+                    yield return new CreateClassFinalizerWriter(method.Body!, symbol.ContainingType, context);
+                    yield break;
+                }
+            }
+
             for (int i = method.ParameterList.Parameters.Count - 1; i >= 0; i--)
             {
                 var parameter = method.ParameterList.Parameters[i];
@@ -78,6 +90,53 @@ namespace CodeBinder.Java
             }
 
             yield return new ConstructorWriter(method, -1, context);
+        }
+
+        class FinalizeMethodWriter : CodeWriter
+        {
+            ITypeSymbol _finalizableType;
+
+            public FinalizeMethodWriter(ITypeSymbol finalizableType)
+            {
+                _finalizableType = finalizableType;
+            }
+
+            protected override void Write()
+            {
+                Builder.AppendLine($$"""
+protected HandledObjectFinalizer createFinalizer()
+{
+    return new {{_finalizableType.Name}}Finalizer();
+}
+""");
+            }
+        }
+
+        class CreateClassFinalizerWriter : CodeWriter
+        {
+            BlockSyntax _block;
+            ITypeSymbol _finalizableType;
+            JavaCodeConversionContext _context;
+
+            public CreateClassFinalizerWriter(BlockSyntax block, ITypeSymbol finalizableType, JavaCodeConversionContext context)
+            {
+                _block = block;
+                _finalizableType = finalizableType;
+                _context = context;
+            }
+
+            protected override void Write()
+            {
+                Builder.AppendLine($"static class {_finalizableType.Name}Finalizer extends HandledObjectFinalizer");
+                using (Builder.Block())
+                {
+                    Builder.AppendLine("public void freeHandle(long handle)");
+                    using (Builder.Block())
+                    {
+                        Builder.Append(_block, _context, true).AppendLine();
+                    }
+                }
+            }
         }
     }
 }

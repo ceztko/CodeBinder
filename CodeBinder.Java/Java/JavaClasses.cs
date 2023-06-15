@@ -164,16 +164,21 @@ public abstract class FinalizableObject
 
     protected FinalizableObject()
     {
-        if (!BinderUtils.isCleanerAvaiable())
-            _finalizers = new ArrayList<IObjectFinalizer>();
     }
 
     protected void registerFinalizer(IObjectFinalizer finalizer)
     {
-        if (_finalizers == null)
+        if (BinderUtils.isCleanerAvaiable())
+        {
             BinderUtils.registerForFinalization(this, finalizer);
+        }
         else
+        {
+            if (_finalizers == null)
+                _finalizers = new ArrayList<IObjectFinalizer>();
+
             _finalizers.add(finalizer);
+        }
     }
 }
 ";
