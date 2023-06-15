@@ -635,6 +635,39 @@ namespace CodeBinder.Shared.CSharp
             if (!(node.IsPartialMethod(out var hasEmptyBody) && hasEmptyBody))
                 addSymbolBinding(node.GetDeclaredSymbol<IMethodSymbol>(this));
 
+            IMethodSymbol symbol;
+            if (node.Identifier.Text == "FreeHandle" && node.Body != null)
+            {
+                symbol = node.GetDeclaredSymbol<IMethodSymbol>(this);
+                if (symbol.OverriddenMethod?.ContainingType.GetFullName() == "CodeBinder.HandledObjectBase")
+                {
+                    foreach (var statement in node.Body.Statements)
+                    {
+                        var expressionSyntax = statement as ExpressionStatementSyntax;
+                        if (expressionSyntax == null)
+                        {
+                            AddError("Unsupported FreeHandle body, it must be a call of static method");
+                            continue;
+                        }
+
+                        var invocation = expressionSyntax.Expression as InvocationExpressionSyntax;
+                        if (invocation == null)
+                        {
+                            AddError("Unsupported FreeHandle body, it must be a call of static method");
+                            continue;
+                        }
+
+                        IMethodSymbol? methodSymbol;
+                        if (!invocation.TryGetSymbol(this, out methodSymbol)
+                            || !methodSymbol.IsStatic)
+                        {
+                            AddError("Unsupported FreeHandle body, it must be a call of static method");
+                            continue;
+                        }
+                    }
+                }
+            }
+
             DefaultVisit(node);
         }
 
