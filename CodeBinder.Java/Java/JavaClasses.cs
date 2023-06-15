@@ -32,21 +32,11 @@ public class BinderUtils
                 _register = cleanerClass.getDeclaredMethod(""register"", Object.class, Runnable.class);
                 _cleaner = create.invoke(null);
             }
-            catch (ClassNotFoundException ex)
+            catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException |
+                   NoSuchMethodException ex)
             {
-                // There shouldn't such exception
-            }
-            catch (InvocationTargetException ex)
-            {
-                // There shouldn't such exception
-            }
-            catch (IllegalAccessException ex)
-            {
-                // There shouldn't such exception
-            }
-            catch (NoSuchMethodException ex)
-            {
-                // There shouldn't such exception
+                System.err.println(ex);
+                throw new RuntimeException(ex);
             }
         }
     }
@@ -104,13 +94,10 @@ public class BinderUtils
         {
             _register.invoke(_cleaner, obj, finalizer);
         }
-        catch (InvocationTargetException ex)
+        catch (InvocationTargetException | IllegalAccessException ex)
         {
-            // There shouldn't such exception
-        }
-        catch (IllegalAccessException ex)
-        {
-            // There shouldn't such exception
+            System.err.println(ex);
+            throw new RuntimeException(ex);
         }
     }
 
