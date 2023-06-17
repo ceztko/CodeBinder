@@ -60,8 +60,8 @@ namespace CodeBinder.Java
                 symbol = method.GetDeclaredSymbol<IMethodSymbol>(context);
                 if (symbol.OverriddenMethod?.ContainingType.GetFullName() == "CodeBinder.HandledObjectBase")
                 {
-                    yield return new FinalizeMethodWriter(symbol.ContainingType);
-                    yield return new CreateClassFinalizerWriter(method.Body!, symbol.ContainingType, context);
+                    yield return new CreateFinalizerMethodWriter(symbol.ContainingType);
+                    yield return new ClassFinalizerWriter(method.Body!, symbol.ContainingType, context);
                     yield break;
                 }
             }
@@ -92,11 +92,11 @@ namespace CodeBinder.Java
             yield return new ConstructorWriter(method, -1, context);
         }
 
-        class FinalizeMethodWriter : CodeWriter
+        class CreateFinalizerMethodWriter : CodeWriter
         {
             ITypeSymbol _finalizableType;
 
-            public FinalizeMethodWriter(ITypeSymbol finalizableType)
+            public CreateFinalizerMethodWriter(ITypeSymbol finalizableType)
             {
                 _finalizableType = finalizableType;
             }
@@ -112,13 +112,13 @@ protected HandledObjectFinalizer createFinalizer()
             }
         }
 
-        class CreateClassFinalizerWriter : CodeWriter
+        class ClassFinalizerWriter : CodeWriter
         {
             BlockSyntax _block;
             ITypeSymbol _finalizableType;
             JavaCodeConversionContext _context;
 
-            public CreateClassFinalizerWriter(BlockSyntax block, ITypeSymbol finalizableType, JavaCodeConversionContext context)
+            public ClassFinalizerWriter(BlockSyntax block, ITypeSymbol finalizableType, JavaCodeConversionContext context)
             {
                 _block = block;
                 _finalizableType = finalizableType;

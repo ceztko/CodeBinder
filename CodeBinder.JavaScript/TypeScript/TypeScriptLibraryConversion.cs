@@ -37,6 +37,11 @@ let napi: any = napi_;
         foreach (var iface in Context.Interfaces)
             builder.Append(new TypeScriptInterfaceWriter(iface)).AppendLine();
 
+        builder.AppendLine("// Finalizers");
+        builder.AppendLine();
+        foreach (var finalizer in Context.Finalizers)
+            builder.Append(new ClassFinalizerWriter(finalizer, this.Context)).AppendLine();
+
         builder.AppendLine("// Classes");
         builder.AppendLine();
         foreach (var cls in getSortedTypes(Context.Classes))

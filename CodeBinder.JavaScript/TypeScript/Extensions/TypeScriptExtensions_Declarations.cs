@@ -47,6 +47,37 @@ static partial class TypeScriptExtensions
         if (methodSymbol.IsPartialDefinition || methodSymbol.IsExtern)
             yield break;
 
+        IMethodSymbol symbol;
+        if (method.Identifier.Text == "FreeHandle")
+        {
+            symbol = method.GetDeclaredSymbol<IMethodSymbol>(context);
+            if (symbol.OverriddenMethod?.ContainingType.GetFullName() == "CodeBinder.HandledObjectBase")
+            {
+                yield return new CreateFinalizerMethodWriter(symbol.ContainingType);
+                yield break;
+            }
+        }
+
         yield return new MethodWriter(method, context);
+    }
+
+    class CreateFinalizerMethodWriter : CodeWriter
+    {
+        ITypeSymbol _finalizableType;
+
+        public CreateFinalizerMethodWriter(ITypeSymbol finalizableType)
+        {
+            _finalizableType = finalizableType;
+        }
+
+        protected override void Write()
+        {
+            Builder.AppendLine($$"""
+protected override createFinalizer(): HandledObjectFinalizer | null
+{
+    return new {{_finalizableType.Name}}Finalizer();
+}
+""");
+        }
     }
 }

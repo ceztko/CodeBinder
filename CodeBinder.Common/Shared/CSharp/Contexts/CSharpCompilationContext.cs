@@ -149,12 +149,14 @@ namespace CodeBinder.Shared.CSharp
         Dictionary<CSharpSyntaxNode, CSharpMemberTypeContext> _NodeMap;
         Dictionary<ITypeSymbol, List<CSharpMemberTypeContext>> _symbolMap;
         SymbolMapWrapper _SymbolMapWrapper;
+        List<MethodDeclarationSyntax> _finalizers;
 
         internal CSharpCompilationContext()
         {
             _NodeMap = new Dictionary<CSharpSyntaxNode, CSharpMemberTypeContext>();
             _symbolMap = new Dictionary<ITypeSymbol, List<CSharpMemberTypeContext>>(SymbolEqualityComparer.Default);
             _SymbolMapWrapper = new SymbolMapWrapper(_symbolMap);
+            _finalizers = new List<MethodDeclarationSyntax>();
         }
 
         public bool IsCompilationDefined(ITypeSymbol symbol)
@@ -192,6 +194,11 @@ namespace CodeBinder.Shared.CSharp
             addDelegate(ctx);
         }
 
+        internal void AddFinalizer(MethodDeclarationSyntax finalizer)
+        {
+            _finalizers.Add(finalizer);
+        }
+
         protected internal virtual CSharpClassTypeContext CreateContext(ClassDeclarationSyntax cls)
         {
             return new CSharpClassTypeContextImpl(cls, this);
@@ -215,6 +222,8 @@ namespace CodeBinder.Shared.CSharp
         {
             return new CSharpEnumTypeContextImpl(enm, this);
         }
+
+        public IEnumerable<MethodDeclarationSyntax>  Finalizers { get { return _finalizers; } }
 
         public abstract ICSharpTypeContextCollection<CSharpClassTypeContext, ClassDeclarationSyntax> Classes { get; }
 
