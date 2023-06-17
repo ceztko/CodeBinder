@@ -326,8 +326,8 @@ export interface IDisposable {
 """
 export class KeyValuePair<TKey, TValue> extends ObjectTS
 {
-	key:TKey | null;
-	value:TValue | null;
+    key:TKey | null;
+    value:TValue | null;
 
     constructor(key?: TKey, value?: TValue)
     {
@@ -343,7 +343,7 @@ export class KeyValuePair<TKey, TValue> extends ObjectTS
 export interface IReadOnlyList<T> extends Iterable<T>
 {
     count:number;
-	get(index:number):T;
+    get(index:number):T;
 }
 """;
 

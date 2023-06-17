@@ -26,16 +26,16 @@ class TypeScriptNAPIWrapperWriter : TypeScriptConversionWriter
 let shext = 'so';
 switch (proc.platform)
 {
-	case 'win32':
-	{
-		shext = 'dll'
-		break;
-	}
-	case 'darwin':
-	{
-		shext = 'dylib'
-		break;
-	}
+    case 'win32':
+    {
+        shext = 'dll'
+        break;
+    }
+    case 'darwin':
+    {
+        shext = 'dylib'
+        break;
+    }
 }
 
 const mod = { exports: {} };
