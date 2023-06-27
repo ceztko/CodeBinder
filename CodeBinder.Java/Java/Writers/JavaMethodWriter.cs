@@ -12,384 +12,383 @@ using CodeBinder.Java.Shared;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics;
 
-namespace CodeBinder.Java
+namespace CodeBinder.Java;
+
+abstract class MethodWriter<TMethod> : JavaCodeWriter<TMethod>
+    where TMethod : BaseMethodDeclarationSyntax
 {
-    abstract class MethodWriter<TMethod> : JavaCodeWriter<TMethod>
-        where TMethod : BaseMethodDeclarationSyntax
+    protected MethodWriter(TMethod method, JavaCodeConversionContext context)
+        : base(method, context) { }
+
+    protected override void Write()
     {
-        protected MethodWriter(TMethod method, JavaCodeConversionContext context)
-            : base(method, context) { }
+        WriteModifiers();
+        if (Arity != 0)
+            WriteTypeParameters();
 
-        protected override void Write()
+        WriteReturnType();
+        Builder.Append(MethodName);
+        WriteParameters();
+        WriteThrows();
+        writeMethodBody();
+    }
+
+    protected virtual void WriteParameters()
+    {
+        int parameterCount = ParameterCount;
+        if (parameterCount == 0)
         {
-            WriteModifiers();
-            if (Arity != 0)
-                WriteTypeParameters();
-
-            WriteReturnType();
-            Builder.Append(MethodName);
-            WriteParameters();
-            WriteThrows();
-            writeMethodBody();
+            Builder.EmptyParameterList();
         }
-
-        protected virtual void WriteParameters()
+        else if (parameterCount == 1)
         {
-            int parameterCount = ParameterCount;
-            if (parameterCount == 0)
+            using (Builder.ParameterList())
             {
-                Builder.EmptyParameterList();
+                writeParameters(Item.ParameterList, parameterCount);
             }
-            else if (parameterCount == 1)
+        }
+        else
+        {
+            using (Builder.Indent())
             {
-                using (Builder.ParameterList())
+                using (Builder.ParameterList(true))
                 {
                     writeParameters(Item.ParameterList, parameterCount);
-                }
-            }
-            else
-            {
-                using (Builder.Indent())
-                {
-                    using (Builder.ParameterList(true))
-                    {
-                        writeParameters(Item.ParameterList, parameterCount);
-                        Builder.AppendLine();
-                    }
+                    Builder.AppendLine();
                 }
             }
         }
-
-        protected virtual void WriteModifiers()
-        {
-            string modifiers = Item.GetJavaModifiersString();
-            if (!modifiers.IsNullOrEmpty())
-                Builder.Append(modifiers).Space();
-        }
-
-        protected void WriteOptionalParameters(SeparatedSyntaxList<ParameterSyntax> parameters, int optionalIndex)
-        {
-            for (int i = 0; i < parameters.Count; i++)
-            {
-                var parameter = parameters[i];
-                if (i > 0)
-                    Builder.CommaSeparator();
-
-                if (i < optionalIndex)
-                {
-                    Builder.Append(parameter.Identifier.Text);
-                }
-                else
-                {
-                    var paramTypeSymbol = parameter.GetDeclaredSymbol<IParameterSymbol>(Context);
-                    if (paramTypeSymbol.Type.TypeKind == TypeKind.Class)
-                        Builder.Parenthesized().Append(paramTypeSymbol.Type.Name).Close();
-
-                    Builder.Append(parameter.Default!.Value, Context);
-                }
-            }
-        }
-
-        protected void WriteType(TypeSyntax type, JavaTypeFlags flags)
-        {
-            Builder.Append(type.GetJavaType(flags, Context));
-        }
-
-        void writeMethodBody()
-        {
-            if (Item.Body == null)
-            {
-                Builder.EndOfStatement();
-            }
-            else
-            {
-                using (Builder.AppendLine().Block())
-                {
-                    WriteMethodBodyPrefixInternal();
-                    if (WriteMethodBody && !Context.Conversion.SkipBody)
-                        Builder.Append(Item.Body, Context, true).AppendLine();
-                    WriteMethodBodyPostfixInternal();
-                }
-            }
-        }
-
-        private void writeParameters(ParameterListSyntax list, int parameterCount)
-        {
-            bool first = true;
-            for (int i = 0; i < parameterCount; i++)
-            {
-                var parameter = list.Parameters[i];
-                Builder.CommaAppendLine(ref first);
-                writeParameter(parameter);
-            }
-        }
-
-        private void writeParameter(ParameterSyntax parameter)
-        {
-            var flags = IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None;
-            bool isRef = parameter.IsRef() | parameter.IsOut();
-            if (isRef)
-                flags |= JavaTypeFlags.IsByRef;
-
-            WriteType(parameter.Type!, flags);
-            Builder.Space().Append(parameter.Identifier.Text);
-        }
-
-
-        protected virtual void WriteThrows() { /* Do nothing */ }
-
-        protected virtual void WriteTypeParameters() { /* Do nothing */ }
-
-        protected virtual void WriteMethodBodyPrefixInternal() { /* Do nothing */ }
-
-        protected virtual void WriteMethodBodyPostfixInternal() { /* Do nothing */ }
-
-        protected virtual void WriteReturnType() { /* Do nothing */ }
-
-        public virtual bool WriteMethodBody
-        {
-            get { return true; }
-        }
-
-        public virtual int Arity
-        {
-            get { return 0; }
-        }
-
-        public virtual int ParameterCount
-        {
-            get { return Item.ParameterList.Parameters.Count; }
-        }
-
-        public abstract string MethodName { get; }
-
-        public abstract bool IsNative { get; }
     }
 
-    class MethodWriter : MethodWriter<MethodDeclarationSyntax>
+    protected virtual void WriteModifiers()
     {
-        int _optionalIndex;
+        string modifiers = Item.GetJavaModifiersString();
+        if (!modifiers.IsNullOrEmpty())
+            Builder.Append(modifiers).Space();
+    }
 
-        public MethodWriter(MethodDeclarationSyntax method, int optionalIndex, JavaCodeConversionContext context)
-            : base(method, context)
+    protected void WriteOptionalParameters(SeparatedSyntaxList<ParameterSyntax> parameters, int optionalIndex)
+    {
+        for (int i = 0; i < parameters.Count; i++)
         {
-            _optionalIndex = optionalIndex;
-        }
+            var parameter = parameters[i];
+            if (i > 0)
+                Builder.CommaSeparator();
 
-        protected override void WriteModifiers()
-        {
-            if (IsParentInterface)
-                return;
-
-            base.WriteModifiers();
-        }
-
-        protected override void WriteTypeParameters()
-        {
-            Builder.Append(Item.GetTypeParameters(Context), Context).Space();
-        }
-
-        protected override void WriteReturnType()
-        {
-            WriteType(Item.ReturnType, IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None);
-            Builder.Space();
-        }
-
-        protected override void WriteMethodBodyPrefixInternal()
-        {
-            if (_optionalIndex >= 0)
+            if (i < optionalIndex)
             {
-                var typeSymbol = Item.ReturnType.GetTypeSymbol(Context);
-                if (typeSymbol.SpecialType != SpecialType.System_Void)
-                    Builder.Append("return").Space();
-
-                using (Builder.Append(MethodName).ParameterList())
-                {
-                    WriteOptionalParameters(Item.ParameterList.Parameters, _optionalIndex);
-                }
-
-                Builder.EndOfStatement();
+                Builder.Append(parameter.Identifier.Text);
             }
             else
             {
-                if (Context.Conversion.SkipBody)
-                    Builder.Append(Item.ReturnType.GetJavaDefaultReturnStatement(Context)).EndOfStatement();
+                var paramTypeSymbol = parameter.GetDeclaredSymbol<IParameterSymbol>(Context);
+                if (paramTypeSymbol.Type.TypeKind == TypeKind.Class)
+                    Builder.Parenthesized().Append(paramTypeSymbol.Type.Name).Close();
+
+                Builder.Append(parameter.Default!.Value, Context);
             }
         }
+    }
 
-        public bool IsParentInterface
+    protected void WriteType(TypeSyntax type, JavaTypeFlags flags)
+    {
+        Builder.Append(type.GetJavaType(flags, Context));
+    }
+
+    void writeMethodBody()
+    {
+        if (Item.Body == null)
         {
-            get { return Item.Parent!.IsKind(SyntaxKind.InterfaceDeclaration); }
+            Builder.EndOfStatement();
         }
-
-        public override string MethodName
+        else
         {
-            get
+            using (Builder.AppendLine().Block())
             {
-                // Try first look for replacements
-                var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
-                if (methodSymbol.HasJavaReplacement(out var replacement))
-                    return replacement.Name;
+                WriteMethodBodyPrefixInternal();
+                if (WriteMethodBody && !Context.Conversion.SkipBody)
+                    Builder.Append(Item.Body, Context, true).AppendLine();
+                WriteMethodBodyPostfixInternal();
+            }
+        }
+    }
 
-                var methodName = Item.GetName();
-                if (IsNative)
-                {
+    private void writeParameters(ParameterListSyntax list, int parameterCount)
+    {
+        bool first = true;
+        for (int i = 0; i < parameterCount; i++)
+        {
+            var parameter = list.Parameters[i];
+            Builder.CommaAppendLine(ref first);
+            writeParameter(parameter);
+        }
+    }
+
+    private void writeParameter(ParameterSyntax parameter)
+    {
+        var flags = IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None;
+        bool isRef = parameter.IsRef() | parameter.IsOut();
+        if (isRef)
+            flags |= JavaTypeFlags.IsByRef;
+
+        WriteType(parameter.Type!, flags);
+        Builder.Space().Append(parameter.Identifier.Text);
+    }
+
+
+    protected virtual void WriteThrows() { /* Do nothing */ }
+
+    protected virtual void WriteTypeParameters() { /* Do nothing */ }
+
+    protected virtual void WriteMethodBodyPrefixInternal() { /* Do nothing */ }
+
+    protected virtual void WriteMethodBodyPostfixInternal() { /* Do nothing */ }
+
+    protected virtual void WriteReturnType() { /* Do nothing */ }
+
+    public virtual bool WriteMethodBody
+    {
+        get { return true; }
+    }
+
+    public virtual int Arity
+    {
+        get { return 0; }
+    }
+
+    public virtual int ParameterCount
+    {
+        get { return Item.ParameterList.Parameters.Count; }
+    }
+
+    public abstract string MethodName { get; }
+
+    public abstract bool IsNative { get; }
+}
+
+class MethodWriter : MethodWriter<MethodDeclarationSyntax>
+{
+    int _optionalIndex;
+
+    public MethodWriter(MethodDeclarationSyntax method, int optionalIndex, JavaCodeConversionContext context)
+        : base(method, context)
+    {
+        _optionalIndex = optionalIndex;
+    }
+
+    protected override void WriteModifiers()
+    {
+        if (IsParentInterface)
+            return;
+
+        base.WriteModifiers();
+    }
+
+    protected override void WriteTypeParameters()
+    {
+        Builder.Append(Item.GetTypeParameters(Context), Context).Space();
+    }
+
+    protected override void WriteReturnType()
+    {
+        WriteType(Item.ReturnType, IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None);
+        Builder.Space();
+    }
+
+    protected override void WriteMethodBodyPrefixInternal()
+    {
+        if (_optionalIndex >= 0)
+        {
+            var typeSymbol = Item.ReturnType.GetTypeSymbol(Context);
+            if (typeSymbol.SpecialType != SpecialType.System_Void)
+                Builder.Append("return").Space();
+
+            using (Builder.Append(MethodName).ParameterList())
+            {
+                WriteOptionalParameters(Item.ParameterList.Parameters, _optionalIndex);
+            }
+
+            Builder.EndOfStatement();
+        }
+        else
+        {
+            if (Context.Conversion.SkipBody)
+                Builder.Append(Item.ReturnType.GetJavaDefaultReturnStatement(Context)).EndOfStatement();
+        }
+    }
+
+    public bool IsParentInterface
+    {
+        get { return Item.Parent!.IsKind(SyntaxKind.InterfaceDeclaration); }
+    }
+
+    public override string MethodName
+    {
+        get
+        {
+            // Try first look for replacements
+            var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
+            if (methodSymbol.HasJavaReplacement(out var replacement))
+                return replacement.Name;
+
+            var methodName = Item.GetName();
+            if (IsNative)
+            {
+                return methodName;
+            }
+            else
+            {
+                if (Context.Conversion.MethodCasing == MethodCasing.LowerCamelCase)
+                    return methodName.ToLowerCamelCase();
+                else
                     return methodName;
-                }
-                else
-                {
-                    if (Context.Conversion.MethodCasing == MethodCasing.LowerCamelCase)
-                        return methodName.ToLowerCamelCase();
-                    else
-                        return methodName;
-                }
-
             }
-        }
 
-        public override bool WriteMethodBody
-        {
-            get { return _optionalIndex == -1; }
-        }
-
-        public override bool IsNative
-        {
-            get { return Item.IsNative(Context); }
-        }
-
-        public override int Arity
-        {
-            get { return Item.Arity; }
-        }
-
-        public override int ParameterCount
-        {
-            get
-            {
-                if (_optionalIndex == -1)
-                    return base.ParameterCount;
-
-                return _optionalIndex;
-            }
         }
     }
 
-    class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
+    public override bool WriteMethodBody
     {
-        int _optionalIndex;
-        bool _isStatic;
+        get { return _optionalIndex == -1; }
+    }
 
-        public ConstructorWriter(ConstructorDeclarationSyntax method, int optionalIndex, JavaCodeConversionContext context)
-            : base(method, context)
+    public override bool IsNative
+    {
+        get { return Item.IsNative(Context); }
+    }
+
+    public override int Arity
+    {
+        get { return Item.Arity; }
+    }
+
+    public override int ParameterCount
+    {
+        get
         {
-            _isStatic = Item.Modifiers.Any(SyntaxKind.StaticKeyword);
-            _optionalIndex = optionalIndex;
+            if (_optionalIndex == -1)
+                return base.ParameterCount;
+
+            return _optionalIndex;
         }
+    }
+}
 
-        protected override void WriteModifiers()
-        {
-            if (!_isStatic)
-                base.WriteModifiers();
-        }
+class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
+{
+    int _optionalIndex;
+    bool _isStatic;
 
-        protected override void WriteParameters()
-        {
-            if (!_isStatic)
-                base.WriteParameters();
-        }
+    public ConstructorWriter(ConstructorDeclarationSyntax method, int optionalIndex, JavaCodeConversionContext context)
+        : base(method, context)
+    {
+        _isStatic = Item.Modifiers.Any(SyntaxKind.StaticKeyword);
+        _optionalIndex = optionalIndex;
+    }
 
-        protected override void WriteMethodBodyPrefixInternal()
+    protected override void WriteModifiers()
+    {
+        if (!_isStatic)
+            base.WriteModifiers();
+    }
+
+    protected override void WriteParameters()
+    {
+        if (!_isStatic)
+            base.WriteParameters();
+    }
+
+    protected override void WriteMethodBodyPrefixInternal()
+    {
+        if (_optionalIndex >= 0)
         {
-            if (_optionalIndex >= 0)
+            using (Builder.Append("this").ParameterList())
             {
-                using (Builder.Append("this").ParameterList())
-                {
-                    WriteOptionalParameters(Item.ParameterList.Parameters, _optionalIndex);
-                }
-
-                Builder.EndOfStatement();
+                WriteOptionalParameters(Item.ParameterList.Parameters, _optionalIndex);
             }
+
+            Builder.EndOfStatement();
+        }
+        else
+        {
+            if (Item.Initializer != null)
+                Builder.Append(Item.Initializer, Context).EndOfStatement();
+        }
+    }
+
+    public override string MethodName
+    {
+        get
+        {
+            if (_isStatic)
+                return "static";
             else
-            {
-                if (Item.Initializer != null)
-                    Builder.Append(Item.Initializer, Context).EndOfStatement();
-            }
-        }
-
-        public override string MethodName
-        {
-            get
-            {
-                if (_isStatic)
-                    return "static";
-                else
-                    return (Item.Parent as BaseTypeDeclarationSyntax)!.GetName();
-            }
-        }
-
-        public override bool IsNative
-        {
-            get { return false; }
-        }
-
-        public override bool WriteMethodBody
-        {
-            get { return _optionalIndex == -1; }
-        }
-
-        public override int ParameterCount
-        {
-            get
-            {
-                if (_optionalIndex == -1)
-                    return base.ParameterCount;
-
-                return _optionalIndex;
-            }
+                return (Item.Parent as BaseTypeDeclarationSyntax)!.GetName();
         }
     }
 
-    class JavaDestructorWriter : MethodWriter<DestructorDeclarationSyntax>
+    public override bool IsNative
     {
-        bool _isFinalizer;
+        get { return false; }
+    }
 
-        public JavaDestructorWriter(DestructorDeclarationSyntax method, JavaCodeConversionContext context)
-            : base(method, context)
-        {
-            var symbol = method.GetDeclaredSymbol<IMethodSymbol>(context);
-            _isFinalizer = symbol.ContainingType.Implements<IObjectFinalizer>();
-        }
+    public override bool WriteMethodBody
+    {
+        get { return _optionalIndex == -1; }
+    }
 
-        protected override void WriteThrows()
+    public override int ParameterCount
+    {
+        get
         {
-            if (!_isFinalizer)
-                Builder.Space().Append("throws Throwable");
-        }
+            if (_optionalIndex == -1)
+                return base.ParameterCount;
 
-        protected override void WriteMethodBodyPostfixInternal()
-        {
-            if (!_isFinalizer)
-                Builder.Append("super.finalize()").EndOfStatement();
+            return _optionalIndex;
         }
+    }
+}
 
-        protected override void WriteModifiers()
-        {
-            Builder.Append(_isFinalizer ? "public" : "protected").Space();
-        }
+class JavaDestructorWriter : MethodWriter<DestructorDeclarationSyntax>
+{
+    bool _isFinalizer;
 
-        protected override void WriteReturnType()
-        {
-            Builder.Append("void").Space();
-        }
+    public JavaDestructorWriter(DestructorDeclarationSyntax method, JavaCodeConversionContext context)
+        : base(method, context)
+    {
+        var symbol = method.GetDeclaredSymbol<IMethodSymbol>(context);
+        _isFinalizer = symbol.ContainingType.Implements<IObjectFinalizer>();
+    }
 
-        public override string MethodName
-        {
-            get { return _isFinalizer ? "run" : "finalize"; }
-        }
+    protected override void WriteThrows()
+    {
+        if (!_isFinalizer)
+            Builder.Space().Append("throws Throwable");
+    }
 
-        public override bool IsNative
-        {
-            get { return false; }
-        }
+    protected override void WriteMethodBodyPostfixInternal()
+    {
+        if (!_isFinalizer)
+            Builder.Append("super.finalize()").EndOfStatement();
+    }
+
+    protected override void WriteModifiers()
+    {
+        Builder.Append(_isFinalizer ? "public" : "protected").Space();
+    }
+
+    protected override void WriteReturnType()
+    {
+        Builder.Append("void").Space();
+    }
+
+    public override string MethodName
+    {
+        get { return _isFinalizer ? "run" : "finalize"; }
+    }
+
+    public override bool IsNative
+    {
+        get { return false; }
     }
 }

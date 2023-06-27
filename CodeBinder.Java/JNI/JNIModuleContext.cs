@@ -8,106 +8,105 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.JNI
+namespace CodeBinder.JNI;
+
+public abstract class JNIModuleContext : TypeContext<JNIModuleContext, JNICompilationContext>
 {
-    public abstract class JNIModuleContext : TypeContext<JNIModuleContext, JNICompilationContext>
+    JNICompilationContext _Compilation;
+
+    public override JNICompilationContext Compilation => _Compilation;
+
+    protected JNIModuleContext(JNICompilationContext context)
     {
-        JNICompilationContext _Compilation;
-
-        public override JNICompilationContext Compilation => _Compilation;
-
-        protected JNIModuleContext(JNICompilationContext context)
-        {
-            _Compilation = context;
-        }
-
-        public abstract IEnumerable<MethodDeclarationSyntax> Methods
-        {
-            get;
-        }
-
-        public abstract IEnumerable<ImportAttribute> Includes
-        {
-            get;
-        }
+        _Compilation = context;
     }
 
-    public class JNIModuleContextParent : JNIModuleContext
+    public abstract IEnumerable<MethodDeclarationSyntax> Methods
     {
-        string _Name;
-        List<ImportAttribute> _includes;
+        get;
+    }
 
-        public JNIModuleContextParent(string name, JNICompilationContext context)
-            : base(context)
-        {
-            _Name = name;
-            _includes = new List<ImportAttribute>();
-        }
+    public abstract IEnumerable<ImportAttribute> Includes
+    {
+        get;
+    }
+}
 
-        public void AddInclude(ImportAttribute include)
-        {
-            _includes.Add(include);
-        }
+public class JNIModuleContextParent : JNIModuleContext
+{
+    string _Name;
+    List<ImportAttribute> _includes;
 
-        protected override IEnumerable<TypeConversion<JNIModuleContext>> GetConversions()
-        {
-            yield return new JNIModuleConversion(this, ConversionType.Header, Compilation.Conversion);
-            yield return new JNIModuleConversion(this, ConversionType.Implementation, Compilation.Conversion);
-        }
+    public JNIModuleContextParent(string name, JNICompilationContext context)
+        : base(context)
+    {
+        _Name = name;
+        _includes = new List<ImportAttribute>();
+    }
 
-        public override IEnumerable<MethodDeclarationSyntax> Methods
+    public void AddInclude(ImportAttribute include)
+    {
+        _includes.Add(include);
+    }
+
+    protected override IEnumerable<TypeConversion<JNIModuleContext>> GetConversions()
+    {
+        yield return new JNIModuleConversion(this, ConversionType.Header, Compilation.Conversion);
+        yield return new JNIModuleConversion(this, ConversionType.Implementation, Compilation.Conversion);
+    }
+
+    public override IEnumerable<MethodDeclarationSyntax> Methods
+    {
+        get
         {
-            get
+            foreach (var child in Children)
             {
-                foreach (var child in Children)
-                {
-                    foreach (var method in child.Methods)
-                        yield return method;
-                }
+                foreach (var method in child.Methods)
+                    yield return method;
             }
         }
-
-        public override string Name
-        {
-            get { return _Name; }
-        }
-
-        public override IEnumerable<ImportAttribute> Includes => _includes;
     }
 
-    public class JNIModuleContextChild : JNIModuleContext
+    public override string Name
     {
-        List<MethodDeclarationSyntax> _methods;
+        get { return _Name; }
+    }
 
-        public JNIModuleContextChild(JNICompilationContext context)
-            : base(context)
-        {
-            _methods = new List<MethodDeclarationSyntax>();
-        }
+    public override IEnumerable<ImportAttribute> Includes => _includes;
+}
 
-        public void AddNativeMethod(MethodDeclarationSyntax method)
-        {
-            _methods.Add(method);
-        }
+public class JNIModuleContextChild : JNIModuleContext
+{
+    List<MethodDeclarationSyntax> _methods;
 
-        protected override IEnumerable<TypeConversion<JNIModuleContext>> GetConversions()
-        {
-            throw new NotImplementedException();
-        }
+    public JNIModuleContextChild(JNICompilationContext context)
+        : base(context)
+    {
+        _methods = new List<MethodDeclarationSyntax>();
+    }
 
-        public override IEnumerable<MethodDeclarationSyntax> Methods
-        {
-            get { return _methods; }
-        }
+    public void AddNativeMethod(MethodDeclarationSyntax method)
+    {
+        _methods.Add(method);
+    }
 
-        public override string Name
-        {
-            get { return Parent!.Name; }
-        }
+    protected override IEnumerable<TypeConversion<JNIModuleContext>> GetConversions()
+    {
+        throw new NotImplementedException();
+    }
 
-        public override IEnumerable<ImportAttribute> Includes
-        {
-            get { yield break; }
-        }
+    public override IEnumerable<MethodDeclarationSyntax> Methods
+    {
+        get { return _methods; }
+    }
+
+    public override string Name
+    {
+        get { return Parent!.Name; }
+    }
+
+    public override IEnumerable<ImportAttribute> Includes
+    {
+        get { yield break; }
     }
 }

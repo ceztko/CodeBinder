@@ -6,18 +6,17 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Shared
+namespace CodeBinder.Shared;
+
+// CHECK-ME Evaluate create a base NodeVisitor class
+public interface INodeVisitor
 {
-    // CHECK-ME Evaluate create a base NodeVisitor class
-    public interface INodeVisitor
+    void Visit(SyntaxTree context);
+
+    void AfterVisit();
+
+    IReadOnlyList<string> Errors
     {
-        void Visit(SyntaxTree context);
-
-        void AfterVisit();
-
-        IReadOnlyList<string> Errors
-        {
-            get;
-        }
+        get;
     }
 }

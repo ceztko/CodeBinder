@@ -9,58 +9,57 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace CodeBinder
+namespace CodeBinder;
+
+/// <summary>
+/// Fully contextualized class to write a conversion item to a stream, coupled to IConversionBuilder
+/// </summary>
+/// <seealso cref="IConversionWriter"/>
+public class ConversionDelegate
 {
-    /// <summary>
-    /// Fully contextualized class to write a conversion item to a stream, coupled to IConversionBuilder
-    /// </summary>
-    /// <seealso cref="IConversionWriter"/>
-    public class ConversionDelegate
+    IConversionWriter _builder;
+
+    public string? SourcePath { get; private set; }
+
+    internal ConversionDelegate(IConversionWriter builder)
+        : this(null, builder) { }
+
+    internal ConversionDelegate(string? sourcePath, IConversionWriter builder)
     {
-        IConversionWriter _builder;
+        SourcePath = sourcePath;
+        _builder = builder;
+    }
 
-        public string? SourcePath { get; private set; }
+    public string TargetFileName
+    {
+        get { return _builder.FileName; }
+    }
 
-        internal ConversionDelegate(IConversionWriter builder)
-            : this(null, builder) { }
+    public string? TargetBasePath
+    {
+        get { return _builder.BasePath; }
+    }
 
-        internal ConversionDelegate(string? sourcePath, IConversionWriter builder)
-        {
-            SourcePath = sourcePath;
-            _builder = builder;
-        }
+    public void Write(Stream stream, Encoding encoding)
+    {
+        var writer = new StreamWriter(stream, encoding);
+        write(writer);
+    }
 
-        public string TargetFileName
-        {
-            get { return _builder.FileName; }
-        }
+    public bool Skip => _builder.Skip;
 
-        public string? TargetBasePath
-        {
-            get { return _builder.BasePath; }
-        }
+    public string ToFullString()
+    {
+        var writer = new StringWriter();
+        write(writer);
+        return writer.ToString();
+    }
 
-        public void Write(Stream stream, Encoding encoding)
-        {
-            var writer = new StreamWriter(stream, encoding);
-            write(writer);
-        }
-
-        public bool Skip => _builder.Skip;
-
-        public string ToFullString()
-        {
-            var writer = new StringWriter();
-            write(writer);
-            return writer.ToString();
-        }
-
-        private void write(TextWriter writer)
-        {
-            var codeBuilder = new CodeBuilder(writer);
-            _builder.Write(codeBuilder);
-            // NOTE: Flush the writer: needed when writing to filestream
-            writer.Flush();
-        }
+    private void write(TextWriter writer)
+    {
+        var codeBuilder = new CodeBuilder(writer);
+        _builder.Write(codeBuilder);
+        // NOTE: Flush the writer: needed when writing to filestream
+        writer.Flush();
     }
 }

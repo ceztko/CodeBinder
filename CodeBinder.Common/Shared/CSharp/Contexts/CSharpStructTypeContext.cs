@@ -5,48 +5,47 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Shared.CSharp
+namespace CodeBinder.Shared.CSharp;
+
+/// <summary>
+/// Struct syntax context
+/// </summary>
+/// <remarks>Inherit this class if needed to extend a struct context</remarks>
+public abstract class CSharpStructTypeContext<TCompilationContext>
+        : CSharpStructTypeContext, ITypeContext<TCompilationContext>
+    where TCompilationContext : CSharpCompilationContext
 {
-    /// <summary>
-    /// Struct syntax context
-    /// </summary>
-    /// <remarks>Inherit this class if needed to extend a struct context</remarks>
-    public abstract class CSharpStructTypeContext<TCompilationContext>
-            : CSharpStructTypeContext, ITypeContext<TCompilationContext>
-        where TCompilationContext : CSharpCompilationContext
+    TCompilationContext _Compilation;
+
+    public CSharpStructTypeContext(StructDeclarationSyntax node, TCompilationContext compilation)
+        : base(node)
     {
-        TCompilationContext _Compilation;
-
-        public CSharpStructTypeContext(StructDeclarationSyntax node, TCompilationContext compilation)
-            : base(node)
-        {
-            _Compilation = compilation;
-        }
-
-        public override TCompilationContext Compilation => _Compilation;
+        _Compilation = compilation;
     }
 
-    public abstract class CSharpStructTypeContext : CSharpTypeContext<StructDeclarationSyntax>
-    {
-        protected CSharpStructTypeContext(StructDeclarationSyntax node)
-            : base(node) { }
+    public override TCompilationContext Compilation => _Compilation;
+}
 
-        protected override IEnumerable<TypeConversion> GetConversions()
-        {
-            return Compilation.Conversion.GetConversions(this);
-        }
+public abstract class CSharpStructTypeContext : CSharpTypeContext<StructDeclarationSyntax>
+{
+    protected CSharpStructTypeContext(StructDeclarationSyntax node)
+        : base(node) { }
+
+    protected override IEnumerable<TypeConversion> GetConversions()
+    {
+        return Compilation.Conversion.GetConversions(this);
     }
+}
 
-    public sealed class CSharpStructTypeContextImpl : CSharpStructTypeContext
+public sealed class CSharpStructTypeContextImpl : CSharpStructTypeContext
+{
+    CSharpCompilationContext _Compilation;
+
+    public override CSharpCompilationContext Compilation => _Compilation;
+
+    public CSharpStructTypeContextImpl(StructDeclarationSyntax node, CSharpCompilationContext compilation)
+        : base(node)
     {
-        CSharpCompilationContext _Compilation;
-
-        public override CSharpCompilationContext Compilation => _Compilation;
-
-        public CSharpStructTypeContextImpl(StructDeclarationSyntax node, CSharpCompilationContext compilation)
-            : base(node)
-        {
-            _Compilation = compilation;
-        }
+        _Compilation = compilation;
     }
 }

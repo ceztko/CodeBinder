@@ -8,20 +8,19 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Java
+namespace CodeBinder.Java;
+
+class JavaFieldWriter : JavaCodeWriter<FieldDeclarationSyntax>
 {
-    class JavaFieldWriter : JavaCodeWriter<FieldDeclarationSyntax>
+    public JavaFieldWriter(FieldDeclarationSyntax syntax, JavaCodeConversionContext context)
+        : base(syntax, context) { }
+
+    protected override void Write()
     {
-        public JavaFieldWriter(FieldDeclarationSyntax syntax, JavaCodeConversionContext context)
-            : base(syntax, context) { }
+        string modifiers = Item.GetJavaModifiersString();
+        if (!modifiers.IsNullOrEmpty())
+            Builder.Append(modifiers).Space();
 
-        protected override void Write()
-        {
-            string modifiers = Item.GetJavaModifiersString();
-            if (!modifiers.IsNullOrEmpty())
-                Builder.Append(modifiers).Space();
-
-            Builder.Append(Item.Declaration, Context).EndOfStatement();
-        }
+        Builder.Append(Item.Declaration, Context).EndOfStatement();
     }
 }

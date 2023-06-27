@@ -4,156 +4,154 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Utils
-{
+namespace CodeBinder.Utils;
 
-    public enum NamespaceNormalization
+public enum NamespaceNormalization
+{
+    None = 0,
+    LowerCase
+}
+
+/// <summary>
+/// Structure where to efficiently store namespace mappings
+/// </summary>
+public class NamespaceMappingTree
+{
+    Node? m_root;
+
+    public NamespaceMappingTree() { }
+
+    public void PushMapping(string refns, string mappedns)
     {
-        None = 0,
-        LowerCase
+        var splitted = refns.Split('.');
+        if (m_root == null)
+            m_root = new Node();
+
+        Node node = m_root;
+        for (int i = 0; i < splitted.Length; i++)
+            node = node.GetChildren(splitted[i]);
+
+        node.MappedNamespace = mappedns;
     }
 
-    /// <summary>
-    /// Structure where to efficiently store namespace mappings
-    /// </summary>
-    public class NamespaceMappingTree
+    public string GetMappedNamespace(string refns,
+        NamespaceNormalization leftOverNorm = NamespaceNormalization.None)
     {
-        Node? m_root;
+        string? ret = GetMappedNamespace(refns, out string? leftoverns);
+        if (ret == null)
+            throw new Exception($"Unable to map namespace {refns}");
 
-        public NamespaceMappingTree() { }
+        if (leftoverns == null)
+            return ret;
 
-        public void PushMapping(string refns, string mappedns)
+        switch (leftOverNorm)
         {
-            var splitted = refns.Split('.');
-            if (m_root == null)
-                m_root = new Node();
+            case NamespaceNormalization.None:
+                return ret + "." + leftoverns;
+            case NamespaceNormalization.LowerCase:
+                return ret + "." + leftoverns.ToLower();
+            default:
+                throw new Exception();
+        }
+    }
 
-            Node node = m_root;
-            for (int i = 0; i < splitted.Length; i++)
-                node = node.GetChildren(splitted[i]);
+    public string? GetMappedNamespace(string refns, out string? leftoverns)
+    {
+        var splitted = refns.Split('.');
+        if (m_root == null)
+            goto Exit;
 
-            node.MappedNamespace = mappedns;
+        Node node = m_root;
+        int i = 0;
+        for (; i < splitted.Length; i++)
+        {
+            Node? found;
+            if (!node.TryGetChildren(splitted[i], out found))
+                break;
+
+            node = found!;
         }
 
-        public string GetMappedNamespace(string refns,
-            NamespaceNormalization leftOverNorm = NamespaceNormalization.None)
+        if (i != 0)
         {
-            string? ret = GetMappedNamespace(refns, out string? leftoverns);
-            if (ret == null)
-                throw new Exception($"Unable to map namespace {refns}");
+            if (node.MappedNamespace == null)
+                leftoverns = refns;
+            else
+                leftoverns = getSubNamespace(splitted, i);
 
-            if (leftoverns == null)
-                return ret;
-
-            switch (leftOverNorm)
-            {
-                case NamespaceNormalization.None:
-                    return ret + "." + leftoverns;
-                case NamespaceNormalization.LowerCase:
-                    return ret + "." + leftoverns.ToLower();
-                default:
-                    throw new Exception();
-            }
+            return node.MappedNamespace;
         }
 
-        public string? GetMappedNamespace(string refns, out string? leftoverns)
-        {
-            var splitted = refns.Split('.');
-            if (m_root == null)
-                goto Exit;
+    Exit:
+        leftoverns = refns;
+        return null;
+    }
 
-            Node node = m_root;
-            int i = 0;
-            for (; i < splitted.Length; i++)
-            {
-                Node? found;
-                if (!node.TryGetChildren(splitted[i], out found))
-                    break;
-
-                node = found!;
-            }
-
-            if (i != 0)
-            {
-                if (node.MappedNamespace == null)
-                    leftoverns = refns;
-                else
-                    leftoverns = getSubNamespace(splitted, i);
-
-                return node.MappedNamespace;
-            }
-
-        Exit:
-            leftoverns = refns;
+    string? getSubNamespace(string[] splitted, int index, int npos = -1)
+    {
+        if (npos == 0 || index >= splitted.Length)
             return null;
-        }
 
-        string? getSubNamespace(string[] splitted, int index, int npos = -1)
+        var builder = new StringBuilder();
+        npos = npos < 0 ? splitted.Length : npos;
+        for (int i = index; i < npos; i++)
         {
-            if (npos == 0 || index >= splitted.Length)
-                return null;
+            if (i != index)
+                builder.Append(".");
 
-            var builder = new StringBuilder();
-            npos = npos < 0 ? splitted.Length : npos;
-            for (int i = index; i < npos; i++)
-            {
-                if (i != index)
-                    builder.Append(".");
-
-                builder.Append(splitted[i]);
-            }
-
-            return builder.ToString();
+            builder.Append(splitted[i]);
         }
 
-        class Node
+        return builder.ToString();
+    }
+
+    class Node
+    {
+        Dictionary<string, Node>? m_children;
+
+        public Node()
         {
-            Dictionary<string, Node>? m_children;
-
-            public Node()
-            {
-                Namespace = null;
-                FullNamespace = null;
-            }
-
-            public Node(string? parentns, string nspart)
-            {
-                Namespace = nspart;
-                if (parentns == null)
-                    FullNamespace = nspart;
-                else
-                    FullNamespace = parentns + "." + nspart;
-            }
-
-            public bool TryGetChildren(string nspart, out Node? node)
-            {
-                if (m_children == null)
-                {
-                    node = null;
-                    return false;
-                }
-
-                return m_children.TryGetValue(nspart, out node);
-            }
-
-            public Node GetChildren(string nspart)
-            {
-                if (m_children == null)
-                    m_children = new Dictionary<string, Node>();
-
-                Node? ret;
-                if (!m_children.TryGetValue(nspart, out ret))
-                {
-                    ret = new Node(FullNamespace, nspart);
-                    m_children[nspart] = ret;
-                }
-
-                return ret;
-            }
-
-            public string? Namespace { get; private set; }
-            public string? FullNamespace { get; private set; }
-            public string? MappedNamespace { get; set; }
+            Namespace = null;
+            FullNamespace = null;
         }
+
+        public Node(string? parentns, string nspart)
+        {
+            Namespace = nspart;
+            if (parentns == null)
+                FullNamespace = nspart;
+            else
+                FullNamespace = parentns + "." + nspart;
+        }
+
+        public bool TryGetChildren(string nspart, out Node? node)
+        {
+            if (m_children == null)
+            {
+                node = null;
+                return false;
+            }
+
+            return m_children.TryGetValue(nspart, out node);
+        }
+
+        public Node GetChildren(string nspart)
+        {
+            if (m_children == null)
+                m_children = new Dictionary<string, Node>();
+
+            Node? ret;
+            if (!m_children.TryGetValue(nspart, out ret))
+            {
+                ret = new Node(FullNamespace, nspart);
+                m_children[nspart] = ret;
+            }
+
+            return ret;
+        }
+
+        public string? Namespace { get; private set; }
+        public string? FullNamespace { get; private set; }
+        public string? MappedNamespace { get; set; }
     }
 }

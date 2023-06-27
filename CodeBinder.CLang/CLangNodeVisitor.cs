@@ -12,93 +12,92 @@ using Microsoft.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
 
-namespace CodeBinder.CLang
+namespace CodeBinder.CLang;
+
+public class CLangNodeVisitor : CSharpNodeVisitorBase<CLangCompilationContext, CLangModuleContext, ConversionCSharpToCLang>
 {
-    public class CLangNodeVisitor : CSharpNodeVisitorBase<CLangCompilationContext, CLangModuleContext, ConversionCSharpToCLang>
+    public CLangNodeVisitor(CLangCompilationContext context)
+        : base(context)
     {
-        public CLangNodeVisitor(CLangCompilationContext context)
-            : base(context)
+    }
+
+    public override void VisitClassDeclaration(ClassDeclarationSyntax node)
+    {
+        var symbol = node.GetDeclaredSymbol<ITypeSymbol>(this)!;
+        if (symbol.Inherits<NativeTypeBinder>())
         {
+            // These are the binders for types
+            Compilation.AddType(node);
         }
 
-        public override void VisitClassDeclaration(ClassDeclarationSyntax node)
+        visitType(node);
+    }
+
+    public override void VisitStructDeclaration(StructDeclarationSyntax node)
+    {
+        if (node.HasAttribute<NativeBindingAttribute>(this))
+            Compilation.AddType(node);
+
+        visitType(node);
+    }
+
+    private void visitType(TypeDeclarationSyntax type)
+    {
+        CLangModuleContextChild? module = null;
+        string? moduleName;
+        if (TryGetModuleName(type, out moduleName))
         {
-            var symbol = node.GetDeclaredSymbol<ITypeSymbol>(this)!;
-            if (symbol.Inherits<NativeTypeBinder>())
+            CLangModuleContextParent? parent;
+            if (!Compilation.TryGetModule(moduleName, out parent))
             {
-                // These are the binders for types
-                Compilation.AddType(node);
+                parent = new CLangModuleContextParent(moduleName, Compilation);
+                Compilation.AddModule(parent);
             }
 
-            visitType(node);
+            module = new CLangModuleContextChild(Compilation);
+            Compilation.AddModuleChild(module, parent);
         }
 
-        public override void VisitStructDeclaration(StructDeclarationSyntax node)
+        foreach (var member in type.Members)
         {
-            if (node.HasAttribute<NativeBindingAttribute>(this))
-                Compilation.AddType(node);
-
-            visitType(node);
-        }
-
-        private void visitType(TypeDeclarationSyntax type)
-        {
-            CLangModuleContextChild? module = null;
-            string? moduleName;
-            if (TryGetModuleName(type, out moduleName))
+            var kind = member.Kind();
+            switch (kind)
             {
-                CLangModuleContextParent? parent;
-                if (!Compilation.TryGetModule(moduleName, out parent))
-                {
-                    parent = new CLangModuleContextParent(moduleName, Compilation);
-                    Compilation.AddModule(parent);
-                }
-
-                module = new CLangModuleContextChild(Compilation);
-                Compilation.AddModuleChild(module, parent);
-            }
-
-            foreach (var member in type.Members)
-            {
-                var kind = member.Kind();
-                switch (kind)
-                {
-                    case SyntaxKind.MethodDeclaration:
-                        // TODO: Chehck for policies. Fix/extend ShouldDiscard
-                        if (module != null && !member.ShouldDiscard(Compilation))
-                        {
-                            var method = (MethodDeclarationSyntax)member;
-                            if (method.IsNative(this))
-                                module.AddNativeMethod(method);
-                        }
-                        break;
-                    case SyntaxKind.ClassDeclaration:
-                        visitType((ClassDeclarationSyntax)member);
-                        break;
-                    case SyntaxKind.StructDeclaration:
-                        visitType((StructDeclarationSyntax)member);
-                        break;
-                    case SyntaxKind.DelegateDeclaration:
-                        visitType((DelegateDeclarationSyntax)member);
-                        break;
-                }
+                case SyntaxKind.MethodDeclaration:
+                    // TODO: Chehck for policies. Fix/extend ShouldDiscard
+                    if (module != null && !member.ShouldDiscard(Compilation))
+                    {
+                        var method = (MethodDeclarationSyntax)member;
+                        if (method.IsNative(this))
+                            module.AddNativeMethod(method);
+                    }
+                    break;
+                case SyntaxKind.ClassDeclaration:
+                    visitType((ClassDeclarationSyntax)member);
+                    break;
+                case SyntaxKind.StructDeclaration:
+                    visitType((StructDeclarationSyntax)member);
+                    break;
+                case SyntaxKind.DelegateDeclaration:
+                    visitType((DelegateDeclarationSyntax)member);
+                    break;
             }
         }
+    }
 
-        public void visitType(DelegateDeclarationSyntax node)
-        {
-            if (node.ShouldDiscard(Compilation))
-                return;
+    public void visitType(DelegateDeclarationSyntax node)
+    {
+        if (node.ShouldDiscard(Compilation))
+            return;
 
-            Compilation.AddCallback(node);
-        }
+        Compilation.AddCallback(node);
+    }
 
-        public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
-        {
-            if (!node.GetAttributes(this).HasAttribute<NativeBindingAttribute>())
-                return;
+    public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
+    {
+        if (!node.GetAttributes(this).HasAttribute<NativeBindingAttribute>())
+            return;
 
-            Compilation.AddEnum(node);
-        }
+        Compilation.AddEnum(node);
     }
 }

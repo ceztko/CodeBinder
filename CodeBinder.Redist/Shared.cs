@@ -4,11 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder
+namespace CodeBinder;
+
+public enum ConversionType
 {
-    public enum ConversionType
-    {
-        Header,
-        Implementation,
-    }
+    Header,
+    Implementation,
 }

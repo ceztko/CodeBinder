@@ -12,207 +12,206 @@ using Microsoft.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace CodeBinder.Apple
+namespace CodeBinder.Apple;
+
+class ObjCTypesHeaderConversion : ObjCHeaderConversionWriter
 {
-    class ObjCTypesHeaderConversion : ObjCHeaderConversionWriter
+    public bool IsInternalHeader { get; private set; }
+
+    public ObjCTypesHeaderConversion(ObjCCompilationContext compilation, bool isInternalHeader)
+        : base(compilation)
     {
-        public bool IsInternalHeader { get; private set; }
+        IsInternalHeader = isInternalHeader;
+    }
 
-        public ObjCTypesHeaderConversion(ObjCCompilationContext compilation, bool isInternalHeader)
-            : base(compilation)
+    protected override string GetFileName() => ConversionCSharpToObjC.TypesHeader;
+
+    protected override string? GetBasePath() => IsInternalHeader ? ConversionCSharpToObjC.InternalBasePath : null;
+
+    protected override string? GetGeneratedPreamble() => ConversionCSharpToObjC.SourcePreamble;
+
+    protected override void write(CodeBuilder builder)
+    {
+        BeginHeaderGuard(builder);
+        builder.AppendLine();
+        if (IsInternalHeader)
         {
-            IsInternalHeader = isInternalHeader;
+            builder.AppendLine($"#include <stdexcept>");
+            builder.AppendLine($"#import \"../{ConversionCSharpToObjC.TypesHeader}\"");
+            // TODO: CBOCBinderUtils.h should be included in a currently missing
+            // internal only header that only has tools for code generation
+            builder.AppendLine($"#import \"{nameof(ObjCResources.CBOCBinderUtils_h).ToObjCHeaderFilename()}\"");
+        }
+        else
+        {
+            builder.AppendLine($"#import \"{BaseTypesHeader}\"");
         }
 
-        protected override string GetFileName() => ConversionCSharpToObjC.TypesHeader;
+        builder.AppendLine();
+        writeOpaqueTypes(builder);
+        builder.AppendLine();
+        writeEnums(builder);
+        builder.AppendLine();
+        writeCallbacks(builder);
+        builder.AppendLine();
+        EndHeaderGuard(builder);
+    }
 
-        protected override string? GetBasePath() => IsInternalHeader ? ConversionCSharpToObjC.InternalBasePath : null;
-
-        protected override string? GetGeneratedPreamble() => ConversionCSharpToObjC.SourcePreamble;
-
-        protected override void write(CodeBuilder builder)
+    void writeOpaqueTypes(CodeBuilder builder)
+    {
+        // Forward declared classes
+        builder.AppendLine("// Forward declared classes");
+        builder.AppendLine();
+        foreach (var type in Compilation.StorageTypes.Declarations)
         {
-            BeginHeaderGuard(builder);
-            builder.AppendLine();
-            if (IsInternalHeader)
-            {
-                builder.AppendLine($"#include <stdexcept>");
-                builder.AppendLine($"#import \"../{ConversionCSharpToObjC.TypesHeader}\"");
-                // TODO: CBOCBinderUtils.h should be included in a currently missing
-                // internal only header that only has tools for code generation
-                builder.AppendLine($"#import \"{nameof(ObjCResources.CBOCBinderUtils_h).ToObjCHeaderFilename()}\"");
-            }
-            else
-            {
-                builder.AppendLine($"#import \"{BaseTypesHeader}\"");
-            }
+            if (ShouldSkipType(type))
+                continue;
 
-            builder.AppendLine();
-            writeOpaqueTypes(builder);
-            builder.AppendLine();
-            writeEnums(builder);
-            builder.AppendLine();
-            writeCallbacks(builder);
-            builder.AppendLine();
-            EndHeaderGuard(builder);
+            builder.Append("@class").Space().Append(type.GetObjCName(Compilation)).EndOfStatement();
         }
 
-        void writeOpaqueTypes(CodeBuilder builder)
+        builder.AppendLine();
+
+        // Forward declared interfaces
+        builder.AppendLine("// Forward declared interfaces");
+        builder.AppendLine();
+        foreach (var iface in Compilation.Interfaces.Declarations)
         {
-            // Forward declared classes
-            builder.AppendLine("// Forward declared classes");
-            builder.AppendLine();
-            foreach (var type in Compilation.StorageTypes.Declarations)
-            {
-                if (ShouldSkipType(type))
-                    continue;
+            if (ShouldSkipType(iface))
+                continue;
 
-                builder.Append("@class").Space().Append(type.GetObjCName(Compilation)).EndOfStatement();
+            builder.Append("@protocol").Space().Append(iface.GetObjCName(Compilation)).EndOfStatement();
+        }
+    }
+
+    private void writeEnums(CodeBuilder builder)
+    {
+        // Enums
+        builder.AppendLine("// Enums");
+        builder.AppendLine();
+        foreach (var enm in Compilation.Enums.Declarations)
+        {
+            if (ShouldSkipType(enm))
+                continue;
+
+            string enumName = enm.GetObjCName(Compilation);
+            var symbol = enm.GetDeclaredSymbol<INamedTypeSymbol>(Compilation);
+            bool isflag = symbol.HasAttribute<FlagsAttribute>();
+            string underlyingType = symbol.EnumUnderlyingType!.GetObjCPrimitiveType();
+            builder.Append("typedef").Space().Append(isflag ? "NS_OPTIONS" : "NS_ENUM").Parenthesized()
+                .Append(underlyingType).CommaSeparator().Append(enumName).Close().AppendLine();
+
+            var members = getEnumMembers(enm);
+            using (builder.EnumBlock())
+            {
+                foreach (var member in members)
+                    builder.Append(member.Name).Space().Append("=").Space().Append(member.Value.ToString()).Comma().AppendLine();
             }
 
             builder.AppendLine();
-
-            // Forward declared interfaces
-            builder.AppendLine("// Forward declared interfaces");
-            builder.AppendLine();
-            foreach (var iface in Compilation.Interfaces.Declarations)
-            {
-                if (ShouldSkipType(iface))
-                    continue;
-
-                builder.Append("@protocol").Space().Append(iface.GetObjCName(Compilation)).EndOfStatement();
-            }
         }
 
-        private void writeEnums(CodeBuilder builder)
+        if (IsInternalHeader)
         {
-            // Enums
-            builder.AppendLine("// Enums");
-            builder.AppendLine();
+            builder.AppendLine("// CBToString for enums");
             foreach (var enm in Compilation.Enums.Declarations)
             {
-                if (ShouldSkipType(enm))
-                    continue;
-
                 string enumName = enm.GetObjCName(Compilation);
-                var symbol = enm.GetDeclaredSymbol<INamedTypeSymbol>(Compilation);
-                bool isflag = symbol.HasAttribute<FlagsAttribute>();
-                string underlyingType = symbol.EnumUnderlyingType!.GetObjCPrimitiveType();
-                builder.Append("typedef").Space().Append(isflag ? "NS_OPTIONS" : "NS_ENUM").Parenthesized()
-                    .Append(underlyingType).CommaSeparator().Append(enumName).Close().AppendLine();
-
-                var members = getEnumMembers(enm);
-                using (builder.EnumBlock())
-                {
-                    foreach (var member in members)
-                        builder.Append(member.Name).Space().Append("=").Space().Append(member.Value.ToString()).Comma().AppendLine();
-                }
-
+                var members = getEnumMembers(enm, true);
+                writeCBToStringMethod(builder, enumName, enm.IsFlag(Compilation), members);
                 builder.AppendLine();
             }
-
-            if (IsInternalHeader)
-            {
-                builder.AppendLine("// CBToString for enums");
-                foreach (var enm in Compilation.Enums.Declarations)
-                {
-                    string enumName = enm.GetObjCName(Compilation);
-                    var members = getEnumMembers(enm, true);
-                    writeCBToStringMethod(builder, enumName, enm.IsFlag(Compilation), members);
-                    builder.AppendLine();
-                }
-            }
         }
+    }
 
-        // Write a CBToString() method for this enum
-        private void writeCBToStringMethod(CodeBuilder builder, string enumName, bool isFlag, List<EnumMember> members)
+    // Write a CBToString() method for this enum
+    private void writeCBToStringMethod(CodeBuilder builder, string enumName, bool isFlag, List<EnumMember> members)
+    {
+        builder.Append("inline").Space().Append("NSString *").Space().Append("CBToString").Parenthesized().Append(isFlag ? $"{enumName}_Options" : enumName).Space().Append("value").Close().AppendLine();
+        using (builder.Block())
         {
-            builder.Append("inline").Space().Append("NSString *").Space().Append("CBToString").Parenthesized().Append(isFlag ? $"{enumName}_Options" : enumName).Space().Append("value").Close().AppendLine();
+            builder.Append("switch (value)").AppendLine();
             using (builder.Block())
             {
-                builder.Append("switch (value)").AppendLine();
-                using (builder.Block())
+                foreach (var member in members)
                 {
-                    foreach (var member in members)
-                    {
-                        builder.Append("case").Space().Append(member.Name).Colon().AppendLine();
-                        builder.IndentChild().Append("return").Append($"@\"{member.Name}\"").EndOfStatement();
-                    }
-
-                    builder.Append("default").Colon().AppendLine();
-                    builder.IndentChild().Append("throw std::runtime_error(\"Unsupported\")").EndOfStatement();
+                    builder.Append("case").Space().Append(member.Name).Colon().AppendLine();
+                    builder.IndentChild().Append("return").Append($"@\"{member.Name}\"").EndOfStatement();
                 }
+
+                builder.Append("default").Colon().AppendLine();
+                builder.IndentChild().Append("throw std::runtime_error(\"Unsupported\")").EndOfStatement();
             }
         }
+    }
 
-        List<EnumMember> getEnumMembers(EnumDeclarationSyntax enm, bool skipAliases = false)
+    List<EnumMember> getEnumMembers(EnumDeclarationSyntax enm, bool skipAliases = false)
+    {
+        var enums = new List<EnumMember>(enm.Members.Count);
+        foreach (var item in enm.Members)
         {
-            var enums = new List<EnumMember>(enm.Members.Count);
-            foreach (var item in enm.Members)
-            {
-                long value = item.GetEnumValue(Compilation);
-                if (skipAliases && enums.Any((enm) => enm.Value == value))
-                    continue;
+            long value = item.GetEnumValue(Compilation);
+            if (skipAliases && enums.Any((enm) => enm.Value == value))
+                continue;
 
-                string name = item.GetObjCName(Compilation);
-                enums.Add(new EnumMember() { Name = name, Value = value });
-            }
-
-            return enums;
+            string name = item.GetObjCName(Compilation);
+            enums.Add(new EnumMember() { Name = name, Value = value });
         }
 
-        private void writeCallbacks(CodeBuilder builder)
-        {
-            // Callbacks
-            builder.AppendLine("// Callbacks");
-            builder.AppendLine();
-            foreach (var callback in Compilation.Delegates.Declarations)
-            {
-                string name;
-                AttributeData? bidingAttrib;
-                if (callback.TryGetAttribute<NativeBindingAttribute>(Compilation, out bidingAttrib))
-                    name = bidingAttrib.GetConstructorArgument<string>(0);
-                else
-                    name = callback.Identifier.Text;
+        return enums;
+    }
 
-                throw new NotImplementedException();
-                /* TODO
-                builder.Append("typedef").Space().Append(callback.GetCLangReturnType(Compilation))
-                    .Append("(*").Append(name).Append(")")
-                    .Append("(").Append(new CLangParameterListWriter(callback.ParameterList, Compilation)).Append(")")
-                    .EndOfLine();
-                */
-            }
-        }
-
-        bool ShouldSkipType(BaseTypeDeclarationSyntax type)
+    private void writeCallbacks(CodeBuilder builder)
+    {
+        // Callbacks
+        builder.AppendLine("// Callbacks");
+        builder.AppendLine();
+        foreach (var callback in Compilation.Delegates.Declarations)
         {
-            bool publicType = type.HasAccessibility(Accessibility.Public, Compilation);
-            if (IsInternalHeader)
-            {
-                if (publicType)
-                    return true;
-            }
+            string name;
+            AttributeData? bidingAttrib;
+            if (callback.TryGetAttribute<NativeBindingAttribute>(Compilation, out bidingAttrib))
+                name = bidingAttrib.GetConstructorArgument<string>(0);
             else
-            {
-                if (!publicType)
-                    return true;
-            }
+                name = callback.Identifier.Text;
 
-            return false;
+            throw new NotImplementedException();
+            /* TODO
+            builder.Append("typedef").Space().Append(callback.GetCLangReturnType(Compilation))
+                .Append("(*").Append(name).Append(")")
+                .Append("(").Append(new CLangParameterListWriter(callback.ParameterList, Compilation)).Append(")")
+                .EndOfLine();
+            */
         }
+    }
 
-        protected override string HeaderGuardStem => IsInternalHeader ? "INTERNAL_TYPES" : "TYPES";
-
-        public string BaseTypesHeader => IsInternalHeader
-            ? $"../{ConversionCSharpToObjC.BaseTypesHeader}"
-            : ConversionCSharpToObjC.BaseTypesHeader;
-
-
-        struct EnumMember
+    bool ShouldSkipType(BaseTypeDeclarationSyntax type)
+    {
+        bool publicType = type.HasAccessibility(Accessibility.Public, Compilation);
+        if (IsInternalHeader)
         {
-            public string Name;
-            public long Value;
+            if (publicType)
+                return true;
         }
+        else
+        {
+            if (!publicType)
+                return true;
+        }
+
+        return false;
+    }
+
+    protected override string HeaderGuardStem => IsInternalHeader ? "INTERNAL_TYPES" : "TYPES";
+
+    public string BaseTypesHeader => IsInternalHeader
+        ? $"../{ConversionCSharpToObjC.BaseTypesHeader}"
+        : ConversionCSharpToObjC.BaseTypesHeader;
+
+
+    struct EnumMember
+    {
+        public string Name;
+        public long Value;
     }
 }

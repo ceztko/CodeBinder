@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Apple
+namespace CodeBinder.Apple;
+
+static class ObjCClasses
 {
-    static class ObjCClasses
-    {
-        public const string CBException_h = @"#ifndef CB_EXCPETION
+    public const string CBException_h = @"#ifndef CB_EXCPETION
 #define CB_EXCPETION
 #pragma once
 
@@ -24,7 +24,7 @@ OBJC_CODEBINDER_API @interface CBException : NSException
 #endif // CB_EXCPETION
 ";
 
-        public const string CBException_mm = @"#define OBJC_CODEBINDER_EXPORT
+    public const string CBException_mm = @"#define OBJC_CODEBINDER_EXPORT
 #import ""CBException.h""
 
 @implementation CBException
@@ -47,7 +47,7 @@ OBJC_CODEBINDER_API @interface CBException : NSException
 }
 @end";
 
-        public const string CBIReadOnlyList_h = @"#ifndef CB_IREADONLYLIST
+    public const string CBIReadOnlyList_h = @"#ifndef CB_IREADONLYLIST
 #define CB_IREADONLYLIST
 #pragma once
 
@@ -58,7 +58,7 @@ OBJC_CODEBINDER_API @interface CBException : NSException
 #endif // CB_IREADONLYLIST
 ";
 
-        public const string CBIEqualityCompararer_h = @"#ifndef CB_IEQUALITYCOMPARARER
+    public const string CBIEqualityCompararer_h = @"#ifndef CB_IEQUALITYCOMPARARER
 #define CB_IEQUALITYCOMPARARER
 #pragma once
 
@@ -69,7 +69,7 @@ OBJC_CODEBINDER_API @interface CBException : NSException
 #endif // CB_IEQUALITYCOMPARARER
 ";
 
-        public const string CBIDisposable_h = @"#ifndef CB_IDISPOSABLE
+    public const string CBIDisposable_h = @"#ifndef CB_IDISPOSABLE
 #define CB_IDISPOSABLE
 
 // Substitute for .NET IDisposable
@@ -80,7 +80,7 @@ OBJC_CODEBINDER_API @interface CBException : NSException
 #endif // CB_IDISPOSABLE
 ";
 
-        public const string CBKeyValuePair_h =
+    public const string CBKeyValuePair_h =
 @"#ifndef CB_KEYVALUEPAIR
 #define CB_KEYVALUEPAIR
 #pragma once
@@ -107,7 +107,7 @@ OBJC_CODEBINDER_API @interface CBKeyValuePair<__covariant KeyType, __covariant V
 #endif // CB_KEYVALUEPAIR
 ";
 
-        public const string CBKeyValuePair_mm =
+    public const string CBKeyValuePair_mm =
 @"#define OBJC_CODEBINDER_EXPORT
 #import ""CBKeyValuePair.h""
 
@@ -136,7 +136,7 @@ OBJC_CODEBINDER_API @interface CBKeyValuePair<__covariant KeyType, __covariant V
 @end
 ";
 
-        public const string CBHandleRef_h =
+    public const string CBHandleRef_h =
 @"#ifndef CB_HANDLEREF
 #define CB_HANDLEREF
 #pragma once
@@ -164,7 +164,7 @@ OBJC_CODEBINDER_API @interface CBHandleRef : NSObject
 #endif // CB_HANDLEREF
 ";
 
-        public const string CBHandleRef_mm =
+    public const string CBHandleRef_mm =
 @"#define OBJC_CODEBINDER_EXPORT
 #import ""CBHandleRef.h""
 
@@ -204,5 +204,4 @@ OBJC_CODEBINDER_API @interface CBHandleRef : NSObject
 
 @end
 ";
-    }
 }

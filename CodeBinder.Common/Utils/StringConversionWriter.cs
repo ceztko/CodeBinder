@@ -5,33 +5,32 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Utils
+namespace CodeBinder.Utils;
+
+public sealed class StringConversionWriter : ConversionWriter
 {
-    public sealed class StringConversionWriter : ConversionWriter
+    Func<string> m_resourceString;
+
+    public new string FileName { get; private set; }
+
+    public new string? GeneratedPreamble { get; set; }
+
+    public new string? BasePath { get; set; }
+
+    public StringConversionWriter(string filename, Func<string> resourceString)
     {
-        Func<string> m_resourceString;
+        FileName = filename;
+        m_resourceString = resourceString;
+    }
 
-        public new string FileName { get; private set; }
+    protected override string GetFileName() => FileName;
 
-        public new string? GeneratedPreamble { get; set; }
+    protected override string? GetBasePath() => BasePath;
 
-        public new string? BasePath { get; set; }
+    protected sealed override string? GetGeneratedPreamble() => GeneratedPreamble;
 
-        public StringConversionWriter(string filename, Func<string> resourceString)
-        {
-            FileName = filename;
-            m_resourceString = resourceString;
-        }
-
-        protected override string GetFileName() => FileName;
-
-        protected override string? GetBasePath() => BasePath;
-
-        protected sealed override string? GetGeneratedPreamble() => GeneratedPreamble;
-
-        protected override void write(CodeBuilder builder)
-        {
-            builder.Append(m_resourceString());
-        }
+    protected override void write(CodeBuilder builder)
+    {
+        builder.Append(m_resourceString());
     }
 }

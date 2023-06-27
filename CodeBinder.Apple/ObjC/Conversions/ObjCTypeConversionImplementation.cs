@@ -8,68 +8,67 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Apple
+namespace CodeBinder.Apple;
+
+partial class ObjCTypeConversion<TTypeContext>
 {
-    partial class ObjCTypeConversion<TTypeContext>
+    public abstract class Implementation : ObjCTypeConversion<TTypeContext>
     {
-        public abstract class Implementation : ObjCTypeConversion<TTypeContext>
+        public ObjImplementationType ImplementationType { get; private set; }
+
+        public Implementation(TTypeContext context, ConversionCSharpToObjC conversion, ObjImplementationType implementationType)
+            : base(context, conversion)
         {
-            public ObjImplementationType ImplementationType { get; private set; }
+            ImplementationType = implementationType;
+        }
 
-            public Implementation(TTypeContext context, ConversionCSharpToObjC conversion, ObjImplementationType implementationType)
-                : base(context, conversion)
+        protected sealed override string GetFileName() => ImplementationsFilename;
+
+        protected override string? GetBasePath() =>
+            ImplementationType == ObjImplementationType.PublicType ? null : ConversionCSharpToObjC.InternalBasePath;
+
+        protected override IEnumerable<string> Imports
+        {
+            get
             {
-                ImplementationType = implementationType;
-            }
-
-            protected sealed override string GetFileName() => ImplementationsFilename;
-
-            protected override string? GetBasePath() =>
-                ImplementationType == ObjImplementationType.PublicType ? null : ConversionCSharpToObjC.InternalBasePath;
-
-            protected override IEnumerable<string> Imports
-            {
-                get
+                if (ImplementationType == ObjImplementationType.PublicType)
                 {
-                    if (ImplementationType == ObjImplementationType.PublicType)
-                    {
-                        yield return $"\"{ConversionCSharpToObjC.InternalBasePath}/{Compilation.ObjCLibraryHeaderName}\"";
-                        yield return $"\"{ConversionCSharpToObjC.InternalBasePath}/{nameof(ObjCResources.CBOCInterop_h).ToObjCHeaderFilename()}\"";
-                    }
-                    else
-                    {
-                        yield return $"\"{Compilation.ObjCLibraryHeaderName}\"";
-                        yield return $"\"{nameof(ObjCResources.CBOCInterop_h).ToObjCHeaderFilename()}\"";
-                    }
-                    yield return $"<{Compilation.CLangLibraryHeaderName}>";
+                    yield return $"\"{ConversionCSharpToObjC.InternalBasePath}/{Compilation.ObjCLibraryHeaderName}\"";
+                    yield return $"\"{ConversionCSharpToObjC.InternalBasePath}/{nameof(ObjCResources.CBOCInterop_h).ToObjCHeaderFilename()}\"";
                 }
+                else
+                {
+                    yield return $"\"{Compilation.ObjCLibraryHeaderName}\"";
+                    yield return $"\"{nameof(ObjCResources.CBOCInterop_h).ToObjCHeaderFilename()}\"";
+                }
+                yield return $"<{Compilation.CLangLibraryHeaderName}>";
             }
-
-            public override ConversionType ConversionType => ConversionType.Implementation;
         }
+
+        public override ConversionType ConversionType => ConversionType.Implementation;
     }
+}
 
-    class ObjCClassConversionImplementation : ObjCTypeConversion<ObjCClassContext>.Implementation
+class ObjCClassConversionImplementation : ObjCTypeConversion<ObjCClassContext>.Implementation
+{
+    public ObjCClassConversionImplementation(ObjCClassContext context,
+            ConversionCSharpToObjC conversion, ObjImplementationType implementationType)
+        : base(context, conversion, implementationType) { }
+
+    protected override CodeWriter GetTypeWriter()
     {
-        public ObjCClassConversionImplementation(ObjCClassContext context,
-                ConversionCSharpToObjC conversion, ObjImplementationType implementationType)
-            : base(context, conversion, implementationType) { }
-
-        protected override CodeWriter GetTypeWriter()
-        {
-            return new ObjCClassWriter(Context.Node, Context.ComputePartialDeclarationsTree(), Context.Compilation, ObjCFileType.Implementation);
-        }
+        return new ObjCClassWriter(Context.Node, Context.ComputePartialDeclarationsTree(), Context.Compilation, ObjCFileType.Implementation);
     }
+}
 
-    class ObjCStructConversionImplementation : ObjCTypeConversion<ObjCStructContext>.Implementation
+class ObjCStructConversionImplementation : ObjCTypeConversion<ObjCStructContext>.Implementation
+{
+    public ObjCStructConversionImplementation(ObjCStructContext context,
+            ConversionCSharpToObjC conversion, ObjImplementationType implementationType)
+        : base(context, conversion, implementationType) { }
+
+    protected override CodeWriter GetTypeWriter()
     {
-        public ObjCStructConversionImplementation(ObjCStructContext context,
-                ConversionCSharpToObjC conversion, ObjImplementationType implementationType)
-            : base(context, conversion, implementationType) { }
-
-        protected override CodeWriter GetTypeWriter()
-        {
-            return new ObjCStructWriter(Context.Node, Context.ComputePartialDeclarationsTree(), Context.Compilation, ObjCFileType.Implementation);
-        }
+        return new ObjCStructWriter(Context.Node, Context.ComputePartialDeclarationsTree(), Context.Compilation, ObjCFileType.Implementation);
     }
 }

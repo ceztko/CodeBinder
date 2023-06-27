@@ -6,88 +6,87 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.CLang
+namespace CodeBinder.CLang;
+
+public abstract class CLangModuleContext : TypeContext<CLangModuleContext, CLangCompilationContext>
 {
-    public abstract class CLangModuleContext : TypeContext<CLangModuleContext, CLangCompilationContext>
+    CLangCompilationContext _Compilation;
+
+    public override CLangCompilationContext Compilation => _Compilation;
+
+    protected CLangModuleContext(CLangCompilationContext context)
     {
-        CLangCompilationContext _Compilation;
-
-        public override CLangCompilationContext Compilation => _Compilation;
-
-        protected CLangModuleContext(CLangCompilationContext context)
-        {
-            _Compilation = context;
-        }
-
-        public abstract IEnumerable<MethodDeclarationSyntax> Methods
-        {
-            get;
-        }
+        _Compilation = context;
     }
 
-    public class CLangModuleContextParent : CLangModuleContext
+    public abstract IEnumerable<MethodDeclarationSyntax> Methods
     {
-        private string _Name;
+        get;
+    }
+}
 
-        public CLangModuleContextParent(string name, CLangCompilationContext context)
-            : base(context)
-        {
-            _Name = name;
-        }
+public class CLangModuleContextParent : CLangModuleContext
+{
+    private string _Name;
 
-        protected override IEnumerable<TypeConversion<CLangModuleContext>> GetConversions()
-        {
-            yield return new CLangModuleConversion(this, ModuleConversionType.CHeader, Compilation.Conversion);
-            if (!Compilation.Conversion.PublicInterfaceOnly)
-                yield return new CLangModuleConversion(this, ModuleConversionType.CppTrampoline, Compilation.Conversion);
-        }
+    public CLangModuleContextParent(string name, CLangCompilationContext context)
+        : base(context)
+    {
+        _Name = name;
+    }
 
-        public override IEnumerable<MethodDeclarationSyntax> Methods
+    protected override IEnumerable<TypeConversion<CLangModuleContext>> GetConversions()
+    {
+        yield return new CLangModuleConversion(this, ModuleConversionType.CHeader, Compilation.Conversion);
+        if (!Compilation.Conversion.PublicInterfaceOnly)
+            yield return new CLangModuleConversion(this, ModuleConversionType.CppTrampoline, Compilation.Conversion);
+    }
+
+    public override IEnumerable<MethodDeclarationSyntax> Methods
+    {
+        get
         {
-            get
+            foreach (var child in Children)
             {
-                foreach (var child in Children)
-                {
-                    foreach (var method in child.Methods)
-                        yield return method;
-                }
+                foreach (var method in child.Methods)
+                    yield return method;
             }
         }
-
-        public override string Name
-        {
-            get { return _Name; }
-        }
     }
 
-    public class CLangModuleContextChild : CLangModuleContext
+    public override string Name
     {
-        private List<MethodDeclarationSyntax> _methods;
+        get { return _Name; }
+    }
+}
 
-        public CLangModuleContextChild(CLangCompilationContext context)
-            : base(context)
-        {
-            _methods = new List<MethodDeclarationSyntax>();
-        }
+public class CLangModuleContextChild : CLangModuleContext
+{
+    private List<MethodDeclarationSyntax> _methods;
 
-        public void AddNativeMethod(MethodDeclarationSyntax method)
-        {
-            _methods.Add(method);
-        }
+    public CLangModuleContextChild(CLangCompilationContext context)
+        : base(context)
+    {
+        _methods = new List<MethodDeclarationSyntax>();
+    }
 
-        protected override IEnumerable<TypeConversion<CLangModuleContext>> GetConversions()
-        {
-            throw new NotImplementedException();
-        }
+    public void AddNativeMethod(MethodDeclarationSyntax method)
+    {
+        _methods.Add(method);
+    }
 
-        public override IEnumerable<MethodDeclarationSyntax> Methods
-        {
-            get { return _methods; }
-        }
+    protected override IEnumerable<TypeConversion<CLangModuleContext>> GetConversions()
+    {
+        throw new NotImplementedException();
+    }
 
-        public override string Name
-        {
-            get { return Parent!.Name; }
-        }
+    public override IEnumerable<MethodDeclarationSyntax> Methods
+    {
+        get { return _methods; }
+    }
+
+    public override string Name
+    {
+        get { return Parent!.Name; }
     }
 }

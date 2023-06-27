@@ -11,52 +11,51 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
-namespace CodeBinder.Apple
+namespace CodeBinder.Apple;
+
+public class ObjCCompilationContext : CSharpCompilationContext<ConversionCSharpToObjC>
 {
-    public class ObjCCompilationContext : CSharpCompilationContext<ConversionCSharpToObjC>
+    public string CLangLibraryHeaderName => $"{LibraryName}.h";
+
+    public string ObjCLibraryHeaderName => $"{ObjCLibraryName}.h";
+
+    public string ObjCLibraryName => $"OC{LibraryName}";
+
+    public ObjCCompilationContext(ConversionCSharpToObjC conversion)
+        : base(conversion)
+
     {
-        public string CLangLibraryHeaderName => $"{LibraryName}.h";
+    }
 
-        public string ObjCLibraryHeaderName => $"{ObjCLibraryName}.h";
+    protected override CSharpClassTypeContext CreateContext(ClassDeclarationSyntax cls)
+    {
+        return new ObjCClassContext(cls, this);
+    }
 
-        public string ObjCLibraryName => $"OC{LibraryName}";
+    protected override CSharpInterfaceTypeContext CreateContext(InterfaceDeclarationSyntax iface)
+    {
+        return new ObjCInterfaceContext(iface, this);
+    }
 
-        public ObjCCompilationContext(ConversionCSharpToObjC conversion)
-            : base(conversion)
+    protected override CSharpStructTypeContext CreateContext(StructDeclarationSyntax str)
+    {
+        return new ObjCStructContext(str, this);
+    }
 
+    public override IEnumerable<IConversionWriter> DefaultConversions
+    {
+        get
         {
+            yield return new ObjCLibDefsHeaderConversion(this);
+            yield return new ObjCTypesHeaderConversion(this, true);
+            yield return new ObjCTypesHeaderConversion(this, false);
+            yield return new ObjCLibraryHeaderConversion(this, true);
+            yield return new ObjCLibraryHeaderConversion(this, false);
         }
+    }
 
-        protected override CSharpClassTypeContext CreateContext(ClassDeclarationSyntax cls)
-        {
-            return new ObjCClassContext(cls, this);
-        }
-
-        protected override CSharpInterfaceTypeContext CreateContext(InterfaceDeclarationSyntax iface)
-        {
-            return new ObjCInterfaceContext(iface, this);
-        }
-
-        protected override CSharpStructTypeContext CreateContext(StructDeclarationSyntax str)
-        {
-            return new ObjCStructContext(str, this);
-        }
-
-        public override IEnumerable<IConversionWriter> DefaultConversions
-        {
-            get
-            {
-                yield return new ObjCLibDefsHeaderConversion(this);
-                yield return new ObjCTypesHeaderConversion(this, true);
-                yield return new ObjCTypesHeaderConversion(this, false);
-                yield return new ObjCLibraryHeaderConversion(this, true);
-                yield return new ObjCLibraryHeaderConversion(this, false);
-            }
-        }
-
-        protected override INodeVisitor CreateVisitor()
-        {
-            return new ObjCNodeVisitor(this);
-        }
+    protected override INodeVisitor CreateVisitor()
+    {
+        return new ObjCNodeVisitor(this);
     }
 }

@@ -4,11 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Java
+namespace CodeBinder.Java;
+
+static class JavaClasses
 {
-    static class JavaClasses
-    {
-        public const string BinderUtils =
+    public const string BinderUtils =
 @"import java.lang.reflect.*;
 
 public class BinderUtils
@@ -108,8 +108,8 @@ public class BinderUtils
     static native Object getGlobalRefTarget(long handle);
     static native Object getGlobalWeakRefTarget(long handle);
 }";
-        // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
-        public const string HandleRef =
+    // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
+    public const string HandleRef =
 @"// https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
 public class HandleRef
 {
@@ -129,7 +129,7 @@ public class HandleRef
     }
 }";
 
-        public const string NativeHandle = """
+    public const string NativeHandle = """
 public class NativeHandle
 {
     long handle;
@@ -156,7 +156,7 @@ public class NativeHandle
 }
 """;
 
-        public const string FinalizableObject = @"import java.util.*;
+    public const string FinalizableObject = @"import java.util.*;
 
 public abstract class FinalizableObject
 {
@@ -183,7 +183,7 @@ public abstract class FinalizableObject
 }
 ";
 
-        public const string HandledObjectBase =
+    public const string HandledObjectBase =
 @"import java.util.*;
 
 public class HandledObjectBase extends FinalizableObject
@@ -244,7 +244,7 @@ public class HandledObjectBase extends FinalizableObject
     }
 }";
 
-        public const string HandledObject =
+    public const string HandledObject =
 @"import java.util.*;
 
 public class HandledObject <BaseT extends HandledObject<BaseT>> extends HandledObjectBase
@@ -261,8 +261,8 @@ public class HandledObject <BaseT extends HandledObject<BaseT>> extends HandledO
 }";
 
 
-        //// TODO: alternatively generate finalize() or run()
-        public const string HandledObjectFinalizer = """
+    //// TODO: alternatively generate finalize() or run()
+    public const string HandledObjectFinalizer = """
 import java.util.*;
 
 public abstract class HandledObjectFinalizer implements IObjectFinalizer
@@ -285,13 +285,12 @@ public abstract class HandledObjectFinalizer implements IObjectFinalizer
 }
 """;
 
-        //// TODO: alternatively inherits Runnable or not
-        public const string IObjectFinalizer = """
+    //// TODO: alternatively inherits Runnable or not
+    public const string IObjectFinalizer = """
 import java.util.*;
 
 public interface IObjectFinalizer extends Runnable
 {
 }
 """;
-    }
 }

@@ -5,68 +5,67 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Shared
+namespace CodeBinder.Shared;
+
+/// <summary>
+/// Class to write a conversion with a context
+/// </summary>
+/// <seealso cref="ConversionDelegate"/>
+/// <remarks>Not coupled to CodeBuilder like <see cref="CodeWriter"/></remarks>
+public abstract class ConversionWriter<TContext> : ConversionWriter
 {
-    /// <summary>
-    /// Class to write a conversion with a context
-    /// </summary>
-    /// <seealso cref="ConversionDelegate"/>
-    /// <remarks>Not coupled to CodeBuilder like <see cref="CodeWriter"/></remarks>
-    public abstract class ConversionWriter<TContext> : ConversionWriter
-    {
-        public TContext Context { get; private set; }
+    public TContext Context { get; private set; }
 
-        public ConversionWriter(TContext context)
-        {
-            Context = context;
-        }
+    public ConversionWriter(TContext context)
+    {
+        Context = context;
+    }
+}
+
+/// <summary>
+/// Class to write a conversion 
+/// </summary>
+/// <seealso cref="ConversionDelegate"/>
+/// <remarks>Not coupled to CodeBuilder like <see cref="CodeWriter"/></remarks>
+public abstract class ConversionWriter : IConversionWriter
+{
+    public void Write(CodeBuilder builder)
+    {
+        string? preamble = GetGeneratedPreamble();
+        if (!preamble.IsNullOrEmpty())
+            builder.AppendLine(preamble);
+
+        write(builder);
     }
 
-    /// <summary>
-    /// Class to write a conversion 
-    /// </summary>
-    /// <seealso cref="ConversionDelegate"/>
-    /// <remarks>Not coupled to CodeBuilder like <see cref="CodeWriter"/></remarks>
-    public abstract class ConversionWriter : IConversionWriter
-    {
-        public void Write(CodeBuilder builder)
-        {
-            string? preamble = GetGeneratedPreamble();
-            if (!preamble.IsNullOrEmpty())
-                builder.AppendLine(preamble);
+    public virtual bool Skip => false;
 
-            write(builder);
-        }
+    protected abstract void write(CodeBuilder builder);
 
-        public virtual bool Skip => false;
+    protected abstract string GetFileName();
 
-        protected abstract void write(CodeBuilder builder);
+    protected virtual string? GetBasePath() => null;
 
-        protected abstract string GetFileName();
+    protected virtual string? GetGeneratedPreamble() => null;
 
-        protected virtual string? GetBasePath() => null;
+    public string FileName => GetFileName();
 
-        protected virtual string? GetGeneratedPreamble() => null;
+    public string? BasePath => GetBasePath();
 
-        public string FileName => GetFileName();
+    public string? GeneratedPreamble => GetGeneratedPreamble();
+}
 
-        public string? BasePath => GetBasePath();
+/// <summary>
+/// Interface to write a conversion
+/// </summary>
+/// <seealso cref="ConversionDelegate"/>
+public interface IConversionWriter
+{
+    void Write(CodeBuilder builder);
 
-        public string? GeneratedPreamble => GetGeneratedPreamble();
-    }
+    string FileName { get; }
 
-    /// <summary>
-    /// Interface to write a conversion
-    /// </summary>
-    /// <seealso cref="ConversionDelegate"/>
-    public interface IConversionWriter
-    {
-        void Write(CodeBuilder builder);
+    string? BasePath { get; }
 
-        string FileName { get; }
-
-        string? BasePath { get; }
-
-        bool Skip { get; }
-    }
+    bool Skip { get; }
 }

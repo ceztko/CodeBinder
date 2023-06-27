@@ -2,43 +2,41 @@
 // SPDX-License-Identifier: MIT
 using CodeBinder.Utils;
 
-namespace CodeBinder.Apple
+namespace CodeBinder.Apple;
+
+abstract class ObjCCodeWriter<TItem> : ObjCCodeWriterBase<TItem>
 {
+    public ObjCFileType FileType { get; private set; }
 
-    abstract class ObjCCodeWriter<TItem> : ObjCCodeWriterBase<TItem>
+    protected ObjCCodeWriter(TItem item, ObjCCompilationContext context, ObjCFileType fileType)
+        : base(item, context)
     {
-        public ObjCFileType FileType { get; private set; }
-
-        protected ObjCCodeWriter(TItem item, ObjCCompilationContext context, ObjCFileType fileType)
-            : base(item, context)
-        {
-            FileType = fileType;
-        }
+        FileType = fileType;
     }
+}
 
-    abstract class ObjCCodeWriterBase<TItem> : CodeWriter<TItem, ObjCCompilationContext>, IObjCCodeWriter
-    {
-        protected ObjCCodeWriterBase(TItem item, ObjCCompilationContext context)
-            : base(item, context) { }
+abstract class ObjCCodeWriterBase<TItem> : CodeWriter<TItem, ObjCCompilationContext>, IObjCCodeWriter
+{
+    protected ObjCCodeWriterBase(TItem item, ObjCCompilationContext context)
+        : base(item, context) { }
 
-        public abstract ObjWriterType Type { get; }
-    }
+    public abstract ObjWriterType Type { get; }
+}
 
-    interface IObjCCodeWriter : ICodeWriter
-    {
-        ObjWriterType Type { get; }
-    }
+interface IObjCCodeWriter : ICodeWriter
+{
+    ObjWriterType Type { get; }
+}
 
-    enum ObjWriterType
-    {
-        Unknown,
-        Type,
-        Field,
-        StaticField,
-        Property,
-        Method,
-        CLangMethod,
-        Constructor,
-        Destructor,
-    }
+enum ObjWriterType
+{
+    Unknown,
+    Type,
+    Field,
+    StaticField,
+    Property,
+    Method,
+    CLangMethod,
+    Constructor,
+    Destructor,
 }

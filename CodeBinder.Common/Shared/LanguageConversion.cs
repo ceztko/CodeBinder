@@ -8,120 +8,119 @@ using CodeBinder.Attributes;
 using CodeBinder.Utils;
 using Microsoft.CodeAnalysis;
 
-namespace CodeBinder.Shared
+namespace CodeBinder.Shared;
+
+/// <summary>
+/// Basic language conversion
+/// </summary>
+/// <remarks>Inherit this class to provide custom contexts</remarks>
+public abstract class LanguageConversion<TCompilationContext, TTypeContext> : LanguageConversion
+    where TCompilationContext : CompilationContext<TTypeContext>
+    where TTypeContext : TypeContext<TTypeContext>
 {
+    public LanguageConversion() { }
+
+    internal sealed override CompilationContext CreateCompilationContext()
+        => createCompilationContext();
+
+    protected abstract TCompilationContext createCompilationContext();
+}
+
+public abstract class LanguageConversion
+{
+    NamespaceMappingTree _NamespaceMapping;
+
+    internal LanguageConversion()
+    {
+        _NamespaceMapping = new NamespaceMappingTree();
+    }
+
     /// <summary>
-    /// Basic language conversion
+    /// Add here policies supported by this language conversion
     /// </summary>
-    /// <remarks>Inherit this class to provide custom contexts</remarks>
-    public abstract class LanguageConversion<TCompilationContext, TTypeContext> : LanguageConversion
-        where TCompilationContext : CompilationContext<TTypeContext>
-        where TTypeContext : TypeContext<TTypeContext>
+    public virtual IReadOnlyCollection<string> SupportedPolicies
     {
-        public LanguageConversion() { }
-
-        internal sealed override CompilationContext CreateCompilationContext()
-            => createCompilationContext();
-
-        protected abstract TCompilationContext createCompilationContext();
+        get { return new string[] { }; }
     }
 
-    public abstract class LanguageConversion
+    /// <summary>
+    /// Supported overload features
+    /// </summary>
+    public virtual OverloadFeature? OverloadFeatures => null;
+
+    /// <summary>
+    /// True for native conversions (eg. CLang)
+    /// </summary>
+    public virtual bool IsNative => false;
+
+    /// <summary>
+    /// Default discard native syntax (eg. [DllImport] methods or [UnmanagedFunctionPointer] delegates)
+    /// </summary>
+    public virtual bool DiscardNative => false;
+
+    /// <summary>
+    /// False if namespace mapping is needed for this conversion
+    /// </summary>
+    public virtual bool NeedNamespaceMapping => true;
+
+    public virtual bool UseUTF8Bom => true;
+
+    /// <summary>
+    /// Method name casing
+    /// </summary>
+    public virtual MethodCasing MethodCasing => MethodCasing.Undefinied;
+
+    /// <summary>
+    /// Namespace mapping store
+    /// </summary>
+    public NamespaceMappingTree NamespaceMapping
     {
-        NamespaceMappingTree _NamespaceMapping;
-
-        internal LanguageConversion()
+        get
         {
-            _NamespaceMapping = new NamespaceMappingTree();
+            if (!NeedNamespaceMapping)
+                throw new Exception("Namespace mapping not supported for this conversion");
+
+            return _NamespaceMapping;
         }
-
-        /// <summary>
-        /// Add here policies supported by this language conversion
-        /// </summary>
-        public virtual IReadOnlyCollection<string> SupportedPolicies
-        {
-            get { return new string[] { }; }
-        }
-
-        /// <summary>
-        /// Supported overload features
-        /// </summary>
-        public virtual OverloadFeature? OverloadFeatures => null;
-
-        /// <summary>
-        /// True for native conversions (eg. CLang)
-        /// </summary>
-        public virtual bool IsNative => false;
-
-        /// <summary>
-        /// Default discard native syntax (eg. [DllImport] methods or [UnmanagedFunctionPointer] delegates)
-        /// </summary>
-        public virtual bool DiscardNative => false;
-
-        /// <summary>
-        /// False if namespace mapping is needed for this conversion
-        /// </summary>
-        public virtual bool NeedNamespaceMapping => true;
-
-        public virtual bool UseUTF8Bom => true;
-
-        /// <summary>
-        /// Method name casing
-        /// </summary>
-        public virtual MethodCasing MethodCasing => MethodCasing.Undefinied;
-
-        /// <summary>
-        /// Namespace mapping store
-        /// </summary>
-        public NamespaceMappingTree NamespaceMapping
-        {
-            get
-            {
-                if (!NeedNamespaceMapping)
-                    throw new Exception("Namespace mapping not supported for this conversion");
-
-                return _NamespaceMapping;
-            }
-        }
-
-        public virtual IEnumerable<IConversionWriter> DefaultConversions
-        {
-            get { yield break; }
-        }
-
-        public virtual bool TryParseExtraArgs(List<string> args)
-        {
-            return false;
-        }
-
-        /// <summary>Conditional compilation symbols</summary>
-        public virtual IReadOnlyList<string> PreprocessorDefinitions
-        {
-            get { return new string[0]; }
-        }
-
-        internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
-        {
-            get
-            {
-                foreach (var conversion in DefaultConversions)
-                    yield return new ConversionDelegate(conversion);
-            }
-        }
-
-        internal CompilationContext GetCompilationContext(Compilation compilation)
-        {
-            var ret = CreateCompilationContext();
-            ret.Compilation = compilation;
-            return ret;
-        }
-
-        internal abstract CompilationContext CreateCompilationContext();
     }
 
-    public enum MethodCasing
+    public virtual IEnumerable<IConversionWriter> DefaultConversions
     {
-        Undefinied = 0,
-        LowerCamelCase
+        get { yield break; }
     }
+
+    public virtual bool TryParseExtraArgs(List<string> args)
+    {
+        return false;
+    }
+
+    /// <summary>Conditional compilation symbols</summary>
+    public virtual IReadOnlyList<string> PreprocessorDefinitions
+    {
+        get { return new string[0]; }
+    }
+
+    internal IEnumerable<ConversionDelegate> DefaultConversionDelegates
+    {
+        get
+        {
+            foreach (var conversion in DefaultConversions)
+                yield return new ConversionDelegate(conversion);
+        }
+    }
+
+    internal CompilationContext GetCompilationContext(Compilation compilation)
+    {
+        var ret = CreateCompilationContext();
+        ret.Compilation = compilation;
+        return ret;
+    }
+
+    internal abstract CompilationContext CreateCompilationContext();
+}
+
+public enum MethodCasing
+{
+    Undefinied = 0,
+    LowerCamelCase
 }

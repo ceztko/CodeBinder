@@ -7,42 +7,41 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace CodeBinder.JNI
+namespace CodeBinder.JNI;
+
+public class JNICompilationContext : CompilationContext<JNIModuleContext, ConversionCSharpToJNI>
 {
-    public class JNICompilationContext : CompilationContext<JNIModuleContext, ConversionCSharpToJNI>
+    Dictionary<string, JNIModuleContextParent> _modules;
+
+    public JNICompilationContext(ConversionCSharpToJNI conversion)
+        : base(conversion)
     {
-        Dictionary<string, JNIModuleContextParent> _modules;
+        _modules = new Dictionary<string, JNIModuleContextParent>();
+    }
 
-        public JNICompilationContext(ConversionCSharpToJNI conversion)
-            : base(conversion)
-        {
-            _modules = new Dictionary<string, JNIModuleContextParent>();
-        }
+    public void AddModule(CompilationContext compilation, JNIModuleContextParent module)
+    {
+        _modules.Add(module.Name, module);
+        AddTypeContext(module, null);
+    }
 
-        public void AddModule(CompilationContext compilation, JNIModuleContextParent module)
-        {
-            _modules.Add(module.Name, module);
-            AddTypeContext(module, null);
-        }
+    public void AddModuleChild(CompilationContext compilation, JNIModuleContextChild module, JNIModuleContextParent parent)
+    {
+        AddTypeContext(module, parent);
+    }
 
-        public void AddModuleChild(CompilationContext compilation, JNIModuleContextChild module, JNIModuleContextParent parent)
-        {
-            AddTypeContext(module, parent);
-        }
+    public bool TryGetModule(string moduleName, [NotNullWhen(true)]out JNIModuleContextParent? module)
+    {
+        return _modules.TryGetValue(moduleName, out module);
+    }
 
-        public bool TryGetModule(string moduleName, [NotNullWhen(true)]out JNIModuleContextParent? module)
-        {
-            return _modules.TryGetValue(moduleName, out module);
-        }
+    protected override INodeVisitor CreateVisitor()
+    {
+        return new JNINodeVisitor(this);
+    }
 
-        protected override INodeVisitor CreateVisitor()
-        {
-            return new JNINodeVisitor(this);
-        }
-
-        public IEnumerable<JNIModuleContextParent> Modules
-        {
-            get { return _modules.Values; }
-        }
+    public IEnumerable<JNIModuleContextParent> Modules
+    {
+        get { return _modules.Values; }
     }
 }

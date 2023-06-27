@@ -4,64 +4,63 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.CLang
+namespace CodeBinder.CLang;
+
+static class CLangBuilderExtensions
 {
-    static class CLangBuilderExtensions
+    public static CodeBuilder EndOfLine(this CodeBuilder builder)
     {
-        public static CodeBuilder EndOfLine(this CodeBuilder builder)
+        return builder.AppendLine(";");
+    }
+
+    public static CodeBuilder Space(this CodeBuilder builder)
+    {
+        return builder.Append(" ");
+    }
+
+    public static CodeBuilder Comma(this CodeBuilder builder)
+    {
+        return builder.Append(",");
+    }
+
+    public static CodeBuilder CommaSeparator(this CodeBuilder builder)
+    {
+        return builder.Append(", ");
+    }
+
+    public static CodeBuilder CommaSeparator(this CodeBuilder builder, ref bool first)
+    {
+        if (first)
+            first = false;
+        else
+            return builder.CommaSeparator();
+
+        return builder;
+    }
+
+    public static CodeBuilder TypeBlock(this CodeBuilder builder, string? postIdentifier = null)
+    {
+        builder.AppendLine("{");
+        return builder.Indent(postIdentifier.IsNullOrEmpty() ? "};" : $"}} {postIdentifier};", true);
+    }
+
+    public static CodeBuilder Block(this CodeBuilder builder, bool appendLine = true)
+    {
+        builder.AppendLine("{");
+        return builder.Indent("}", appendLine);
+    }
+
+    public static CodeBuilder ParameterList(this CodeBuilder builder, bool multiLine = false)
+    {
+        if (multiLine)
         {
-            return builder.AppendLine(";");
+            builder.AppendLine("(");
+            return builder.Indent(")");
         }
-
-        public static CodeBuilder Space(this CodeBuilder builder)
+        else
         {
-            return builder.Append(" ");
-        }
-
-        public static CodeBuilder Comma(this CodeBuilder builder)
-        {
-            return builder.Append(",");
-        }
-
-        public static CodeBuilder CommaSeparator(this CodeBuilder builder)
-        {
-            return builder.Append(", ");
-        }
-
-        public static CodeBuilder CommaSeparator(this CodeBuilder builder, ref bool first)
-        {
-            if (first)
-                first = false;
-            else
-                return builder.CommaSeparator();
-
-            return builder;
-        }
-
-        public static CodeBuilder TypeBlock(this CodeBuilder builder, string? postIdentifier = null)
-        {
-            builder.AppendLine("{");
-            return builder.Indent(postIdentifier.IsNullOrEmpty() ? "};" : $"}} {postIdentifier};", true);
-        }
-
-        public static CodeBuilder Block(this CodeBuilder builder, bool appendLine = true)
-        {
-            builder.AppendLine("{");
-            return builder.Indent("}", appendLine);
-        }
-
-        public static CodeBuilder ParameterList(this CodeBuilder builder, bool multiLine = false)
-        {
-            if (multiLine)
-            {
-                builder.AppendLine("(");
-                return builder.Indent(")");
-            }
-            else
-            {
-                builder.Append("(");
-                return builder.Using(")");
-            }
+            builder.Append("(");
+            return builder.Using(")");
         }
     }
 }

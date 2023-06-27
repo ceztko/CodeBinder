@@ -10,101 +10,100 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace CodeBinder.CLang
+namespace CodeBinder.CLang;
+
+public class CLangCompilationContext : CompilationContext<CLangModuleContext, ConversionCSharpToCLang>
 {
-    public class CLangCompilationContext : CompilationContext<CLangModuleContext, ConversionCSharpToCLang>
+    Dictionary<string, CLangModuleContextParent> _Modules;
+    List<EnumDeclarationSyntax> _Enums;
+    List<ClassDeclarationSyntax> _OpaqueTypes;
+    List<StructDeclarationSyntax> _StructTypes;
+    List<DelegateDeclarationSyntax> _Callbacks;
+
+    internal CLangCompilationContext(ConversionCSharpToCLang conversion)
+        : base(conversion)
     {
-        Dictionary<string, CLangModuleContextParent> _Modules;
-        List<EnumDeclarationSyntax> _Enums;
-        List<ClassDeclarationSyntax> _OpaqueTypes;
-        List<StructDeclarationSyntax> _StructTypes;
-        List<DelegateDeclarationSyntax> _Callbacks;
+        _Modules = new Dictionary<string, CLangModuleContextParent>();
+        _Enums = new List<EnumDeclarationSyntax>();
+        _OpaqueTypes = new List<ClassDeclarationSyntax>();
+        _StructTypes = new List<StructDeclarationSyntax>();
+        _Callbacks = new List<DelegateDeclarationSyntax>();
+    }
 
-        internal CLangCompilationContext(ConversionCSharpToCLang conversion)
-            : base(conversion)
-        {
-            _Modules = new Dictionary<string, CLangModuleContextParent>();
-            _Enums = new List<EnumDeclarationSyntax>();
-            _OpaqueTypes = new List<ClassDeclarationSyntax>();
-            _StructTypes = new List<StructDeclarationSyntax>();
-            _Callbacks = new List<DelegateDeclarationSyntax>();
-        }
+    public void AddModule(CLangModuleContextParent module)
+    {
+        _Modules.Add(module.Name, module);
+        AddTypeContext(module, null);
+    }
 
-        public void AddModule(CLangModuleContextParent module)
-        {
-            _Modules.Add(module.Name, module);
-            AddTypeContext(module, null);
-        }
+    public void AddModuleChild(CLangModuleContextChild module, CLangModuleContextParent parent)
+    {
+        AddTypeContext(module, parent);
+    }
 
-        public void AddModuleChild(CLangModuleContextChild module, CLangModuleContextParent parent)
-        {
-            AddTypeContext(module, parent);
-        }
+    public bool TryGetModule(string moduleName, [NotNullWhen(true)]out CLangModuleContextParent? module)
+    {
+        return _Modules.TryGetValue(moduleName, out module);
+    }
 
-        public bool TryGetModule(string moduleName, [NotNullWhen(true)]out CLangModuleContextParent? module)
-        {
-            return _Modules.TryGetValue(moduleName, out module);
-        }
+    public void AddEnum(EnumDeclarationSyntax enm)
+    {
+        _Enums.Add(enm);
+    }
 
-        public void AddEnum(EnumDeclarationSyntax enm)
-        {
-            _Enums.Add(enm);
-        }
+    public void AddCallback(DelegateDeclarationSyntax callback)
+    {
+        _Callbacks.Add(callback);
+    }
 
-        public void AddCallback(DelegateDeclarationSyntax callback)
-        {
-            _Callbacks.Add(callback);
-        }
+    public void AddType(ClassDeclarationSyntax type)
+    {
+        _OpaqueTypes.Add(type);
+    }
 
-        public void AddType(ClassDeclarationSyntax type)
-        {
-            _OpaqueTypes.Add(type);
-        }
+    public void AddType(StructDeclarationSyntax type)
+    {
+        _StructTypes.Add(type);
+    }
 
-        public void AddType(StructDeclarationSyntax type)
-        {
-            _StructTypes.Add(type);
-        }
+    protected override INodeVisitor CreateVisitor()
+    {
+        return new CLangNodeVisitor(this);
+    }
 
-        protected override INodeVisitor CreateVisitor()
-        {
-            return new CLangNodeVisitor(this);
-        }
+    public IReadOnlyCollection<CLangModuleContextParent> Modules
+    {
+        get { return _Modules.Values; }
+    }
 
-        public IReadOnlyCollection<CLangModuleContextParent> Modules
-        {
-            get { return _Modules.Values; }
-        }
+    public IReadOnlyList<EnumDeclarationSyntax> Enums
+    {
+        get { return _Enums; }
+    }
 
-        public IReadOnlyList<EnumDeclarationSyntax> Enums
-        {
-            get { return _Enums; }
-        }
+    public IReadOnlyList<ClassDeclarationSyntax> OpaqueTypes
+    {
+        get { return _OpaqueTypes; }
+    }
 
-        public IReadOnlyList<ClassDeclarationSyntax> OpaqueTypes
-        {
-            get { return _OpaqueTypes; }
-        }
+    public IReadOnlyList<StructDeclarationSyntax> StructTypes
+    {
+        get { return _StructTypes; }
+    }
 
-        public IReadOnlyList<StructDeclarationSyntax> StructTypes
-        {
-            get { return _StructTypes; }
-        }
+    public IReadOnlyList<DelegateDeclarationSyntax> Callbacks
+    {
+        get { return _Callbacks; }
+    }
 
-        public IReadOnlyList<DelegateDeclarationSyntax> Callbacks
+    public override IEnumerable<IConversionWriter> DefaultConversions
+    {
+        get
         {
-            get { return _Callbacks; }
-        }
-
-        public override IEnumerable<IConversionWriter> DefaultConversions
-        {
-            get
-            {
-                yield return new CLangLibraryHeaderConversion(this);
-                yield return new CLangLibDefsHeaderConversion(this);
-                yield return new CLangTypesHeaderConversion(this);
-                yield return new CLangMethodInitConversion(this);
-            }
+            yield return new CLangLibraryHeaderConversion(this);
+            yield return new CLangLibDefsHeaderConversion(this);
+            yield return new CLangTypesHeaderConversion(this);
+            yield return new CLangMethodInitConversion(this);
         }
     }
 }

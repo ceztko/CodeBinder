@@ -9,170 +9,169 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
-namespace CodeBinder.Shared
+namespace CodeBinder.Shared;
+
+/// <summary>
+/// Context built around a CodeAnalysis.Compilation
+/// </summary>
+/// <remarks>Inherit this class to add contextualized info to CompilationContext</remarks>
+public abstract class CompilationContext<TTypeContext, TLanguageConversion> : CompilationContext<TTypeContext>
+    where TTypeContext : TypeContext<TTypeContext>
+    where TLanguageConversion : LanguageConversion
 {
-    /// <summary>
-    /// Context built around a CodeAnalysis.Compilation
-    /// </summary>
-    /// <remarks>Inherit this class to add contextualized info to CompilationContext</remarks>
-    public abstract class CompilationContext<TTypeContext, TLanguageConversion> : CompilationContext<TTypeContext>
-        where TTypeContext : TypeContext<TTypeContext>
-        where TLanguageConversion : LanguageConversion
+    List<TTypeContext> _Types;
+    TLanguageConversion _Conversion;
+
+    protected CompilationContext(TLanguageConversion conversion)
     {
-        List<TTypeContext> _Types;
-        TLanguageConversion _Conversion;
-
-        protected CompilationContext(TLanguageConversion conversion)
-        {
-            _Conversion = conversion;
-            _Types = new List<TTypeContext>();
-        }
-
-        public override TLanguageConversion Conversion => _Conversion;
-
-        internal override void addTypeContext(TTypeContext type)
-        {
-            _Types.Add(type);
-        }
-
-        protected override sealed IEnumerable<TTypeContext> GetTypes() => _Types;
+        _Conversion = conversion;
+        _Types = new List<TTypeContext>();
     }
 
-    public abstract class CompilationContext<TTypeContext> : CompilationContext
-        where TTypeContext : TypeContext<TTypeContext>
+    public override TLanguageConversion Conversion => _Conversion;
+
+    internal override void addTypeContext(TTypeContext type)
     {
-        Dictionary<ISymbol, string> _bindedMethodNames;
-
-        internal CompilationContext()
-        {
-            _bindedMethodNames = new Dictionary<ISymbol, string>(SymbolEqualityComparer.Default);
-        }
-
-        public bool TryGetBindedName(IMethodSymbol symbol, [NotNullWhen(true)] out string? name)
-        {
-            if (_bindedMethodNames.TryGetValue(symbol, out name))
-                return true;
-
-            return false;
-        }
-
-        internal void AddMethodBinding(IMethodSymbol symbol, string bindedName)
-        {
-            _bindedMethodNames.Add(symbol, bindedName);
-        }
-
-        protected internal void AddTypeContext(TTypeContext type, TTypeContext? parent)
-        {
-            if (type.Parent != null)
-                throw new Exception("Can't re-add root type");
-
-            if (type == parent)
-                throw new Exception("The parent can't be same reference as the given type");
-
-            if (parent != null)
-            {
-                type.Parent = parent;
-                parent.AddChild(type);
-            }
-
-            addTypeContext(type);
-        }
-
-        internal abstract void addTypeContext(TTypeContext type);
+        _Types.Add(type);
     }
 
-    public abstract class CompilationContext : ICompilationContextProvider
+    protected override sealed IEnumerable<TTypeContext> GetTypes() => _Types;
+}
+
+public abstract class CompilationContext<TTypeContext> : CompilationContext
+    where TTypeContext : TypeContext<TTypeContext>
+{
+    Dictionary<ISymbol, string> _bindedMethodNames;
+
+    internal CompilationContext()
     {
-        HashSet<string> _Namespaces;
-        private Dictionary<SyntaxTree, SemanticModel> _modelCache;
-        private Compilation _compilation = null!;
+        _bindedMethodNames = new Dictionary<ISymbol, string>(SymbolEqualityComparer.Default);
+    }
 
-        public string LibraryName { get; private set; } = string.Empty;
+    public bool TryGetBindedName(IMethodSymbol symbol, [NotNullWhen(true)] out string? name)
+    {
+        if (_bindedMethodNames.TryGetValue(symbol, out name))
+            return true;
 
-        internal CompilationContext()
+        return false;
+    }
+
+    internal void AddMethodBinding(IMethodSymbol symbol, string bindedName)
+    {
+        _bindedMethodNames.Add(symbol, bindedName);
+    }
+
+    protected internal void AddTypeContext(TTypeContext type, TTypeContext? parent)
+    {
+        if (type.Parent != null)
+            throw new Exception("Can't re-add root type");
+
+        if (type == parent)
+            throw new Exception("The parent can't be same reference as the given type");
+
+        if (parent != null)
         {
-            _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
-            _Namespaces = new HashSet<string>();
+            type.Parent = parent;
+            parent.AddChild(type);
         }
 
-        public event EventHandler? CompilationSet;
+        addTypeContext(type);
+    }
 
-        public SemanticModel GetSemanticModel(SyntaxTree tree)
+    internal abstract void addTypeContext(TTypeContext type);
+}
+
+public abstract class CompilationContext : ICompilationContextProvider
+{
+    HashSet<string> _Namespaces;
+    private Dictionary<SyntaxTree, SemanticModel> _modelCache;
+    private Compilation _compilation = null!;
+
+    public string LibraryName { get; private set; } = string.Empty;
+
+    internal CompilationContext()
+    {
+        _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
+        _Namespaces = new HashSet<string>();
+    }
+
+    public event EventHandler? CompilationSet;
+
+    public SemanticModel GetSemanticModel(SyntaxTree tree)
+    {
+        SemanticModel? model;
+        if (!_modelCache.TryGetValue(tree, out model))
         {
-            SemanticModel? model;
-            if (!_modelCache.TryGetValue(tree, out model))
+            model = Compilation.GetSemanticModel(tree, true);
+            _modelCache.Add(tree, model);
+        }
+
+        return model;
+    }
+
+    protected internal void AddNamespace(string ns)
+    {
+        _Namespaces.Add(ns);
+    }
+
+    public abstract LanguageConversion Conversion { get; }
+
+    public IReadOnlyCollection<string> Namespaces => _Namespaces;
+
+    public Compilation Compilation
+    {
+        get { return _compilation; }
+        internal set
+        {
+            _compilation = value;
+            try
             {
-                model = Compilation.GetSemanticModel(tree, true);
-                _modelCache.Add(tree, model);
+                LibraryName = _compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0);
+            }
+            catch
+            {
+                throw new Exception($"Missing {nameof(NativeLibraryAttribute)}");
             }
 
-            return model;
+            CompilationSet?.Invoke(this, EventArgs.Empty);
         }
+    }
 
-        protected internal void AddNamespace(string ns)
+    internal protected abstract INodeVisitor CreateVisitor();
+
+    protected abstract IEnumerable<TypeContext> GetTypes();
+
+    internal IEnumerable<ConversionDelegate> ConversionDelegates
+    {
+        get
         {
-            _Namespaces.Add(ns);
+            foreach (var conversion in DefaultConversions)
+                yield return new ConversionDelegate(conversion);
         }
+    }
 
-        public abstract LanguageConversion Conversion { get; }
+    // Compilation wide default converions, see CLangCompilationContext for some examples
+    public virtual IEnumerable<IConversionWriter> DefaultConversions
+    {
+        get { yield break; }
+    }
 
-        public IReadOnlyCollection<string> Namespaces => _Namespaces;
+    public IEnumerable<TypeContext> Types => GetTypes();
 
-        public Compilation Compilation
+    public IEnumerable<TypeContext> RootTypes
+    {
+        get
         {
-            get { return _compilation; }
-            internal set
+            foreach (var type in GetTypes())
             {
-                _compilation = value;
-                try
-                {
-                    LibraryName = _compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0);
-                }
-                catch
-                {
-                    throw new Exception($"Missing {nameof(NativeLibraryAttribute)}");
-                }
-
-                CompilationSet?.Invoke(this, EventArgs.Empty);
+                if (type.Parent == null)
+                    yield return type;
             }
         }
+    }
 
-        internal protected abstract INodeVisitor CreateVisitor();
-
-        protected abstract IEnumerable<TypeContext> GetTypes();
-
-        internal IEnumerable<ConversionDelegate> ConversionDelegates
-        {
-            get
-            {
-                foreach (var conversion in DefaultConversions)
-                    yield return new ConversionDelegate(conversion);
-            }
-        }
-
-        // Compilation wide default converions, see CLangCompilationContext for some examples
-        public virtual IEnumerable<IConversionWriter> DefaultConversions
-        {
-            get { yield break; }
-        }
-
-        public IEnumerable<TypeContext> Types => GetTypes();
-
-        public IEnumerable<TypeContext> RootTypes
-        {
-            get
-            {
-                foreach (var type in GetTypes())
-                {
-                    if (type.Parent == null)
-                        yield return type;
-                }
-            }
-        }
-
-        CompilationContext ICompilationContextProvider.Compilation
-        {
-            get { return this; }
-        }
+    CompilationContext ICompilationContextProvider.Compilation
+    {
+        get { return this; }
     }
 }

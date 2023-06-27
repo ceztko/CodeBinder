@@ -5,10 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Shared
+namespace CodeBinder.Shared;
+
+public interface ICompilationContextProvider
 {
-    public interface ICompilationContextProvider
-    {
-        CompilationContext Compilation { get; }
-    }
+    CompilationContext Compilation { get; }
 }

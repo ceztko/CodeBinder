@@ -4,26 +4,25 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace CodeBinder.Apple
+namespace CodeBinder.Apple;
+
+class SymbolReplacement
 {
-    class SymbolReplacement
-    {
-        public string Name { get; set; } = string.Empty;
-        public SymbolReplacementKind Kind { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public SymbolReplacementKind Kind { get; set; }
 
-        // Valid only for properties
-        public string SetterName { get; set; } = string.Empty;
+    // Valid only for properties
+    public string SetterName { get; set; } = string.Empty;
 
-        // Valid only for methods/properties
-        public string? ReturnType { get; set; } = null;
-    }
+    // Valid only for methods/properties
+    public string? ReturnType { get; set; } = null;
+}
 
-    enum SymbolReplacementKind
-    {
-        Method,
-        StaticMethod,
-        Field,
-        Literal,
-        Property
-    }
+enum SymbolReplacementKind
+{
+    Method,
+    StaticMethod,
+    Field,
+    Literal,
+    Property
 }
