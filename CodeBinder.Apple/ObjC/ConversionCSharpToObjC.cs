@@ -1,10 +1,6 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using System.Collections.Generic;
 using CodeBinder.Attributes;
-using CodeBinder.Shared;
-using CodeBinder.Shared.CSharp;
-using CodeBinder.Utils;
 using BinderPolicies = CodeBinder.Attributes.Policies;
 
 namespace CodeBinder.Apple;

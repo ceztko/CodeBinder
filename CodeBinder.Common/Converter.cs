@@ -1,11 +1,6 @@
 ﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using CodeBinder.Shared;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.MSBuild;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;

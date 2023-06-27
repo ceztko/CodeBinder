@@ -1,7 +1,5 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using System;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace CodeBinder;

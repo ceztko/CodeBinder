@@ -1,17 +1,8 @@
 ﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using CodeBinder.Shared.CSharp;
-using CodeBinder.Utils;
-using CodeBinder.Shared;
 using CodeBinder.Attributes;
+using System.Linq;
 using System.Runtime.InteropServices;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection.Metadata;
 
 namespace CodeBinder.CLang;
 

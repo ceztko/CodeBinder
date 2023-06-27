@@ -1,12 +1,7 @@
 ﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto<ceztko@gmail.com>
 // SPDX-FileCopyrightText: (C) 2017-2018 ICSharpCode
 // SPDX-License-Identifier: MIT
-using CodeBinder.Shared;
-using CodeBinder.Utils;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace CodeBinder;

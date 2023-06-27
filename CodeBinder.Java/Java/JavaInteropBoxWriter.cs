@@ -1,12 +1,6 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using CodeBinder.Shared;
 using CodeBinder.Java.Shared;
-using CodeBinder.Utils;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 
 namespace CodeBinder.Java;
 

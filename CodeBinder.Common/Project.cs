@@ -1,7 +1,6 @@
 ﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
-using System;
 using System.IO;
 
 namespace CodeBinder;

@@ -1,10 +1,4 @@
-﻿using CodeBinder.Shared;
-using CodeBinder.Utils;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CodeBinder.CLang;
+﻿namespace CodeBinder.CLang;
 
 static class CLangBuilderExtensions
 {

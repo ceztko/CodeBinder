@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 using CodeBinder.Attributes;
-using System;
-using System.Diagnostics;
 
 namespace CodeBinder.Apple.Attributes;
 

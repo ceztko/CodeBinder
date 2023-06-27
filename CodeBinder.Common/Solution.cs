@@ -2,9 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 using Microsoft.Build.Construction;
-using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace CodeBinder;

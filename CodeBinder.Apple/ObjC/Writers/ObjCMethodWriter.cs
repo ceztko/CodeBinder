@@ -1,16 +1,8 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using CodeBinder.Shared;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using CodeBinder.Shared.CSharp;
-using Microsoft.CodeAnalysis;
-using System.Diagnostics;
-using System;
-using System.Linq;
-using CodeBinder.Attributes;
-using CodeBinder.Utils;
 using CodeBinder.Apple.Attributes;
+using CodeBinder.Attributes;
+using System.Linq;
 
 namespace CodeBinder.Apple;
 

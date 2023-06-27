@@ -1,16 +1,5 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using CodeBinder.Shared;
-using CodeBinder.Shared.CSharp;
-using CodeBinder.Utils;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.CodeAnalysis;
-using System.Diagnostics;
 
 namespace CodeBinder.Java;
 

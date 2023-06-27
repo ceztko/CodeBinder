@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
+// SPDX-License-Identifier: MIT
 
 namespace CodeBinder.Shared;
 

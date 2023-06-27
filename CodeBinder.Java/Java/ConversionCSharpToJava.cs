@@ -1,13 +1,7 @@
 ﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using System;
-using System.Collections.Generic;
-using CodeBinder.Shared;
-using CodeBinder.Shared.CSharp;
-using CodeBinder.Java.Shared;
-using CodeBinder.Utils;
-using Microsoft.CodeAnalysis;
 using CodeBinder.Attributes;
+using CodeBinder.Java.Shared;
 
 namespace CodeBinder.Java;
 

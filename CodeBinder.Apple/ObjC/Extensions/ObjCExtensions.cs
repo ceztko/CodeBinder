@@ -1,18 +1,8 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using CodeBinder.Shared.CSharp;
-using CodeBinder.Utils;
-using CodeBinder.Shared;
-using Microsoft.CodeAnalysis.CSharp;
-using System.Diagnostics.CodeAnalysis;
-using CodeBinder.Attributes;
-using System.Diagnostics;
-using CodeBinder.CLang;
 using CodeBinder.Apple.Attributes;
+using CodeBinder.Attributes;
+using CodeBinder.CLang;
 using System.Text.RegularExpressions;
 
 namespace CodeBinder.Apple;

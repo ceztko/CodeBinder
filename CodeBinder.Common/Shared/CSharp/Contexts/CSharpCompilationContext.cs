@@ -1,13 +1,7 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Linq;
-using System;
-using Microsoft.CodeAnalysis.CSharp;
-using System.Diagnostics.CodeAnalysis;
 using System.Collections;
+using System.Linq;
 
 namespace CodeBinder.Shared.CSharp;
 
