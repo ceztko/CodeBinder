@@ -25,6 +25,8 @@ public class ConversionCSharpToTypeScript : CSharpLanguageConversion<TypeScriptC
         return new TypeScriptCompilationContext(this);
     }
 
+    public override IReadOnlyCollection<string> SupportedPolicies => new string[] { Policies.YieldReturn };
+
     public override IReadOnlyList<string> PreprocessorDefinitions
     {
         get { return new string[] { "JavaScript", "TypeScript" }; }

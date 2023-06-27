@@ -156,6 +156,15 @@ namespace CodeBinder.Shared.CSharp
             var kind = node.Kind();
             switch (kind)
             {
+                // Yield statements
+                case SyntaxKind.YieldBreakStatement:
+                case SyntaxKind.YieldReturnStatement:
+                {
+                    if (!Compilation.Conversion.SupportedPolicies.Contains(Policies.YieldReturn))
+                        Unsupported(node);
+
+                    break;
+                }
                 // Type constraints
                 case SyntaxKind.ConstructorConstraint:
                 case SyntaxKind.StructConstraint:
@@ -172,9 +181,6 @@ namespace CodeBinder.Shared.CSharp
                 case SyntaxKind.FixedStatement:
                 case SyntaxKind.LocalFunctionStatement:
                 case SyntaxKind.ForEachVariableStatement:
-                // Yield statements
-                case SyntaxKind.YieldBreakStatement:
-                case SyntaxKind.YieldReturnStatement:
                 // Goto statements
                 case SyntaxKind.GotoStatement:
                 case SyntaxKind.GotoCaseStatement:
