@@ -1,5 +1,5 @@
-﻿// Copyright(c) 2018 Francesco Pretto
-// This file is subject to the MIT license
+﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto <ceztko@gmail.com>
+// SPDX-License-Identifier: MIT
 
 using Microsoft.Build.Construction;
 using Microsoft.CodeAnalysis;

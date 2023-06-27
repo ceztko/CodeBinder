@@ -1,4 +1,7 @@
-﻿namespace CodeBinder.Apple
+﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
+// SPDX-License-Identifier: MIT
+
+namespace CodeBinder.Apple
 {
     public struct NSFastEnumerationState
     {

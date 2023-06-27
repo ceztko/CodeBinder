@@ -1,4 +1,7 @@
-﻿using CodeBinder.Attributes;
+﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
+// SPDX-License-Identifier: MIT
+
+using CodeBinder.Attributes;
 using System;
 using System.Diagnostics;
 

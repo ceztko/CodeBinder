@@ -1,12 +1,6 @@
-﻿// Copyright(c) 2020 Francesco Pretto
-// This file is subject to the MIT license
-using System;
-using CodeBinder.Shared;
-using CodeBinder.Shared.CSharp;
+﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
+// SPDX-License-Identifier: MIT
 using CodeBinder.Utils;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CodeBinder.Apple
 {

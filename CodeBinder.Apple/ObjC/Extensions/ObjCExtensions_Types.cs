@@ -1,5 +1,5 @@
-﻿// Copyright(c) 2018 Francesco Pretto
-// This file is subject to the MIT license
+﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
+// SPDX-License-Identifier: MIT
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
