@@ -70,6 +70,9 @@ protected:
     }
 
     cbstringbase()
+        : m_str{ "", 0 } { }
+
+    cbstringbase(nullptr_t)
         : m_str{ } { }
 
     cbstringbase(const cbstring& str)
@@ -77,7 +80,6 @@ protected:
 
     // Non owning
     cbstringbase(const char* str, size_t len)
-        : m_str{ }
     {
         m_str.data = str;
         m_str.opaque = len;
@@ -150,7 +152,8 @@ public:
         str = { };
     }
 
-    cbstringp(std::nullptr_t) { }
+    cbstringp(std::nullptr_t)
+        : cbstringbase(nullptr) { }
 
     cbstringp(const char* str, size_t len)
         : cbstringbase(str, len) { }
@@ -238,7 +241,8 @@ public:
 
     cbstringr() { }
 
-    cbstringr(std::nullptr_t) { }
+    cbstringr(std::nullptr_t)
+        : cbstringbase(nullptr) { }
 
     cbstringr(const char* str, size_t len)
         : cbstringbase(init(str, len)) { }
