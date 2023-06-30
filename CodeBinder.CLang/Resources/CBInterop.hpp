@@ -162,14 +162,14 @@ public:
         : cbstringbase(str, str == nullptr ? 0 : std::char_traits<char>::length(str)) { }
 
     cbstringp(const std::string_view& str)
-        : cbstringbase(str.data(), str.length()) { }
+        : cbstringbase(str.data() == nullptr ? "" : str.data(), str.length()) { }
 
     cbstringp(const std::string& str)
         : cbstringbase(str.data(), str.length()) { }
 
     void operator=(const std::string_view& str)
     {
-        cbstringbase::operator=(init(str.data(), str.length()));
+        cbstringbase::operator=(init(str.data() == nullptr ? "" : str.data(), str.length()));
     }
 
     void operator=(const std::string& str)
@@ -251,7 +251,7 @@ public:
         : cbstringbase(init(str, str == nullptr ? 0 : std::char_traits<char>::length(str))) { }
 
     cbstringr(const std::string_view& str)
-        : cbstringbase(init(str.data(), str.length())) { }
+        : cbstringbase(init(str.data() == nullptr ? "" : str.data(), str.length())) { }
 
     cbstringr(const std::string& str)
         : cbstringbase(init(str.data(), str.length())) { }
