@@ -22,16 +22,16 @@ static class JNIMethodExtensions
         return builder.ToString();
     }
 
-    public static string GetJNIType(this ParameterSyntax parameter, ICompilationContextProvider provider)
+    public static string GetJNIType(this ParameterSyntax parameter, ICompilationProvider provider)
     {
-        var symbol = parameter.Type!.GetTypeSymbol(provider);
+        var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
         bool isByRef = parameter.IsRef() || parameter.IsOut();
         return getJNIType(symbol, isByRef);
     }
 
-    public static string GetJNIReturnType(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+    public static string GetJNIReturnType(this MethodDeclarationSyntax method, ICompilationProvider provider)
     {
-        var symbol = method.ReturnType.GetTypeSymbol(provider);
+        var symbol = method.ReturnType.GetTypeSymbolThrow(provider);
         return getJNIType(symbol, false);
     }
 

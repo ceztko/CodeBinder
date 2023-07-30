@@ -3,7 +3,7 @@
 
 namespace CodeBinder.Shared;
 
-public interface ICompilationContextProvider
+public interface ICompilationProvider
 {
-    CompilationContext Compilation { get; }
+    CompilationProvider Compilation { get; }
 }

@@ -10,9 +10,9 @@ static class NAPIMethodExtensions
         return $"NAPI_{method.GetName()}";
     }
 
-    public static string GetNAPIType(this ParameterSyntax parameter, ICompilationContextProvider provider)
+    public static string GetNAPIType(this ParameterSyntax parameter, ICompilationProvider provider)
     {
-        var symbol = parameter.Type!.GetTypeSymbol(provider);
+        var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
         bool isByRef = parameter.IsRef() || parameter.IsOut();
         return getNAPIType(symbol, isByRef);
     }

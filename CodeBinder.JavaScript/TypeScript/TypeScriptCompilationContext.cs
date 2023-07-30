@@ -47,8 +47,8 @@ public class TypeScriptCompilationContext : CSharpCompilationContext<ConversionC
         return new TypeScriptDelegateContext(dlg, this);
     }
 
-    protected override INodeVisitor CreateVisitor()
+    protected override CSharpCollectionContext CreateCollectionContext()
     {
-        return new TypeScriptNodeVisitor(this);
+        return new TypeScriptCollectionContext(this);
     }
 }

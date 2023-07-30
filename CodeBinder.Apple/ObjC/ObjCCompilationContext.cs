@@ -43,9 +43,4 @@ public class ObjCCompilationContext : CSharpCompilationContext<ConversionCSharpT
             yield return new ObjCLibraryHeaderConversion(this, false);
         }
     }
-
-    protected override INodeVisitor CreateVisitor()
-    {
-        return new ObjCNodeVisitor(this);
-    }
 }

@@ -21,8 +21,7 @@ class ClassFinalizerWriter : CodeWriter
             Builder.AppendLine("override freeHandle(handle: number): void");
             using (Builder.Block())
             {
-                //// ENABLE-ME
-                ////Builder.Append(_finalizer.Body!, _context, true).AppendLine();
+                Builder.Append(_finalizer.Body!, _context, true).AppendLine();
             }
         }
     }

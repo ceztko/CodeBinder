@@ -11,19 +11,17 @@ abstract class JavaCodeWriter<TItem> : CodeWriter<TItem, JavaCodeConversionConte
 
 // NOTE: This class is needed since the conversion doesn't use a custom CompilationContext
 // so we can't propagate CSharCompilationContext to access the ConversionCSharpToJava
-public class JavaCodeConversionContext : ICompilationContextProvider
+public class JavaCodeConversionContext : ICompilationProvider
 {
-    public ICompilationContextProvider Provider { get; private set; }
+    public CompilationContext Compilation { get; private set; }
+
     public ConversionCSharpToJava Conversion { get; private set; }
 
-    public JavaCodeConversionContext(ICompilationContextProvider provider, ConversionCSharpToJava conversion)
+    public JavaCodeConversionContext(CompilationContext provider, ConversionCSharpToJava conversion)
     {
-        Provider = provider;
+        Compilation = provider;
         Conversion = conversion;
     }
 
-    public CompilationContext Compilation
-    {
-        get { return Provider.Compilation; }
-    }
+    CompilationProvider ICompilationProvider.Compilation => Compilation;
 }

@@ -47,6 +47,11 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
         yield break;
     }
 
+    protected override CSharpValidationContext? CreateValidationContext()
+    {
+        return new JavaValidationContext(this);
+    }
+
     public override IReadOnlyList<string> PreprocessorDefinitions
     {
         get { return new string[] { "JAVA", "JVM" }; }
@@ -69,14 +74,19 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
             yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandledObject), JavaClasses.HandledObject);
             yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandledObjectFinalizer), JavaClasses.HandledObjectFinalizer);
             yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.IObjectFinalizer), JavaClasses.IObjectFinalizer);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Boolean, this);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Byte, this);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Short, this);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Integer, this);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Long, this);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Float, this);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Double, this);
-            yield return new JavaInteropBoxWriter(JavaInteropType.String, this);
+            yield return new JavaInteropBoxWriter(JavaInteropType.Boolean);
+            yield return new JavaInteropBoxWriter(JavaInteropType.Byte);
+            yield return new JavaInteropBoxWriter(JavaInteropType.Short);
+            yield return new JavaInteropBoxWriter(JavaInteropType.Integer);
+            yield return new JavaInteropBoxWriter(JavaInteropType.Long);
+            yield return new JavaInteropBoxWriter(JavaInteropType.Float);
+            yield return new JavaInteropBoxWriter(JavaInteropType.Double);
+            yield return new JavaInteropBoxWriter(JavaInteropType.String);
+            for (int i = 0; i < 10; i++)
+            {
+                yield return new JavaDelegateWriter(true, i);
+                yield return new JavaDelegateWriter(false, i);
+            }
         }
     }
 }

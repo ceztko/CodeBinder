@@ -20,15 +20,23 @@ public class ConversionCSharpToObjC : CSharpLanguageConversion<ObjCCompilationCo
 
     public ConversionCSharpToObjC() { }
 
-    protected override ObjCCompilationContext createCSharpCompilationContext()
+    public override string GetMethodBaseName(IMethodSymbol symbol)
+    {
+        if (symbol.MethodKind == MethodKind.Constructor)
+            return "init";
+        else
+            return base.GetMethodBaseName(symbol);
+    }
+
+    protected override ObjCCompilationContext CreateCSharpCompilationContext()
     {
         return new ObjCCompilationContext(this);
     }
 
     // NOTE: Delegates are not yet fully supported, PassByRef doesn't work perfectly as well
-    // _policies = new List<string>() { BinderPolicies.PassByRef, BinderPolicies.PassByRef, BinderPolicies.Delegates, BinderPolicies.ExplicitInterfaceImplementation };
+    // _policies = new List<string>() { BinderPolicies.PassByRef, BinderPolicies.PassByRef, BinderPolicies.Delegates };
     public override IReadOnlyCollection<string> SupportedPolicies =>
-        new string[] { BinderPolicies.ExplicitInterfaceImplementation, BinderPolicies.InstanceFinalizers};
+        new string[] { BinderPolicies.InstanceFinalizers};
 
     public override OverloadFeature? OverloadFeatures => OverloadFeature.ParameterArity;
 

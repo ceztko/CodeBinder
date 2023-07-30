@@ -5,13 +5,13 @@ using CodeBinder.JNI.Resources;
 namespace CodeBinder.JNI;
 
 [ConversionLanguageName("JNI")]
-public class ConversionCSharpToJNI : LanguageConversion<JNICompilationContext, JNIModuleContext>
+public class ConversionCSharpToJNI : CSharpLanguageConversionBase<JNICompilationContext, JNIModuleContext>
 {
     internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 
     public ConversionCSharpToJNI() { }
 
-    protected override JNICompilationContext createCompilationContext()
+    protected override JNICompilationContext CreateCompilationContext()
     {
         return new JNICompilationContext(this);
     }

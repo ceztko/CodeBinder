@@ -99,7 +99,7 @@ class JavaInterfaceConversion : JavaTypeConversion<CSharpInterfaceTypeContext>
     protected override CodeWriter GetTypeWriter()
     {
         return new JavaInterfaceWriter(Context.Node, Context.ComputePartialDeclarationsTree(),
-            new JavaCodeConversionContext(this, Conversion));
+            new JavaCodeConversionContext(Compilation, Conversion));
     }
 }
 
@@ -111,7 +111,7 @@ class JavaClassConversion : JavaTypeConversion<CSharpClassTypeContext>
     protected override CodeWriter GetTypeWriter()
     {
         return new JavaClassWriter(Context.Node, Context.ComputePartialDeclarationsTree(),
-            new JavaCodeConversionContext(this, Conversion));
+            new JavaCodeConversionContext(Compilation, Conversion));
     }
 }
 
@@ -123,7 +123,7 @@ class JavaStructConversion : JavaTypeConversion<CSharpStructTypeContext>
     protected override CodeWriter GetTypeWriter()
     {
         return new JavaStructWriter(Context.Node, Context.ComputePartialDeclarationsTree(),
-            new JavaCodeConversionContext(this, Conversion));
+            new JavaCodeConversionContext(Compilation, Conversion));
     }
 }
 
@@ -135,6 +135,6 @@ class JavaEnumConversion : JavaBaseTypeConversion<CSharpEnumTypeContext>
     protected override CodeWriter GetTypeWriter()
     {
         return new JavaEnumWriter(Context.Node,
-            new JavaCodeConversionContext(this, Conversion));
+            new JavaCodeConversionContext(Compilation, Conversion));
     }
 }

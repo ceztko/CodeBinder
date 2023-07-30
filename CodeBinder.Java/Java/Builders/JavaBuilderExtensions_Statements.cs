@@ -1,10 +1,71 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
+using CodeBinder.Java.Shared;
+
 namespace CodeBinder.Java;
 
 static partial class JavaBuilderExtension
 {
+    // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
+    public static CodeBuilder Append(this CodeBuilder builder, StatementSyntax statement, JavaCodeConversionContext context)
+    {
+        var kind = statement.Kind();
+        switch (kind)
+        {
+            case SyntaxKind.Block:
+                return builder.Append((BlockSyntax)statement, context);
+            case SyntaxKind.BreakStatement:
+                return builder.Append((BreakStatementSyntax)statement, context);
+            case SyntaxKind.ForEachStatement:
+                return builder.Append((ForEachStatementSyntax)statement, context);
+            case SyntaxKind.ContinueStatement:
+                return builder.Append((ContinueStatementSyntax)statement, context);
+            case SyntaxKind.DoStatement:
+                return builder.Append((DoStatementSyntax)statement, context);
+            case SyntaxKind.EmptyStatement:
+                return builder.Append((EmptyStatementSyntax)statement, context);
+            case SyntaxKind.ExpressionStatement:
+                return builder.Append((ExpressionStatementSyntax)statement, context);
+            case SyntaxKind.ForStatement:
+                return builder.Append((ForStatementSyntax)statement, context);
+            case SyntaxKind.IfStatement:
+                return builder.Append((IfStatementSyntax)statement, context);
+            case SyntaxKind.LocalDeclarationStatement:
+                return builder.Append((LocalDeclarationStatementSyntax)statement, context);
+            case SyntaxKind.ReturnStatement:
+                return builder.Append((ReturnStatementSyntax)statement, context);
+            case SyntaxKind.SwitchStatement:
+                return builder.Append((SwitchStatementSyntax)statement, context);
+            case SyntaxKind.ThrowStatement:
+                return builder.Append((ThrowStatementSyntax)statement, context);
+            case SyntaxKind.TryStatement:
+                return builder.Append((TryStatementSyntax)statement, context);
+            case SyntaxKind.UsingStatement:
+                return builder.Append((UsingStatementSyntax)statement, context);
+            case SyntaxKind.WhileStatement:
+                return builder.Append((WhileStatementSyntax)statement, context);
+            case SyntaxKind.LocalFunctionStatement:
+                return builder.Append((LocalFunctionStatementSyntax)statement, context);
+            // Unsupported statements
+            case SyntaxKind.LockStatement:
+            case SyntaxKind.CheckedStatement:
+            case SyntaxKind.UnsafeStatement:
+            case SyntaxKind.LabeledStatement:
+            case SyntaxKind.FixedStatement:
+            case SyntaxKind.ForEachVariableStatement:
+            // Unsupported yield statements
+            case SyntaxKind.YieldBreakStatement:
+            case SyntaxKind.YieldReturnStatement:
+            // Unsupported goto statements
+            case SyntaxKind.GotoStatement:
+            case SyntaxKind.GotoCaseStatement:
+            case SyntaxKind.GotoDefaultStatement:
+            default:
+                throw new NotSupportedException();
+        }
+    }
+
     public static CodeBuilder Append(this CodeBuilder builder, BlockSyntax syntax, JavaCodeConversionContext context, bool skipBraces = false)
     {
         if (skipBraces)
@@ -28,24 +89,15 @@ static partial class JavaBuilderExtension
     {
         bool first = true;
         foreach (var statement in staments)
-        {
-            IEnumerable<CodeWriter>? writers;
-            if (statement.HasReplacementWriters(context, out writers))
-            {
-                foreach (var writer in writers)
-                    builder.AppendLine(ref first).Append(writer);
-            }
-            else
-            {
-                builder.AppendLine(ref first).Append(statement, context);
-            }
-        }
+            builder.AppendLine(ref first).Append(statement, context);
 
         return builder;
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, BreakStatementSyntax syntax, JavaCodeConversionContext context)
     {
+        _ = syntax;
+        _ = context;
         builder.Append("break").SemiColon();
         return builder;
     }
@@ -60,6 +112,8 @@ static partial class JavaBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, ContinueStatementSyntax syntax, JavaCodeConversionContext context)
     {
+        _ = syntax;
+        _ = context;
         builder.Append("continue").SemiColon();
         return builder;
     }
@@ -74,6 +128,8 @@ static partial class JavaBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, EmptyStatementSyntax syntax, JavaCodeConversionContext context)
     {
+        _ = syntax;
+        _ = context;
         return builder.SemiColon();
     }
 
@@ -117,18 +173,23 @@ static partial class JavaBuilderExtension
         return builder;
     }
 
-    public static CodeBuilder Append(this CodeBuilder builder, LockStatementSyntax syntax, JavaCodeConversionContext context)
-    {
-        builder.Append("synchronized").Space().Parenthesized().Append(syntax.Expression, context).Close().AppendLine();
-        builder.IndentChild().Append(syntax.Statement, context);
-        return builder;
-    }
-
     public static CodeBuilder Append(this CodeBuilder builder, ReturnStatementSyntax syntax, JavaCodeConversionContext context)
     {
-        builder.Append("return");
         if (syntax.Expression != null)
-            builder.Space().Append(syntax.Expression, context);
+        {
+            // FIXME: Workaround for ref arguments invocations. Real fix is improve
+            // existing tree manipulation to also add syntetized arguments. See JavaValidationContext
+            var block = syntax.FindAncestorBlock();
+            if (block.Parent.IsKind(SyntaxKind.LocalFunctionStatement))
+                builder.Append(syntax.Expression, context);
+            else
+                builder.Append("return").Space().Append(syntax.Expression, context);
+        }
+        else
+        {
+            builder.Append("return");
+        }
+
         builder.SemiColon();
         return builder;
     }
@@ -176,68 +237,36 @@ static partial class JavaBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, WhileStatementSyntax syntax, JavaCodeConversionContext context)
     {
-        builder.Append("while").Space().Append(syntax.Condition, context).AppendLine()
+        builder.Append("while").Space().Parenthesized().Append(syntax.Condition, context).Close().AppendLine()
             .IndentChild().Append(syntax.Statement, context);
         return builder;
     }
 
-    // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
-    public static CodeBuilder Append(this CodeBuilder builder, StatementSyntax statement, JavaCodeConversionContext context)
+    public static CodeBuilder Append(this CodeBuilder builder, LocalFunctionStatementSyntax syntax, JavaCodeConversionContext context)
     {
-        var kind = statement.Kind();
-        switch (kind)
+        var method = syntax.GetDeclaredSymbol<IMethodSymbol>(context);
+        void writeTypeArguments()
         {
-            case SyntaxKind.Block:
-                return builder.Append((BlockSyntax)statement, context);
-            case SyntaxKind.BreakStatement:
-                return builder.Append((BreakStatementSyntax)statement, context);
-            case SyntaxKind.ForEachStatement:
-                return builder.Append((ForEachStatementSyntax)statement, context);
-            case SyntaxKind.ContinueStatement:
-                return builder.Append((ContinueStatementSyntax)statement, context);
-            case SyntaxKind.DoStatement:
-                return builder.Append((DoStatementSyntax)statement, context);
-            case SyntaxKind.EmptyStatement:
-                return builder.Append((EmptyStatementSyntax)statement, context);
-            case SyntaxKind.ExpressionStatement:
-                return builder.Append((ExpressionStatementSyntax)statement, context);
-            case SyntaxKind.ForStatement:
-                return builder.Append((ForStatementSyntax)statement, context);
-            case SyntaxKind.IfStatement:
-                return builder.Append((IfStatementSyntax)statement, context);
-            case SyntaxKind.LocalDeclarationStatement:
-                return builder.Append((LocalDeclarationStatementSyntax)statement, context);
-            case SyntaxKind.LockStatement:
-                return builder.Append((LockStatementSyntax)statement, context);
-            case SyntaxKind.ReturnStatement:
-                return builder.Append((ReturnStatementSyntax)statement, context);
-            case SyntaxKind.SwitchStatement:
-                return builder.Append((SwitchStatementSyntax)statement, context);
-            case SyntaxKind.ThrowStatement:
-                return builder.Append((ThrowStatementSyntax)statement, context);
-            case SyntaxKind.TryStatement:
-                return builder.Append((TryStatementSyntax)statement, context);
-            case SyntaxKind.UsingStatement:
-                return builder.Append((UsingStatementSyntax)statement, context);
-            case SyntaxKind.WhileStatement:
-                return builder.Append((WhileStatementSyntax)statement, context);
-            // Unsupported statements
-            case SyntaxKind.CheckedStatement:
-            case SyntaxKind.UnsafeStatement:
-            case SyntaxKind.LabeledStatement:
-            case SyntaxKind.FixedStatement:
-            case SyntaxKind.LocalFunctionStatement:
-            case SyntaxKind.ForEachVariableStatement:
-            // Unsupported yield statements
-            case SyntaxKind.YieldBreakStatement:
-            case SyntaxKind.YieldReturnStatement:
-            // Unsupported goto statements
-            case SyntaxKind.GotoStatement:
-            case SyntaxKind.GotoCaseStatement:
-            case SyntaxKind.GotoDefaultStatement:
-            default:
-                throw new Exception();
+            bool first = true;
+            foreach (var parameter in method.Parameters)
+                builder.CommaSeparator(ref first).Append(method.ReturnType.GetJavaType());
+
+            if (!method.ReturnsVoid)
+            {
+                if (method.Parameters.Length != 0)
+                    builder.CommaSeparator();
+
+                builder.Append(method.ReturnType.GetJavaType(JavaTypeFlags.TypeArgument));
+            }
         }
+
+        builder.Append($"{(method.ReturnsVoid ? "Action" : "Function")}{method.Parameters.Length}");
+        if (!method.ReturnsVoid || method.Parameters.Length != 0)
+            builder.AngleBracketed(writeTypeArguments);
+
+        builder.Space().Append(syntax.Identifier.Text).Space().Append("=").Space()
+            .Append(syntax.ParameterList, context).Space().AppendLine("->").Append(syntax.Body!, context).SemiColon();
+        return builder;
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, VariableDeclarationSyntax syntax, JavaCodeConversionContext context)

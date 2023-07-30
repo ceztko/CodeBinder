@@ -34,5 +34,6 @@ enum JavaTypeFlags
 {
     None = 0,
     NativeMethod = 1,
-    IsByRef = 2,
+    ByRef = 2,
+    TypeArgument = 4,
 }

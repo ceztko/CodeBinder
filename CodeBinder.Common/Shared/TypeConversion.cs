@@ -43,7 +43,7 @@ public abstract class TypeConversion<TTypeContext> : TypeConversion
     }
 }
 
-public abstract class TypeConversion : ConversionWriter, ICompilationContextProvider
+public abstract class TypeConversion : ConversionWriter, ICompilationProvider
 {
     internal TypeConversion() { }
 
@@ -56,6 +56,8 @@ public abstract class TypeConversion : ConversionWriter, ICompilationContextProv
     {
         get { return Context.Compilation; }
     }
+
+    CompilationProvider ICompilationProvider.Compilation => Context.Compilation;
 
     protected abstract TypeContext GetContext();
 }

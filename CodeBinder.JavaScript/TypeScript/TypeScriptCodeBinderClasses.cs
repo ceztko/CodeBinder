@@ -10,6 +10,7 @@ static class TypeScriptCodeBinderClasses
         get
         {
             return new string[] {
+                nameof(NativeHandle),
                 nameof(BinderUtils),
                 nameof(ObjectTS),
                 nameof(Exception),
@@ -28,6 +29,7 @@ static class TypeScriptCodeBinderClasses
                 nameof(KeyValuePair),
                 nameof(IEqualityComparer),
                 nameof(NotImplementedException),
+                nameof(BooleanArray),
             };
         }
     }
@@ -37,6 +39,7 @@ static class TypeScriptCodeBinderClasses
         get
         {
             return new string[] {
+                NativeHandle,
                 BinderUtils,
                 ObjectTS,
                 Exception,
@@ -55,10 +58,33 @@ static class TypeScriptCodeBinderClasses
                 KeyValuePair,
                 IEqualityComparer,
                 NotImplementedException,
+                BooleanArray,
             };
         }
     }
 
+    const string NativeHandle =
+"""
+export class NativeHandle
+{
+    #address: number;
+
+    constructor(address: number)
+    {
+        this.#address = address;
+    }
+
+    get address(): number
+    {
+        return this.#address;
+    }
+
+    get target(): object
+    {
+        return napi.NativeHandleGetTarget(this.#address);
+    }
+}
+""";
 
     const string BinderUtils =
 """
@@ -68,7 +94,7 @@ export class BinderUtils
 
     private constructor() { }
 
-    static BinderUtils()
+    static
     {
         BinderUtils._registry = new FinalizationRegistry<IObjectFinalizer>((finalizer: IObjectFinalizer) => {
           finalizer.finalize();
@@ -89,6 +115,30 @@ export class BinderUtils
             return n as T;
         else
             throw new Error(`Could not cast input to type ${typeof type}`);
+    }
+
+    static createNativeHandle(obj: object): NativeHandle
+    {
+        return new NativeHandle(napi.CreateNativeHandle(obj));
+    }
+
+    static createWeakNativeHandle(obj: object): NativeHandle
+    {
+        return new NativeHandle(napi.CreateWeakNativeHandle(obj));
+    }
+
+    static freeNativeHandle(nativeHandle: NativeHandle): void
+    {
+        napi.FreeNativeHandle(nativeHandle.address);
+    }
+
+    // FIXME: This is garbage, this should replaced by proper AST manipulation
+    static clear(arr: { set length(count: number); }): { (): void; }
+    {
+        arr.length = 0;
+        // Returns a callable do nothing function, so it will be
+        // compatible with Clear() signature
+        return function (): void { };
     }
 
     /** @internal */
@@ -121,7 +171,7 @@ export class ObjectTS
 export class Exception extends Error
 {
     constructor(
-        message: string | null
+        message?: string
     )
     {
         super(message!);
@@ -137,7 +187,7 @@ export class HandleRef extends ObjectTS
     wrapper: object | null;
     handle: number;
 
-    constructor(wrapper?: object, handle?: number)
+    constructor(wrapper?: object | null, handle?: number)
     {
         super();
         this.wrapper = wrapper ?? null;
@@ -343,7 +393,7 @@ export class KeyValuePair<TKey, TValue> extends ObjectTS
 export interface IReadOnlyList<T> extends Iterable<T>
 {
     count:number;
-    get(index:number):T;
+    getAt(index: number): T | null;
 }
 """;
 
@@ -360,6 +410,46 @@ export interface IEqualityComparer <T>
 export class NotImplementedException extends Error
 {
 
+}
+""";
+
+    const string BooleanArray =
+"""
+export class BooleanArray
+{
+    #actualArray: Uint8ClampedArray;
+
+    [index: number]: boolean;
+
+    constructor(length? : number)
+    {
+        this.#actualArray = new Uint8ClampedArray(length ?? 0);
+        return new Proxy(this, BooleanArray.indexedHandler);
+    }
+
+    get length(): number
+    {
+        return this.#actualArray.length;
+    }
+
+    private static indexedHandler: ProxyHandler<BooleanArray> =
+    {
+        get(target, prop)
+        {
+            switch (prop)
+            {
+                case 'length':
+                    return target.length;
+                default:
+                    return target.#actualArray[Number(prop)] !== 0;
+            }
+        },
+        set(target, index, value): boolean
+        {
+            target.#actualArray[Number(index)] = value ? 1 : 0;
+            return true;
+        }
+    }
 }
 """;
 }

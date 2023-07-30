@@ -5,6 +5,10 @@ using System.Linq;
 
 namespace CodeBinder.Shared.CSharp;
 
+/// <summary>
+/// CSharp compilation context with CSharp specific type context
+/// </summary>
+/// <remarks>Inherit this class if you will use custom CSharp type contexts</remarks>
 public abstract class CSharpCompilationContext<TLanguageConversion,
         TClassContext, TStructContext, TInterfaceContext,
         TEnumContext, TDelegateContext> : CSharpCompilationContext
@@ -80,6 +84,10 @@ public abstract class CSharpCompilationContext<TLanguageConversion,
     }
 }
 
+/// <summary>
+/// CSharp compilation context with CSharp specific type context
+/// </summary>
+/// <remarks>Inherit this class if you will use base CSharp type contexts</remarks>
 public abstract class CSharpCompilationContext<TLanguageConversion> : CSharpCompilationContext
     where TLanguageConversion : CSharpLanguageConversion
 {
@@ -138,7 +146,11 @@ public abstract class CSharpCompilationContext<TLanguageConversion> : CSharpComp
     }
 }
 
-public abstract class CSharpCompilationContext : CompilationContext<CSharpMemberTypeContext>
+/// <summary>
+/// CSharp compilation context with CSharp specific type context
+/// </summary>
+/// <remarks>This class is infrastructural, you can't inherit it</remarks>
+public abstract class CSharpCompilationContext : CSharpCompilationContextBase<CSharpMemberTypeContext>
 {
     Dictionary<CSharpSyntaxNode, CSharpMemberTypeContext> _NodeMap;
     Dictionary<ITypeSymbol, List<CSharpMemberTypeContext>> _symbolMap;
@@ -153,6 +165,11 @@ public abstract class CSharpCompilationContext : CompilationContext<CSharpMember
         _finalizers = new List<MethodDeclarationSyntax>();
     }
 
+    protected internal override CSharpCollectionContext CreateCollectionContext()
+    {
+        return new CSharpCollectionContextImpl(this);
+    }
+
     public bool IsCompilationDefined(ITypeSymbol symbol)
     {
         return _symbolMap.ContainsKey(symbol);
@@ -162,30 +179,35 @@ public abstract class CSharpCompilationContext : CompilationContext<CSharpMember
     {
         addToSymbolMap(ctx);
         addClass(ctx);
+        _NodeMap.Add(ctx.Node, ctx);
     }
 
     internal void AddStruct(CSharpStructTypeContext ctx)
     {
         addToSymbolMap(ctx);
         addStruct(ctx);
+        _NodeMap.Add(ctx.Node, ctx);
     }
 
     internal void AddInterface(CSharpInterfaceTypeContext ctx)
     {
         addToSymbolMap(ctx);
         addInterface(ctx);
+        _NodeMap.Add(ctx.Node, ctx);
     }
 
     internal void AddEnum(CSharpEnumTypeContext ctx)
     {
         addToSymbolMap(ctx);
         addEnum(ctx);
+        _NodeMap.Add(ctx.Node, ctx);
     }
 
     internal void AddDelegate(CSharpDelegateTypeContext ctx)
     {
         addToSymbolMap(ctx);
         addDelegate(ctx);
+        _NodeMap.Add(ctx.Node, ctx);
     }
 
     internal void AddFinalizer(MethodDeclarationSyntax finalizer)
@@ -217,7 +239,7 @@ public abstract class CSharpCompilationContext : CompilationContext<CSharpMember
         return new CSharpEnumTypeContextImpl(enm, this);
     }
 
-    public IEnumerable<MethodDeclarationSyntax>  Finalizers { get { return _finalizers; } }
+    public IEnumerable<MethodDeclarationSyntax> Finalizers { get { return _finalizers; } }
 
     public abstract ICSharpTypeContextCollection<CSharpClassTypeContext, ClassDeclarationSyntax> Classes { get; }
 
@@ -287,13 +309,6 @@ public abstract class CSharpCompilationContext : CompilationContext<CSharpMember
 
     public IReadOnlyDictionary<ITypeSymbol, IReadOnlyList<CSharpMemberTypeContext>> SymbolMap => _SymbolMapWrapper;
 
-    protected override sealed IEnumerable<CSharpMemberTypeContext> GetTypes() => _NodeMap.Values;
-
-    protected internal override INodeVisitor CreateVisitor()
-    {
-        return new CSharpNodeVisitorImpl(this);
-    }
-
     internal abstract void addClass(CSharpClassTypeContext ctx);
 
     internal abstract void addStruct(CSharpStructTypeContext ctx);
@@ -303,11 +318,6 @@ public abstract class CSharpCompilationContext : CompilationContext<CSharpMember
     internal abstract void addEnum(CSharpEnumTypeContext ctx);
 
     internal abstract void addDelegate(CSharpDelegateTypeContext ctx);
-
-    internal override void addTypeContext(CSharpMemberTypeContext type)
-    {
-        _NodeMap.Add(type.Node, type);
-    }
 
     void addToSymbolMap(CSharpMemberTypeContext ctx)
     {
@@ -487,6 +497,32 @@ public abstract class CSharpCompilationContext : CompilationContext<CSharpMember
             return GetEnumerator();
         }
     }
+}
+
+/// <summary>
+/// CSharp compilation context
+/// </summary>
+/// <remarks>Inherit this class if you will use custom type contexts</remarks>
+public abstract class CSharpCompilationContextBase<TTypeContext, TLanguageConversion> : CompilationContext<TTypeContext, TLanguageConversion, CSharpNodeVisitor>
+    where TTypeContext : TypeContext<TTypeContext>
+    where TLanguageConversion : LanguageConversion
+{
+    protected CSharpCompilationContextBase(TLanguageConversion conversion)
+        : base(conversion) { }
+
+    internal protected abstract override CSharpCollectionContextBase CreateCollectionContext();
+}
+
+/// <summary>
+/// CSharp compilation context
+/// </summary>
+/// <remarks>This class is infrastructural, you can't inherit it</remarks>
+public abstract class CSharpCompilationContextBase<TTypeContext> : CompilationContext<TTypeContext, CSharpNodeVisitor>
+    where TTypeContext : TypeContext<TTypeContext>
+{
+    internal CSharpCompilationContextBase() { }
+
+    internal protected abstract override CSharpCollectionContextBase CreateCollectionContext();
 }
 
 /// <summary>

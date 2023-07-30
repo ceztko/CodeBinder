@@ -25,7 +25,11 @@ static partial class TypeScriptExtensions
             } },
             { "System.Collections.Generic.List<T>", new Dictionary<string, SymbolReplacement>() {
                 { "Add", new SymbolReplacement() { Name = "push", Kind = SymbolReplacementKind.Method } },
-                ////{ "Clear", new SymbolReplacement() { Name = "clear", Kind = SymbolReplacementKind.Method } },
+                { "Clear", new SymbolReplacement() { Name = "BinderUtils.clear", Kind = SymbolReplacementKind.StaticMethod } }, // FIXME: This is an ugly workaround. Solution is AST manipulation
+            } },
+            { "System.Collections.Generic.IList<T>", new Dictionary<string, SymbolReplacement>() {
+                { "Add", new SymbolReplacement() { Name = "push", Kind = SymbolReplacementKind.Method } },
+                { "Clear", new SymbolReplacement() { Name = "BinderUtils.clear", Kind = SymbolReplacementKind.StaticMethod } },// FIXME: This is an ugly workaround. Solution is AST manipulation
             } },
             // java.lang.AutoCloseable
             ////{ "System.IDisposable", new Dictionary<string, SymbolReplacement>() {
@@ -102,12 +106,25 @@ static partial class TypeScriptExtensions
 
     public static string GetTypeScriptName(this IMethodSymbol method, TypeScriptCompilationContext context)
     {
+        return GetTypeScriptName(method, context, out _);
+    }
+
+    public static string GetTypeScriptName(this IMethodSymbol method, TypeScriptCompilationContext context, out bool isOverload)
+    {
         if (method.HasTypeScriptReplacement(out var replacement))
+        {
+            isOverload = false;
             return replacement.Name;
+        }
+
 
         if (context.TryGetBindedName(method, out var bindedName))
-            return bindedName;
+        {
+            isOverload = bindedName.IsOverload;
+            return bindedName.Name;
+        }
 
+        isOverload = false;
         if (method.IsNative())
         {
             return method.Name;
@@ -257,6 +274,8 @@ static partial class TypeScriptExtensions
                 return "++";
             case SyntaxKind.PostDecrementExpression:
                 return "--";
+            case SyntaxKind.SuppressNullableWarningExpression:
+                return "!";
             default:
                 throw new NotSupportedException();
         }

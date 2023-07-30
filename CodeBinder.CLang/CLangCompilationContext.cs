@@ -3,7 +3,7 @@
 
 namespace CodeBinder.CLang;
 
-public class CLangCompilationContext : CompilationContext<CLangModuleContext, ConversionCSharpToCLang>
+public class CLangCompilationContext : CSharpCompilationContextBase<CLangModuleContext, ConversionCSharpToCLang>
 {
     Dictionary<string, CLangModuleContextParent> _Modules;
     List<EnumDeclarationSyntax> _Enums;
@@ -57,9 +57,9 @@ public class CLangCompilationContext : CompilationContext<CLangModuleContext, Co
         _StructTypes.Add(type);
     }
 
-    protected override INodeVisitor CreateVisitor()
+    protected override CSharpCollectionContextBase CreateCollectionContext()
     {
-        return new CLangNodeVisitor(this);
+        return new CLangCollectionContext(this);
     }
 
     public IReadOnlyCollection<CLangModuleContextParent> Modules

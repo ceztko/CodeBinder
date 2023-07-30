@@ -133,18 +133,58 @@ static partial class JavaBuilderExtension
         return builder.Append(")");
     }
 
-    /// <remarks>One line. Child istance</remarks>
-    public static CodeBuilder Parenthesized(this CodeBuilder builder)
+    /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
+    public static CodeBuilder Parenthesized(this CodeBuilder builder, bool childIstance = true)
     {
         builder.Append("(");
-        return builder.UsingChild(")");
+        if (childIstance)
+            return builder.UsingChild(")");
+        else
+            return builder.Using(")");
     }
 
-    /// <remarks>One line. Child istance</remarks>
-    public static CodeBuilder Braced(this CodeBuilder builder)
+    /// <remarks>One line</remarks>
+    public static CodeBuilder AngleBracketed(this CodeBuilder builder, Action bracketed)
     {
-        builder.Append("{ ");
-        return builder.UsingChild(" }");
+        builder.Append("<");
+        bracketed();
+        return builder.Append(">");
+    }
+
+    /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
+    public static CodeBuilder AngleBracketed(this CodeBuilder builder, bool childIstance = true)
+    {
+        builder.Append("<");
+        if (childIstance)
+            return builder.UsingChild(">");
+        else
+            return builder.Using(">");
+    }
+
+    /// <remarks>One line</remarks>
+    public static CodeBuilder Braced(this CodeBuilder builder, Action braced)
+    {
+        builder.Append("{");
+        braced();
+        return builder.Append("}");
+    }
+
+    /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
+    public static CodeBuilder Braced(this CodeBuilder builder, bool childIstance = true)
+    {
+        builder.Append("{");
+        if (childIstance)
+            return builder.UsingChild("}");
+        else
+            return builder.Using("}");
+    }
+
+    /// <remarks>One line</remarks>
+    public static CodeBuilder Bracketed(this CodeBuilder builder, Action bracketed)
+    {
+        builder.Append("[");
+        bracketed();
+        return builder.Append("]");
     }
 
     /// <remarks>One line. Child istance</remarks>

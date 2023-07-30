@@ -199,7 +199,7 @@ static partial class ObjCBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, WhileStatementSyntax syntax, ObjCCompilationContext context)
     {
-        builder.Append("while").Space().Append(syntax.Condition, context).AppendLine()
+        builder.Append("while").Space().Parenthesized().Append(syntax.Condition, context).Close().AppendLine()
             .IndentChild().Append(syntax.Statement, context);
         return builder;
     }

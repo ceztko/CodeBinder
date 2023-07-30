@@ -1,6 +1,7 @@
 ﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 using CodeBinder.Attributes;
+using Microsoft.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -10,21 +11,77 @@ public static class CSharpMethodExtensions
 {
     static Regex? _splitCamelCase;
 
+    public static BlockSyntax FindAncestorBlock(this SyntaxNode node)
+    {
+        return FindAncestorBlock(node, out _);
+    }
+
+    public static BlockSyntax FindAncestorBlock(this SyntaxNode node, out int index)
+    {
+        SyntaxNode prev = node;
+        while (true)
+        {
+            if (node.IsKind(SyntaxKind.Block))
+            {
+                var block = (BlockSyntax)node;
+                index = -1;
+                if (prev != node)
+                    index = block.Statements.IndexOf((StatementSyntax)prev);
+
+                return block;
+            }
+
+            if (node.Parent == null)
+                throw new Exception("Can't find ancestor block");
+
+            prev = node;
+            node = node.Parent;
+        }
+    }
+
+    public static bool TryGetModuleName(this TypeDeclarationSyntax type, ICompilationProvider provider,
+        [NotNullWhen(true)]out string? moduleName)
+    {
+        // To support partial calsses, iterate syntax attributes,
+        // don't infer them from context
+        foreach (var attributeList in type.AttributeLists)
+        {
+            foreach (var attribute in attributeList.GetAttributes(provider))
+            {
+                if (attribute.IsAttribute<ModuleAttribute>())
+                {
+                    moduleName = attribute.GetConstructorArgument<string>(0);
+                    return true;
+                }
+            }
+        }
+
+        // As a last resort ask for all the symbol attributes
+        if (type.TryGetAttribute<ModuleAttribute>(provider, out var attr))
+        {
+            moduleName = attr.GetConstructorArgument<string>(0);
+            return true;
+        }
+
+        moduleName = null;
+        return false;
+    }
+
     public static string GetMappedNamespaceName(this MemberDeclarationSyntax node, NamespaceMappingTree mapping,
-        ICompilationContextProvider provider)
+        ICompilationProvider provider)
     {
         return mapping.GetMappedNamespace(
             node.GetContainingNamespaceName(provider), NamespaceNormalization.None);
     }
 
     public static string GetMappedNamespaceName(this MemberDeclarationSyntax node, NamespaceMappingTree mapping,
-        NamespaceNormalization normalization, ICompilationContextProvider provider)
+        NamespaceNormalization normalization, ICompilationProvider provider)
     {
         return mapping.GetMappedNamespace(
             node.GetContainingNamespaceName(provider), normalization);
     }
 
-    public static string GetContainingNamespaceName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
+    public static string GetContainingNamespaceName(this MemberDeclarationSyntax node, ICompilationProvider provider)
     {
         var symbol = node.GetDeclaredSymbol(provider)!;
         return symbol.ContainingNamespace.GetFullName();
@@ -57,7 +114,7 @@ public static class CSharpMethodExtensions
     // https://github.com/dotnet/roslyn/issues/48#issuecomment-75641847
     public static bool IsPartialMethod(this IMethodSymbol method, out bool hasEmptyBody)
     {
-        if (method.IsDefinedInMetadata())
+        if (method.MethodKind == MethodKind.LocalFunction || method.IsDefinedInMetadata())
         {
             hasEmptyBody = false;
             return false;
@@ -221,6 +278,7 @@ public static class CSharpMethodExtensions
                 return true;
             case SyntaxKind.PostIncrementExpression:
             case SyntaxKind.PostDecrementExpression:
+            case SyntaxKind.SuppressNullableWarningExpression:
                 kind = CSharp.ExpressionKind.PostfixUnary;
                 return true;
             case SyntaxKind.UnaryPlusExpression:
@@ -610,54 +668,76 @@ public static class CSharpMethodExtensions
         }
     }
 
-    public static string GetFullName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
+    public static string GetFullName(this MemberDeclarationSyntax node, ICompilationProvider provider)
     {
         var symbol = node.GetDeclaredSymbol(provider)!;
         return symbol.GetFullName();
     }
 
-    public static string GetQualifiedName(this MemberDeclarationSyntax node, ICompilationContextProvider provider)
+    public static string GetQualifiedName(this MemberDeclarationSyntax node, ICompilationProvider provider)
     {
         var symbol = node.GetDeclaredSymbol(provider)!;
         return symbol.GetQualifiedName();
     }
 
-    public static string GetQualifiedName(this MemberDeclarationSyntax node, bool includeTypeParameters, ICompilationContextProvider provider)
+    public static string GetQualifiedName(this MemberDeclarationSyntax node, bool includeTypeParameters, ICompilationProvider provider)
     {
         var symbol = node.GetDeclaredSymbol(provider)!;
         return symbol.GetQualifiedName(includeTypeParameters);
     }
 
-    public static string GetFullName(this TypeSyntax node, ICompilationContextProvider provider)
+    public static string GetFullName(this TypeSyntax node, ICompilationProvider provider)
     {
-        var symbol = node.GetTypeSymbol(provider);
+        var symbol = node.GetTypeSymbolThrow(provider);
         return symbol.GetFullName();
     }
 
-    public static string GetQualifiedName(this TypeSyntax node, ICompilationContextProvider provider)
+    public static string GetQualifiedName(this TypeSyntax node, ICompilationProvider provider)
     {
-        var symbol = node.GetTypeSymbol(provider);
+        var symbol = node.GetTypeSymbolThrow(provider);
         return symbol.GetQualifiedName();
     }
 
-    public static string GetQualifiedName(this TypeSyntax node, bool includeTypeParameters, ICompilationContextProvider provider)
+    public static string GetQualifiedName(this TypeSyntax node, bool includeTypeParameters, ICompilationProvider provider)
     {
-        var symbol = node.GetTypeSymbol(provider);
+        var symbol = node.GetTypeSymbolThrow(provider);
         return symbol.GetQualifiedName(includeTypeParameters);
     }
 
-    public static ITypeSymbol GetTypeSymbol(this TypeSyntax node, ICompilationContextProvider provider)
+    /// <summary>
+    /// Try get the symbol for this node, also in the case of ElementAccessExpression
+    /// </summary>
+    /// <remarks>Throws if the symbol can't be retrieved</remarks>
+    public static ISymbol GetSymbolSafe(this SyntaxNode node, ICompilationProvider provider)
+    {
+        if (node.IsKind(SyntaxKind.ElementAccessExpression))
+        {
+            var access = (ElementAccessExpressionSyntax)node;
+            node = access.Expression;
+        }
+
+        var model = node.GetSemanticModel(provider);
+        return model.GetSymbolInfo(node).Symbol ?? throw new Exception($"Unable to get symbol for syntax: {node}");
+    }
+
+    public static ITypeSymbol GetTypeSymbolThrow(this TypeSyntax node, ICompilationProvider provider)
     {
         var info = node.GetTypeInfo(provider);
-        return info.ConvertedType!;
+        return info.ConvertedType ?? throw new ArgumentNullException(nameof(info.ConvertedType));
     }
 
-    public static ITypeSymbol GetTypeSymbol(this BaseTypeDeclarationSyntax node, ICompilationContextProvider provider)
+    public static ITypeSymbol? GetTypeSymbol(this TypeSyntax node, ICompilationProvider provider)
+    {
+        var info = node.GetTypeInfo(provider);
+        return info.ConvertedType;
+    }
+
+    public static ITypeSymbol GetTypeSymbol(this BaseTypeDeclarationSyntax node, ICompilationProvider provider)
     {
         return node.GetDeclaredSymbol<ITypeSymbol>(provider);
     }
 
-    public static CSharpTypeParameters GetTypeParameters(this MethodDeclarationSyntax syntax, ICompilationContextProvider provider)
+    public static CSharpTypeParameters GetTypeParameters(this MethodDeclarationSyntax syntax, ICompilationProvider provider)
     {
         var symbol = syntax.GetDeclaredSymbol<IMethodSymbol>(provider);
         if (symbol.OverriddenMethod != null)
@@ -690,11 +770,6 @@ public static class CSharpMethodExtensions
         return new CSharpTypeParameters(parameters);
     }
 
-    public static bool IsRefLike(this ArgumentSyntax argument)
-    {
-        return !argument.RefKindKeyword.IsKind(SyntaxKind.None);
-    }
-
     public static bool IsNone(this SyntaxToken token)
     {
         return token.IsKind(SyntaxKind.None);
@@ -715,7 +790,7 @@ public static class CSharpMethodExtensions
         return type.TypeKind == TypeKind.Delegate && type.HasAttribute<UnmanagedFunctionPointerAttribute>();
     }
 
-    public static bool IsNative(this MethodDeclarationSyntax method, ICompilationContextProvider provider)
+    public static bool IsNative(this MethodDeclarationSyntax method, ICompilationProvider provider)
     {
         if (!method.HasAttribute<DllImportAttribute>(provider))
             return false;
@@ -723,7 +798,7 @@ public static class CSharpMethodExtensions
         return method.Modifiers.Any(SyntaxKind.ExternKeyword);
     }
 
-    public static bool IsFlag(this EnumDeclarationSyntax node, ICompilationContextProvider provider)
+    public static bool IsFlag(this EnumDeclarationSyntax node, ICompilationProvider provider)
     {
         return node.HasAttribute<FlagsAttribute>(provider);
     }
@@ -733,23 +808,23 @@ public static class CSharpMethodExtensions
         return ShouldDiscard(node, context, context.Conversion);
     }
 
-    public static bool ShouldDiscard(this SyntaxNode node, ICompilationContextProvider provider, LanguageConversion conversion)
+    public static bool ShouldDiscard(this SyntaxNode node, ICompilationProvider compilation, LanguageConversion conversion)
     {
-        var symbol = getDeclaredSymbol(node, provider);
+        var symbol = getDeclaredSymbol(node, compilation);
         if (symbol == null)
             return false;
 
         return symbol.ShouldDiscard(conversion);
     }
 
-    public static bool HasAttribute<TAttribute>(this CSharpSyntaxNode node, ICompilationContextProvider provider)
+    public static bool HasAttribute<TAttribute>(this CSharpSyntaxNode node, ICompilationProvider provider)
         where TAttribute : Attribute
     {
         return GetDeclaredSymbol(node, provider)?.HasAttribute<TAttribute>() == true;
     }
 
 
-    public static bool TryGetAttribute<TAttribute>(this CSharpSyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)] out AttributeData? data)
+    public static bool TryGetAttribute<TAttribute>(this CSharpSyntaxNode node, ICompilationProvider provider, [NotNullWhen(true)] out AttributeData? data)
         where TAttribute : Attribute
     {
         var symbol = GetDeclaredSymbol(node, provider);
@@ -762,7 +837,7 @@ public static class CSharpMethodExtensions
         return symbol.TryGetAttribute<TAttribute>(out data);
     }
 
-    public static AttributeData GetAttribute<TAttribute>(this CSharpSyntaxNode node, ICompilationContextProvider provider)
+    public static AttributeData GetAttribute<TAttribute>(this CSharpSyntaxNode node, ICompilationProvider provider)
         where TAttribute : Attribute
     {
         AttributeData? ret;
@@ -772,7 +847,7 @@ public static class CSharpMethodExtensions
         return ret!;
     }
 
-    public static IReadOnlyList<AttributeData> GetAttributes<TAttribute>(this CSharpSyntaxNode node, ICompilationContextProvider provider)
+    public static IReadOnlyList<AttributeData> GetAttributes<TAttribute>(this CSharpSyntaxNode node, ICompilationProvider provider)
        where TAttribute : Attribute
     {
         var symbol = GetDeclaredSymbol(node, provider);
@@ -782,7 +857,7 @@ public static class CSharpMethodExtensions
         return symbol.GetAttributes<TAttribute>();
     }
 
-    public static IReadOnlyList<AttributeData> GetAttributes(this AttributeListSyntax attributes, ICompilationContextProvider provider)
+    public static IReadOnlyList<AttributeData> GetAttributes(this AttributeListSyntax attributes, ICompilationProvider provider)
     {
         // Collect pertinent syntax trees from these attributes
         var acceptedTrees = new HashSet<SyntaxTree>();
@@ -802,19 +877,19 @@ public static class CSharpMethodExtensions
         return ret;
     }
 
-    public static TSymbol GetDeclaredSymbol<TSymbol>(this CSharpSyntaxNode node, ICompilationContextProvider provider)
+    public static TSymbol GetDeclaredSymbol<TSymbol>(this CSharpSyntaxNode node, ICompilationProvider provider)
         where TSymbol : class, ISymbol
     {
         return getDeclaredSymbol(node, provider) as TSymbol ?? throw new Exception($"Unable to get declared symbol {typeof(ISymbol).Name} in syntax: {node}");
     }
 
     // In fields declaration, get synbol of first declared symbol
-    public static ISymbol? GetDeclaredSymbol(CSharpSyntaxNode node, ICompilationContextProvider provider)
+    public static ISymbol? GetDeclaredSymbol(CSharpSyntaxNode node, ICompilationProvider provider)
     {
         return getDeclaredSymbol(node, provider);
     }
 
-    static ISymbol? getDeclaredSymbol(SyntaxNode node, ICompilationContextProvider provider)
+    static ISymbol? getDeclaredSymbol(SyntaxNode node, ICompilationProvider provider)
     {
         if (node.IsKind(SyntaxKind.FieldDeclaration))
         {
@@ -851,7 +926,7 @@ public static class CSharpMethodExtensions
     /// <summary>
     /// Say if type is partial and if so return the main delclaration (delclaration with non null baselist if present)
     /// </summary>
-    public static bool IsPartial(this TypeDeclarationSyntax declaration, ICompilationContextProvider provider, out TypeDeclarationSyntax mainDeclaration)
+    public static bool IsPartial(this TypeDeclarationSyntax declaration, ICompilationProvider provider, out TypeDeclarationSyntax mainDeclaration)
     {
         bool isPartial = declaration.IsPartial();
         if (isPartial && declaration.BaseList == null)
@@ -872,11 +947,6 @@ public static class CSharpMethodExtensions
         return isPartial;
     }
 
-    public static bool IsRefLike(this IParameterSymbol parameter)
-    {
-        return parameter.RefKind != RefKind.None;
-    }
-
     public static bool IsPartial(this TypeDeclarationSyntax declaration)
     {
         return declaration.Modifiers.Any(SyntaxKind.PartialKeyword);
@@ -886,14 +956,14 @@ public static class CSharpMethodExtensions
     /// Return base declarations
     /// </summary>
     /// <remarks>Try to identify principal (aka with a base types list) declaration in case of partial types</remarks>
-    public static IReadOnlyList<BaseTypeDeclarationSyntax> GetBaseDeclarations(this BaseTypeDeclarationSyntax type, ICompilationContextProvider provider)
+    public static IReadOnlyList<BaseTypeDeclarationSyntax> GetBaseDeclarations(this BaseTypeDeclarationSyntax type, ICompilationProvider provider)
     {
         var ret = new List<BaseTypeDeclarationSyntax>();
         if (type.BaseList != null)
         {
             foreach (var baseType in type.BaseList.Types)
             {
-                var symbol = baseType.Type.GetTypeSymbol(provider)!;
+                var symbol = baseType.Type.GetTypeSymbolThrow(provider)!;
                 BaseTypeDeclarationSyntax? foundDeclaration = null;
                 foreach (var reference in symbol.DeclaringSyntaxReferences)
                 {
@@ -918,27 +988,27 @@ public static class CSharpMethodExtensions
 
     }
 
-    public static bool IsAbstract(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
+    public static bool IsAbstract(this BasePropertyDeclarationSyntax property, ICompilationProvider provider)
     {
         return property.GetDeclaredSymbol<IPropertySymbol>(provider).IsAbstract;
     }
 
-    public static bool IsAbstract(this BaseMethodDeclarationSyntax property, ICompilationContextProvider provider)
+    public static bool IsAbstract(this BaseMethodDeclarationSyntax property, ICompilationProvider provider)
     {
         return property.GetDeclaredSymbol(provider)!.IsAbstract;
     }
 
-    public static bool IsReadOnly(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
+    public static bool IsReadOnly(this BasePropertyDeclarationSyntax property, ICompilationProvider provider)
     {
         return property.GetDeclaredSymbol<IPropertySymbol>(provider).IsReadOnly;
     }
 
-    public static bool IsWriteOnly(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
+    public static bool IsWriteOnly(this BasePropertyDeclarationSyntax property, ICompilationProvider provider)
     {
         return property.GetDeclaredSymbol<IPropertySymbol>(provider).IsWriteOnly;
     }
 
-    public static bool IsAutomatic(this BasePropertyDeclarationSyntax property, ICompilationContextProvider provider)
+    public static bool IsAutomatic(this BasePropertyDeclarationSyntax property, ICompilationProvider provider)
     {
         if (property.GetDeclaredSymbol<IPropertySymbol>(provider).IsAbstract)
         {
@@ -956,6 +1026,41 @@ public static class CSharpMethodExtensions
         }
     }
 
+    /// <summary>
+    /// True if this parameter is a R/W ref parameter
+    /// </summary>
+    public static bool IsRefLike(this IParameterSymbol parameter)
+    {
+        switch (parameter.RefKind)
+        {
+            case RefKind.Ref:
+            case RefKind.Out:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// True if this parameter is a R/W ref argument
+    /// </summary>
+    public static bool IsRefLike(this ArgumentSyntax argument)
+    {
+        switch(argument.RefKindKeyword.Kind())
+        {
+            case SyntaxKind.RefKeyword:
+            case SyntaxKind.OutKeyword:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static bool IsRefLike(this ParameterSyntax parameter)
+    {
+        return parameter.Modifiers.Any(SyntaxKind.RefKeyword) || parameter.Modifiers.Any(SyntaxKind.OutKeyword);
+    }
+
     public static bool IsRef(this ParameterSyntax parameter)
     {
         return parameter.Modifiers.Any(SyntaxKind.RefKeyword);
@@ -966,41 +1071,41 @@ public static class CSharpMethodExtensions
         return parameter.Modifiers.Any(SyntaxKind.OutKeyword);
     }
 
-    public static bool HasAccessibility(this MemberDeclarationSyntax member, Accessibility accessibility, ICompilationContextProvider context)
+    public static bool HasAccessibility(this MemberDeclarationSyntax member, Accessibility accessibility, ICompilationProvider context)
     {
         var symbol = member.GetDeclaredSymbol<ISymbol>(context);
         return symbol.HasAccessibility(accessibility);
     }
 
-    public static bool HasAccessibility(this AccessorDeclarationSyntax accessor, Accessibility accessibility, ICompilationContextProvider context)
+    public static bool HasAccessibility(this AccessorDeclarationSyntax accessor, Accessibility accessibility, ICompilationProvider context)
     {
         var symbol = accessor.GetDeclaredSymbol<ISymbol>(context);
         return symbol.HasAccessibility(accessibility);
     }
 
-    public static Accessibility GetAccessibility(this MemberDeclarationSyntax member, ICompilationContextProvider context)
+    public static Accessibility GetAccessibility(this MemberDeclarationSyntax member, ICompilationProvider context)
     {
         return GetDeclaredSymbol(member, context)!.DeclaredAccessibility;
     }
 
-    public static Accessibility GetAccessibility(this AccessorDeclarationSyntax accessor, ICompilationContextProvider context)
+    public static Accessibility GetAccessibility(this AccessorDeclarationSyntax accessor, ICompilationProvider context)
     {
         return accessor.GetDeclaredSymbol<ISymbol>(context).DeclaredAccessibility;
     }
 
-    public static long GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationContextProvider context)
+    public static long GetEnumValue(this EnumMemberDeclarationSyntax node, ICompilationProvider context)
     {
         var symbol = (IFieldSymbol)node.GetDeclaredSymbol(context)!;
         return Convert.ToInt64(symbol.ConstantValue);
     }
 
-    public static bool IsConst(this BaseFieldDeclarationSyntax field, ICompilationContextProvider context)
+    public static bool IsConst(this BaseFieldDeclarationSyntax field, ICompilationProvider context)
     {
         var fieldSymbol = (IFieldSymbol)GetDeclaredSymbol(field, context)!;
         return fieldSymbol.IsConst;
     }
 
-    public static bool IsStatic(this MemberDeclarationSyntax field, ICompilationContextProvider context)
+    public static bool IsStatic(this MemberDeclarationSyntax field, ICompilationProvider context)
     {
         var fieldSymbol = GetDeclaredSymbol(field, context)!;
         return fieldSymbol.IsStatic;

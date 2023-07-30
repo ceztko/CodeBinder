@@ -1,8 +1,6 @@
 ﻿// SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
-using System.Linq;
-
 namespace CodeBinder.JavaScript.TypeScript;
 
 static partial class TypeScriptExtensions
@@ -14,7 +12,7 @@ static partial class TypeScriptExtensions
         switch (kind)
         {
             case SyntaxKind.ConstructorDeclaration:
-                return new[] { new ConstructorWriter((ConstructorDeclarationSyntax)member, context) };
+                return getConstructorWriters((ConstructorDeclarationSyntax)member, context);
             case SyntaxKind.DestructorDeclaration:
                 return new[] { new DestructorWriter((DestructorDeclarationSyntax)member, context) };
             case SyntaxKind.MethodDeclaration:
@@ -41,10 +39,18 @@ static partial class TypeScriptExtensions
         }
     }
 
+    static IEnumerable<CodeWriter> getConstructorWriters(ConstructorDeclarationSyntax constructor, TypeScriptCompilationContext context)
+    {
+        yield return new ConstructorWriter(constructor, context);
+        var methodSymbol = constructor.GetDeclaredSymbol<IMethodSymbol>(context);
+        if (methodSymbol.ContainingType.TypeKind == TypeKind.Struct && methodSymbol.Parameters.Length != 0)
+            yield return new StructConstructorWrapperWriter(constructor, context);
+    }
+
     static IEnumerable<CodeWriter> getMethodWriters(MethodDeclarationSyntax method, TypeScriptCompilationContext context)
     {
         var methodSymbol = method.GetDeclaredSymbol<IMethodSymbol>(context);
-        if (methodSymbol.IsPartialDefinition || methodSymbol.IsExtern)
+        if (methodSymbol.IsPartialDefinition || methodSymbol.IsNative())
             yield break;
 
         IMethodSymbol symbol;

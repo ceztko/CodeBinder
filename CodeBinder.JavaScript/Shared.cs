@@ -29,5 +29,6 @@ public enum JavaScriptInteropType
 enum TypeScriptTypeFlags
 {
     None = 0,
-    IsByRef = 1,
+    ByRef = 1,
+    TypeArgument = 2,
 }

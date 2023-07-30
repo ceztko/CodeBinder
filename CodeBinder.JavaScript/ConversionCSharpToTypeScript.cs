@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 using CodeBinder.Attributes;
-using CodeBinder.JavaScript.NAPI;
 using CodeBinder.JavaScript.TypeScript;
 
 namespace CodeBinder.JavaScript;
@@ -20,12 +19,25 @@ public class ConversionCSharpToTypeScript : CSharpLanguageConversion<TypeScriptC
     {
     }
 
-    protected override TypeScriptCompilationContext createCSharpCompilationContext()
+    public override string GetMethodBaseName(IMethodSymbol symbol)
+    {
+        if (symbol.MethodKind == MethodKind.Constructor)
+            return "constructor";
+        else
+            return base.GetMethodBaseName(symbol);
+    }
+
+    protected override TypeScriptCompilationContext CreateCSharpCompilationContext()
     {
         return new TypeScriptCompilationContext(this);
     }
 
-    public override IReadOnlyCollection<string> SupportedPolicies => new string[] { Policies.YieldReturn };
+    protected override CSharpValidationContext? CreateValidationContext()
+    {
+        return new TypeScriptValidationContext(this);
+    }
+
+    public override IReadOnlyCollection<string> SupportedPolicies => new string[] { Policies.GarbageCollection, Policies.Iterators, Policies.Generators };
 
     public override IReadOnlyList<string> PreprocessorDefinitions
     {

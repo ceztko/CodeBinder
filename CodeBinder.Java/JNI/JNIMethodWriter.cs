@@ -49,7 +49,7 @@ class JNITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, JNIModuleC
         Builder.AppendLine("(void)jcls;");
 
         bool closeBuilder = false;
-        var returnTypeSym = Item.ReturnType.GetTypeSymbol(Context);
+        var returnTypeSym = Item.ReturnType.GetTypeSymbolThrow(Context);
         if (returnTypeSym.SpecialType != SpecialType.System_Void)
         {
             Builder.Append("return").Space();

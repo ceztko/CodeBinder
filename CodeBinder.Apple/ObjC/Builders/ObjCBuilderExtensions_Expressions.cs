@@ -10,7 +10,6 @@ static partial class ObjCBuilderExtension
     // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
     public static CodeBuilder Append(this CodeBuilder builder, ExpressionSyntax expression, ObjCCompilationContext context)
     {
-
         void AppendExpression(CodeBuilder builder)
         {
             var kind = expression.Kind();
@@ -100,6 +99,7 @@ static partial class ObjCBuilderExtension
                     break;
                 case SyntaxKind.PostIncrementExpression:
                 case SyntaxKind.PostDecrementExpression:
+                case SyntaxKind.SuppressNullableWarningExpression:
                     builder.Append((PostfixUnaryExpressionSyntax)expression, context);
                     break;
                 case SyntaxKind.UnaryPlusExpression:
@@ -321,7 +321,7 @@ static partial class ObjCBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax syntax, ObjCCompilationContext context)
     {
-        var type = syntax.Type.GetTypeSymbol(context);
+        var type = syntax.Type.GetTypeSymbolThrow(context);
         if (type.TryGetObjCPrimitiveType(out var objcName))
             builder.Parenthesized().Append(objcName).Close().Append(syntax.Expression, context);
         else
@@ -571,7 +571,10 @@ static partial class ObjCBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, PostfixUnaryExpressionSyntax syntax, ObjCCompilationContext context)
     {
-        builder.Append(syntax.Operand, context).Append(syntax.GetObjCOperator());
+        if (syntax.IsKind(SyntaxKind.SuppressNullableWarningExpression))
+            builder.Append(syntax.Operand, context); // Ignore treatement of the suppress nullable warning operator
+        else
+            builder.Append(syntax.Operand, context).Append(syntax.GetObjCOperator());
         return builder;
     }
 

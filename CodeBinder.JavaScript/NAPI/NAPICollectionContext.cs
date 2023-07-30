@@ -5,19 +5,26 @@ using CodeBinder.Attributes;
 
 namespace CodeBinder.JavaScript.NAPI;
 
-public class NAPINodeVisitor : CSharpNodeVisitorBase<NAPICompilationContext, NAPIModuleContext, ConversionCSharpToNAPI>
+public class NAPICollectionContext : CSharpCollectionContextBase<NAPICompilationContext>
 {
-    public NAPINodeVisitor(NAPICompilationContext compilation)
+    public NAPICollectionContext(NAPICompilationContext compilation)
         : base(compilation)
     {
+        Init += NAPICollectionContext_VisitorInit;
     }
 
-    public override void VisitClassDeclaration(ClassDeclarationSyntax node)
+    private void NAPICollectionContext_VisitorInit(CSharpNodeVisitor visitor)
+    {
+        visitor.ClassDeclarationVisit += Visitor_ClassDeclarationVisit;
+        visitor.StructDeclarationVisit += Visitor_StructDeclarationVisit;
+    }
+
+    private void Visitor_ClassDeclarationVisit(CSharpNodeVisitor visitor, ClassDeclarationSyntax node)
     {
         visitType(node);
     }
 
-    public override void VisitStructDeclaration(StructDeclarationSyntax node)
+    private void Visitor_StructDeclarationVisit(CSharpNodeVisitor visitor, StructDeclarationSyntax node)
     {
         visitType(node);
     }
@@ -26,7 +33,7 @@ public class NAPINodeVisitor : CSharpNodeVisitorBase<NAPICompilationContext, NAP
     {
         JNIModuleContextChild? module = null;
         string? moduleName;
-        if (TryGetModuleName(type, out moduleName))
+        if (type.TryGetModuleName(this, out moduleName))
         {
             JNIModuleContextParent? parent;
             if (!Compilation.TryGetModule(moduleName, out parent))

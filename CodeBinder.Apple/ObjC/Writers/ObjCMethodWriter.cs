@@ -220,7 +220,7 @@ class MethodWriter : MethodWriter<MethodDeclarationSyntax>
     {
         if (_optionalIndex >= 0)
         {
-            var typeSymbol = Item.ReturnType.GetTypeSymbol(Context);
+            var typeSymbol = Item.ReturnType.GetTypeSymbolThrow(Context);
             if (typeSymbol.SpecialType != SpecialType.System_Void)
                 Builder.Append("return").Space();
 

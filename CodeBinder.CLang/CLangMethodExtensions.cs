@@ -39,16 +39,16 @@ public static class CLangMethodExtensions
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter,
-        ICompilationContextProvider provider)
+        ICompilationProvider provider)
     {
         return Append(builder, parameter, false, provider);
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter,
-        bool cppMethod, ICompilationContextProvider provider)
+        bool cppMethod, ICompilationProvider provider)
     {
         bool isByRef = parameter.IsRef() || parameter.IsOut();
-        var symbol = parameter.Type!.GetTypeSymbol(provider);
+        var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
         string? suffix;
         string type = getCLangType(symbol, parameter.GetAttributes(provider),
             isByRef ? DeclarationType.ParamByRef : DeclarationType.Regular,
@@ -76,28 +76,28 @@ public static class CLangMethodExtensions
     }
 
     public static bool TryGetCLangBinder(this BaseTypeDeclarationSyntax typeSyntax,
-        ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        ICompilationProvider provider, [NotNullWhen(true)] out string? binderStr)
     {
         return TryGetCLangBinder(typeSyntax, false, provider, out binderStr);
     }
 
     public static bool TryGetCLangBinder(this BaseTypeDeclarationSyntax typeSyntax, bool pointerType,
-        ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        ICompilationProvider provider, [NotNullWhen(true)] out string? binderStr)
     {
         var symbol = typeSyntax.GetTypeSymbol(provider);
         return tryGetCLangBinder(symbol, pointerType, out binderStr);
     }
 
     public static bool TryGetCLangBinder(this ParameterSyntax parameter,
-        ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        ICompilationProvider provider, [NotNullWhen(true)] out string? binderStr)
     {
         return TryGetCLangBinder(parameter, false, provider, out binderStr);
     }
 
     public static bool TryGetCLangBinder(this ParameterSyntax parameter, bool pointerType,
-        ICompilationContextProvider provider, [NotNullWhen(true)] out string? binderStr)
+        ICompilationProvider provider, [NotNullWhen(true)] out string? binderStr)
     {
-        var symbol = parameter.Type!.GetTypeSymbol(provider);
+        var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
         if (tryGetCLangBinder(symbol, pointerType, out binderStr))
         {
             return true;
@@ -133,22 +133,22 @@ public static class CLangMethodExtensions
         return true;
     }
 
-    public static string GetCLangDeclaration(this VariableDeclarationSyntax declaration, ICompilationContextProvider provider)
+    public static string GetCLangDeclaration(this VariableDeclarationSyntax declaration, ICompilationProvider provider)
     {
-        var symbol = declaration.Type.GetTypeSymbol(provider);
+        var symbol = declaration.Type.GetTypeSymbolThrow(provider);
         var type = getCLangType(symbol, declaration.Variables[0].GetAttributes(provider),
             DeclarationType.Regular, DeclarationFlags.None, out _);
         return $"{type} {declaration.Variables[0].Identifier.Text}";
     }
 
-    public static string GetCLangDeclaration(this ParameterSyntax parameter, ICompilationContextProvider provider)
+    public static string GetCLangDeclaration(this ParameterSyntax parameter, ICompilationProvider provider)
     {
         return GetCLangDeclaration(parameter, false, provider);
     }
 
-    public static string GetCLangDeclaration(this ParameterSyntax parameter, bool noFixedArray, ICompilationContextProvider provider)
+    public static string GetCLangDeclaration(this ParameterSyntax parameter, bool noFixedArray, ICompilationProvider provider)
     {
-        var symbol = parameter.Type!.GetTypeSymbol(provider);
+        var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
         string? suffix;
         var type = getCLangType(symbol, parameter.GetAttributes(provider), DeclarationType.Regular,
             noFixedArray ? DeclarationFlags.NoSubscriptSyntax : DeclarationFlags.None, out suffix);
@@ -199,18 +199,18 @@ public static class CLangMethodExtensions
     }
 
     internal static string GetCLangReturnType(this MethodDeclarationSyntax method,
-        ICompilationContextProvider provider)
+        ICompilationProvider provider)
     {
         return GetCLangReturnType(method, false, provider);
     }
 
-    internal static string GetCLangReturnType(this MethodDeclarationSyntax method, bool cppMethod, ICompilationContextProvider provider)
+    internal static string GetCLangReturnType(this MethodDeclarationSyntax method, bool cppMethod, ICompilationProvider provider)
     {
         var symbol = method.GetDeclaredSymbol<IMethodSymbol>(provider);
         return GetCLangReturnType(symbol, cppMethod);
     }
 
-    public static string GetCLangReturnType(this DelegateDeclarationSyntax dlg, ICompilationContextProvider provider)
+    public static string GetCLangReturnType(this DelegateDeclarationSyntax dlg, ICompilationProvider provider)
     {
         // TODO: Should be possible to prpare static cpp trampolines also for delegates.
         // Maybe not so easy

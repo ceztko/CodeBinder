@@ -22,7 +22,7 @@ static partial class ObjCExtensions
     public static string? GetObjCDefaultLiteral(this TypeSyntax type,
         ObjCCompilationContext context)
     {
-        var symbol = type.GetTypeSymbol(context);
+        var symbol = type.GetTypeSymbolThrow(context);
         if (symbol.TypeKind == TypeKind.Enum)
         {
             // Return a default 0 value for the enum
@@ -157,17 +157,15 @@ static partial class ObjCExtensions
     public static string GetObjCType(this TypeSyntax type, ObjCCompilationContext context)
     {
         var builder = new CodeBuilder();
-        var typeSymbol = type.GetTypeSymbol(context);
-        ObjCTypeKind objcTypeKind;
-        writeTypeSymbol(builder, typeSymbol, ObjCTypeUsageKind.Normal, context, out objcTypeKind);
+        var typeSymbol = type.GetTypeSymbolThrow(context);
+        writeTypeSymbol(builder, typeSymbol, ObjCTypeUsageKind.Normal, context, out _);
         return builder.ToString();
     }
 
     public static ObjCTypeInfo GetObjCTypeInfo(this TypeSyntax type, ObjCCompilationContext context)
     {
         var builder = new CodeBuilder();
-        var typeSymbol = type.GetTypeSymbol(context);
-        string fullName = typeSymbol.GetFullName();
+        var typeSymbol = type.GetTypeSymbolThrow(context);
         var ret = new ObjCTypeInfo();
         writeTypeSymbol(builder, typeSymbol, ObjCTypeUsageKind.Normal, context, out ret.Kind);
         ret.Reachability = GetReachability(typeSymbol, context);
@@ -178,15 +176,15 @@ static partial class ObjCExtensions
     public static string GetObjCType(this TypeSyntax type, ObjCTypeUsageKind displayKind, ObjCCompilationContext context)
     {
         var builder = new CodeBuilder();
-        var typeSymbol = type.GetTypeSymbol(context);
-        writeTypeSymbol(builder, typeSymbol, displayKind, context, out var objcTypeKind);
+        var typeSymbol = type.GetTypeSymbolThrow(context);
+        writeTypeSymbol(builder, typeSymbol, displayKind, context, out var _);
         return builder.ToString();
     }
 
     public static string GetObjCType(this ITypeSymbol typeSymbol, ObjCTypeUsageKind displayKind, ObjCCompilationContext context)
     {
         var builder = new CodeBuilder();
-        writeTypeSymbol(builder, typeSymbol, displayKind, context, out var objcTypeKind);
+        writeTypeSymbol(builder, typeSymbol, displayKind, context, out var _);
         return builder.ToString();
     }
 
@@ -200,7 +198,7 @@ static partial class ObjCExtensions
         ISymbol symbol;
         // Symbol can be null https://github.com/dotnet/roslyn/issues/31471
         if (syntax.Kind() == SyntaxKind.ArrayType)
-            symbol = syntax.GetTypeSymbol(context);
+            symbol = syntax.GetTypeSymbolThrow(context);
         else
             symbol = syntax.GetSymbol(context)!;
 
@@ -210,9 +208,8 @@ static partial class ObjCExtensions
             case SymbolKind.NamedType:
             case SymbolKind.ArrayType:
             {
-                ObjCTypeKind objcTypeKind;
                 var typeSymbol = (ITypeSymbol)symbol;
-                writeTypeSymbol(builder, typeSymbol, usageKind, context, out objcTypeKind);
+                writeTypeSymbol(builder, typeSymbol, usageKind, context, out _);
                 return builder;
             }
             case SymbolKind.Method:

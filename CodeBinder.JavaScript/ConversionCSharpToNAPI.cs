@@ -6,13 +6,13 @@ using CodeBinder.JavaScript.NAPI;
 namespace CodeBinder.JavaScript;
 
 [ConversionLanguageName("NAPI")]
-public class ConversionCSharpToNAPI : LanguageConversion<NAPICompilationContext, NAPIModuleContext>
+public class ConversionCSharpToNAPI : CSharpLanguageConversionBase<NAPICompilationContext, NAPIModuleContext>
 {
     internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
 
     public ConversionCSharpToNAPI() { }
 
-    protected override NAPICompilationContext createCompilationContext()
+    protected override NAPICompilationContext CreateCompilationContext()
     {
         return new NAPICompilationContext(this);
     }

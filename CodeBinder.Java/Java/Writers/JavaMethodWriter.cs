@@ -1,6 +1,7 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 using CodeBinder.Java.Shared;
+using System.Linq.Expressions;
 
 namespace CodeBinder.Java;
 
@@ -34,7 +35,7 @@ abstract class MethodWriter<TMethod> : JavaCodeWriter<TMethod>
         {
             using (Builder.ParameterList())
             {
-                writeParameters(Item.ParameterList, parameterCount);
+                Builder.Append(Item.ParameterList.Parameters, parameterCount, IsNative, Context);
             }
         }
         else
@@ -43,7 +44,7 @@ abstract class MethodWriter<TMethod> : JavaCodeWriter<TMethod>
             {
                 using (Builder.ParameterList(true))
                 {
-                    writeParameters(Item.ParameterList, parameterCount);
+                    Builder.Append(Item.ParameterList.Parameters, parameterCount, IsNative, Context);
                     Builder.AppendLine();
                 }
             }
@@ -80,11 +81,6 @@ abstract class MethodWriter<TMethod> : JavaCodeWriter<TMethod>
         }
     }
 
-    protected void WriteType(TypeSyntax type, JavaTypeFlags flags)
-    {
-        Builder.Append(type.GetJavaType(flags, Context));
-    }
-
     void writeMethodBody()
     {
         if (Item.Body == null)
@@ -102,29 +98,6 @@ abstract class MethodWriter<TMethod> : JavaCodeWriter<TMethod>
             }
         }
     }
-
-    private void writeParameters(ParameterListSyntax list, int parameterCount)
-    {
-        bool first = true;
-        for (int i = 0; i < parameterCount; i++)
-        {
-            var parameter = list.Parameters[i];
-            Builder.CommaAppendLine(ref first);
-            writeParameter(parameter);
-        }
-    }
-
-    private void writeParameter(ParameterSyntax parameter)
-    {
-        var flags = IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None;
-        bool isRef = parameter.IsRef() | parameter.IsOut();
-        if (isRef)
-            flags |= JavaTypeFlags.IsByRef;
-
-        WriteType(parameter.Type!, flags);
-        Builder.Space().Append(parameter.Identifier.Text);
-    }
-
 
     protected virtual void WriteThrows() { /* Do nothing */ }
 
@@ -181,7 +154,7 @@ class MethodWriter : MethodWriter<MethodDeclarationSyntax>
 
     protected override void WriteReturnType()
     {
-        WriteType(Item.ReturnType, IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None);
+        Builder.Append(Item.ReturnType.GetJavaType(IsNative ? JavaTypeFlags.NativeMethod : JavaTypeFlags.None, Context));
         Builder.Space();
     }
 
@@ -189,7 +162,7 @@ class MethodWriter : MethodWriter<MethodDeclarationSyntax>
     {
         if (_optionalIndex >= 0)
         {
-            var typeSymbol = Item.ReturnType.GetTypeSymbol(Context);
+            var typeSymbol = Item.ReturnType.GetTypeSymbolThrow(Context);
             if (typeSymbol.SpecialType != SpecialType.System_Void)
                 Builder.Append("return").Space();
 

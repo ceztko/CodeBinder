@@ -10,7 +10,7 @@ namespace CodeBinder.CLang;
 /// <remarks>Inherit this class to provide custom contexts</remarks>
 [ConversionLanguageName(LanguageName)]
 [ConfigurationSwitch("interface-only", "Only output public interface (CLang)")]
-public class ConversionCSharpToCLang : LanguageConversion<CLangCompilationContext, CLangModuleContext>
+public class ConversionCSharpToCLang : CSharpLanguageConversionBase<CLangCompilationContext, CLangModuleContext>
 {
     internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
     public const string LanguageName = "C";
@@ -25,7 +25,7 @@ public class ConversionCSharpToCLang : LanguageConversion<CLangCompilationContex
 
     public override IReadOnlyCollection<string> SupportedPolicies => new[] { Policies.Delegates };
 
-    protected override CLangCompilationContext createCompilationContext()
+    protected override CLangCompilationContext CreateCompilationContext()
     {
         return new CLangCompilationContext(this);
     }

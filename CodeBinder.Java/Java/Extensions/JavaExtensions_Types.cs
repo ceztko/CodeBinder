@@ -1,6 +1,7 @@
 ﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 using CodeBinder.Java.Shared;
+using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.Java;
 
@@ -110,30 +111,50 @@ static partial class JavaExtensions
             case SyntaxKind.DoubleKeyword:
                 return "double";
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
     }
 
     public static string GetJavaType(this TypeSyntax type, JavaCodeConversionContext context)
     {
-        var builder = new CodeBuilder();
-        bool isInterface;
-        return type.GetJavaType(context, out isInterface);
+        return GetJavaType(type, JavaTypeFlags.None, context, out _);
     }
 
 
     public static string GetJavaType(this TypeSyntax type, JavaCodeConversionContext context, out bool isInterface)
     {
-        var builder = new CodeBuilder();
-        var typeSymbol = type.GetTypeSymbol(context);
-        writeJavaType(builder, typeSymbol.GetFullName(), type, typeSymbol, null, false, context, out isInterface);
-        return builder.ToString();
+        return GetJavaType(type, JavaTypeFlags.None, context, out isInterface);
     }
 
     public static string GetJavaType(this TypeSyntax type, JavaTypeFlags flags, JavaCodeConversionContext context)
     {
-        var symbol = type.GetTypeSymbol(context);
-        return getJavaType(symbol.GetFullName(), type, symbol, flags, context);
+        return GetJavaType(type, flags, context, out _);
+    }
+
+    public static string GetJavaType(this TypeSyntax type, JavaTypeFlags flags, JavaCodeConversionContext context, out bool isInterface)
+    {
+        var symbol = type.GetTypeSymbolThrow(context);
+        var fullTypeName = symbol.GetFullName();
+        if (isHandled(fullTypeName, symbol, flags, out bool isByRef, out bool isTypeArgument, out string? javaType))
+        {
+            isInterface = false;
+            return javaType;
+        }
+
+        var builder = new CodeBuilder();
+        writeJavaType(builder, fullTypeName, type, symbol, isByRef, isTypeArgument, context, out isInterface);
+        return builder.ToString();
+    }
+
+    public static string GetJavaType(this ITypeSymbol symbol, JavaTypeFlags flags = JavaTypeFlags.None)
+    {
+        var fullTypeName = symbol.GetFullName();
+        if (isHandled(fullTypeName, symbol, flags, out bool isByRef, out bool isTypeArgument, out string? javaType))
+            return javaType;
+
+        var builder = new CodeBuilder();
+        writeTypeSymbol(builder, fullTypeName, symbol, isByRef, isTypeArgument, out _);
+        return builder.ToString();
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, IPropertySymbol symbol, JavaCodeConversionContext context)
@@ -177,7 +198,7 @@ static partial class JavaExtensions
         ISymbol symbol;
         // Symbol can be null https://github.com/dotnet/roslyn/issues/31471
         if (syntax.Kind() == SyntaxKind.ArrayType)
-            symbol = syntax.GetTypeSymbol(context);
+            symbol = syntax.GetTypeSymbolThrow(context);
         else
             symbol = syntax.GetSymbol(context)!;
 
@@ -187,9 +208,8 @@ static partial class JavaExtensions
             case SymbolKind.NamedType:
             case SymbolKind.ArrayType:
             {
-                bool isInterface;
                 var typeSymbol = (ITypeSymbol)symbol;
-                writeJavaType(builder, typeSymbol.GetFullName(), syntax, typeSymbol, null, false, context, out isInterface);
+                writeJavaType(builder, typeSymbol.GetFullName(), syntax, typeSymbol, false, false, context, out _);
                 return builder;
             }
             case SymbolKind.Method:
@@ -222,15 +242,23 @@ static partial class JavaExtensions
                 break;
             }
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
 
         return builder;
     }
 
-    static string getJavaType(string typeName, TypeSyntax syntax, ITypeSymbol symbol, JavaTypeFlags flags, JavaCodeConversionContext context)
+    public static CodeBuilder Append(this CodeBuilder builder, ITypeSymbol symbol)
     {
-        bool isByRef = flags.HasFlag(JavaTypeFlags.IsByRef);
+        writeTypeSymbol(builder, symbol.GetFullName(), symbol, false, false, out _);
+        return builder;
+    }
+
+    static bool isHandled(string fullName, ITypeSymbol symbol, JavaTypeFlags flags,
+        out bool isByRef, out bool isTypeArgument, [NotNullWhen(true)]out string? javaType)
+    {
+        isByRef = flags.HasFlag(JavaTypeFlags.ByRef);
+        isTypeArgument = flags.HasFlag(JavaTypeFlags.TypeArgument);
         if (flags.HasFlag(JavaTypeFlags.NativeMethod))
         {
             switch (symbol.TypeKind)
@@ -239,10 +267,12 @@ static partial class JavaExtensions
                 {
                     if (isByRef && !symbol.IsCLRPrimitiveType())
                     {
-                        if (symbol.GetFullName() == "CodeBinder.cbstring")
-                            return "StringBox";
+                        if (fullName == "CodeBinder.cbstring")
+                            javaType = "StringBox";
                         else
-                            return "long";
+                            javaType = "long";
+
+                        return true;
                     }
 
                     break;
@@ -250,17 +280,17 @@ static partial class JavaExtensions
                 case TypeKind.Enum:
                 {
                     if (isByRef)
-                        return "IntegerBox"; // TODO: Box for enums on non native methods
+                        javaType = "IntegerBox"; // TODO: Box for enums on non native methods
                     else
-                        return "int";
+                        javaType = "int";
+
+                    return true;
                 }
             }
         }
 
-        var builder = new CodeBuilder();
-        bool isInterface;
-        writeJavaType(builder, typeName, syntax, symbol, null, isByRef, context, out isInterface);
-        return builder.ToString();
+        javaType = null;
+        return false;
     }
 
     static void writeJavaMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol method, JavaCodeConversionContext context)
@@ -294,12 +324,21 @@ static partial class JavaExtensions
             case SyntaxKind.GenericName:
             {
                 var genericName = (GenericNameSyntax)syntax;
-                builder.Append(genericName.TypeArgumentList, genericName, context).Append(javaMethodName);
+                builder.append(genericName.TypeArgumentList, context).Append(javaMethodName);
                 break;
             }
             default:
                 throw new Exception();
         }
+
+        switch (method.MethodKind)
+        {
+            case MethodKind.DelegateInvoke:
+            case MethodKind.LocalFunction:
+                // NOTE: In Java we must access the "apply" invocation for such calls
+                builder.Dot().Append("apply");
+                break;
+        }            
     }
 
     static void writeJavaPropertyIdentifier(CodeBuilder builder, SyntaxNode syntax, IPropertySymbol property, JavaCodeConversionContext context)
@@ -384,7 +423,7 @@ static partial class JavaExtensions
                     break;
                 }
                 default:
-                    throw new Exception();
+                    throw new NotSupportedException();
             }
         }
 
@@ -393,6 +432,8 @@ static partial class JavaExtensions
 
     static void writeJavaIdentifier(CodeBuilder builder, TypeSyntax syntax, ISymbol symbol, JavaCodeConversionContext context)
     {
+        _ = symbol;
+        _ = context;
         var kind = syntax.Kind();
         switch (kind)
         {
@@ -403,26 +444,17 @@ static partial class JavaExtensions
                 break;
             }
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
     }
 
-    static CodeBuilder Append(this CodeBuilder builder, TypeSyntax type, TypeSyntax parent,
-        JavaCodeConversionContext context)
-    {
-        bool isInterface;
-        var typeSymbol = type.GetTypeSymbol(context);
-        writeJavaType(builder, typeSymbol.GetFullName(), type, typeSymbol, parent, false, context, out isInterface);
-        return builder;
-    }
-
     static void writeJavaType(CodeBuilder builder, string fullTypeName, TypeSyntax type, ITypeSymbol symbol,
-        TypeSyntax? parent, bool isByRef, JavaCodeConversionContext context, out bool isInterface)
+        bool isByRef, bool isTypeArgument, JavaCodeConversionContext context, out bool isInterface)
     {
         if (type.IsVar)
         {
             // Type is inferred
-            writeTypeSymbol(builder, fullTypeName, symbol, null, isByRef, out isInterface);
+            writeTypeSymbol(builder, fullTypeName, symbol, isByRef, isTypeArgument, out isInterface);
             return;
         }
 
@@ -440,33 +472,34 @@ static partial class JavaExtensions
             case SymbolKind.ArrayType:
             {
                 var arrayType = (IArrayTypeSymbol)symbol;
-                fullTypeName = arrayType.ElementType.GetFullName();
+                if (!arrayType.ElementType.IsCLRPrimitiveType())
+                    fullTypeName = arrayType.ElementType.GetFullName();
                 break;
             }
             case SymbolKind.TypeParameter:
-                // Nothing to do
+                // Do nothing
                 break;
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
 
         var typeKind = type.Kind();
         string? javaTypeName;
-        if (IsKnownJavaType(fullTypeName, isByRef, parent?.GetTypeSymbol(context), out javaTypeName, out isInterface))
+        if (isKnownJavaType(fullTypeName, isByRef, isTypeArgument, out javaTypeName, out isInterface))
         {
             switch (typeKind)
             {
                 case SyntaxKind.GenericName:
                 {
                     var genericType = (GenericNameSyntax)type;
-                    builder.Append(javaTypeName).Append(genericType.TypeArgumentList, type, context);
+                    builder.Append(javaTypeName).append(genericType.TypeArgumentList, context);
                     break;
                 }
                 case SyntaxKind.ArrayType:
                 {
                     var arrayType = (ArrayTypeSyntax)type;
                     Debug.Assert(arrayType.RankSpecifiers.Count == 1);
-                    builder.Append(javaTypeName).Append(arrayType.RankSpecifiers[0], context);
+                    builder.Append(javaTypeName).append(arrayType.RankSpecifiers[0], context);
                     break;
                 }
                 case SyntaxKind.NullableType:
@@ -475,7 +508,7 @@ static partial class JavaExtensions
                     if (JavaUtils.TryGetBoxType(fullTypeName, out boxTypeName))
                         builder.Append(boxTypeName);
                     else
-                        throw new Exception();
+                        builder.Append(javaTypeName);
                     break;
                 }
                 case SyntaxKind.PredefinedType:
@@ -490,11 +523,11 @@ static partial class JavaExtensions
                 }
                 case SyntaxKind.QualifiedName:
                 {
-                    var qualifiedName = type as QualifiedNameSyntax;
+                    //var qualifiedName = type as QualifiedNameSyntax;
                     throw new Exception();
                 }
                 default:
-                    throw new Exception();
+                    throw new NotSupportedException();
             }
         }
         else
@@ -511,13 +544,13 @@ static partial class JavaExtensions
                 {
                     var arrayType = (ArrayTypeSyntax)type;
                     Debug.Assert(arrayType.RankSpecifiers.Count == 1);
-                    builder.Append(arrayType.ElementType, type, context).Append(arrayType.RankSpecifiers[0], context);
+                    builder.Append(arrayType.ElementType, context).append(arrayType.RankSpecifiers[0], context);
                     break;
                 }
                 case SyntaxKind.GenericName:
                 {
                     var genericType = (GenericNameSyntax)type;
-                    builder.Append(genericType.GetName()).Append(genericType.TypeArgumentList, type, context);
+                    builder.Append(genericType.GetName()).append(genericType.TypeArgumentList, context);
                     break;
                 }
                 case SyntaxKind.NullableType:
@@ -526,12 +559,17 @@ static partial class JavaExtensions
                     switch (symbol.TypeKind)
                     {
                         case TypeKind.Struct:
-                            builder.Append(nullableType.ElementType, type, context);
+                        case TypeKind.Class:
+                        case TypeKind.Interface:
+                        case TypeKind.TypeParameter:
+                        case TypeKind.Array:
+                            var elementTypeSymbol = nullableType.ElementType.GetSymbol<ITypeSymbol>(context);
+                            writeJavaType(builder, elementTypeSymbol.GetFullName(), nullableType.ElementType, elementTypeSymbol, false, true, context, out _);
                             break;
                         case TypeKind.Enum:
                             throw new Exception("TODO");
                         default:
-                            throw new Exception();
+                            throw new NotSupportedException();
                     }
 
                     break;
@@ -539,27 +577,20 @@ static partial class JavaExtensions
                 case SyntaxKind.QualifiedName:
                 {
                     var qualifiedName = (QualifiedNameSyntax)type;
-                    builder.Append(qualifiedName.Left, type, context).Dot().Append(qualifiedName.Right, type, context);
+                    builder.Append(qualifiedName.Left, context).Dot().Append(qualifiedName.Right, context);
                     break;
                 }
                 default:
-                    throw new Exception();
+                    throw new NotSupportedException();
             }
 
             isInterface = symbol.TypeKind == TypeKind.Interface;
         }
     }
 
-    static CodeBuilder Append(this CodeBuilder builder, ITypeSymbol symbol, ITypeSymbol parent)
-    {
-        bool isInterface;
-        writeTypeSymbol(builder, symbol.GetFullName(), symbol, parent, false, out isInterface);
-        return builder;
-    }
-
     /// <summary>This method is mainly used for inferred types</summary>
     static void writeTypeSymbol(CodeBuilder builder, string fullTypeName, ITypeSymbol symbol,
-        ITypeSymbol? parentSymbol, bool isByRef, out bool isInterface)
+        bool isByRef, bool isTypeArgument, out bool isInterface)
     {
         // Try to adjust the typename, looking for know types
         switch (symbol.Kind)
@@ -575,12 +606,12 @@ static partial class JavaExtensions
                         {
                             case TypeKind.Struct:
                                 var nullableType = namedType.TypeArguments[0];
-                                writeTypeSymbol(builder, nullableType.GetFullName(), nullableType, symbol, isByRef, out isInterface);
+                                writeTypeSymbol(builder, nullableType.GetFullName(), nullableType, isByRef, isTypeArgument, out isInterface);
                                 return;
                             case TypeKind.Enum:
                                 throw new Exception("TODO");
                             default:
-                                throw new Exception();
+                                throw new NotSupportedException();
                         }
                     }
 
@@ -592,19 +623,19 @@ static partial class JavaExtensions
             case SymbolKind.ArrayType:
             {
                 var arrayType = (IArrayTypeSymbol)symbol;
-                builder.Append(arrayType.ElementType, symbol).EmptyRankSpecifier();
+                builder.Append(arrayType.ElementType).EmptyRankSpecifier();
                 isInterface = false;
                 return;
             }
             case SymbolKind.TypeParameter:
-                // Nothing to do
+                // Do nothing
                 break;
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
 
         string? javaTypeName;
-        if (!IsKnownJavaType(fullTypeName, isByRef, parentSymbol, out javaTypeName, out isInterface))
+        if (!isKnownJavaType(fullTypeName, isByRef, isTypeArgument, out javaTypeName, out isInterface))
         {
             isInterface = symbol.TypeKind == TypeKind.Interface;
             javaTypeName = symbol.GetQualifiedName();
@@ -622,7 +653,7 @@ static partial class JavaExtensions
                     {
                         bool first = true;
                         foreach (var parameter in namedType.TypeArguments)
-                            builder.CommaSeparator(ref first).Append(parameter, symbol);
+                            builder.CommaSeparator(ref first).Append(parameter);
                     }
                 }
 
@@ -634,23 +665,27 @@ static partial class JavaExtensions
                 break;
             }
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
     }
 
-    static CodeBuilder Append(this CodeBuilder builder, TypeArgumentListSyntax syntax, TypeSyntax parent, JavaCodeConversionContext context)
+    static CodeBuilder append(this CodeBuilder builder, TypeArgumentListSyntax syntax, JavaCodeConversionContext context)
     {
         using (builder.TypeParameterList())
         {
             bool first = true;
             foreach (var type in syntax.Arguments)
-                builder.CommaSeparator(ref first).Append(type, parent, context);
+            {
+                builder.CommaSeparator(ref first);
+                var argumentTypeSymbol = type.GetSymbol<ITypeSymbol>(context);
+                writeJavaType(builder, argumentTypeSymbol.GetFullName(), type, argumentTypeSymbol, false, true, context, out _);
+            }
         }
 
         return builder;
     }
 
-    static CodeBuilder Append(this CodeBuilder builder, ArrayRankSpecifierSyntax syntax, JavaCodeConversionContext context)
+    static CodeBuilder append(this CodeBuilder builder, ArrayRankSpecifierSyntax syntax, JavaCodeConversionContext context)
     {
         if (syntax.Sizes.Count > 0)
         {
@@ -665,10 +700,10 @@ static partial class JavaExtensions
         return builder;
     }
 
-    public static bool IsKnownJavaType(string fullTypeName, bool isByRef, ITypeSymbol? parent,
+    static bool isKnownJavaType(string fullTypeName, bool isByRef, bool isTypeArgument,
         [NotNullWhen(true)]out string? knownJavaType, out bool isInterface)
     {
-        if (IsKnowSimpleJavaType(fullTypeName, isByRef, parent, out knownJavaType))
+        if (isKnowSimpleJavaType(fullTypeName, isByRef, isTypeArgument, out knownJavaType))
         {
             isInterface = false;
             return true;
@@ -727,7 +762,8 @@ static partial class JavaExtensions
         }
     }
 
-    public static bool IsKnowSimpleJavaType(string fullTypeName, bool isByRef, ITypeSymbol? parent, [NotNullWhen(true)]out string? knownJavaType)
+    public static bool isKnowSimpleJavaType(string fullTypeName, bool isByRef, bool isTypeArgument,
+        [NotNullWhen(true)]out string? knownJavaType)
     {
         if (isByRef)
         {
@@ -736,7 +772,7 @@ static partial class JavaExtensions
             else
                 return false;
         }
-        else if (parent?.IsGeneric() == true)
+        else if (isTypeArgument)
         {
             switch (fullTypeName)
             {
@@ -784,7 +820,7 @@ static partial class JavaExtensions
                     knownJavaType = "Double";
                     return true;
                 case "System.Void":
-                    throw new Exception();
+                    throw new NotSupportedException();
                 default:
                     knownJavaType = null;
                     return false;

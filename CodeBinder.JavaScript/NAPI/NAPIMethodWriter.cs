@@ -48,7 +48,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
         bindParameters();
 
         var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
-        if (methodSymbol.ReturnType.SpecialType != SpecialType.System_Void)
+        if (!methodSymbol.ReturnsVoid)
         {
             Builder.Append(methodSymbol.GetCLangReturnType()).Space().Append("cret_").Space().Append("=").Space();
         }
@@ -156,7 +156,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
         Builder.EndOfLine();
         Builder.AppendLine();
 
-        if (methodSymbol.ReturnType.SpecialType == SpecialType.System_Void)
+        if (methodSymbol.ReturnsVoid)
         {
             // NOTE: void returning function needs nullptr
             Builder.Append("return nullptr").EndOfLine();
@@ -211,7 +211,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
         if (parameterCount == 0)
             return;
 
-        Builder.AppendLine("size_t argc;");
+        Builder.AppendLine($"size_t argc = {parameterCount};");
         Builder.AppendLine($"napi_value args[{parameterCount}];");
         Builder.AppendLine("napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);");
         Builder.AppendLine($"assert(argc == {parameterCount});");

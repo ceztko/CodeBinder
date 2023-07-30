@@ -3,7 +3,7 @@
 
 namespace CodeBinder.JavaScript.NAPI;
 
-public class NAPICompilationContext : CompilationContext<NAPIModuleContext, ConversionCSharpToNAPI>
+public class NAPICompilationContext : CSharpCompilationContextBase<NAPIModuleContext, ConversionCSharpToNAPI>
 {
     Dictionary<string, JNIModuleContextParent> _modules;
 
@@ -29,9 +29,9 @@ public class NAPICompilationContext : CompilationContext<NAPIModuleContext, Conv
         return _modules.TryGetValue(moduleName, out module);
     }
 
-    protected override INodeVisitor CreateVisitor()
+    protected override CSharpCollectionContextBase CreateCollectionContext()
     {
-        return new NAPINodeVisitor(this);
+        return new NAPICollectionContext(this);
     }
 
     public IEnumerable<JNIModuleContextParent> Modules

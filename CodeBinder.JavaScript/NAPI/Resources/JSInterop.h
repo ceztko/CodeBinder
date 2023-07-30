@@ -174,7 +174,7 @@ namespace js
     inline void* GetHandleRefPtrFromNapiValue(napi_env env, napi_value value)
     {
         napi_value napi_ptr;
-        napi_get_named_property(env, value, "ptr", &napi_ptr);
+        napi_get_named_property(env, value, "handle", &napi_ptr);
 
         double ret;
         napi_get_value_double(env, napi_ptr, &ret);
@@ -284,7 +284,7 @@ namespace js
     inline napi_value CreateNapiValue(napi_env env, const void* ptr)
     {
         napi_value ret;
-        napi_create_double(env, *reinterpret_cast<const double*>((const uint64_t*)ptr), &ret);
+        napi_create_double(env, *reinterpret_cast<const double*>((const uint64_t*)&ptr), &ret);
         return ret;
     }
 

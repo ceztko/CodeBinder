@@ -28,32 +28,23 @@ static partial class TypeScriptBuilderExtension
     {
         bool first = true;
         foreach (var statement in staments)
-        {
-            IEnumerable<CodeWriter>? writers;
-            if (statement.HasReplacementWriters(context, out writers))
-            {
-                foreach (var writer in writers)
-                    builder.AppendLine(ref first).Append(writer);
-            }
-            else
-            {
-                builder.AppendLine(ref first).Append(statement, context);
-            }
-        }
+            builder.AppendLine(ref first).Append(statement, context);
 
         return builder;
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, BreakStatementSyntax syntax, TypeScriptCompilationContext context)
     {
+        _ = syntax;
+        _ = context;
         builder.Append("break").SemiColon();
         return builder;
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, ForEachStatementSyntax syntax, TypeScriptCompilationContext context)
     {
-        builder.Append("for").Space().Parenthesized().Append(syntax.Type, context).Space().Append(syntax.Identifier.Text)
-            .Space().Colon().Space().Append(syntax.Expression, context).Close().AppendLine();
+        builder.Append("for").Space().Parenthesized().Append("let").Space().Append(syntax.Identifier.Text)
+            .Space().Append("of").Space().Append(syntax.Expression, context).Close().AppendLine();
         builder.IndentChild().Append(syntax.Statement, context);
         return builder;
     }
@@ -74,6 +65,8 @@ static partial class TypeScriptBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, EmptyStatementSyntax syntax, TypeScriptCompilationContext context)
     {
+        _ = syntax;
+        _ = context;
         return builder.SemiColon();
     }
 
@@ -88,10 +81,12 @@ static partial class TypeScriptBuilderExtension
         builder.Append("for").Space().Parenthesized(() =>
         {
             if (syntax.Declaration != null)
-                builder.Append(syntax.Declaration, context);
+                builder.Append("let").Space().Append(syntax.Declaration, context);
+
             builder.SemiColonSeparator();
             if (syntax.Condition != null)
                 builder.Append(syntax.Condition, context);
+
             builder.SemiColonSeparator().Append(syntax.Incrementors, context);
         }).AppendLine();
         builder.IndentChild().Append(syntax.Statement, context);
@@ -113,22 +108,35 @@ static partial class TypeScriptBuilderExtension
         if (syntax.IsConst)
             builder.Append("final").Space();
 
-        builder.Append(syntax.Declaration, context).SemiColon();
+        builder.Append("let").Space().Append(syntax.Declaration, context).SemiColon();
         return builder;
     }
 
-    public static CodeBuilder Append(this CodeBuilder builder, LockStatementSyntax syntax, TypeScriptCompilationContext context)
+    public static CodeBuilder Append(this CodeBuilder builder, LocalFunctionStatementSyntax syntax, TypeScriptCompilationContext context)
     {
-        builder.Append("synchronized").Space().Parenthesized().Append(syntax.Expression, context).Close().AppendLine();
-        builder.IndentChild().Append(syntax.Statement, context);
+        builder.Append("let").Space().Append(syntax.Identifier.Text).Space().Append("=").Space().Append(syntax.ParameterList, context).Space().Colon().Space()
+            .Append(syntax.ReturnType.GetTypeScriptType(context)).Space().AppendLine("=>")
+            .Append(syntax.Body!, context);
         return builder;
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, ReturnStatementSyntax syntax, TypeScriptCompilationContext context)
     {
-        builder.Append("return");
         if (syntax.Expression != null)
-            builder.Space().Append(syntax.Expression, context);
+        {
+            // FIXME: Workaround for ref arguments invocations. Real fix is improve
+            // existing tree manipulation to also add syntetized arguments. See TypeScriptValidationContext
+            var block = syntax.FindAncestorBlock();
+            if (block.Parent.IsKind(SyntaxKind.LocalFunctionStatement))
+                builder.Append(syntax.Expression, context);
+            else
+                builder.Append("return").Space().Append(syntax.Expression, context);
+        }
+        else
+        {
+            builder.Append("return");
+        }
+
         builder.SemiColon();
         return builder;
     }
@@ -138,9 +146,8 @@ static partial class TypeScriptBuilderExtension
         builder.Append("switch").Space().Parenthesized().Append(syntax.Expression, context).Close().AppendLine();
         using (builder.Block(false))
         {
-            bool first = true;
             foreach (var section in syntax.Sections)
-                builder.AppendLine(ref first).Append(section, context);
+                builder.Append(section, context).AppendLine();
         }
         return builder;
     }
@@ -176,9 +183,18 @@ static partial class TypeScriptBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, WhileStatementSyntax syntax, TypeScriptCompilationContext context)
     {
-        builder.Append("while").Space().Append(syntax.Condition, context).AppendLine()
+        builder.Append("while").Space().Parenthesized().Append(syntax.Condition, context).Close().AppendLine()
             .IndentChild().Append(syntax.Statement, context);
         return builder;
+    }
+
+    public static CodeBuilder Append(this CodeBuilder builder, YieldStatementSyntax syntax, TypeScriptCompilationContext context)
+    {
+        if (syntax.Expression == null)
+            builder.Append("yield").Space().Append("break");
+        else
+            builder.Append("yield").Space().Append(syntax.Expression, context);
+        return builder.SemiColon();
     }
 
     // Reference: roslyn/src/Compilers/CSharp/Portable/Generated/Syntax.xml.Main.Generated.cs
@@ -207,8 +223,8 @@ static partial class TypeScriptBuilderExtension
                 return builder.Append((IfStatementSyntax)statement, context);
             case SyntaxKind.LocalDeclarationStatement:
                 return builder.Append((LocalDeclarationStatementSyntax)statement, context);
-            case SyntaxKind.LockStatement:
-                return builder.Append((LockStatementSyntax)statement, context);
+            case SyntaxKind.LocalFunctionStatement:
+                return builder.Append((LocalFunctionStatementSyntax)statement, context);
             case SyntaxKind.ReturnStatement:
                 return builder.Append((ReturnStatementSyntax)statement, context);
             case SyntaxKind.SwitchStatement:
@@ -221,16 +237,16 @@ static partial class TypeScriptBuilderExtension
                 return builder.Append((UsingStatementSyntax)statement, context);
             case SyntaxKind.WhileStatement:
                 return builder.Append((WhileStatementSyntax)statement, context);
+            case SyntaxKind.YieldReturnStatement:
+            case SyntaxKind.YieldBreakStatement:
+                return builder.Append((YieldStatementSyntax)statement, context);
             // Unsupported statements
+            case SyntaxKind.LockStatement:
             case SyntaxKind.CheckedStatement:
             case SyntaxKind.UnsafeStatement:
             case SyntaxKind.LabeledStatement:
             case SyntaxKind.FixedStatement:
-            case SyntaxKind.LocalFunctionStatement:
             case SyntaxKind.ForEachVariableStatement:
-            // Unsupported yield statements
-            case SyntaxKind.YieldBreakStatement:
-            case SyntaxKind.YieldReturnStatement:
             // Unsupported goto statements
             case SyntaxKind.GotoStatement:
             case SyntaxKind.GotoCaseStatement:
@@ -246,15 +262,9 @@ static partial class TypeScriptBuilderExtension
         var declaration = syntax.Variables[0];
         builder.Append(declaration.Identifier.Text).Colon().Space().Append(syntax.Type, context);
         if (declaration.Initializer == null)
-        {
-            Debug.Assert(syntax.Parent != null);
-            if (syntax.Parent.IsKind(SyntaxKind.FieldDeclaration))
-                builder.Space().Append("=").Space().Append(syntax.Type.GetTypeScriptDefaultLiteral(context)!);
-        }
+            builder.Space().Append("=").Space().Append(syntax.Type.GetTypeScriptDefaultLiteral(context)!);
         else
-        {
-            builder.Space().Append(declaration.Initializer, context);
-        }    
+            builder.Space().Append(declaration.Initializer, context);  
 
         return builder;
     }
@@ -318,15 +328,6 @@ static partial class TypeScriptBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, CaseSwitchLabelSyntax syntax, TypeScriptCompilationContext context)
     {
-        var typeSymbol = syntax.Value.GetTypeSymbol(context)!;
-        if (typeSymbol.TypeKind == TypeKind.Enum)
-        {
-            // Shitty Java wants enum elements to be written unqualified
-            var symbol = syntax.Value.GetSymbol<IFieldSymbol>(context);
-            builder.Append(symbol.Name);
-            return builder;
-        }
-
         builder.Append(syntax.Value, context);
         return builder;
     }

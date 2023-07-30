@@ -120,7 +120,7 @@ class CLangMethodTrampolineWriter : CLangMethodWriter
             }
         }
 
-        if (Item.ReturnType.GetTypeSymbol(Context).SpecialType != SpecialType.System_Void)
+        if (Item.ReturnType.GetTypeSymbolThrow(Context).SpecialType != SpecialType.System_Void)
             Builder.Append("return").Space();
 
         Builder.Append(Context.Compilation.LibraryName.ToLower()).Append("::")
@@ -157,12 +157,12 @@ class CLangMethodTrampolineWriter : CLangMethodWriter
     public override bool HasBody => true;
 }
 
-class CLangParameterListWriter : CodeWriter<ParameterListSyntax, ICompilationContextProvider>
+class CLangParameterListWriter : CodeWriter<ParameterListSyntax, ICompilationProvider>
 {
     public bool CppMethod { get; private set; }
 
     public CLangParameterListWriter(ParameterListSyntax list, bool cppMethod,
-        ICompilationContextProvider module)
+        ICompilationProvider module)
         : base(list, module)
     {
         CppMethod = cppMethod;
@@ -172,13 +172,6 @@ class CLangParameterListWriter : CodeWriter<ParameterListSyntax, ICompilationCon
     {
         bool first = true;
         foreach (var parameter in Item.Parameters)
-        {
-            if (first)
-                first = false;
-            else
-                Builder.CommaSeparator();
-
-            Builder.Append(parameter, CppMethod, Context);
-        }
+            Builder.CommaSeparator(ref first).Append(parameter, CppMethod, Context);
     }
 }

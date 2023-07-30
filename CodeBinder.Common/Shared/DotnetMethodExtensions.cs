@@ -1,12 +1,13 @@
 ﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 using CodeBinder.Attributes;
+using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;
 
 namespace CodeBinder.Shared;
 
-public static class RoslynMethodExtensions
+public static class DotnetMethodExtensions
 {
     /// <summary>Primitive types as defined by https://docs.microsoft.com/en-us/dotnet/api/system.type.isprimitive
     /// </summary>
@@ -18,7 +19,6 @@ public static class RoslynMethodExtensions
             case SpecialType.System_IntPtr:
             case SpecialType.System_UIntPtr:
             case SpecialType.System_Boolean:
-            case SpecialType.System_Char:
             case SpecialType.System_SByte:
             case SpecialType.System_Byte:
             case SpecialType.System_Int16:
@@ -35,9 +35,103 @@ public static class RoslynMethodExtensions
         }
     }
 
+    public static string GetCSharpTypeName(this ITypeSymbol symbol)
+    {
+        switch (symbol.SpecialType)
+        {
+            case SpecialType.System_Boolean:
+                return "bool";
+            case SpecialType.System_SByte:
+                return "sbyte";
+            case SpecialType.System_Byte:
+                return "byte";
+            case SpecialType.System_Int16:
+                return "short";
+            case SpecialType.System_UInt16:
+                return "ushort";
+            case SpecialType.System_Int32:
+                return "int";
+            case SpecialType.System_UInt32:
+                return "uint";
+            case SpecialType.System_Int64:
+                return "long";
+            case SpecialType.System_UInt64:
+                return "ulong";
+            case SpecialType.System_Single:
+                return "float";
+            case SpecialType.System_Double:
+                return "double";
+            case SpecialType.System_Void:
+                return "void";
+            default:
+                return symbol.Name;
+        }
+    }
+
+    /// <summary>
+    /// Return the binded name for this symbol
+    /// </summary>
+    public static string GetBindedName(this IMethodSymbol symbol, LanguageConversion conversion, out bool isOverload)
+    {
+        string? stem = null;
+        var enableIfMissing = OverloadFeature.None;
+        isOverload = false;
+        if (symbol.TryGetAttribute<OverloadBindingAttribute>(out var overloadAttrib))
+        {
+            stem = overloadAttrib.GetConstructorArgument<string>(0);
+            enableIfMissing = overloadAttrib.GetConstructorArgument<OverloadFeature>(1);
+            isOverload = true;
+        }
+
+        if (stem == null && symbol.OverriddenMethod != null)
+        {
+            if (symbol.OverriddenMethod.TryGetAttribute<OverloadBindingAttribute>(out overloadAttrib))
+            {
+                stem = overloadAttrib.GetConstructorArgument<string>(0);
+                enableIfMissing = overloadAttrib.GetConstructorArgument<OverloadFeature>(0);
+                isOverload = true;
+            }
+        }
+
+        if (stem == null || (conversion.OverloadFeatures?.HasFlag(enableIfMissing) ?? true))
+        {
+            return conversion.GetMethodBaseName(symbol);
+        }
+        else
+        {
+            if (symbol.MethodKind == MethodKind.Constructor)
+            {
+                string bindedName = stem;
+                conversion.HandleMethodCasing(symbol, ref bindedName);
+                return bindedName;
+            }
+            else
+            {
+                return conversion.GetMethodBaseName(symbol) + stem;
+            }
+        }
+    }
+
+    public static bool IsGetEnumerator(this IMethodSymbol method)
+    {
+        if (method.Name != "GetEnumerator")
+            return false;
+
+        // If the containing type is IEnumerable<T> then it's clearly GetEnumerator() method
+        if (method.ContainingType.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T)
+            return true;
+
+        // Or it's a type that implements IEnumerable<T>
+        var ienumerable = method.ContainingType.Interfaces.FirstOrDefault((entry) =>entry.OriginalDefinition.GetFullName() == "System.Collections.Generic.IEnumerable<out T>");
+        if (ienumerable != null && method.ContainingType.FindImplementationForInterfaceMember(ienumerable.GetMembers().First()) != null)
+            return true;
+
+        return false;
+    }
+
     public static bool IsNullable(this INamedTypeSymbol symbol)
     {
-        return symbol.IsNullable(out var underlyingType);
+        return symbol.IsNullable(out var _);
     }
 
     public static bool IsNullable(this INamedTypeSymbol symbol,[NotNullWhen(true)]out ITypeSymbol? underlyingType)
@@ -119,7 +213,7 @@ public static class RoslynMethodExtensions
         return attribute.AttributeClass!.GetFullName() == typeof(TAttribute).FullName;
     }
 
-    public static TypeInfo GetTypeInfo(this SyntaxNode node, ICompilationContextProvider provider)
+    public static TypeInfo GetTypeInfo(this SyntaxNode node, ICompilationProvider provider)
     {
         var model = node.GetSemanticModel(provider);
         return model.GetTypeInfo(node);
@@ -385,7 +479,7 @@ public static class RoslynMethodExtensions
         return def;
     }
 
-    public static ImmutableArray<AttributeData> GetAttributes(this SyntaxNode node, ICompilationContextProvider provider)
+    public static ImmutableArray<AttributeData> GetAttributes(this SyntaxNode node, ICompilationProvider provider)
     {
         var symbol = node.GetDeclaredSymbol(provider);
         if (symbol == null)
@@ -394,65 +488,79 @@ public static class RoslynMethodExtensions
         return symbol.GetAttributes();
     }
 
-    public static IOperation? GetOperation(this SyntaxNode node, ICompilationContextProvider provider)
+    public static IOperation? GetOperation(this SyntaxNode node, ICompilationProvider provider)
     {
         var model = node.GetSemanticModel(provider);
         return model.GetOperation(node);
     }
 
-    public static TOperation? GetOperation<TOperation>(this SyntaxNode node, ICompilationContextProvider provider)
+    public static TOperation? GetOperation<TOperation>(this SyntaxNode node, ICompilationProvider provider)
         where TOperation : class,IOperation
     {
         return (TOperation?)GetOperation(node, provider);
     }
 
-    public static bool TryGetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)]out TSymbol? symbol)
+    public static bool TryGetSymbol<TSymbol>(this SyntaxNode node, ICompilationProvider provider, [NotNullWhen(true)]out TSymbol? symbol)
         where TSymbol : class, ISymbol
     {
         symbol = GetSymbol(node, provider) as TSymbol;
         return symbol != null;
     }
 
-    public static TSymbol GetSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
+    public static TSymbol GetSymbol<TSymbol>(this SyntaxNode node, ICompilationProvider provider)
         where TSymbol : class,ISymbol
     {
         return GetSymbol(node, provider) as TSymbol ?? throw new Exception($"Unable to get symbol {typeof(TSymbol).Name} in syntax: {node}");
     }
 
-    public static ISymbol? GetSymbol(this SyntaxNode node, ICompilationContextProvider provider)
+    public static ISymbol? GetSymbol(this SyntaxNode node, ICompilationProvider provider)
     {
         var model = node.GetSemanticModel(provider);
         return model.GetSymbolInfo(node).Symbol;
     }
 
-    public static TSymbol GetDeclaredSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
+    public static ISymbol GetSymbolThrow(this SyntaxNode node, ICompilationProvider provider)
+    {
+        var model = node.GetSemanticModel(provider);
+        return model.GetSymbolInfo(node).Symbol ?? throw new Exception($"Unable to get symbol for syntax: {node}");
+    }
+
+    public static bool TryGetDeclaredSymbol<TSymbol>(this SyntaxNode node, ICompilationProvider provider,
+            [NotNullWhen(true)]out TSymbol? symbol)
+        where TSymbol : class, ISymbol
+    {
+        symbol = node.GetDeclaredSymbol(provider) as TSymbol;
+        return symbol != null;
+    }
+
+    public static TSymbol GetDeclaredSymbol<TSymbol>(this SyntaxNode node, ICompilationProvider provider)
         where TSymbol : class,ISymbol
     {
         return GetDeclaredSymbol(node, provider) as TSymbol ?? throw new Exception($"Unable to get declared symbol {typeof(ISymbol).Name} in syntax: {node}");
     }
 
-    public static ISymbol? GetDeclaredSymbol(this SyntaxNode node, ICompilationContextProvider provider)
+    public static ISymbol? GetDeclaredSymbol(this SyntaxNode node, ICompilationProvider provider)
     {
         var model = node.GetSemanticModel(provider);
         return model.GetDeclaredSymbol(node);
     }
 
     /// <summary>Get unconverted type symbol</summary>
-    public static ITypeSymbol? GetTypeSymbolRaw(this SyntaxNode node, ICompilationContextProvider provider)
+    public static ITypeSymbol? GetTypeSymbolRaw(this SyntaxNode node, ICompilationProvider provider)
     {
         var info = node.GetTypeInfo(provider);
         return info.Type;
     }
 
     /// <summary>Get unconverted type symbol</summary>
-    public static TSymbol GetTypeSymbolRaw<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
+    public static TSymbol GetTypeSymbolRaw<TSymbol>(this SyntaxNode node, ICompilationProvider provider)
         where TSymbol : class, ITypeSymbol
     {
         return GetTypeSymbolRaw(node, provider) as TSymbol ?? throw new Exception($"Unable to get symbol {typeof(TSymbol).Name} in syntax: {node}");
     }
 
     /// <summary>Get unconverted type symbol</summary>
-    public static bool TryGetTypeSymbolRaw<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)]out TSymbol? symbol)
+    public static bool TryGetTypeSymbolRaw<TSymbol>(this SyntaxNode node, ICompilationProvider provider, [NotNullWhen(true)]out TSymbol? symbol)
         where TSymbol : class, ITypeSymbol
     {
         symbol = GetTypeSymbolRaw(node, provider) as TSymbol;
@@ -460,28 +568,35 @@ public static class RoslynMethodExtensions
     }
 
     /// <summary>Get inferred (possibly converted) type symbol</summary>
-    public static ITypeSymbol? GetTypeSymbol(this SyntaxNode node, ICompilationContextProvider provider)
+    public static ITypeSymbol? GetTypeSymbol(this SyntaxNode node, ICompilationProvider provider)
     {
         var info = node.GetTypeInfo(provider);
         return info.ConvertedType;
     }
 
     /// <summary>Get inferred (possibly converted) type symbol</summary>
-    public static TSymbol GetTypeSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider)
+    public static ITypeSymbol GetTypeSymbolThrow(this SyntaxNode node, ICompilationProvider provider)
+    {
+        var info = node.GetTypeInfo(provider);
+        return info.ConvertedType ?? throw new ArgumentNullException(nameof(info.ConvertedType));
+    }
+
+    /// <summary>Get inferred (possibly converted) type symbol</summary>
+    public static TSymbol GetTypeSymbol<TSymbol>(this SyntaxNode node, ICompilationProvider provider)
         where TSymbol : class,ITypeSymbol
     {
         return GetTypeSymbol(node, provider) as TSymbol ?? throw new Exception($"Unable to get symbol {typeof(TSymbol).Name} in syntax: {node}");
     }
 
     /// <summary>Get inferred (possibly converted) type symbol</summary>
-    public static bool TryGetTypeSymbol<TSymbol>(this SyntaxNode node, ICompilationContextProvider provider, [NotNullWhen(true)]out TSymbol? symbol)
+    public static bool TryGetTypeSymbol<TSymbol>(this SyntaxNode node, ICompilationProvider provider, [NotNullWhen(true)]out TSymbol? symbol)
         where TSymbol : class,ITypeSymbol
     {
         symbol = GetTypeSymbol(node, provider) as TSymbol;
         return symbol != null;
     }
 
-    public static SemanticModel GetSemanticModel(this SyntaxNode node, ICompilationContextProvider provider)
+    public static SemanticModel GetSemanticModel(this SyntaxNode node, ICompilationProvider provider)
     {
         return provider.GetSemanticModel(node.SyntaxTree);
     }
@@ -517,13 +632,13 @@ public static class RoslynMethodExtensions
         return false;
     }
 
-    public static object? GetValue(this SyntaxNode node, ICompilationContextProvider provider)
+    public static object? GetValue(this SyntaxNode node, ICompilationProvider provider)
     {
         var model = provider.GetSemanticModel(node.SyntaxTree);
         return model.GetConstantValue(node).Value;
     }
 
-    public static T? GetValue<T>(this SyntaxNode node, ICompilationContextProvider provider)
+    public static T? GetValue<T>(this SyntaxNode node, ICompilationProvider provider)
     {
         var model = provider.GetSemanticModel(node.SyntaxTree);
         return (T?)model.GetConstantValue(node).Value;
@@ -576,7 +691,7 @@ public static class RoslynMethodExtensions
         }
     }
 
-    public static SemanticModel GetSemanticModel(this ICompilationContextProvider provider, SyntaxTree tree)
+    public static SemanticModel GetSemanticModel(this ICompilationProvider provider, SyntaxTree tree)
     {
         return provider.Compilation.GetSemanticModel(tree);
     }
@@ -610,6 +725,11 @@ public static class RoslynMethodExtensions
     public static string GetFullNameNormalized(this ITypeSymbol symbol)
     {
         return SymbolDisplay.ToDisplayString(symbol.OriginalDefinition, DisplayFormats.FullnameFormat);
+    }
+
+    public static bool IsNullable(this ITypeSymbol symbol)
+    {
+        return symbol.NullableAnnotation == NullableAnnotation.Annotated;
     }
 
     /// <summary>

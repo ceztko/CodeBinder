@@ -4,16 +4,24 @@ using CodeBinder.Attributes;
 
 namespace CodeBinder.CLang;
 
-public class CLangNodeVisitor : CSharpNodeVisitorBase<CLangCompilationContext, CLangModuleContext, ConversionCSharpToCLang>
+public class CLangCollectionContext : CSharpCollectionContextBase<CLangCompilationContext>
 {
-    public CLangNodeVisitor(CLangCompilationContext context)
+    public CLangCollectionContext(CLangCompilationContext context)
         : base(context)
     {
+        Init += CLangCollectionContext_VisitorInit;
     }
 
-    public override void VisitClassDeclaration(ClassDeclarationSyntax node)
+    private void CLangCollectionContext_VisitorInit(CSharpNodeVisitor visitor)
     {
-        var symbol = node.GetDeclaredSymbol<ITypeSymbol>(this)!;
+        visitor.ClassDeclarationVisit += Visitor_ClassDeclarationVisit;
+        visitor.StructDeclarationVisit += Visitor_StructDeclarationVisit;
+        visitor.EnumDeclarationVisit += Visitor_EnumDeclarationVisit;
+    }
+
+    private void Visitor_ClassDeclarationVisit(CSharpNodeVisitor visitor, ClassDeclarationSyntax node)
+    {
+        var symbol = node.GetDeclaredSymbol<ITypeSymbol>(this);
         if (symbol.Inherits<NativeTypeBinder>())
         {
             // These are the binders for types
@@ -23,7 +31,7 @@ public class CLangNodeVisitor : CSharpNodeVisitorBase<CLangCompilationContext, C
         visitType(node);
     }
 
-    public override void VisitStructDeclaration(StructDeclarationSyntax node)
+    private void Visitor_StructDeclarationVisit(CSharpNodeVisitor visitor, StructDeclarationSyntax node)
     {
         if (node.HasAttribute<NativeBindingAttribute>(this))
             Compilation.AddType(node);
@@ -31,11 +39,19 @@ public class CLangNodeVisitor : CSharpNodeVisitorBase<CLangCompilationContext, C
         visitType(node);
     }
 
+    private void Visitor_EnumDeclarationVisit(CSharpNodeVisitor visitor, EnumDeclarationSyntax node)
+    {
+        if (!node.GetAttributes(this).HasAttribute<NativeBindingAttribute>())
+            return;
+
+        Compilation.AddEnum(node);
+    }
+
     private void visitType(TypeDeclarationSyntax type)
     {
         CLangModuleContextChild? module = null;
         string? moduleName;
-        if (TryGetModuleName(type, out moduleName))
+        if (type.TryGetModuleName(this, out moduleName))
         {
             CLangModuleContextParent? parent;
             if (!Compilation.TryGetModule(moduleName, out parent))
@@ -81,13 +97,5 @@ public class CLangNodeVisitor : CSharpNodeVisitorBase<CLangCompilationContext, C
             return;
 
         Compilation.AddCallback(node);
-    }
-
-    public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
-    {
-        if (!node.GetAttributes(this).HasAttribute<NativeBindingAttribute>())
-            return;
-
-        Compilation.AddEnum(node);
     }
 }

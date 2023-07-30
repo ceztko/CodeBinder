@@ -53,16 +53,8 @@ static partial class ObjCBuilderExtension
         {
             builder.Append("<");
             bool first = true;
-
             foreach (var iface in protocols)
-            {
-                if (first)
-                    first = false;
-                else
-                    builder.CommaSeparator();
-
-                builder.Append(iface);
-            }
+                builder.CommaSeparator(ref first).Append(iface);
 
             builder.Append(">");
         }

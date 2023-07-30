@@ -92,16 +92,8 @@ abstract class ObjCBaseTypeWriter<TTypeDeclaration>
         {
             Builder.Append("<");
             bool first = true;
-
             foreach (var iface in interfaces)
-            {
-                if (first)
-                    first = false;
-                else
-                    Builder.CommaSeparator();
-
-                Builder.Append(iface);
-            }
+                Builder.CommaSeparator(ref first).Append(iface);
 
             Builder.Append(">");
         }
@@ -394,7 +386,7 @@ abstract class ObjCBaseTypeWriter<TTypeDeclaration>
 
     public string ObjCTypeName => Item.GetObjCName(Context);
 
-    public ICompilationContextProvider Provider => Context;
+    public ICompilationProvider Provider => Context;
 
     public ConversionCSharpToObjC Conversion => Context.Conversion;
 }

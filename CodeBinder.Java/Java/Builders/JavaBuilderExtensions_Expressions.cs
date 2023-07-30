@@ -1,6 +1,8 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
+using CodeBinder.Java.Shared;
+
 namespace CodeBinder.Java;
 
 static partial class JavaBuilderExtension
@@ -17,6 +19,8 @@ static partial class JavaBuilderExtension
     public static CodeBuilder Append(this CodeBuilder builder, OmittedArraySizeExpressionSyntax syntax, JavaCodeConversionContext context)
     {
         // Do nothing
+        _ = syntax;
+        _ = context;
         return builder;
     }
 
@@ -107,7 +111,7 @@ static partial class JavaBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax syntax, JavaCodeConversionContext context)
     {
-        var symbol = syntax.Type.GetTypeSymbol(context);
+        var symbol = syntax.Type.GetTypeSymbolThrow(context);
         if (symbol.TypeKind == TypeKind.Enum)
         {
             // Handle enum cast
@@ -150,12 +154,16 @@ static partial class JavaBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, BaseExpressionSyntax syntax, JavaCodeConversionContext context)
     {
+        _ = syntax;
+        _ = context;
         builder.Append("super");
         return builder;
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, ThisExpressionSyntax syntax, JavaCodeConversionContext context)
     {
+        _ = syntax;
+        _ = context;
         builder.Append("this");
         return builder;
     }
@@ -167,21 +175,136 @@ static partial class JavaBuilderExtension
         if (methodSymbol.IsPartialMethod(out hasEmptyBody) && (hasEmptyBody || methodSymbol.PartialImplementationPart!.ShouldDiscard(context.Conversion)))
             return builder;
 
+        List<RefArgument>? refArguments = null;
+        if (methodSymbol.IsNative())
+            refArguments = getRefArguments(syntax, context);
+
+        void appendInvocation()
+        {
+            if (refArguments?.Count > 0)
+                writeRefInvocation(builder, syntax, methodSymbol, refArguments, context);
+            else
+                builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
+        }
+
         if (methodSymbol.IsNative() && methodSymbol.ReturnType.TypeKind == TypeKind.Enum)
-            builder.Append(methodSymbol.ReturnType.Name).Dot().Append("fromValue").Parenthesized(() => append(builder, syntax, context));
+            builder.Append(methodSymbol.ReturnType.Name).Dot().Append("fromValue").Parenthesized(appendInvocation);
         else
-            append(builder, syntax, context);
+            appendInvocation();
 
         return builder;
     }
 
-    static void append(CodeBuilder builder, InvocationExpressionSyntax syntax, JavaCodeConversionContext context)
+    // FIXME: This is hacky. It should be fixed by improving existing ref invocation
+    // tree manipulation. See JavaValidationContext
+    static void writeRefInvocation(CodeBuilder builder, InvocationExpressionSyntax invocation,
+        IMethodSymbol method, List<RefArgument> refArguments, JavaCodeConversionContext context)
     {
-        builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, context);
+        foreach (var arg in refArguments)
+        {
+            string boxType;
+            if (arg.Type.TypeKind == TypeKind.Enum)
+                boxType = "IntegerBox";
+            else
+                boxType = JavaUtils.GetRefBoxType(arg.Type.GetFullName());
+
+            builder.Append(boxType).Space().Append("__" + arg.Symbol.Name).Space().Append("=").Space()
+                    .Append("new").Space().Append(boxType).EmptyParameterList().EndOfStatement();
+        }
+
+        if (!method.ReturnsVoid)
+        {
+            builder.Append(method.ReturnType.GetJavaType()).Space().Append("__ret").Space()
+                    .Append("=").Space();
+        }
+
+        builder.Append(invocation.Expression, context).Parenthesized().
+            append(invocation.ArgumentList.Arguments, true, context).Close().EndOfStatement();
+
+        bool first = true;
+        foreach (var arg in refArguments)
+        {
+            if (first)
+                first = false;
+            else
+                builder.EndOfStatement();
+
+            builder.Append($"{arg.Symbol.Name}[0]").Space().Append("=").Space();
+
+            void appendAssingmentRHS()
+            {
+                builder.Append("__").Append(arg.Symbol.Name).Dot().Append("value");
+            }
+
+            if (arg.Type.TypeKind == TypeKind.Enum)
+                builder.Append(arg.Type.Name).Dot().Append("fromValue").Parenthesized(() => appendAssingmentRHS());
+            else
+                appendAssingmentRHS();
+        }
+
+        if (!method.ReturnsVoid)
+            builder.EndOfStatement().Append("return").Space().Append("__ret");
+    }
+
+    static List<RefArgument> getRefArguments(InvocationExpressionSyntax invocation, JavaCodeConversionContext context)
+    {
+        var ret = new List<RefArgument>();
+        foreach (var arg in invocation.ArgumentList.Arguments)
+        {
+            if (!arg.RefKindKeyword.IsNone())
+            {
+                var symbol = arg.Expression.GetSymbolSafe(context);
+                var type = arg.Expression.GetTypeSymbol(context)!;
+                ret.Add(new RefArgument() { Argument = arg, Symbol = symbol, Type = type });
+            }
+        }
+
+        return ret;
+    }
+
+    struct RefArgument
+    {
+        public ArgumentSyntax Argument;
+        public ISymbol Symbol;
+        public ITypeSymbol Type;
+    }
+
+    public static CodeBuilder Append(this CodeBuilder builder, ParameterListSyntax syntax, JavaCodeConversionContext context)
+    {
+        builder.Parenthesized().Append(syntax.Parameters, syntax.Parameters.Count, false, context).Close();
+        return builder;
+    }
+
+    public static CodeBuilder Append(this CodeBuilder builder, IReadOnlyList<ParameterSyntax> paramaters,
+        int parameterCount, bool isNative, JavaCodeConversionContext context)
+    {
+        bool first = true;
+        for (int i = 0; i < parameterCount; i++)
+        {
+            var parameter = paramaters[i];
+            builder.CommaAppendLine(ref first);
+            writeParameter(builder, parameter, isNative, context);
+        }
+
+        return builder;
+    }
+
+    static void writeParameter(CodeBuilder builder, ParameterSyntax parameter, bool isNative, JavaCodeConversionContext context)
+    {
+        var flags = JavaTypeFlags.None;
+        bool isRef = parameter.IsRef() | parameter.IsOut();
+        if (isRef)
+            flags |= JavaTypeFlags.ByRef;
+
+        if (isNative)
+            flags |= JavaTypeFlags.NativeMethod;
+
+        builder.Append(parameter.Type!.GetJavaType(flags, context)).Space().Append(parameter.Identifier.Text);
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, LiteralExpressionSyntax syntax, JavaCodeConversionContext context)
     {
+        _ = context;
         if (syntax.Token.IsKind(SyntaxKind.StringLiteralToken) && syntax.Token.Text.StartsWith("@"))
             builder.Append(syntax.Token.Text.Replace("\"", "\"\"")); // Handle verbatim strings
         else
@@ -230,7 +353,10 @@ static partial class JavaBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, PostfixUnaryExpressionSyntax syntax, JavaCodeConversionContext context)
     {
-        builder.Append(syntax.Operand, context).Append(syntax.GetJavaOperator());
+        if (syntax.IsKind(SyntaxKind.SuppressNullableWarningExpression))
+            builder.Append(syntax.Operand, context); // Ignore treatement of the suppress nullable warning operator
+        else
+            builder.Append(syntax.Operand, context).Append(syntax.GetJavaOperator());
         return builder;
     }
 
@@ -321,6 +447,7 @@ static partial class JavaBuilderExtension
                 return builder.Append((ParenthesizedExpressionSyntax)expression, context);
             case SyntaxKind.PostIncrementExpression:
             case SyntaxKind.PostDecrementExpression:
+            case SyntaxKind.SuppressNullableWarningExpression:
                 return builder.Append((PostfixUnaryExpressionSyntax)expression, context);
             case SyntaxKind.UnaryPlusExpression:
             case SyntaxKind.UnaryMinusExpression:
@@ -408,31 +535,33 @@ static partial class JavaBuilderExtension
         if (parentSymbol?.Kind == SymbolKind.Method && (parentSymbol as IMethodSymbol)!.IsNative())
             isNativeInvocation = true;
 
-        builder.Parenthesized().Append(syntax.Arguments, isNativeInvocation, context);
+        builder.Parenthesized().append(syntax.Arguments, isNativeInvocation, context);
         return builder;
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, JavaCodeConversionContext context)
     {
-        builder.Append(arguments, false, context);
+        builder.append(arguments, false, context);
         return builder;
     }
 
-    public static CodeBuilder Append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, bool native, JavaCodeConversionContext context)
+    static CodeBuilder append(this CodeBuilder builder, IEnumerable<ArgumentSyntax> arguments, bool native, JavaCodeConversionContext context)
     {
         bool first = true;
         foreach (var arg in arguments)
         {
             builder.CommaSeparator(ref first);
 
-            if (native)
+            if (native && arg.IsRefLike())
             {
                 // In native invocations, prepend "__" for ref/out arguments
-                if (!arg.RefKindKeyword.IsNone())
-                    builder.Append("__");
+                var symbol = arg.Expression.GetSymbolSafe(context);
+                builder.Append($"__{symbol.Name}");
             }
-
-            builder.Append(arg.Expression, context);
+            else
+            {
+                builder.Append(arg.Expression, context);
+            }
 
             if (native && arg.RefKindKeyword.IsNone())
             {

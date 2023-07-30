@@ -2,20 +2,28 @@
 // SPDX-License-Identifier: MIT
 
 using CodeBinder.Attributes;
-using Microsoft.CodeAnalysis;
 
 namespace CodeBinder.JavaScript.TypeScript;
 
 abstract class MethodWriter<TMethod> : CodeWriter<TMethod, TypeScriptCompilationContext>
     where TMethod : BaseMethodDeclarationSyntax
 {
+    public IMethodSymbol Symbol { get; private set; }
+
     protected MethodWriter(TMethod method, TypeScriptCompilationContext context)
-        : base(method, context) { }
+        : base(method, context)
+    {
+        Symbol = method.GetDeclaredSymbol<IMethodSymbol>(context);
+    }
 
     protected override void Write()
     {
         if (!Item.Parent.IsKind(SyntaxKind.InterfaceDeclaration))
             WriteModifiers();
+
+        var namePrefix = MethodNamePrefix;
+        if (namePrefix != string.Empty)
+            Builder.Append(namePrefix);
 
         Builder.Append(MethodName);
         if (Arity != 0)
@@ -37,29 +45,42 @@ abstract class MethodWriter<TMethod> : CodeWriter<TMethod, TypeScriptCompilation
         {
             using (Builder.ParameterList())
             {
-                writeParameters(Item.ParameterList, parameterCount);
+                Builder.Append(Item.ParameterList.Parameters, parameterCount, Context);
             }
         }
         else
         {
             using (Builder.ParameterList(true))
             {
-                writeParameters(Item.ParameterList, parameterCount);
+                Builder.Append(Item.ParameterList.Parameters, parameterCount, Context);
                 Builder.AppendLine();
             }
         }
     }
 
+    protected void WriteParameterDefaults()
+    {
+        foreach (var param in Item.ParameterList.Parameters)
+        {
+            if (param.Default == null)
+                continue;
+
+            Builder.Append(param.Identifier.Text).Append(" = ").Append(param.Identifier.Text).Append(" ?? ").Append(param.Default.Value, Context).EndOfStatement();
+        }
+    }
+
     protected virtual void WriteModifiers()
     {
+        if (Symbol.ExplicitInterfaceImplementations.Length != 0)
+        {
+            // We assume interface implementations to be
+            // always public and not needing other modifiers
+            return;
+        }
+
         var modifiers = Item.GetModifiersString(Context);
         if (!modifiers.IsNullOrEmpty())
             Builder.Append(modifiers).Space();
-    }
-
-    protected void WriteType(TypeSyntax type, TypeScriptTypeFlags flags)
-    {
-        Builder.Append(type.GetTypeScriptType(flags, Context));
     }
 
     void writeMethodBody()
@@ -73,37 +94,11 @@ abstract class MethodWriter<TMethod> : CodeWriter<TMethod, TypeScriptCompilation
             using (Builder.AppendLine().Block())
             {
                 WriteMethodBodyPrefixInternal();
-                if (!Context.Conversion.SkipBody)
+                if (!Context.Conversion.SkipBody && WriteMethodBody)
                     Builder.Append(Item.Body, Context, true).AppendLine();
                 WriteMethodBodyPostfixInternal();
             }
         }
-    }
-
-    void writeParameters(ParameterListSyntax list, int parameterCount)
-    {
-        bool first = true;
-        for (int i = 0; i < parameterCount; i++)
-        {
-            var parameter = list.Parameters[i];
-            Builder.CommaAppendLine(ref first);
-            writeParameter(parameter);
-        }
-    }
-
-    void writeParameter(ParameterSyntax parameter)
-    {
-        var flags = TypeScriptTypeFlags.None;
-        bool isRef = parameter.IsRef() | parameter.IsOut();
-        if (isRef)
-            flags |= TypeScriptTypeFlags.IsByRef;
-
-        Builder.Append(parameter.Identifier.Text);
-        if (parameter.Default != null)
-            Builder.QuestionMark();
-
-        Builder.Colon().Space();
-        WriteType(parameter.Type!, flags);
     }
 
     protected virtual void WriteTypeParameters() { /* Do nothing */ }
@@ -114,24 +109,38 @@ abstract class MethodWriter<TMethod> : CodeWriter<TMethod, TypeScriptCompilation
 
     protected virtual void WriteReturnType() { /* Do nothing */ }
 
-    public virtual int Arity
-    {
-        get { return 0; }
-    }
+    public virtual string MethodNamePrefix => string.Empty;
 
-    public virtual int ParameterCount
-    {
-        get { return Item.ParameterList.Parameters.Count; }
-    }
+    public virtual bool WriteMethodBody => true;
+
+    public virtual int Arity => 0;
+
+    public virtual int ParameterCount => Item.ParameterList.Parameters.Count;
 
     public abstract string MethodName { get; }
 }
 
 class MethodWriter : MethodWriter<MethodDeclarationSyntax>
 {
+    bool _isEnumerator;
+    bool _isGenerator;
+
     public MethodWriter(MethodDeclarationSyntax method, TypeScriptCompilationContext context)
         : base(method, context)
     {
+        if (Symbol.IsGetEnumerator())
+        {
+            _isEnumerator = true;
+            _isGenerator = isGenerator();
+        }
+        else
+        {
+            if (Symbol.ReturnType.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerable_T
+                || Symbol.ReturnType.OriginalDefinition.SpecialType == SpecialType.System_Collections_Generic_IEnumerator_T)
+            {
+                _isGenerator = isGenerator();
+            }
+        }
     }
 
     protected override void WriteModifiers()
@@ -150,11 +159,12 @@ class MethodWriter : MethodWriter<MethodDeclarationSyntax>
     protected override void WriteReturnType()
     {
         Builder.Colon().Space();
-        WriteType(Item.ReturnType, TypeScriptTypeFlags.None);
+        Builder.Append(Item.ReturnType.GetTypeScriptType(TypeScriptTypeFlags.None, Context));
     }
 
     protected override void WriteMethodBodyPrefixInternal()
     {
+        WriteParameterDefaults();
         if (Context.Conversion.SkipBody)
             Builder.Append(Item.ReturnType.GetTypeScriptDefaultReturnStatement(Context)).EndOfStatement();
     }
@@ -164,18 +174,49 @@ class MethodWriter : MethodWriter<MethodDeclarationSyntax>
         get { return Item.Parent!.IsKind(SyntaxKind.InterfaceDeclaration); }
     }
 
+    public override string MethodNamePrefix
+    {
+        get
+        {
+            // In TypeScript, only generator functions can use yield
+            if (_isGenerator)
+                return "*";
+
+            return string.Empty;
+        }
+    }
+
     public override string MethodName
     {
         get
         {
-            var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
-            return methodSymbol.GetTypeScriptName(Context);
+            if (_isEnumerator)
+                return "[Symbol.iterator]";
+
+            return Symbol.GetTypeScriptName(Context);
         }
     }
 
     public override int Arity
     {
         get { return Item.Arity; }
+    }
+
+    bool isGenerator()
+    {
+        var isGeneratorWalker = new IsGeneratorWalker();
+        isGeneratorWalker.Visit(Item);
+        return isGeneratorWalker.IsGenerator;
+    }
+
+    class IsGeneratorWalker : CSharpSyntaxWalker
+    {
+        public bool IsGenerator { get; private set; }
+
+        public override void VisitYieldStatement(YieldStatementSyntax node)
+        {
+            IsGenerator = true;
+        }
     }
 }
 
@@ -188,11 +229,10 @@ class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
     public ConstructorWriter(ConstructorDeclarationSyntax method, TypeScriptCompilationContext context)
         : base(method, context)
     {
-        var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
-        _isStatic = methodSymbol.IsStatic;
-        _isStructType = methodSymbol.ContainingType.TypeKind == TypeKind.Struct;
-        if (methodSymbol.HasAttribute<OverloadBindingAttribute>())
-            _wrapperMethodName = methodSymbol.GetTypeScriptName(Context);
+        _isStatic = Symbol.IsStatic;
+        _isStructType = Symbol.ContainingType.TypeKind == TypeKind.Struct;
+        if (Symbol.HasAttribute<OverloadBindingAttribute>())
+            _wrapperMethodName = Symbol.GetTypeScriptName(Context);
     }
 
     protected override void WriteModifiers()
@@ -216,8 +256,16 @@ class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
     {
         if (_isStructType)
         {
-            var symbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
-            Builder.Append("let ret = new").Space().Append(symbol.ContainingType.Name).EmptyParameterList().EndOfStatement();
+            Builder.Append("let ret = new").Space().Append(Symbol.ContainingType.Name).EmptyParameterList().EndOfStatement();
+            Builder.Append("ret").Dot().Append($"__{_wrapperMethodName}");
+            bool first = true;
+            using (Builder.ParameterList())
+            {
+                foreach (var param in Item.ParameterList.Parameters)
+                    Builder.CommaSeparator(ref first).Append(param.Identifier.Text);
+            }
+            Builder.EndOfStatement();
+            Builder.Append("return ret").EndOfStatement();
         }
         else
         {
@@ -236,16 +284,11 @@ class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
                 Builder.Append(Item.Initializer, _wrapperMethodName != null, Context).EndOfStatement();
             }
         }
+
+        WriteParameterDefaults();
     }
 
-    protected override void WriteMethodBodyPostfixInternal()
-    {
-        //// TODO: Finish method wrapper
-        if (_isStructType)
-        {
-            Builder.Append("return ret").EndOfStatement();
-        }
-    }
+    public override bool WriteMethodBody => !_isStructType;
 
     public override string MethodName
     {
@@ -266,19 +309,37 @@ class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
     }
 }
 
-class DestructorWriter : MethodWriter<DestructorDeclarationSyntax>
+class StructConstructorWrapperWriter : MethodWriter<ConstructorDeclarationSyntax>
 {
-    public DestructorWriter(DestructorDeclarationSyntax method, TypeScriptCompilationContext context)
-        : base(method, context) { }
+    string _wrapperMethodName;
 
-    protected override void WriteMethodBodyPostfixInternal()
+    public StructConstructorWrapperWriter(ConstructorDeclarationSyntax method, TypeScriptCompilationContext context)
+        : base(method, context)
     {
-        Builder.Append("super.finalize()").EndOfStatement();
+        _wrapperMethodName = $"__{Symbol.GetTypeScriptName(Context)}";
     }
 
     protected override void WriteModifiers()
     {
-        Builder.Append("protected").Space();
+        Builder.Append("private").Space();
+    }
+
+    public override string MethodName => _wrapperMethodName;
+}
+
+class DestructorWriter : MethodWriter<DestructorDeclarationSyntax>
+{
+    public DestructorWriter(DestructorDeclarationSyntax method, TypeScriptCompilationContext context)
+        : base(method, context)
+    {
+        // We support destructor syntax only for finalizers
+        var symbol = method.GetDeclaredSymbol<IMethodSymbol>(context);
+        if (!symbol.ContainingType.Implements<IObjectFinalizer>())
+            throw new NotSupportedException();
+    }
+
+    protected override void WriteModifiers()
+    {
     }
 
     protected override void WriteReturnType()

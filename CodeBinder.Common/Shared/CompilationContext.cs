@@ -8,51 +8,37 @@ namespace CodeBinder.Shared;
 /// Context built around a CodeAnalysis.Compilation
 /// </summary>
 /// <remarks>Inherit this class to add contextualized info to CompilationContext</remarks>
-public abstract class CompilationContext<TTypeContext, TLanguageConversion> : CompilationContext<TTypeContext>
+public abstract class CompilationContext<TTypeContext, TLanguageConversion, TVisitor> : CompilationContext<TTypeContext, TVisitor>
     where TTypeContext : TypeContext<TTypeContext>
     where TLanguageConversion : LanguageConversion
+    where TVisitor : NodeVisitor
 {
-    List<TTypeContext> _Types;
     TLanguageConversion _Conversion;
 
     protected CompilationContext(TLanguageConversion conversion)
     {
         _Conversion = conversion;
-        _Types = new List<TTypeContext>();
     }
 
     public override TLanguageConversion Conversion => _Conversion;
-
-    internal override void addTypeContext(TTypeContext type)
-    {
-        _Types.Add(type);
-    }
-
-    protected override sealed IEnumerable<TTypeContext> GetTypes() => _Types;
 }
 
-public abstract class CompilationContext<TTypeContext> : CompilationContext
+/// <summary>
+/// Context built around a CodeAnalysis.Compilation
+/// </summary>
+/// <remarks>This class is for infrastructure only</remarks>
+public abstract class CompilationContext<TTypeContext, TVisitor> : CompilationContext
     where TTypeContext : TypeContext<TTypeContext>
+    where TVisitor : NodeVisitor
 {
-    Dictionary<ISymbol, string> _bindedMethodNames;
+    List<TTypeContext> _Types;
 
     internal CompilationContext()
     {
-        _bindedMethodNames = new Dictionary<ISymbol, string>(SymbolEqualityComparer.Default);
+        _Types = new List<TTypeContext>();
     }
 
-    public bool TryGetBindedName(IMethodSymbol symbol, [NotNullWhen(true)] out string? name)
-    {
-        if (_bindedMethodNames.TryGetValue(symbol, out name))
-            return true;
-
-        return false;
-    }
-
-    internal void AddMethodBinding(IMethodSymbol symbol, string bindedName)
-    {
-        _bindedMethodNames.Add(symbol, bindedName);
-    }
+    internal protected abstract override CollectionContext<TVisitor> CreateCollectionContext();
 
     protected internal void AddTypeContext(TTypeContext type, TTypeContext? parent)
     {
@@ -71,36 +57,43 @@ public abstract class CompilationContext<TTypeContext> : CompilationContext
         addTypeContext(type);
     }
 
-    internal abstract void addTypeContext(TTypeContext type);
+    void addTypeContext(TTypeContext type)
+    {
+        _Types.Add(type);
+    }
+
+    public override sealed IEnumerable<TTypeContext> Types => _Types;
 }
 
-public abstract class CompilationContext : ICompilationContextProvider
+/// <summary>
+/// Context built around a CodeAnalysis.Compilation
+/// </summary>
+/// <remarks>This class is for infrastructure only</remarks>
+public abstract class CompilationContext : CompilationProvider
 {
     HashSet<string> _Namespaces;
-    private Dictionary<SyntaxTree, SemanticModel> _modelCache;
-    private Compilation _compilation = null!;
-
-    public string LibraryName { get; private set; } = string.Empty;
+    Dictionary<ISymbol, BindedName> _bindedMethodNames;
 
     internal CompilationContext()
     {
-        _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
         _Namespaces = new HashSet<string>();
+        _bindedMethodNames = new Dictionary<ISymbol, BindedName>(SymbolEqualityComparer.Default);
     }
 
-    public event EventHandler? CompilationSet;
-
-    public SemanticModel GetSemanticModel(SyntaxTree tree)
+    public bool TryGetBindedName(ISymbol symbol, out BindedName name)
     {
-        SemanticModel? model;
-        if (!_modelCache.TryGetValue(tree, out model))
-        {
-            model = Compilation.GetSemanticModel(tree, true);
-            _modelCache.Add(tree, model);
-        }
+        if (_bindedMethodNames.TryGetValue(symbol, out name))
+            return true;
 
-        return model;
+        return false;
     }
+
+    internal void AddBinding(ISymbol symbol, string bindedName, bool isOverload)
+    {
+        _bindedMethodNames.Add(symbol, new BindedName() { Name = bindedName, IsOverload = isOverload });
+    }
+
+    internal protected abstract CollectionContext CreateCollectionContext();
 
     protected internal void AddNamespace(string ns)
     {
@@ -110,29 +103,6 @@ public abstract class CompilationContext : ICompilationContextProvider
     public abstract LanguageConversion Conversion { get; }
 
     public IReadOnlyCollection<string> Namespaces => _Namespaces;
-
-    public Compilation Compilation
-    {
-        get { return _compilation; }
-        internal set
-        {
-            _compilation = value;
-            try
-            {
-                LibraryName = _compilation.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0);
-            }
-            catch
-            {
-                throw new Exception($"Missing {nameof(NativeLibraryAttribute)}");
-            }
-
-            CompilationSet?.Invoke(this, EventArgs.Empty);
-        }
-    }
-
-    internal protected abstract INodeVisitor CreateVisitor();
-
-    protected abstract IEnumerable<TypeContext> GetTypes();
 
     internal IEnumerable<ConversionDelegate> ConversionDelegates
     {
@@ -149,22 +119,81 @@ public abstract class CompilationContext : ICompilationContextProvider
         get { yield break; }
     }
 
-    public IEnumerable<TypeContext> Types => GetTypes();
+    public abstract IEnumerable<TypeContext> Types { get; }
 
     public IEnumerable<TypeContext> RootTypes
     {
         get
         {
-            foreach (var type in GetTypes())
+            foreach (var type in Types)
             {
                 if (type.Parent == null)
                     yield return type;
             }
         }
     }
+}
 
-    CompilationContext ICompilationContextProvider.Compilation
+/// <summary>
+/// Context built around a CodeAnalysis.Compilation
+/// </summary>
+/// <remarks>This class is for infrastructure only</remarks>
+public class CompilationProvider : ICompilationProvider
+{
+    private Dictionary<SyntaxTree, SemanticModel> _modelCache;
+    private Compilation _Compilation = null!;
+    public string LibraryName { get; private set; } = null!;
+
+    internal CompilationProvider(Compilation compilation)
+    {
+        _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
+        Compilation = compilation;
+    }
+
+    internal CompilationProvider()
+    {
+        _modelCache = new Dictionary<SyntaxTree, SemanticModel>();
+    }
+
+    public SemanticModel GetSemanticModel(SyntaxTree tree)
+    {
+        SemanticModel? model;
+        if (!_modelCache.TryGetValue(tree, out model))
+        {
+            model = Compilation.GetSemanticModel(tree, true);
+            _modelCache.Add(tree, model);
+        }
+
+        return model;
+    }
+
+    /// The Microsoft.CodeAnalysis compilation
+    /// <remarks>The compilation instance is not available during construction</remarks>
+    public Compilation Compilation
+    {
+        get { return _Compilation; }
+        internal set
+        {
+            _Compilation = value;
+            try
+            {
+                LibraryName = value.Assembly.GetAttribute<NativeLibraryAttribute>().GetConstructorArgument<string>(0);
+            }
+            catch
+            {
+                throw new Exception($"Missing {nameof(NativeLibraryAttribute)}");
+            }
+        }
+    }
+
+    CompilationProvider ICompilationProvider.Compilation
     {
         get { return this; }
     }
+}
+
+public struct BindedName
+{
+    public string Name;
+    public bool IsOverload;
 }

@@ -52,7 +52,7 @@ where TTypeContext : TypeContext
 }
 
 [DebuggerDisplay("Name = {Name}")]
-public abstract class TypeContext : ICompilationContextProvider
+public abstract class TypeContext : ICompilationProvider
 {
     internal TypeContext() { }
 
@@ -77,6 +77,8 @@ public abstract class TypeContext : ICompilationContextProvider
     public virtual string FullName => Name;
 
     public TypeContext? Parent => GetParent();
+
+    CompilationProvider ICompilationProvider.Compilation => Compilation;
 }
 
 public interface ITypeContext<TCompilationContext>

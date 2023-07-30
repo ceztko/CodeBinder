@@ -9,18 +9,22 @@ namespace CodeBinder.Shared;
 /// Basic language conversion
 /// </summary>
 /// <remarks>Inherit this class to provide custom contexts</remarks>
-public abstract class LanguageConversion<TCompilationContext, TTypeContext> : LanguageConversion
-    where TCompilationContext : CompilationContext<TTypeContext>
+public abstract class LanguageConversion<TCompilationContext, TTypeContext, TVisitor> : LanguageConversion
+    where TCompilationContext : CompilationContext<TTypeContext, TVisitor>
     where TTypeContext : TypeContext<TTypeContext>
+    where TVisitor : NodeVisitor
 {
-    public LanguageConversion() { }
+    protected LanguageConversion() { }
 
-    internal sealed override CompilationContext CreateCompilationContext()
-        => createCompilationContext();
+    internal protected abstract override TCompilationContext CreateCompilationContext();
 
-    protected abstract TCompilationContext createCompilationContext();
+    internal protected abstract override ValidationContext<TVisitor>? CreateValidationContext();
 }
 
+/// <summary>
+/// Validation context that's used to validate a compilation
+/// </summary>
+/// <remarks>This class is for infrastructure only</remarks>
 public abstract class LanguageConversion
 {
     NamespaceMappingTree _NamespaceMapping;
@@ -30,12 +34,33 @@ public abstract class LanguageConversion
         _NamespaceMapping = new NamespaceMappingTree();
     }
 
+    internal protected abstract NodeVisitor CreateVisitor();
+
+    internal protected abstract ValidationContext? CreateValidationContext();
+
     /// <summary>
     /// Add here policies supported by this language conversion
     /// </summary>
     public virtual IReadOnlyCollection<string> SupportedPolicies
     {
         get { return new string[] { }; }
+    }
+
+    public virtual string GetMethodBaseName(IMethodSymbol symbol)
+    {
+        string baseName;
+        if (symbol.ExplicitInterfaceImplementations.Length == 0)
+        {
+            baseName = symbol.Name;
+        }
+        else
+        {
+            // Get name of explicitly interface implemented method
+            baseName = symbol.ExplicitInterfaceImplementations[0].Name;
+        }
+
+        HandleMethodCasing(symbol, ref baseName);
+        return baseName;
     }
 
     /// <summary>
@@ -59,6 +84,11 @@ public abstract class LanguageConversion
     public virtual bool NeedNamespaceMapping => true;
 
     public virtual bool UseUTF8Bom => true;
+
+    public bool CheckMethodOverloads
+    {
+        get { return OverloadFeatures == null ? false : OverloadFeatures != OverloadFeature.FullSupport; }
+    }
 
     /// <summary>
     /// Method name casing
@@ -104,14 +134,28 @@ public abstract class LanguageConversion
         }
     }
 
-    internal CompilationContext GetCompilationContext(Compilation compilation)
+    internal protected abstract CompilationContext CreateCompilationContext();
+
+    internal void HandleMethodCasing(IMethodSymbol symbol, ref string methodName)
     {
-        var ret = CreateCompilationContext();
-        ret.Compilation = compilation;
-        return ret;
+        if (symbol.IsNative())
+            return;
+
+        switch (MethodCasing)
+        {
+            case MethodCasing.LowerCamelCase:
+                methodName = methodNameToLowerCase(methodName);
+                break;
+        }
     }
 
-    internal abstract CompilationContext CreateCompilationContext();
+    static string methodNameToLowerCase(string methodName)
+    {
+        if (char.IsLower(methodName, 0))
+            return methodName;
+
+        return char.ToLowerInvariant(methodName[0]) + methodName.Substring(1);
+    }
 }
 
 public enum MethodCasing

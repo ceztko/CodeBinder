@@ -3,7 +3,7 @@
 
 namespace CodeBinder.JNI;
 
-public class JNICompilationContext : CompilationContext<JNIModuleContext, ConversionCSharpToJNI>
+public class JNICompilationContext : CSharpCompilationContextBase<JNIModuleContext, ConversionCSharpToJNI>
 {
     Dictionary<string, JNIModuleContextParent> _modules;
 
@@ -15,12 +15,14 @@ public class JNICompilationContext : CompilationContext<JNIModuleContext, Conver
 
     public void AddModule(CompilationContext compilation, JNIModuleContextParent module)
     {
+        _ = compilation;
         _modules.Add(module.Name, module);
         AddTypeContext(module, null);
     }
 
     public void AddModuleChild(CompilationContext compilation, JNIModuleContextChild module, JNIModuleContextParent parent)
     {
+        _ = compilation;
         AddTypeContext(module, parent);
     }
 
@@ -29,9 +31,9 @@ public class JNICompilationContext : CompilationContext<JNIModuleContext, Conver
         return _modules.TryGetValue(moduleName, out module);
     }
 
-    protected override INodeVisitor CreateVisitor()
+    protected override CSharpCollectionContextBase CreateCollectionContext()
     {
-        return new JNINodeVisitor(this);
+        return new JNICollectionContext(this);
     }
 
     public IEnumerable<JNIModuleContextParent> Modules

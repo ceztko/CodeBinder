@@ -4,12 +4,11 @@ using CodeBinder.Java.Shared;
 
 namespace CodeBinder.Java;
 
-class JavaInteropBoxWriter : JavaConversionWriter
+class JavaInteropBoxWriter : JavaConversionWriterBase
 {
     JavaInteropType _primitiveType;
 
-    public JavaInteropBoxWriter(JavaInteropType primitiveType, ConversionCSharpToJava conversion)
-        : base(conversion)
+    public JavaInteropBoxWriter(JavaInteropType primitiveType)
     {
         _primitiveType = primitiveType;
     }

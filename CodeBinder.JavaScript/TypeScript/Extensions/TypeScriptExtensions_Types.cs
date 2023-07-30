@@ -1,8 +1,6 @@
 ﻿// SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
-using Microsoft.CodeAnalysis;
-
 namespace CodeBinder.JavaScript.TypeScript;
 
 static partial class TypeScriptExtensions
@@ -42,7 +40,10 @@ static partial class TypeScriptExtensions
             case "System.UInt64":
                 return "0n";
             default:
-                return "null";
+                if (type.IsKind(SyntaxKind.NullableType))
+                    return "null";
+                else
+                    return "null!";
         }
     }
 
@@ -80,7 +81,7 @@ static partial class TypeScriptExtensions
             case SyntaxKind.DoubleKeyword:
                 return "number";
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
     }
 
@@ -96,12 +97,21 @@ static partial class TypeScriptExtensions
 
     public static string GetTypeScriptType(this TypeSyntax type, TypeScriptTypeFlags flags, TypeScriptCompilationContext context, out bool isInterface)
     {
-        return getTypeScriptType(type, type.GetTypeSymbol(context), flags, context, out isInterface);
+        return getTypeScriptType(type, type.GetTypeSymbolThrow(context), flags, context, out isInterface);
     }
 
     public static string GetTypeScriptType(this TypeSyntax type, TypeScriptTypeFlags flags, TypeScriptCompilationContext context)
     {
-        return getTypeScriptType(type, type.GetTypeSymbol(context), flags, context, out _);
+        return getTypeScriptType(type, type.GetTypeSymbolThrow(context), flags, context, out _);
+    }
+
+    public static string GetTypeScriptType(this ITypeSymbol type, TypeScriptTypeFlags flags = TypeScriptTypeFlags.None)
+    {
+        var builder = new CodeBuilder();
+        bool isByRef = flags.HasFlag(TypeScriptTypeFlags.ByRef);
+        bool isTypeArgument = flags.HasFlag(TypeScriptTypeFlags.TypeArgument);
+        writeTypeSymbol(builder, type.GetFullName(), type, isByRef, isTypeArgument, out _);
+        return builder.ToString();
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, ElementAccessExpressionSyntax syntax, IPropertySymbol symbol, TypeScriptCompilationContext context)
@@ -110,42 +120,18 @@ static partial class TypeScriptExtensions
         return builder;
     }
 
-    // TODO: This method should just handle whole replacements, also member access, example IntPtr.Zero -> 0
-    public static bool TryToReplace(this CodeBuilder builder, SyntaxNode syntax, TypeScriptCompilationContext context)
+    public static CodeBuilder Append(this CodeBuilder builder, ITypeSymbol symbol)
     {
-        var symbol = syntax.GetSymbol(context);
-        if (symbol == null)
-            return false;
-
-        switch (symbol.Kind)
-        {
-            case SymbolKind.Field:
-            {
-                var field = (IFieldSymbol)symbol;
-                if (field.HasTypeScriptReplacement(out var replacement))
-                {
-                    builder.Append(replacement.Name);
-                    return true;
-                }
-                break;
-            }
-            case SymbolKind.Property:
-            case SymbolKind.Method:
-            {
-                // TODO
-                break;
-            }
-        }
-
-        return false;
+        writeTypeSymbol(builder, symbol.GetFullName(), symbol, false, false, out _);
+        return builder;
     }
 
     public static CodeBuilder Append(this CodeBuilder builder, TypeSyntax syntax, TypeScriptCompilationContext context)
     {
         ISymbol symbol;
         // Symbol can be null https://github.com/dotnet/roslyn/issues/31471
-        if (syntax.Kind() == SyntaxKind.ArrayType)
-            symbol = syntax.GetTypeSymbol(context);
+        if (syntax.IsVar || syntax.Kind() == SyntaxKind.ArrayType)
+            symbol = syntax.GetTypeSymbolThrow(context);
         else
             symbol = syntax.GetSymbol(context)!;
 
@@ -156,7 +142,7 @@ static partial class TypeScriptExtensions
             case SymbolKind.ArrayType:
             {
                 var typeSymbol = (ITypeSymbol)symbol;
-                writeTypeScriptType(builder, typeSymbol.GetFullName(), syntax, typeSymbol, null, false, context, out _);
+                writeTypeScriptType(builder, typeSymbol.GetFullName(), syntax, typeSymbol, false, false, context, out _);
                 return builder;
             }
             case SymbolKind.Method:
@@ -189,7 +175,7 @@ static partial class TypeScriptExtensions
                 break;
             }
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
 
         return builder;
@@ -199,31 +185,18 @@ static partial class TypeScriptExtensions
         TypeScriptCompilationContext context, out bool isInterface)
     {
         var typeName = symbol.GetFullName();
-        bool isByRef = flags.HasFlag(TypeScriptTypeFlags.IsByRef);
+        bool isByRef = flags.HasFlag(TypeScriptTypeFlags.ByRef);
+        bool isTypeArgument = flags.HasFlag(TypeScriptTypeFlags.TypeArgument);
         var builder = new CodeBuilder();
-        writeTypeScriptType(builder, typeName, syntax, symbol, null, isByRef, context, out isInterface);
+        writeTypeScriptType(builder, typeName, syntax, symbol, isByRef, isTypeArgument, context, out isInterface);
         return builder.ToString();
     }
 
     static void writeTypeScriptMethodIdentifier(CodeBuilder builder, TypeSyntax syntax, IMethodSymbol method, TypeScriptCompilationContext context)
     {
-        SymbolReplacement? replacement;
-        string typeScriptMethodName;
-        if (method.HasTypeScriptReplacement(out replacement))
-        {
-            typeScriptMethodName = replacement.Name;
-        }
-        else
-        {
-            if (method.IsNative())
-            {
-                typeScriptMethodName = $"napi.{method.Name}";
-            }
-            else
-            {
-                typeScriptMethodName = context.Conversion.MethodCasing == MethodCasing.LowerCamelCase ? method.Name.ToTypeScriptLowerCase() : method.Name;
-            }
-        }
+        string typeScriptMethodName = method.GetTypeScriptName(context);
+        if (method.IsNative())
+            typeScriptMethodName = $"napi.{typeScriptMethodName}";
 
         var kind = syntax.Kind();
         switch (kind)
@@ -236,7 +209,7 @@ static partial class TypeScriptExtensions
             case SyntaxKind.GenericName:
             {
                 var genericName = (GenericNameSyntax)syntax;
-                builder.Append(genericName.TypeArgumentList, genericName, context).Append(typeScriptMethodName);
+                builder.append(genericName.TypeArgumentList, context).Append(typeScriptMethodName);
                 break;
             }
             default:
@@ -323,7 +296,7 @@ static partial class TypeScriptExtensions
                     break;
                 }
                 default:
-                    throw new Exception();
+                    throw new NotSupportedException();
             }
         }
 
@@ -332,6 +305,7 @@ static partial class TypeScriptExtensions
 
     static void writeTypeScriptIdentifier(CodeBuilder builder, TypeSyntax syntax, TypeScriptCompilationContext context)
     {
+        _ = context;
         var kind = syntax.Kind();
         switch (kind)
         {
@@ -342,25 +316,17 @@ static partial class TypeScriptExtensions
                 break;
             }
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
     }
 
-    static CodeBuilder Append(this CodeBuilder builder, TypeSyntax type, TypeSyntax parent,
-        TypeScriptCompilationContext context)
-    {
-        var typeSymbol = type.GetTypeSymbol(context);
-        writeTypeScriptType(builder, typeSymbol.GetFullName(), type, typeSymbol, parent, false, context, out _);
-        return builder;
-    }
-
     static void writeTypeScriptType(CodeBuilder builder, string fullTypeName, TypeSyntax type, ITypeSymbol symbol,
-        TypeSyntax? parentType, bool isByRef, TypeScriptCompilationContext context, out bool isInterface)
+        bool isByRef, bool isTypeArgument, TypeScriptCompilationContext context, out bool isInterface)
     {
         if (type.IsVar)
         {
             // Type is inferred
-            writeTypeSymbol(builder, fullTypeName, symbol, null, isByRef, out isInterface);
+            writeTypeSymbol(builder, fullTypeName, symbol, isByRef, isTypeArgument, out isInterface);
             return;
         }
 
@@ -386,28 +352,26 @@ static partial class TypeScriptExtensions
                 // Nothing to do
                 break;
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
 
         var typeKind = type.Kind();
         string? typeScriptTypeName;
-        if (IsKnownTypeScriptType(fullTypeName, isByRef, parentType?.GetTypeSymbol(context), out typeScriptTypeName, out isInterface))
+        if (isKnownTypeScriptType(fullTypeName, isByRef, isTypeArgument, out typeScriptTypeName, out isInterface))
         {
             switch (typeKind)
             {
                 case SyntaxKind.GenericName:
                 {
                     var genericType = (GenericNameSyntax)type;
-                    builder.Append(typeScriptTypeName).Append(genericType.TypeArgumentList, type, context);
+                    builder.Append(typeScriptTypeName).append(genericType.TypeArgumentList, context);
                     break;
                 }
                 case SyntaxKind.ArrayType:
                 {
                     var arrayType = (ArrayTypeSyntax)type;
                     Debug.Assert(arrayType.RankSpecifiers.Count == 1);
-                    //// CHECK-ME: Handle rank?
-                    ////builder.Append(typeScriptTypeName).Append(arrayType.RankSpecifiers[0], context);
-                    builder.Append(typeScriptTypeName);
+                    builder.Append(typeScriptTypeName).append(arrayType.RankSpecifiers[0], context);
                     break;
                 }
                 case SyntaxKind.NullableType:
@@ -416,7 +380,7 @@ static partial class TypeScriptExtensions
                     if (TypeScriptUtils.TryGetBoxType(fullTypeName, out boxTypeName))
                         builder.Append(boxTypeName);
                     else
-                        throw new NotSupportedException();
+                        builder.Append(typeScriptTypeName).Append(" | null");
 
                     break;
                 }
@@ -453,13 +417,13 @@ static partial class TypeScriptExtensions
                 {
                     var arrayType = (ArrayTypeSyntax)type;
                     Debug.Assert(arrayType.RankSpecifiers.Count == 1);
-                    builder.Append(arrayType.ElementType, type, context).Append(arrayType.RankSpecifiers[0], context);
+                    TypeScriptBuilderExtension.Append(builder, arrayType.ElementType, context).append(arrayType.RankSpecifiers[0], context);
                     break;
                 }
                 case SyntaxKind.GenericName:
                 {
                     var genericType = (GenericNameSyntax)type;
-                    builder.Append(genericType.GetName()).Append(genericType.TypeArgumentList, type, context);
+                    builder.Append(genericType.GetName()).append(genericType.TypeArgumentList, context);
                     break;
                 }
                 case SyntaxKind.NullableType:
@@ -467,8 +431,13 @@ static partial class TypeScriptExtensions
                     var nullableType = (NullableTypeSyntax)type;
                     switch (symbol.TypeKind)
                     {
+                        case TypeKind.Class:
                         case TypeKind.Struct:
-                            builder.Append(nullableType.ElementType, type, context);
+                        case TypeKind.Interface:
+                        case TypeKind.TypeParameter:
+                            var elementTypeSymbol = nullableType.ElementType.GetSymbol<ITypeSymbol>(context);
+                            writeTypeScriptType(builder, elementTypeSymbol.GetFullName(), nullableType.ElementType, elementTypeSymbol, false, true, context, out _);
+                            builder.Append(" | null");
                             break;
                         case TypeKind.Enum:
                             throw new NotImplementedException("TODO");
@@ -481,7 +450,7 @@ static partial class TypeScriptExtensions
                 case SyntaxKind.QualifiedName:
                 {
                     var qualifiedName = (QualifiedNameSyntax)type;
-                    builder.Append(qualifiedName.Left, type, context).Dot().Append(qualifiedName.Right, type, context);
+                    builder.Append(qualifiedName.Left, context).Dot().Append(qualifiedName.Right, context);
                     break;
                 }
                 default:
@@ -490,43 +459,44 @@ static partial class TypeScriptExtensions
 
             isInterface = symbol.TypeKind == TypeKind.Interface;
         }
-
-        if (!(skipNullableCondition(type, parentType, symbol)))
-            builder.Append(" | null");
     }
 
-    static bool skipNullableCondition(TypeSyntax type, TypeSyntax? parentType, ITypeSymbol typeSymbol)
+    static CodeBuilder append(this CodeBuilder builder, TypeArgumentListSyntax syntax, TypeScriptCompilationContext context)
     {
-        switch (parentType?.Kind() ?? SyntaxKind.None)
+        using (builder.TypeParameterList())
         {
-            case SyntaxKind.GenericName:
-            case SyntaxKind.NullableType:
-                return true;
+            bool first = true;
+            foreach (var type in syntax.Arguments)
+            {
+                builder.CommaSeparator(ref first);
+                var argumentTypeSymbol = type.GetSymbol<ITypeSymbol>(context);
+                writeTypeScriptType(builder, argumentTypeSymbol.GetFullName(), type, argumentTypeSymbol, false, true, context, out _);
+            }
         }
 
-        switch (type.Parent?.Kind() ?? SyntaxKind.None)
-        {
-            case SyntaxKind.SimpleBaseType:
-            case SyntaxKind.TypeConstraint:
-            case SyntaxKind.SimpleMemberAccessExpression:
-                return true;
-        }
-
-        if (typeSymbol.SpecialType == SpecialType.System_Void || typeSymbol.IsCLRPrimitiveType())
-            return true;
-
-        return false;
+        return builder;
     }
 
-    static CodeBuilder Append(this CodeBuilder builder, ITypeSymbol symbol, ITypeSymbol parent)
+    static CodeBuilder append(this CodeBuilder builder, ArrayRankSpecifierSyntax syntax, TypeScriptCompilationContext context)
     {
-        writeTypeSymbol(builder, symbol.GetFullName(), symbol, parent, false, out _);
+        if (syntax.Sizes.Count > 0)
+        {
+            Debug.Assert(syntax.Sizes.Count == 1);
+            var size = syntax.Sizes[0];
+            // Ignore omitted array size expression. It can be either:
+            // - An initialization "new Array<number>", which valid TS syntax
+            // - A declaration of any kind, eg. a parameter "param: Array<number>",
+            // which will work without any rank specifier
+            if (!size.IsKind(SyntaxKind.OmittedArraySizeExpression))
+                builder.Parenthesized().Append(size, context);
+        }
+
         return builder;
     }
 
     /// <summary>This method is mainly used for inferred types</summary>
     static void writeTypeSymbol(CodeBuilder builder, string fullTypeName, ITypeSymbol symbol,
-        ITypeSymbol? parentSymbol, bool isByRef, out bool isInterface)
+        bool isByRef, bool isTypeArgument, out bool isInterface)
     {
         // Try to adjust the typename, looking for know types
         switch (symbol.Kind)
@@ -542,12 +512,12 @@ static partial class TypeScriptExtensions
                         {
                             case TypeKind.Struct:
                                 var nullableType = namedType.TypeArguments[0];
-                                writeTypeSymbol(builder, nullableType.GetFullName(), nullableType, symbol, isByRef, out isInterface);
+                                writeTypeSymbol(builder, nullableType.GetFullName(), nullableType, isByRef, isTypeArgument, out isInterface);
                                 return;
                             case TypeKind.Enum:
                                 throw new Exception("TODO");
                             default:
-                                throw new Exception();
+                                throw new NotSupportedException();
                         }
                     }
 
@@ -559,19 +529,87 @@ static partial class TypeScriptExtensions
             case SymbolKind.ArrayType:
             {
                 var arrayType = (IArrayTypeSymbol)symbol;
-                builder.Append(arrayType.ElementType, symbol).EmptyRankSpecifier();
+                switch (arrayType.ElementType.SpecialType)
+                {
+                    case SpecialType.System_Byte:
+                    {
+                        builder.Append("Uint8ClampedArray");
+                        break;
+                    }
+                    case SpecialType.System_SByte:
+                    {
+                        builder.Append("Int8Array");
+                        break;
+                    }
+                    case SpecialType.System_UInt16:
+                    {
+                        builder.Append("Uint16Array");
+                        break;
+                    }
+                    case SpecialType.System_Int16:
+                    {
+                        builder.Append("Int16Array");
+                        break;
+                    }
+                    case SpecialType.System_UInt32:
+                    {
+                        builder.Append("Uint32Array");
+                        break;
+                    }
+                    case SpecialType.System_Int32:
+                    {
+                        builder.Append("Int32Array");
+                        break;
+                    }
+                    case SpecialType.System_UInt64:
+                    {
+                        builder.Append("BigUint64Array");
+                        break;
+                    }
+                    case SpecialType.System_Int64:
+                    {
+                        builder.Append("BigInt64Array");
+                        break;
+                    }
+                    case SpecialType.System_Single:
+                    {
+                        builder.Append("Float32Array");
+                        break;
+                    }
+                    case SpecialType.System_Double:
+                    {
+                        builder.Append("Float64Array");
+                        break;
+                    }
+                    case SpecialType.System_IntPtr:
+                    {
+                        builder.Append("Float64Array");
+                        break;
+                    }
+                    case SpecialType.System_Boolean:
+                    {
+                        builder.Append("BooleanArray");
+                        break;
+                    }
+                    default:
+                        throw new NotSupportedException();
+                }
+
                 isInterface = false;
+                if (symbol.IsNullable())
+                    builder.Append(" | null");
+
                 return;
             }
             case SymbolKind.TypeParameter:
                 // Nothing to do
                 break;
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
 
         string? typeScriptTypeName;
-        if (!IsKnownTypeScriptType(fullTypeName, isByRef, parentSymbol, out typeScriptTypeName, out isInterface))
+        if (!isKnownTypeScriptType(fullTypeName, isByRef, isTypeArgument, out typeScriptTypeName, out isInterface))
         {
             isInterface = symbol.TypeKind == TypeKind.Interface;
             typeScriptTypeName = symbol.GetQualifiedName();
@@ -589,7 +627,7 @@ static partial class TypeScriptExtensions
                     {
                         bool first = true;
                         foreach (var parameter in namedType.TypeArguments)
-                            builder.CommaSeparator(ref first).Append(parameter, symbol);
+                            builder.CommaSeparator(ref first).Append(parameter);
                     }
                 }
 
@@ -601,41 +639,17 @@ static partial class TypeScriptExtensions
                 break;
             }
             default:
-                throw new Exception();
+                throw new NotSupportedException();
         }
+
+        if (symbol.IsNullable())
+            builder.Append(" | null");
     }
 
-    static CodeBuilder Append(this CodeBuilder builder, TypeArgumentListSyntax syntax, TypeSyntax parent, TypeScriptCompilationContext context)
-    {
-        using (builder.TypeParameterList())
-        {
-            bool first = true;
-            foreach (var type in syntax.Arguments)
-                builder.CommaSeparator(ref first).Append(type, parent, context);
-        }
-
-        return builder;
-    }
-
-    static CodeBuilder Append(this CodeBuilder builder, ArrayRankSpecifierSyntax syntax, TypeScriptCompilationContext context)
-    {
-        if (syntax.Sizes.Count > 0)
-        {
-            Debug.Assert(syntax.Sizes.Count == 1);
-            builder.Bracketed().Append(syntax.Sizes[0], context);
-        }
-        else
-        {
-            builder.EmptyRankSpecifier();
-        }
-
-        return builder;
-    }
-
-    public static bool IsKnownTypeScriptType(string fullTypeName, bool isByRef, ITypeSymbol? parent,
+    static bool isKnownTypeScriptType(string fullTypeName, bool isByRef, bool isTypeArgument,
         [NotNullWhen(true)]out string? knownTypeScriptType, out bool isInterface)
     {
-        if (IsKnowSimpleTypeScriptType(fullTypeName, isByRef, parent, out knownTypeScriptType))
+        if (isKnowSimpleTypeScriptType(fullTypeName, isByRef, isTypeArgument, out knownTypeScriptType))
         {
             isInterface = false;
             return true;
@@ -661,10 +675,22 @@ static partial class TypeScriptExtensions
                 isInterface = true;
                 return true;
             }
+            case "System.Collections.Generic.IEnumerator<out T>":
+            {
+                knownTypeScriptType = "Iterator";
+                isInterface = true;
+                return true;
+            }
             case "System.Collections.Generic.IEnumerable<out T>":
             {
                 knownTypeScriptType = "Iterable";
                 isInterface = true;
+                return true;
+            }
+            case "System.Boolean[]":
+            {
+                knownTypeScriptType = "BooleanArray";
+                isInterface = false;
                 return true;
             }
             case "System.Byte[]":
@@ -727,6 +753,12 @@ static partial class TypeScriptExtensions
                 isInterface = false;
                 return true;
             }
+            case "System.IntPtr[]":
+            {
+                knownTypeScriptType = "Float64Array";
+                isInterface = false;
+                return true;
+            }
             case "System.Collections.Generic.List<T>":
             {
                 knownTypeScriptType = "Array";
@@ -748,7 +780,7 @@ static partial class TypeScriptExtensions
         }
     }
 
-    public static bool IsKnowSimpleTypeScriptType(string fullTypeName, bool isByRef, ITypeSymbol? parent, [NotNullWhen(true)]out string? knownTypeScriptType)
+    static bool isKnowSimpleTypeScriptType(string fullTypeName, bool isByRef, bool isTypeArgument, [NotNullWhen(true)]out string? knownTypeScriptType)
     {
         if (isByRef)
         {
@@ -757,7 +789,7 @@ static partial class TypeScriptExtensions
             else
                 return false;
         }
-        else if (parent?.IsGeneric() == true)
+        else if (isTypeArgument)
         {
             switch (fullTypeName)
             {
