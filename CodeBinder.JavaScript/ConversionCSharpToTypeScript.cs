@@ -51,7 +51,7 @@ public class ConversionCSharpToTypeScript : CSharpLanguageConversion<TypeScriptC
 
     public override bool TryParseExtraArgs(List<string> args)
     {
-        // Try parse --interface-only switch
+        // Try parse --commonjs switch
         if (args.Count == 1 && args[0] == "commonjs")
         {
             GenerationFlags |= TypeScriptGenerationFlags.CommonJSCompat;
