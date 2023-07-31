@@ -49,6 +49,18 @@ public class ConversionCSharpToTypeScript : CSharpLanguageConversion<TypeScriptC
         get { return false; }
     }
 
+    public override bool TryParseExtraArgs(List<string> args)
+    {
+        // Try parse --interface-only switch
+        if (args.Count == 1 && args[0] == "commonjs")
+        {
+            GenerationFlags |= TypeScriptGenerationFlags.CommonJSCompat;
+            return true;
+        }
+
+        return false;
+    }
+
     internal string TypeScriptModuleLoadSuffix
     {
         get
