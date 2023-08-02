@@ -7,6 +7,7 @@ using CodeBinder.JavaScript.TypeScript;
 namespace CodeBinder.JavaScript;
 
 [ConversionLanguageName("TypeScript")]
+[ConfigurationSwitch("commonjs", "Output is CommonJS compatible (TypeScript)")]
 public class ConversionCSharpToTypeScript : CSharpLanguageConversion<TypeScriptCompilationContext>
 {
     internal const string CodeBinderNamespace = "CodeBinder";
