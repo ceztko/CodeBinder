@@ -480,7 +480,19 @@ public abstract class CSharpValidationContextBase : ValidationContext<CSharpNode
     private void Visitor_VariableDeclarationVisit(CSharpNodeVisitor visitor, VariableDeclarationSyntax node)
     {
         if (node.Variables.Count != 1)
+        {
             Unsupported(node, "Variable declaration with variable count not equals to 1");
+        }
+        else
+        {
+            var variable = node.Variables[0];
+            var symbol = variable.GetDeclaredSymbol(this)!;
+            if (symbol.Kind == SymbolKind.Field)
+            {
+                if (variable.Initializer != null)
+                    Unsupported(node, "Field variable declaration with non null initializer");
+            }
+        }
     }
 
     private void Visitor_AliasQualifiedNameVisit(CSharpNodeVisitor visitor, AliasQualifiedNameSyntax node)
