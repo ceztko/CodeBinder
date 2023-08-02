@@ -113,7 +113,7 @@ class Program
                 throw new Exception("Could not parse extra args: " + extra);
 
             if (supportedExtraArgs.Count != 0 && !converter.Conversion.TryParseExtraArgs(supportedExtraArgs))
-                throw new Exception("Could not parse extra args: " + extra);
+                throw new Exception("Could not parse extra args: " + string.Join(", ", extra));
         }
         catch
         {
