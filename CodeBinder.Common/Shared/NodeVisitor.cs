@@ -3,7 +3,7 @@
 
 namespace CodeBinder.Shared;
 
-public delegate void BeforeNodeVisitDelegate(NodeVisitor visitor, SyntaxNode node, ref NodeVisitorToken token);
+public delegate void BeforeNodeVisitDelegate(NodeVisitor visitor, SyntaxNode node, NodeVisitorToken token);
 
 /// <summary>
 /// A class that visit syntax trees of a specific language
@@ -34,11 +34,24 @@ public abstract class NodeVisitor
         Visited?.Invoke(this);
     }
 
-    protected void OnBeforeNodeVisit(SyntaxNode node, ref NodeVisitorToken token)
+    protected void OnBeforeNodeVisit(SyntaxNode node, NodeVisitorToken token)
     {
         // Early reset after node visit event
         AfterNodeVisit = null;
-        BeforeNodeVisit?.Invoke(this, node, ref token);
+        var evnt = BeforeNodeVisit;
+        if (evnt != null)
+        {
+            // Manually invoke registered delegates so we can block
+            // further processing on the first if visiting is canceled
+            var delegates = evnt.GetInvocationList();
+            for (int i = 0; i < delegates.Length; i++)
+            {
+                var dlg = (BeforeNodeVisitDelegate)delegates[i];
+                dlg.Invoke(this, node, token);
+                if (token.IsCanceled)
+                    break;
+            }
+        }
     }
 
     protected void OnAfterNodeVisit(SyntaxNode node)
@@ -49,7 +62,7 @@ public abstract class NodeVisitor
     protected abstract void VisitTree(SyntaxTree tree);
 }
 
-public struct NodeVisitorToken
+public class NodeVisitorToken
 {
     public bool IsCanceled { get; private set; }
 

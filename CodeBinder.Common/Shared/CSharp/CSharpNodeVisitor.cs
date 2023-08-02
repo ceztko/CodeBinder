@@ -1699,7 +1699,7 @@ public class CSharpNodeVisitor : NodeVisitor
                 return;
 
             var cancelToken = new NodeVisitorToken();
-            _wrapper.OnBeforeNodeVisit(node, ref cancelToken);
+            _wrapper.OnBeforeNodeVisit(node, cancelToken);
             if (!cancelToken.IsCanceled)
             {
                 base.Visit(node);

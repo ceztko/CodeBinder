@@ -191,7 +191,7 @@ public abstract class CSharpCollectionContextBase : CollectionContext<CSharpNode
         visitor.BeforeNodeVisit += Visitor_BeforeNodeVisit;
     }
 
-    private void Visitor_BeforeNodeVisit(NodeVisitor visitor, SyntaxNode node, ref NodeVisitorToken token)
+    private void Visitor_BeforeNodeVisit(NodeVisitor visitor, SyntaxNode node, NodeVisitorToken token)
     {
         if (node.ShouldDiscard(Compilation))
         {

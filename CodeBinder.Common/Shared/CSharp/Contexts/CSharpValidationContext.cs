@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 using CodeBinder.Attributes;
-using Microsoft.CodeAnalysis;
 using System.Linq;
 
 namespace CodeBinder.Shared.CSharp;
@@ -24,46 +23,22 @@ public class CSharpValidationContext<TLanguageConversion> : CSharpValidationCont
 
 /// <summary>
 /// CSharp language specific validation context
+///
+/// It does some generic constructs validation
 /// </summary>
 /// <remarks>This class is for infrastructure only. It's bound to a full CSharpCompilationConversion</remarks>
 public abstract class CSharpValidationContext : CSharpValidationContextBase
 {
-    internal CSharpValidationContext() { }
-
-    public override abstract CSharpLanguageConversion Conversion { get; }
-}
-
-/// <summary>
-/// CSharp language specific validation context
-/// </summary>
-public class CSharpValidationContextBase<TLanguageConversion> : CSharpValidationContextBase
-    where TLanguageConversion : LanguageConversion
-{
-    TLanguageConversion _Conversion;
-
-    protected CSharpValidationContextBase(TLanguageConversion conversion)
-    {
-        _Conversion = conversion;
-    }
-    public override TLanguageConversion Conversion => _Conversion;
-}
-
-/// <summary>
-/// CSharp language specific validation context
-/// </summary>
-/// <remarks>This class is for infrastructure only. It's bound to a generic LanguageConversion</remarks>
-public abstract class CSharpValidationContextBase : ValidationContext<CSharpNodeVisitor>
-{
     HashSet<ITypeSymbol> _typeWithRegularCostructor = null!;
     Dictionary<string, List<IMethodSymbol>> _methods;
 
-    internal CSharpValidationContextBase()
+    internal CSharpValidationContext()
     {
         _methods = new Dictionary<string, List<IMethodSymbol>>();
-        Init += CSharpValidationContextBase_Initialized;
+        Init += CSharpValidationContext_Init;
     }
 
-    private void CSharpValidationContextBase_Initialized(CSharpNodeVisitor visitor)
+    private void CSharpValidationContext_Init(CSharpNodeVisitor visitor)
     {
         if (Conversion.CheckMethodOverloads)
             _typeWithRegularCostructor = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
@@ -99,14 +74,8 @@ public abstract class CSharpValidationContextBase : ValidationContext<CSharpNode
         visitor.TypeOfExpressionVisit += Visitor_TypeOfExpressionVisit;
     }
 
-    private void Visitor_BeforeNodeVisit(NodeVisitor visitor, SyntaxNode node, ref NodeVisitorToken token)
+    private void Visitor_BeforeNodeVisit(NodeVisitor visitor, SyntaxNode node, NodeVisitorToken token)
     {
-        if (node.ShouldDiscard(this, Conversion))
-        {
-            token.Cancel();
-            return;
-        }
-
         var kind = node.Kind();
         switch (kind)
         {
@@ -594,6 +563,51 @@ public abstract class CSharpValidationContextBase : ValidationContext<CSharpNode
         {
             bindedMethods = new List<IMethodSymbol> { method };
             _methods.Add(methodName, bindedMethods);
+        }
+    }
+
+    public override abstract CSharpLanguageConversion Conversion { get; }
+}
+
+/// <summary>
+/// CSharp language specific validation context
+/// </summary>
+public class CSharpValidationContextBase<TLanguageConversion> : CSharpValidationContextBase
+    where TLanguageConversion : LanguageConversion
+{
+    TLanguageConversion _Conversion;
+
+    protected CSharpValidationContextBase(TLanguageConversion conversion)
+    {
+        _Conversion = conversion;
+    }
+    public override TLanguageConversion Conversion => _Conversion;
+}
+
+/// <summary>
+/// CSharp language specific validation context
+///
+/// It does no default validation
+/// </summary>
+/// <remarks>This class is for infrastructure only. It's bound to a generic LanguageConversion</remarks>
+public abstract class CSharpValidationContextBase : ValidationContext<CSharpNodeVisitor>
+{
+    internal CSharpValidationContextBase()
+    {
+        Init += CSharpValidationContextBase_Initialized;
+    }
+
+    private void CSharpValidationContextBase_Initialized(CSharpNodeVisitor visitor)
+    {
+        visitor.BeforeNodeVisit += Visitor_BeforeNodeVisit;
+    }
+
+    private void Visitor_BeforeNodeVisit(NodeVisitor visitor, SyntaxNode node, NodeVisitorToken token)
+    {
+        if (node.ShouldDiscard(this, Conversion))
+        {
+            token.Cancel();
+            return;
         }
     }
 }

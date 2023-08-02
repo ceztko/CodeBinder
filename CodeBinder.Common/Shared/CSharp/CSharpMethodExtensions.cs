@@ -897,6 +897,12 @@ public static class CSharpMethodExtensions
             Debug.Assert(field.Declaration.Variables.Count == 1);
             return field.Declaration.Variables[0].GetDeclaredSymbol(provider);
         }
+        else if (node.IsKind(SyntaxKind.VariableDeclaration))
+        {
+            var field = (VariableDeclarationSyntax)node;
+            Debug.Assert(field.Variables.Count == 1);
+            return field.Variables[0].GetDeclaredSymbol(provider);
+        }
         else
         {
             return node.GetDeclaredSymbol(provider);
