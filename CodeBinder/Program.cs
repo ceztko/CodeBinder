@@ -51,8 +51,6 @@ class Program
         string? solutionPath = null;
         string? targetRootPath = null;
         string? language = null;
-        List<string> definitionsToAdd = new();
-        List<string> definitionsToRemove = new();
         List<string> namespaceMappings = new();
         bool shouldShowHelp = false;
         var conversions = GetConverterInfos();
@@ -60,8 +58,6 @@ class Program
         var options = new OptionSet {
             { "p|project=", "The project to be converted", p => projects.Add(p) },
             { "s|solution=", "The solution to be converted", s => solutionPath = s },
-            { "d|def=", "Preprocessor definition to be added during conversion", d => definitionsToAdd.Add(d) },
-            { "n|nodef=", "Preprocessor definition to be removed during conversion", d => definitionsToRemove.Add(d) },
             { "m|nsmapping=", "Mapping for the given, must be colon separated ns1:ns2", ns => namespaceMappings.Add(ns) },
             { "l|language=", "The target language for the conversion", l => language = l },
             { "r|rootpath=", "The target root path for the conversion", r => targetRootPath = r },
@@ -130,9 +126,6 @@ class Program
 
             converter.Conversion.NamespaceMapping.PushMapping(splitted[0], splitted[1]);
         }
-
-        converter.Options.PreprocessorDefinitionsAdded = definitionsToAdd;
-        converter.Options.PreprocessorDefinitionsRemoved = definitionsToRemove;
 
         GeneratorOptions genargs = new GeneratorOptions();
         genargs.TargetRootPath = targetRootPath;

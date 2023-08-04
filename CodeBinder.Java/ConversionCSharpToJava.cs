@@ -6,6 +6,7 @@ using CodeBinder.Java.Shared;
 namespace CodeBinder.Java;
 
 [ConversionLanguageName("Java")]
+[ConfigurationSwitch("android", "Output is compatible with android sdk (Java)")]
 public class ConversionCSharpToJava : CSharpLanguageConversion
 {
     internal const string CodeBinderNamespace = "CodeBinder";
@@ -18,9 +19,23 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
 
     public bool SkipBody { get; set; }
 
+    public JavaPlatform JavaPlatform { get; set; } = JavaPlatform.JDK;
+
     public override MethodCasing MethodCasing => MethodCasing.LowerCamelCase;
 
     public override IReadOnlyCollection<string> SupportedPolicies => new string[] { Policies.GarbageCollection, Policies.InstanceFinalizers };
+
+    public override bool TryParseExtraArgs(List<string> args)
+    {
+        // Try parse --commonjs switch
+        if (args.Count == 1 && args[0] == "android")
+        {
+            JavaPlatform = JavaPlatform.Android;
+            return true;
+        }
+
+        return false;
+    }
 
     public override IEnumerable<TypeConversion<CSharpClassTypeContext>> GetConversions(CSharpClassTypeContext cls)
     {
@@ -54,7 +69,19 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
 
     public override IReadOnlyList<string> PreprocessorDefinitions
     {
-        get { return new string[] { "JAVA", "JVM" }; }
+        get
+        {
+            switch (JavaPlatform)
+            {
+                case JavaPlatform.JDK:
+                    return new string[] { "JAVA", "JVM", "JVM_JDK", "JNI_JDK" };
+                case JavaPlatform.Android:
+                    return new string[] { "JAVA", "JVM", "JVM_ANDROID", "JNI_ANDROID" };
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
     }
 
     public override bool UseUTF8Bom
@@ -89,4 +116,10 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
             }
         }
     }
+}
+
+public enum JavaPlatform
+{
+    JDK = 0,
+    Android
 }

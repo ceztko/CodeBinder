@@ -18,7 +18,7 @@ public class ConversionCSharpToJNI : CSharpLanguageConversionBase<JNICompilation
 
     public override IReadOnlyList<string> PreprocessorDefinitions
     {
-        get { return new string[] { "JNI", "JVM" }; }
+        get { return new string[] { "JVM", "JNI", "JNI_JDK", "JNI_ANDROID" }; }
     }
 
     public override IEnumerable<IConversionWriter> DefaultConversions

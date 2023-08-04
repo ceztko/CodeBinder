@@ -9,12 +9,6 @@ namespace CodeBinder;
 
 public class ConverterOptions
 {
-    /// <summary>Plaform specific preprocessor symbols that will be added during compilation</summary>
-    public IReadOnlyList<string>? PreprocessorDefinitionsAdded { get; set; }
-
-    /// <summary>Preprocessor symbols that will be be removed during compilation</summary>
-    public IReadOnlyList<string>? PreprocessorDefinitionsRemoved { get; set; }
-
     public bool IgnoreCompilationErrors { get; set; }
 }
 
@@ -27,8 +21,6 @@ public class GeneratorOptions
 
 public abstract class Converter
 {
-    const string DefineConstantsName = "DefineConstants";
-
     public ConverterOptions Options { get; private set; }
 
     internal Converter()
@@ -130,28 +122,14 @@ public abstract class Converter
 
     MSBuildWorkspace createWorkspace()
     {
-        var builder = new StringBuilder();
-        builder.Append("CODE_BINDER");
-
+        var properties = new Dictionary<string, string>{ { "CODE_BINDER", "1" } };
         if (Conversion.PreprocessorDefinitions.Count != 0)
         {
-            foreach (var definition in Conversion.PreprocessorDefinitions!)
-            {
-                builder.Append(";");
-                builder.Append(definition);
-            }
+            foreach (var definition in Conversion.PreprocessorDefinitions)
+                properties[definition] = "1";
         }
 
-        if (Options.PreprocessorDefinitionsAdded != null)
-        {
-            foreach (var definition in Options.PreprocessorDefinitionsAdded!)
-            {
-                builder.Append(";");
-                builder.Append(definition);
-            }
-        }
-
-        return MSBuildWorkspace.Create(new Dictionary<string, string>() { { DefineConstantsName, builder.ToString() } });
+        return MSBuildWorkspace.Create(properties);
     }
 
     public LanguageConversion Conversion

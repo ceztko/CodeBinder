@@ -1,7 +1,6 @@
 ﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto<ceztko@gmail.com>
 // SPDX-FileCopyrightText: (C) 2017-2018 ICSharpCode
 // SPDX-License-Identifier: MIT
-using Microsoft.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,6 +9,18 @@ namespace CodeBinder;
 
 class ProjectConverter
 {
+    static readonly string[] PreprocessorDefinitionsToRemove = new string[] {
+        "NETFRAMEWORK",
+        "NET452",
+        "NET20_OR_GREATER",
+        "NET30_OR_GREATER",
+        "NET35_OR_GREATER",
+        "NET40_OR_GREATER",
+        "NET45_OR_GREATER",
+        "NET451_OR_GREATER",
+        "NET452_OR_GREATER",
+    };
+
     public Microsoft.CodeAnalysis.Project Project { get; private set; }
 
     public Converter Converter { get; private set; }
@@ -22,19 +33,30 @@ class ProjectConverter
 
     public IEnumerable<ConversionDelegate> GetConversionDelegates()
     {
+        var conversion = Converter.Conversion;
+
         // Add some language specific preprocessor options
         var options = (CSharpParseOptions)Project.ParseOptions!;
-        var preprocessorSymbols = options.PreprocessorSymbolNames;
-        if (Converter.Options.PreprocessorDefinitionsRemoved != null)
-            preprocessorSymbols = preprocessorSymbols.Except(Converter.Options.PreprocessorDefinitionsRemoved).ToArray();
 
-        var solutionFilePath = Project.Solution.FilePath;
+        var preprocessorSymbols = new HashSet<string>(options.PreprocessorSymbolNames);
+        preprocessorSymbols.ExceptWith(PreprocessorDefinitionsToRemove);
+        preprocessorSymbols.Add("CODE_BINDER");
+        if (conversion.PreprocessorDefinitions.Count != 0)
+        {
+            foreach (var definition in conversion.PreprocessorDefinitions)
+                preprocessorSymbols.Add(definition);
+        }
+
+        options = options.WithPreprocessorSymbols(preprocessorSymbols);
+        var project = Project.WithParseOptions(options);
+
+        var solutionFilePath = project.Solution.FilePath;
         var solutionDir = Path.GetDirectoryName(solutionFilePath);
-        var compilation = Project.GetCompilationAsync().Result!;
+        var compilation = project.GetCompilationAsync().Result!;
         checkCompilationErrors(compilation);
 
         // Select only syntax tress that belongs to solution dir, if not null
-        var conversion = Converter.Conversion;
+
         var validationContext = conversion.CreateValidationContext();
         var syntaxTrees = filterTrees(compilation, solutionDir);
         if (validationContext != null)

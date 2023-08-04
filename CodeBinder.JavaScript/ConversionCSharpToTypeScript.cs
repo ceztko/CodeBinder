@@ -42,7 +42,7 @@ public class ConversionCSharpToTypeScript : CSharpLanguageConversion<TypeScriptC
 
     public override IReadOnlyList<string> PreprocessorDefinitions
     {
-        get { return new string[] { "JavaScript", "TypeScript" }; }
+        get { return new string[] { "JAVASCRIPT", "TYPESCRIPT", "NODEJS" }; }
     }
 
     public override bool UseUTF8Bom
