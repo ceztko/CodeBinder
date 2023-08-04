@@ -9,6 +9,7 @@ namespace CodeBinder;
 
 class ProjectConverter
 {
+    // Remove dotnet specific definitions
     static readonly string[] PreprocessorDefinitionsToRemove = new string[] {
         "NETFRAMEWORK",
         "NET452",
@@ -19,6 +20,16 @@ class ProjectConverter
         "NET45_OR_GREATER",
         "NET451_OR_GREATER",
         "NET452_OR_GREATER",
+        "NETSTANDARD",
+        "NETSTANDARD2_0",
+        "NETSTANDARD1_0_OR_GREATER",
+        "NETSTANDARD1_1_OR_GREATER",
+        "NETSTANDARD1_2_OR_GREATER",
+        "NETSTANDARD1_3_OR_GREATER",
+        "NETSTANDARD1_4_OR_GREATER",
+        "NETSTANDARD1_5_OR_GREATER",
+        "NETSTANDARD1_6_OR_GREATER",
+        "NETSTANDARD2_0_OR_GREATER",
     };
 
     public Microsoft.CodeAnalysis.Project Project { get; private set; }
