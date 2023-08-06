@@ -26,6 +26,7 @@ public class Solution
     public static Solution Open(string filepath)
     {
         var name = Path.GetFileNameWithoutExtension(filepath);
+        filepath = Path.GetFullPath(filepath);
         var solution = SolutionFile.Parse(filepath);
         var projects = new List<Project>();
         foreach (var project in solution.ProjectsInOrder)

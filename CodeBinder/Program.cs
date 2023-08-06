@@ -77,6 +77,7 @@ class Program
             ShowHelp(options);
             return;
         }
+
         ConversionInfo conversionInfo;
         Converter converter;
         try
@@ -93,7 +94,7 @@ class Program
             }
             catch
             {
-                throw new Exception("Target language is missing or unsupported");
+                throw new Exception($"Target language {language} is missing or unsupported");
             }
 
             // Find all Converter.CreateFor method

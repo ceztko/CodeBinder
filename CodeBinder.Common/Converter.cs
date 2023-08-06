@@ -122,6 +122,8 @@ public abstract class Converter
 
     MSBuildWorkspace createWorkspace()
     {
+        // Creat a workspace with all the preprocessor definition
+        // also available as a valorized (the value is arbitrarily 1) property
         var properties = new Dictionary<string, string>{ { "CODE_BINDER", "1" } };
         if (Conversion.PreprocessorDefinitions.Count != 0)
         {

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>10.0</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\CodeBinder.Redist\CodeBinder.Redist.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(APPLE) == ''">
+    <None Include="Apple\*.cs" />
+    <Compile Remove="Apple\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(JVM) == ''">
+    <None Include="JVM\*.cs" />
+    <Compile Remove="JVM\*.cs" />
+  </ItemGroup>
+
+</Project>

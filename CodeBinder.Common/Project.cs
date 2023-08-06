@@ -24,6 +24,7 @@ public class Project
 
     public static Project Open(string filepath)
     {
+        filepath = Path.GetFullPath(filepath);
         var name = Path.GetFileNameWithoutExtension(filepath);
         return new Project(filepath, name, null);
     }
