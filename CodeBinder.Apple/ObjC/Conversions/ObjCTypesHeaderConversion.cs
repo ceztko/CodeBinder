@@ -39,12 +39,21 @@ class ObjCTypesHeaderConversion : ObjCHeaderConversionWriter
         }
 
         builder.AppendLine();
-        writeOpaqueTypes(builder);
-        builder.AppendLine();
-        writeEnums(builder);
-        builder.AppendLine();
-        writeCallbacks(builder);
-        builder.AppendLine();
+        if (IsInternalHeader)
+        {
+            writeEnumToStringMethods(builder);
+            builder.AppendLine();
+        }
+        else
+        {
+            writeOpaqueTypes(builder);
+            builder.AppendLine();
+            writeEnums(builder);
+            builder.AppendLine();
+            writeCallbacks(builder);
+            builder.AppendLine();
+        }
+
         EndHeaderGuard(builder);
     }
 
@@ -55,9 +64,6 @@ class ObjCTypesHeaderConversion : ObjCHeaderConversionWriter
         builder.AppendLine();
         foreach (var type in Compilation.StorageTypes.Declarations)
         {
-            if (ShouldSkipType(type))
-                continue;
-
             builder.Append("@class").Space().Append(type.GetObjCName(Compilation)).EndOfStatement();
         }
 
@@ -68,9 +74,6 @@ class ObjCTypesHeaderConversion : ObjCHeaderConversionWriter
         builder.AppendLine();
         foreach (var iface in Compilation.Interfaces.Declarations)
         {
-            if (ShouldSkipType(iface))
-                continue;
-
             builder.Append("@protocol").Space().Append(iface.GetObjCName(Compilation)).EndOfStatement();
         }
     }
@@ -82,9 +85,6 @@ class ObjCTypesHeaderConversion : ObjCHeaderConversionWriter
         builder.AppendLine();
         foreach (var enm in Compilation.Enums.Declarations)
         {
-            if (ShouldSkipType(enm))
-                continue;
-
             string enumName = enm.GetObjCName(Compilation);
             var symbol = enm.GetDeclaredSymbol<INamedTypeSymbol>(Compilation);
             bool isflag = symbol.HasAttribute<FlagsAttribute>();
@@ -101,17 +101,17 @@ class ObjCTypesHeaderConversion : ObjCHeaderConversionWriter
 
             builder.AppendLine();
         }
+    }
 
-        if (IsInternalHeader)
+    private void writeEnumToStringMethods(CodeBuilder builder)
+    {
+        builder.AppendLine("// CBToString for enums");
+        foreach (var enm in Compilation.Enums.Declarations)
         {
-            builder.AppendLine("// CBToString for enums");
-            foreach (var enm in Compilation.Enums.Declarations)
-            {
-                string enumName = enm.GetObjCName(Compilation);
-                var members = getEnumMembers(enm, true);
-                writeCBToStringMethod(builder, enumName, enm.IsFlag(Compilation), members);
-                builder.AppendLine();
-            }
+            string enumName = enm.GetObjCName(Compilation);
+            var members = getEnumMembers(enm, true);
+            writeCBToStringMethod(builder, enumName, enm.IsFlag(Compilation), members);
+            builder.AppendLine();
         }
     }
 
