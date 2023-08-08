@@ -38,7 +38,7 @@ public class ConversionCSharpToTypeScript : CSharpLanguageConversion<TypeScriptC
         return new TypeScriptValidationContext(this);
     }
 
-    public override IReadOnlyCollection<string> SupportedPolicies => new string[] { Policies.GarbageCollection, Policies.Iterators, Policies.Generators };
+    public override IReadOnlyCollection<string> SupportedPolicies => new string[] { Features.GarbageCollection, Features.Iterators, Features.Generators };
 
     public override IReadOnlyList<string> PreprocessorDefinitions
     {

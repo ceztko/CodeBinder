@@ -228,7 +228,7 @@ public sealed class VerbatimConversionAttribute : CodeBinderAttribute
     }
 }
 
-public static class Policies
+public static class Features
 {
     public const string Delegates = "{0CA8BB17-A589-41A9-A97C-0E1870837AB4}";
     public const string OperatorOverloading = "{B19FE437-C7FE-41A5-841F-D9170CCEEBA1}";

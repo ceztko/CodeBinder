@@ -1,7 +1,7 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 using CodeBinder.Attributes;
-using BinderPolicies = CodeBinder.Attributes.Policies;
+using BinderPolicies = CodeBinder.Attributes.Features;
 
 namespace CodeBinder.Apple;
 

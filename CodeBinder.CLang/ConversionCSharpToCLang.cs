@@ -4,10 +4,6 @@ using CodeBinder.Attributes;
 
 namespace CodeBinder.CLang;
 
-/// <summary>
-/// Basic CSharp language conversion
-/// </summary>
-/// <remarks>Inherit this class to provide custom contexts</remarks>
 [ConversionLanguageName(LanguageName)]
 [ConfigurationSwitch("interface-only", "Only output public interface (CLang)")]
 public class ConversionCSharpToCLang : CSharpLanguageConversionBase<CLangCompilationContext, CLangModuleContext>
@@ -23,7 +19,7 @@ public class ConversionCSharpToCLang : CSharpLanguageConversionBase<CLangCompila
 
     public bool PublicInterfaceOnly { get; set; }
 
-    public override IReadOnlyCollection<string> SupportedPolicies => new[] { Policies.Delegates };
+    public override IReadOnlyCollection<string> SupportedPolicies => new[] { Features.Delegates };
 
     protected override CLangCompilationContext CreateCompilationContext()
     {

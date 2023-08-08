@@ -23,7 +23,7 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
 
     public override MethodCasing MethodCasing => MethodCasing.LowerCamelCase;
 
-    public override IReadOnlyCollection<string> SupportedPolicies => new string[] { Policies.GarbageCollection, Policies.InstanceFinalizers };
+    public override IReadOnlyCollection<string> SupportedPolicies => new string[] { Features.GarbageCollection, Features.InstanceFinalizers };
 
     public override bool TryParseExtraArgs(List<string> args)
     {

@@ -83,7 +83,7 @@ public abstract class CSharpValidationContext : CSharpValidationContextBase
             case SyntaxKind.YieldBreakStatement:
             case SyntaxKind.YieldReturnStatement:
             {
-                if (!Conversion.SupportedPolicies.Contains(Policies.Iterators))
+                if (!Conversion.SupportedPolicies.Contains(Features.Iterators))
                     Unsupported(node);
 
                 break;
@@ -189,7 +189,7 @@ public abstract class CSharpValidationContext : CSharpValidationContextBase
     private void Visitor_MethodDeclarationVisit(CSharpNodeVisitor visitor, MethodDeclarationSyntax node)
     {
         var symbol = node.GetDeclaredSymbol<IMethodSymbol>(this);
-        if (Conversion.SupportedPolicies.Contains(Policies.PassByRef))
+        if (Conversion.SupportedPolicies.Contains(Features.PassByRef))
         {
             foreach (var arg in node.ParameterList.Parameters)
             {
@@ -268,7 +268,7 @@ public abstract class CSharpValidationContext : CSharpValidationContextBase
 
     private void Visitor_DestructorDeclarationVisit(CSharpNodeVisitor visitor, DestructorDeclarationSyntax node)
     {
-        if (!Conversion.SupportedPolicies.Contains(Policies.InstanceFinalizers))
+        if (!Conversion.SupportedPolicies.Contains(Features.InstanceFinalizers))
         {
             var symbol = node.GetDeclaredSymbol<IMethodSymbol>(this);
             if (!symbol.ContainingType.Implements<IObjectFinalizer>())
@@ -320,7 +320,7 @@ public abstract class CSharpValidationContext : CSharpValidationContextBase
 
     private void Visitor_InvocationExpressionVisit(CSharpNodeVisitor visitor, InvocationExpressionSyntax node)
     {
-        if (Conversion.SupportedPolicies.Contains(Policies.PassByRef))
+        if (Conversion.SupportedPolicies.Contains(Features.PassByRef))
             return;
 
         BlockSyntax? block = null;

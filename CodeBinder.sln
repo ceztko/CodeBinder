@@ -30,6 +30,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.JavaScript", "Co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample", "Sample\Sample.csproj", "{0A30CE27-0F97-4B3A-AFF5-82D2AE7DDC8C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeBinder.NativeAOT", "CodeBinder.NativeAOT\CodeBinder.NativeAOT.csproj", "{4D358843-DAC1-401C-B240-828213A492A0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +74,10 @@ Global
 		{0A30CE27-0F97-4B3A-AFF5-82D2AE7DDC8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A30CE27-0F97-4B3A-AFF5-82D2AE7DDC8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A30CE27-0F97-4B3A-AFF5-82D2AE7DDC8C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D358843-DAC1-401C-B240-828213A492A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D358843-DAC1-401C-B240-828213A492A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D358843-DAC1-401C-B240-828213A492A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D358843-DAC1-401C-B240-828213A492A0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
