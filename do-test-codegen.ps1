@@ -18,7 +18,7 @@ $codebinder = Join-Path bin $conf CodeBinder.exe
     "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryJNI))"
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
-    --language=C "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryCLang))"
+    --language=CLang "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryCLang))"
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=ObjectiveC "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryObjC))"

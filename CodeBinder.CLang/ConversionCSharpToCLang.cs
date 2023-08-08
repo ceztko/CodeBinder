@@ -13,7 +13,7 @@ namespace CodeBinder.CLang;
 public class ConversionCSharpToCLang : CSharpLanguageConversionBase<CLangCompilationContext, CLangModuleContext>
 {
     internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
-    public const string LanguageName = "C";
+    public const string LanguageName = "CLang";
 
     public ConversionCSharpToCLang() { }
 
