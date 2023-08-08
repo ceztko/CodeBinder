@@ -632,7 +632,7 @@ static partial class ObjCBuilderExtension
                 }
 
                 builder.CommaSeparator(ref first);
-                void appendExpression(CodeBuilder builder)
+                void appendExpression()
                 {
                     builder.Append(arg.Expression, context);
                 }
@@ -656,19 +656,19 @@ static partial class ObjCBuilderExtension
                         {
                             if (arg.RefKindKeyword.IsKind(SyntaxKind.None))
                             {
-                                builder.Append("SN2OC").Parenthesized((builder) => appendExpression(builder));
+                                builder.Append("SN2OC").Parenthesized(appendExpression);
                             }
                             else
                             {
                                 builder.Parenthesized().Append("SN2OC").Close();
-                                appendExpression(builder);
+                                appendExpression();
                             }
 
                             break;
                         }
                         default:
                         {
-                            appendExpression(builder);
+                            appendExpression();
                             break;
                         }
                     }

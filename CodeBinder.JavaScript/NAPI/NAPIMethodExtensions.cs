@@ -132,51 +132,6 @@ static class NAPIMethodExtensions
         }
     }
 
-    public static CodeBuilder EndOfLine(this CodeBuilder builder)
-    {
-        return builder.AppendLine(";");
-    }
-
-    public static CodeBuilder Space(this CodeBuilder builder)
-    {
-        return builder.Append(" ");
-    }
-
-    public static CodeBuilder CommaSeparator(this CodeBuilder builder)
-    {
-        return builder.Append(", ");
-    }
-
-    public static CodeBuilder CommaSeparator(this CodeBuilder builder, ref bool first)
-    {
-        if (first)
-            first = false;
-        else
-            return builder.CommaSeparator();
-
-        return builder;
-    }
-
-    public static CodeBuilder Block(this CodeBuilder builder, bool appendLine = true)
-    {
-        builder.AppendLine("{");
-        return builder.Indent("}", appendLine);
-    }
-
-    public static CodeBuilder ParameterList(this CodeBuilder builder, bool multiLine = false)
-    {
-        if (multiLine)
-        {
-            builder.AppendLine("(");
-            return builder.Indent(")");
-        }
-        else
-        {
-            builder.Append("(");
-            return builder.Using(")");
-        }
-    }
-
     /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
     public static CodeBuilder Parenthesized(this CodeBuilder builder, bool childIstance = true)
     {

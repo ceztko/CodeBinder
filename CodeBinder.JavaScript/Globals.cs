@@ -8,4 +8,5 @@ global using Microsoft.CodeAnalysis.CSharp;
 global using Microsoft.CodeAnalysis.CSharp.Syntax;
 global using CodeBinder.Utils;
 global using CodeBinder.Shared;
+global using CodeBinder.CLang;
 global using CodeBinder.Shared.CSharp;

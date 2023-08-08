@@ -93,7 +93,7 @@ class ObjCTypesHeaderConversion : ObjCHeaderConversionWriter
                 .Append(underlyingType).CommaSeparator().Append(enumName).Close().AppendLine();
 
             var members = getEnumMembers(enm);
-            using (builder.EnumBlock())
+            using (builder.TypeBlock())
             {
                 foreach (var member in members)
                     builder.Append(member.Name).Space().Append("=").Space().Append(member.Value.ToString()).Comma().AppendLine();

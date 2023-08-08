@@ -45,8 +45,8 @@ builder.AppendLine();
         builder.AppendLine("namespace js");
         using (builder.Block())
         {
-            builder.Append("napi_ref s_AddonThisRef").EndOfLine();
-            builder.Append("napi_env s_Env").EndOfLine();
+            builder.Append("napi_ref s_AddonThisRef").EndOfStatement();
+            builder.Append("napi_env s_Env").EndOfStatement();
             builder.AppendLine();
             builder.AppendLine("""
 extern "C" void Destructor(napi_env env, void* finalize_data, void* finalize_hint)
@@ -111,12 +111,12 @@ assert(status == napi_ok);
                     declareMethod(builder, "FreeNativeHandle", "NAPI_FreeNativeHandle");
                     declareMethod(builder, "NativeHandleGetTarget", "NAPI_NativeHandleGetTarget");
                 }
-                builder.EndOfLine();
+                builder.EndOfStatement();
                 builder.AppendLine();
-                builder.Append("status = napi_define_properties(env, obj, std::size(addDescriptor), addDescriptor)").EndOfLine();
-                builder.Append("assert(status == napi_ok)").EndOfLine();
-                builder.Append("s_Env = env").EndOfLine();
-                builder.Append("return obj").EndOfLine();
+                builder.Append("status = napi_define_properties(env, obj, std::size(addDescriptor), addDescriptor)").EndOfStatement();
+                builder.Append("assert(status == napi_ok)").EndOfStatement();
+                builder.Append("s_Env = env").EndOfStatement();
+                builder.Append("return obj").EndOfStatement();
             }
 
             builder.AppendLine();

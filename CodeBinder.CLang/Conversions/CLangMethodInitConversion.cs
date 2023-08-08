@@ -24,7 +24,7 @@ class CLangMethodInitConversion : CLangConversionWriter
             }
         }
 
-        builder.Append("}").EndOfLine();
+        builder.Append("}").EndOfStatement();
     }
 
     protected override string GetGeneratedPreamble() => ConversionCSharpToCLang.SourcePreamble;

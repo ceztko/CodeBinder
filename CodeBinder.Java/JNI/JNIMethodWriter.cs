@@ -1,7 +1,5 @@
 ﻿// SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
-using CodeBinder.CLang;
-
 namespace CodeBinder.JNI;
 
 class JNITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, JNIModuleConversion>

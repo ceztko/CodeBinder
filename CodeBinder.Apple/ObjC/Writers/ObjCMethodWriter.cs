@@ -158,7 +158,7 @@ abstract class MethodWriter<TMethod> : ObjCCodeWriter<TMethod>
         }
 
         Builder.Colon();
-        Builder.Parenthesized((builder) =>
+        Builder.Parenthesized(() =>
             WriteType(parameter.Type!, isRef ? ObjCTypeUsageKind.DeclarationByRef : ObjCTypeUsageKind.Declaration)
         );
         Builder.Append(parameter.Identifier.Text);

@@ -36,7 +36,7 @@ abstract class CLangMethodWriter : CodeWriter<MethodDeclarationSyntax, CLangModu
         }
         else
         {
-            Builder.EndOfLine();
+            Builder.EndOfStatement();
         }    
 
     }
@@ -116,7 +116,7 @@ class CLangMethodTrampolineWriter : CLangMethodWriter
             if (symbol.Type.GetFullName() == "CodeBinder.cbstring" && symbol.RefKind != RefKind.None)
             {
                 Builder.Append("cbstringpr").Space().Append(param.Identifier.Text)
-                    .Append("_(").Append(param.Identifier.Text).Append(")").EndOfLine();
+                    .Append("_(").Append(param.Identifier.Text).Append(")").EndOfStatement();
             }
         }
 
@@ -151,7 +151,7 @@ class CLangMethodTrampolineWriter : CLangMethodWriter
                 }
             }
         }
-        Builder.EndOfLine();
+        Builder.EndOfStatement();
     }
 
     public override bool HasBody => true;

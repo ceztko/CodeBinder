@@ -145,7 +145,7 @@ class CLangTypesHeaderConversion : CLangConversionWriter
             builder.Append("typedef").Space().Append(callback.GetCLangReturnType(Compilation))
                 .Append("(*").Append(name).Append(")")
                 .Append("(").Append(new CLangParameterListWriter(callback.ParameterList, false, Compilation))
-                .Append(")").EndOfLine();
+                .Append(")").EndOfStatement();
         }
     }
 
@@ -157,7 +157,7 @@ class CLangTypesHeaderConversion : CLangConversionWriter
                 continue;
 
             var field = (member as FieldDeclarationSyntax)!;
-            builder.Append(field.Declaration.GetCLangDeclaration(Compilation)).EndOfLine();
+            builder.Append(field.Declaration.GetCLangDeclaration(Compilation)).EndOfStatement();
         }
     }
 

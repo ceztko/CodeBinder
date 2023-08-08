@@ -32,17 +32,17 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
         }
         else
         {
-            Builder.EndOfLine();
+            Builder.EndOfStatement();
         }
     }
 
     void writeBody()
     {
-        Builder.Append("napi_status napistatus_").EndOfLine();
+        Builder.Append("napi_status napistatus_").EndOfStatement();
         Builder.AppendLine();
-        Builder.Append("(void)env").EndOfLine();
-        Builder.Append("(void)info").EndOfLine();
-        Builder.Append("(void)napistatus_").EndOfLine();
+        Builder.Append("(void)env").EndOfStatement();
+        Builder.Append("(void)info").EndOfStatement();
+        Builder.Append("(void)napistatus_").EndOfStatement();
         Builder.AppendLine();
 
         bindParameters();
@@ -153,13 +153,13 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
             }
         }
 
-        Builder.EndOfLine();
+        Builder.EndOfStatement();
         Builder.AppendLine();
 
         if (methodSymbol.ReturnsVoid)
         {
             // NOTE: void returning function needs nullptr
-            Builder.Append("return nullptr").EndOfLine();
+            Builder.Append("return nullptr").EndOfStatement();
         }
         else
         {
@@ -169,7 +169,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
                 case TypeKind.Enum:
                 {
                     // Enum types requires cast to jint
-                    Builder.Append("CreateNapiValue(env, (int32_t)cret_)").EndOfLine();
+                    Builder.Append("CreateNapiValue(env, (int32_t)cret_)").EndOfStatement();
                     break;
                 }
                 default:
@@ -191,7 +191,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
                         case "System.Double":
                         case "CodeBinder.cbstring":
                         {
-                            Builder.Append("CreateNapiValue(env, cret_)").EndOfLine();
+                            Builder.Append("CreateNapiValue(env, cret_)").EndOfStatement();
                             break;
                         }
                         default:
@@ -362,7 +362,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
             }
         }
 
-        Builder.EndOfLine();
+        Builder.EndOfStatement();
     }
 
     public string MethodName
