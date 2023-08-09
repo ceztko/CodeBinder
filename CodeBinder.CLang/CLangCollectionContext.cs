@@ -70,7 +70,6 @@ public class CLangCollectionContext : CSharpCollectionContextBase<CLangCompilati
             switch (kind)
             {
                 case SyntaxKind.MethodDeclaration:
-                    // TODO: Chehck for policies. Fix/extend ShouldDiscard
                     if (module != null && !member.ShouldDiscard(Compilation))
                     {
                         var method = (MethodDeclarationSyntax)member;
