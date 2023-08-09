@@ -134,7 +134,7 @@ class NativeAOTTypesConversion : NativeAOTConversionWriter
                 name = callback.Identifier.Text;
 
             builder.Append("unsafe delegate").Space().Append(callback.GetCLangReturnType(Compilation)).Space()
-                .Append(name).Parenthesized().Append(new CLangParameterListWriter(callback.ParameterList, false, Compilation))
+                .Append(name).Parenthesized().Append(new CLangParameterListWriter(callback.ParameterList, Compilation))
                 .Close().EndOfStatement();
         }
     }

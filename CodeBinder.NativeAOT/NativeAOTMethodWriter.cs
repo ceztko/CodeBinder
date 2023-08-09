@@ -5,22 +5,15 @@ namespace CodeBinder.NativeAOT;
 
 abstract class NativeAOTMethodWriter : CodeWriter<MethodDeclarationSyntax, NativeAOTModuleConversion>
 {
-    public bool CppMethod { get; private set; }
-
-    protected NativeAOTMethodWriter(MethodDeclarationSyntax method, bool cppMethod, NativeAOTModuleConversion context)
+    protected NativeAOTMethodWriter(MethodDeclarationSyntax method, NativeAOTModuleConversion context)
         : base(method, context)
     {
-        CppMethod = cppMethod;
     }
 
     protected override void Write()
     {
-        if (CppMethod)
-            Builder.Append("inline");
-        else
-            Builder.Append(Context.Compilation.LibraryName.ToUpper()).Append("_SHARED_API");
-
-        Builder.Space().Append(ReturnType).Space();
+        Builder.AppendLine("[UnmanagedCallersOnly]");
+        Builder.Append("public static unsafe partial").Space().Append(ReturnType).Space();
         Builder.Append(MethodName).AppendLine("(");
         using (Builder.Indent())
         {
@@ -37,8 +30,7 @@ abstract class NativeAOTMethodWriter : CodeWriter<MethodDeclarationSyntax, Nativ
         else
         {
             Builder.EndOfStatement();
-        }    
-
+        }
     }
 
     public abstract string MethodName
@@ -65,17 +57,17 @@ abstract class NativeAOTMethodWriter : CodeWriter<MethodDeclarationSyntax, Nativ
 
 class CLangMethodDeclarationWriter : NativeAOTMethodWriter
 {
-    public CLangMethodDeclarationWriter(MethodDeclarationSyntax method, bool cppMethod, NativeAOTModuleConversion context)
-        : base(method, cppMethod, context) { }
+    public CLangMethodDeclarationWriter(MethodDeclarationSyntax method, NativeAOTModuleConversion context)
+        : base(method, context) { }
 
     protected override void WriteParameters()
     {
-        Builder.Append(new CLangParameterListWriter(Item.ParameterList, CppMethod, Context));
+        Builder.Append(new CLangParameterListWriter(Item.ParameterList, Context));
     }
 
     public override string ReturnType
     {
-        get { return Item.GetCLangReturnType(CppMethod, Context); }
+        get { return Item.GetCLangReturnType(Context); }
     }
 
     public override string MethodName
@@ -89,16 +81,16 @@ class CLangMethodDeclarationWriter : NativeAOTMethodWriter
 class CLangMethodTrampolineWriter : NativeAOTMethodWriter
 {
     public CLangMethodTrampolineWriter(MethodDeclarationSyntax method, NativeAOTModuleConversion context)
-        : base(method, false, context) { }
+        : base(method, context) { }
 
     protected override void WriteParameters()
     {
-        Builder.Append(new CLangParameterListWriter(Item.ParameterList, false, Context));
+        Builder.Append(new CLangParameterListWriter(Item.ParameterList, Context));
     }
 
     public override string ReturnType
     {
-        get { return Item.GetCLangReturnType(false, Context); }
+        get { return Item.GetCLangReturnType(Context); }
     }
 
     public override string MethodName
@@ -159,19 +151,16 @@ class CLangMethodTrampolineWriter : NativeAOTMethodWriter
 
 class CLangParameterListWriter : CodeWriter<ParameterListSyntax, ICompilationProvider>
 {
-    public bool CppMethod { get; private set; }
-
-    public CLangParameterListWriter(ParameterListSyntax list, bool cppMethod,
+    public CLangParameterListWriter(ParameterListSyntax list,
         ICompilationProvider module)
         : base(list, module)
     {
-        CppMethod = cppMethod;
     }
 
     protected override void Write()
     {
         bool first = true;
         foreach (var parameter in Item.Parameters)
-            Builder.CommaSeparator(ref first).Append(parameter, CppMethod, Context);
+            Builder.CommaSeparator(ref first).Append(parameter, Context);
     }
 }

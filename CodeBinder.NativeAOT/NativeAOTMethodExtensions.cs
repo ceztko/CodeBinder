@@ -24,35 +24,13 @@ public static class NativeAOTMethodExtensions
         Return,
     }
 
-    [Flags]
-    enum DeclarationFlags
-    {
-        None = 0,
-        /// <summary>
-        /// Use a C++ declaration
-        /// </summary>
-        CppMethod = 1,
-        /// <summary>
-        /// Don't use subscript syntax for array declarations
-        /// </summary>
-        NoSubscriptSyntax = 2,
-    }
-
-    public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter,
-        ICompilationProvider provider)
-    {
-        return Append(builder, parameter, false, provider);
-    }
-
-    public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter,
-        bool cppMethod, ICompilationProvider provider)
+    public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter, ICompilationProvider provider)
     {
         bool isByRef = parameter.IsRef() || parameter.IsOut();
         var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
         string? suffix;
         string type = getCLangType(symbol, parameter.GetAttributes(provider),
-            isByRef ? DeclarationType.ParamByRef : DeclarationType.Regular,
-            cppMethod ? DeclarationFlags.CppMethod : DeclarationFlags.None, out suffix);
+            isByRef ? DeclarationType.ParamByRef : DeclarationType.Regular, out suffix);
         builder.Append(type).Space().Append(parameter.Identifier.Text);
         if (suffix != null)
             builder.Append(suffix);
@@ -137,56 +115,19 @@ public static class NativeAOTMethodExtensions
     {
         var symbol = declaration.Type.GetTypeSymbolThrow(provider);
         var type = getCLangType(symbol, declaration.Variables[0].GetAttributes(provider),
-            DeclarationType.Regular, DeclarationFlags.None, out _);
+            DeclarationType.Regular, out _);
         return $"{type} {declaration.Variables[0].Identifier.Text}";
     }
 
     public static string GetCLangDeclaration(this ParameterSyntax parameter, ICompilationProvider provider)
     {
-        return GetCLangDeclaration(parameter, false, provider);
-    }
-
-    public static string GetCLangDeclaration(this ParameterSyntax parameter, bool noFixedArray, ICompilationProvider provider)
-    {
         var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
         string? suffix;
-        var type = getCLangType(symbol, parameter.GetAttributes(provider), DeclarationType.Regular,
-            noFixedArray ? DeclarationFlags.NoSubscriptSyntax : DeclarationFlags.None, out suffix);
+        var type = getCLangType(symbol, parameter.GetAttributes(provider), DeclarationType.Regular, out suffix);
         if (suffix == null)
             return $"{type} {parameter.Identifier.Text}";
         else
             return $"{type} {parameter.Identifier.Text}{suffix}";
-    }
-
-    public static string GetCLangType(this SpecialType type)
-    {
-        switch(type)
-        {
-            case SpecialType.System_Byte:
-                return "uint8_t";
-            case SpecialType.System_SByte:
-                return "int8_t";
-            case SpecialType.System_UInt16:
-                return "uint16_t";
-            case SpecialType.System_Int16:
-                return "int16_t";
-            case SpecialType.System_UInt32:
-                return "uint32_t";
-            case SpecialType.System_Int32:
-                return "int32_t";
-            case SpecialType.System_UInt64:
-                return "uint64_t";
-            case SpecialType.System_Int64:
-                return "int64_t";
-            case SpecialType.System_Single:
-                return "float";
-            case SpecialType.System_Double:
-                return "double";
-            case SpecialType.System_IntPtr:
-                return "void*";
-            default:
-                throw new Exception($"Unsupported by type {type}");
-        }
     }
 
     public static string GetCLangMethodName(this MethodDeclarationSyntax method)
@@ -197,13 +138,8 @@ public static class NativeAOTMethodExtensions
     internal static string GetCLangReturnType(this MethodDeclarationSyntax method,
         ICompilationProvider provider)
     {
-        return GetCLangReturnType(method, false, provider);
-    }
-
-    internal static string GetCLangReturnType(this MethodDeclarationSyntax method, bool cppMethod, ICompilationProvider provider)
-    {
         var symbol = method.GetDeclaredSymbol<IMethodSymbol>(provider);
-        return GetCLangReturnType(symbol, cppMethod);
+        return GetCLangReturnType(symbol);
     }
 
     public static string GetCLangReturnType(this DelegateDeclarationSyntax dlg, ICompilationProvider provider)
@@ -211,14 +147,14 @@ public static class NativeAOTMethodExtensions
         // TODO: Should be possible to prpare static cpp trampolines also for delegates.
         // Maybe not so easy
         var symbol = dlg.GetDeclaredSymbol<INamedTypeSymbol>(provider);
-        return GetCLangReturnType(symbol.DelegateInvokeMethod!, false);
+        return GetCLangReturnType(symbol.DelegateInvokeMethod!);
     }
 
-    public static string GetCLangReturnType(this IMethodSymbol method, bool cppMethod = false)
+    public static string GetCLangReturnType(this IMethodSymbol method)
     {
         string? suffix;
         string type = getCLangType(method.ReturnType, method.GetReturnTypeAttributes(),
-            DeclarationType.Return, cppMethod ? DeclarationFlags.CppMethod : DeclarationFlags.None, out suffix);
+            DeclarationType.Return, out suffix);
         if (suffix == null)
             return type;
         else
@@ -226,9 +162,8 @@ public static class NativeAOTMethodExtensions
     }
 
     private static string getCLangType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes,
-        DeclarationType declType, DeclarationFlags declFlags, out string? suffix)
+        DeclarationType declType, out string? suffix)
     {
-        bool constParameter = false;
         string? bindedType;
         switch (symbol.TypeKind)
         {
@@ -260,29 +195,22 @@ public static class NativeAOTMethodExtensions
                 {
                     suffix = null;
                     if (attributes.HasAttribute<ConstAttribute>())
-                        constParameter = true;
+                        ;
                 }
                 else
                 {
                     if (!attributes.HasAttribute<OutAttribute>())
-                        constParameter = true;
+                        ;
 
-                    if (declFlags.HasFlag(DeclarationFlags.NoSubscriptSyntax))
+                    int fixedSizeArray;
+                    if (attributes.TryGetAttribute<MarshalAsAttribute>(out var marshalAsAttr) &&
+                        marshalAsAttr.TryGetNamedArgument("SizeConst", out fixedSizeArray))
                     {
-                        suffix = null;
+                        suffix = $"[{fixedSizeArray}]";
                     }
                     else
                     {
-                        int fixedSizeArray;
-                        if (attributes.TryGetAttribute<MarshalAsAttribute>(out var marshalAsAttr) &&
-                            marshalAsAttr.TryGetNamedArgument("SizeConst", out fixedSizeArray))
-                        {
-                            suffix = $"[{fixedSizeArray}]";
-                        }
-                        else
-                        {
-                            suffix = "[]";
-                        }
+                        suffix = null;
                     }
                 }
 
@@ -293,10 +221,7 @@ public static class NativeAOTMethodExtensions
                     switch (declType)
                     {
                         case DeclarationType.Regular:
-                            if (declFlags.HasFlag(DeclarationFlags.NoSubscriptSyntax))
-                                bindedType = getCLangPointerType(typeName, attributes);
-                            else
-                                bindedType = getCLangType(typeName, attributes);
+                            bindedType = getCLangPointerType(typeName, attributes);
                             break;
                         case DeclarationType.Return:
                             bindedType = getCLangPointerType(typeName, attributes);
@@ -321,32 +246,17 @@ public static class NativeAOTMethodExtensions
                     {
                         case DeclarationType.Regular:
                         {
-                            if (declFlags.HasFlag(DeclarationFlags.CppMethod))
-                            {
-                                constParameter |= true;
-                                bindedType = "cbstringp&";
-                            }
-                            else
-                            {
-                                bindedType = "cbstring";
-                            }
-
+                            bindedType = "cbstring";
                             break;
                         }
                         case DeclarationType.Return:
                         {
-                            if (declFlags.HasFlag(DeclarationFlags.CppMethod))
-                                bindedType = "cbstringr";
-                            else
-                                bindedType = "cbstring";
+                            bindedType = "cbstring";
                             break;
                         }
                         case DeclarationType.ParamByRef:
                         {
-                            if (declFlags.HasFlag(DeclarationFlags.CppMethod))
-                                bindedType = "cbstringpr&";
-                            else
-                                bindedType = "cbstring*";
+                            bindedType = "cbstring*";
                             break;
                         }
                         default:
@@ -380,10 +290,7 @@ public static class NativeAOTMethodExtensions
             }
         }
 
-        if (constParameter)
-            return $"const {bindedType}";
-        else
-            return bindedType;
+        return bindedType;
     }
 
     static string getCLangType(string typeName, IEnumerable<AttributeData> attributes)
@@ -406,22 +313,21 @@ public static class NativeAOTMethodExtensions
             case "CodeBinder.cbbool":
                 return "cbbool";
             case "System.Byte":
-                return "uint8_t";
+                return "byte";
             case "System.SByte":
-                return "int8_t";
+                return "sbyte";
             case "System.Int16":
-                return "int16_t";
+                return "short";
             case "System.UInt16":
-                return "uint16_t";
+                return "ushort";
             case "System.Int32":
-                // TODO: Add CodeBinder.Attributes attribute to specify explicitly sized 32 bit signed integer
                 return "int";
             case "System.UInt32":
-                return "uint32_t";
+                return "uint";
             case "System.Int64":
-                return "int64_t";
+                return "long";
             case "System.UInt64":
-                return "uint64_t";
+                return "ulong";
             case "System.Single":
                 return "float";
             case "System.Double":
@@ -447,22 +353,21 @@ public static class NativeAOTMethodExtensions
             case "CodeBinder.cbbool":
                 return "cbbool*";
             case "System.Byte":
-                return "uint8_t*";
+                return "byte*";
             case "System.SByte":
-                return "int8_t*";
+                return "sbyte*";
             case "System.Int16":
-                return "int16_t*";
+                return "short*";
             case "System.UInt16":
-                return "uint16_t*";
+                return "ushort*";
             case "System.Int32":
-                // TODO: Add CodeBinder.Attributes attribute to specify explicitly sized 32 bit signed integer
                 return "int*";
             case "System.UInt32":
-                return "uint32_t*";
+                return "uint*";
             case "System.Int64":
-                return "int64_t*";
+                return "long*";
             case "System.UInt64":
-                return "uint64_t*";
+                return "ulong*";
             case "System.Single":
                 return "float*";
             case "System.Double":

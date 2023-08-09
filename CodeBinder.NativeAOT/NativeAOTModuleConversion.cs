@@ -19,31 +19,15 @@ public class NativeAOTModuleConversion : TypeConversion<NativeAOTModuleContext, 
 
     protected sealed override void write(CodeBuilder builder)
     {
-        WriteCppTrampoline(builder);
-    }
-    void WriteCppTrampoline(CodeBuilder builder)
-    {
+        builder.Append("using CodeBinder").EndOfStatement();
+        builder.Append("using System.Runtime.InteropServices").EndOfStatement();
+        builder.AppendLine();
         builder.Append("partial class ").Append(ModuleName).AppendLine();
         using (builder.Block())
         {
             builder.AppendLine("// Partial method declarations");
-            writePartialMethodDeclarations(builder);
-
-            builder.AppendLine("// Native AOT  Trampolines");
-            writeNativeAOTTrampoline(builder, true);
-        }
-    }
-
-    private void writeNativeAOTTrampoline(CodeBuilder builder, bool writeBody)
-    {
-        foreach (var method in Context.Methods)
-        {
-            if (writeBody)
-                builder.Append(new CLangMethodTrampolineWriter(method, this));
-            else
-                builder.Append(new CLangMethodDeclarationWriter(method, false, this));
-
             builder.AppendLine();
+            writePartialMethodDeclarations(builder);
         }
     }
 
@@ -51,7 +35,7 @@ public class NativeAOTModuleConversion : TypeConversion<NativeAOTModuleContext, 
     {
         foreach (var method in Context.Methods)
         {
-            builder.Append(new CLangMethodDeclarationWriter(method, true, this));
+            builder.Append(new CLangMethodDeclarationWriter(method, this));
             builder.AppendLine();
         }
     }
