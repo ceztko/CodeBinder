@@ -37,6 +37,7 @@ static partial class ObjCExtensions
             case "System.UIntPtr":
             case "System.IntPtr":
                 return "nullptr";
+            case "CodeBinder.cbbool":
             case "System.Boolean":
                 return "NO";
             case "CodeBinder.Apple.NSUInteger":

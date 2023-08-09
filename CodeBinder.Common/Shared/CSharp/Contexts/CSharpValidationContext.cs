@@ -362,7 +362,12 @@ public abstract class CSharpValidationContext : CSharpValidationContextBase
             {
                 case TypeKind.Struct:
                 {
-                    if (!argType.IsCLRPrimitiveType() && argType.GetFullName() != "CodeBinder.cbstring")
+                    if (!argType.IsCLRPrimitiveType() && argType.GetFullName() switch
+                        {
+                            "CodeBinder.cbstring" => false,
+                            "CodeBinder.cbbool" => false,
+                            _ => true
+                        })
                     {
                         switch (refKind)
                         {

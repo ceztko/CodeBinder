@@ -25,5 +25,6 @@
     <ProjectReference Include="..\..\CodeBinder\CodeBinder.Common\CodeBinder.Common.csproj" />
     <ProjectReference Include="..\..\CodeBinder\CodeBinder.JavaScript\CodeBinder.JavaScript.csproj" />
     <ProjectReference Include="..\..\CodeBinder\CodeBinder.Java\CodeBinder.Java.csproj" />
+    <ProjectReference Include="..\CodeBinder.NativeAOT\CodeBinder.NativeAOT.csproj" />
   </ItemGroup>
 </Project>

@@ -158,12 +158,10 @@ public static class CLangMethodExtensions
             return $"{type} {parameter.Identifier.Text}{suffix}";
     }
 
-    public static string GetCLangType(this SpecialType type)
+    public static string GetCLangType(this ITypeSymbol type)
     {
-        switch(type)
+        switch(type.SpecialType)
         {
-            case SpecialType.System_Boolean:
-                return "cbbool";
             case SpecialType.System_Byte:
                 return "uint8_t";
             case SpecialType.System_SByte:
@@ -186,8 +184,17 @@ public static class CLangMethodExtensions
                 return "double";
             case SpecialType.System_IntPtr:
                 return "void*";
-            case SpecialType.System_UIntPtr:
-                return "void*";
+            case SpecialType.None:
+            {
+                string fullName = type.GetFullName();
+                switch (fullName)
+                {
+                    case "CodeBinder.cbbool":
+                        return "cbbool";
+                    default:
+                        throw new Exception($"Unsupported by type {fullName}");
+                }
+            }
             default:
                 throw new Exception($"Unsupported by type {type}");
         }
@@ -407,8 +414,7 @@ public static class CLangMethodExtensions
             }
             case "CodeBinder.cbstring":
                 return "cbstring";
-            case "System.Boolean":
-                // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
+            case "CodeBinder.cbbool":
                 return "cbbool";
             case "System.Byte":
                 return "uint8_t";
@@ -449,8 +455,7 @@ public static class CLangMethodExtensions
 
                 return "void**";
             }
-            case "System.Boolean":
-                // TODO: Check this has the attribute [MarshalAs(UnmanageType.I1)]
+            case "CodeBinder.cbbool":
                 return "cbbool*";
             case "System.Byte":
                 return "uint8_t*";

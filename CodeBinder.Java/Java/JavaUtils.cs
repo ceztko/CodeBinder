@@ -71,14 +71,15 @@ public static class JavaUtils
             case "CodeBinder.cbstring":
                 boxTypeName = "StringBox";
                 return true;
+            case "CodeBinder.cbbool":
+            case "System.Boolean":
+                boxTypeName = "BooleanBox";
+                return true;
             case "System.String":
                 boxTypeName = "StringBox";
                 return true;
             case "System.IntPtr":
                 boxTypeName = "LongBox";
-                return true;
-            case "System.Boolean":
-                boxTypeName = "BooleanBox";
                 return true;
             case "System.Byte":
             case "System.SByte":

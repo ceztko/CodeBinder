@@ -59,6 +59,7 @@ public static class TypeScriptUtils
             case "System.String":
                 boxTypeName = "StringRefBox";
                 return true;
+            case "CodeBinder.cbbool":
             case "System.Boolean":
                 boxTypeName = "BooleanRefBox";
                 return true;

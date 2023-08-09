@@ -17,7 +17,6 @@ public static class DotnetMethodExtensions
         switch (symbol.SpecialType)
         {
             case SpecialType.System_IntPtr:
-            case SpecialType.System_UIntPtr:
             case SpecialType.System_Boolean:
             case SpecialType.System_SByte:
             case SpecialType.System_Byte:

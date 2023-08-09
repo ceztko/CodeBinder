@@ -50,12 +50,12 @@ class JNITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, JNIModuleC
         var returnTypeSym = Item.ReturnType.GetTypeSymbolThrow(Context);
         if (returnTypeSym.SpecialType != SpecialType.System_Void)
         {
+            var fullName = returnTypeSym.GetFullName();
             Builder.Append("return").Space();
-            switch (returnTypeSym.SpecialType)
+            switch (fullName)
             {
-                case SpecialType.System_Boolean:
-                case SpecialType.System_IntPtr:
-                case SpecialType.System_UIntPtr:
+                case "CodeBinder.cbbool":
+                case "System.IntPtr":
                 {
                     // These types requires cast
                     Builder.Append($"({Item.GetJNIReturnType(Context)})");
@@ -174,7 +174,7 @@ class JNITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, JNIModuleC
 
                                 break;
                             }
-                            case "System.Boolean":
+                            case "CodeBinder.cbbool":
                             {
                                 if (symbol.IsRefLike())
                                     WriteBoxParameter(param, symbol);
@@ -221,7 +221,7 @@ class JNITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, JNIModuleC
     {
         // e.g. BJ2N<uint32_t>(jenv, objNum)
         Builder.Append("BJ2N")
-            .AngleBracketed().Append(symbol.Type.SpecialType.GetCLangType()).Close()
+            .AngleBracketed().Append(symbol.Type.GetCLangType()).Close()
             .Parenthesized().Append("jenv").CommaSeparator().Append(param.Identifier.Text).Close();
     }
 

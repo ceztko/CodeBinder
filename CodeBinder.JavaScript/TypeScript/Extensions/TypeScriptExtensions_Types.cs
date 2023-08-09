@@ -25,6 +25,7 @@ static partial class TypeScriptExtensions
                 return null;
             case "System.IntPtr":
                 return "0";
+            case "CodeBinder.cbbool":
             case "System.Boolean":
                 return "false";
             case "System.Byte":
@@ -835,11 +836,10 @@ static partial class TypeScriptExtensions
                     knownTypeScriptType = "object";
                     return true;
                 case "CodeBinder.cbstring":
-                    knownTypeScriptType = "string";
-                    return true;
                 case "System.String":
                     knownTypeScriptType = "string";
                     return true;
+                case "CodeBinder.cbbool":
                 case "System.Boolean":
                     knownTypeScriptType = "boolean";
                     return true;

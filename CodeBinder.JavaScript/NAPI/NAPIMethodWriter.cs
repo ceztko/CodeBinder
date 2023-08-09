@@ -68,7 +68,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
                     {
                         var arrayType = (IArrayTypeSymbol)symbol.Type;
                         bool commit = symbol.HasAttribute<OutAttribute>();
-                        Builder.Append("AJS2N").AngleBracketed().Append(arrayType.ElementType.SpecialType.GetCLangType()).Close()
+                        Builder.Append("AJS2N").AngleBracketed().Append(arrayType.ElementType.GetCLangType()).Close()
                             .Parenthesized().Append("env")
                             .CommaSeparator().Append(param.Identifier.Text)
                             .CommaSeparator().Append(commit ? "true" : "false")
@@ -119,6 +119,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
                                         .Append("env").CommaSeparator().Append(param.Identifier.Text).Close();
                                     break;
                                 }
+                                case "CodeBinder.cbbool":
                                 case "System.Boolean":
                                 case "System.Byte":
                                 case "System.SByte":
@@ -190,6 +191,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
                         case "System.Single":
                         case "System.Double":
                         case "CodeBinder.cbstring":
+                        case "CodeBinder.cbbool":
                         {
                             Builder.Append("CreateNapiValue(env, cret_)").EndOfStatement();
                             break;
@@ -225,7 +227,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
     {
         // e.g. BJS2N<uint32_t>(env, box)
         Builder.Append("BJS2N")
-            .AngleBracketed().Append(symbol.Type.SpecialType.GetCLangType()).Close()
+            .AngleBracketed().Append(symbol.Type.GetCLangType()).Close()
             .Parenthesized().Append("env").CommaSeparator().Append(param.Identifier.Text).Close();
     }
 
@@ -300,7 +302,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
                             Builder.Append($"CreateCBStringFromNapiValue(env, args[{index}])");
                             break;
                         }
-                        case "System.Boolean":
+                        case "CodeBinder.cbbool":
                         {
                             Builder.Append($"GetBoolFromNapiValue(env, args[{index}])");
                             break;
@@ -355,6 +357,8 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
                             Builder.Append($"GetDoubleFromNapiValue(env, args[{index}])");
                             break;
                         }
+                        default:
+                            throw new NotSupportedException($"Unsupported type {fullTypeName}");
                     }
                 }
 

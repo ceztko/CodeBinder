@@ -18,9 +18,6 @@ $codebinder = Join-Path bin $conf CodeBinder.exe
     "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryJNI))"
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
-    --language=CLang "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryCLang))"
-& $codebinder `
-    "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=ObjectiveC "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryObjC))"
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
@@ -30,3 +27,9 @@ $codebinder = Join-Path bin $conf CodeBinder.exe
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=TypeScript --nsmapping=SampleLibrary:SampleLibrary `
     "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryMTS))"
+& $codebinder `
+    "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
+    --language=CLang "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryCLang sgen))"
+& $codebinder `
+    "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
+    --language=NativeAOT "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAOT sgen))"

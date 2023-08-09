@@ -27,6 +27,7 @@ static partial class JavaExtensions
                 return null;
             case "System.IntPtr":
                 return "0";
+            case "CodeBinder.cbbool":
             case "System.Boolean":
                 return "false";
             case "System.Byte":
@@ -267,10 +268,18 @@ static partial class JavaExtensions
                 {
                     if (isByRef && !symbol.IsCLRPrimitiveType())
                     {
-                        if (fullName == "CodeBinder.cbstring")
-                            javaType = "StringBox";
-                        else
-                            javaType = "long";
+                        switch (fullName)
+                        {
+                            case "CodeBinder.cbstring":
+                                javaType = "StringBox";
+                                break;
+                            case "CodeBinder.cbbool":
+                                javaType = "BooleanBox";
+                                break;
+                            default:
+                                javaType = "long";
+                                break;
+                        }
 
                         return true;
                     }
@@ -779,6 +788,7 @@ static partial class JavaExtensions
                 case "System.Object":
                     knownJavaType = "Object";
                     return true;
+                case "CodeBinder.cbstring":
                 case "System.String":
                     knownJavaType = "String";
                     return true;
@@ -786,6 +796,7 @@ static partial class JavaExtensions
                 case "System.IntPtr":
                     knownJavaType = "Long";
                     return true;
+                case "CodeBinder.cbbool":
                 case "System.Boolean":
                     knownJavaType = "Boolean";
                     return true;
@@ -845,6 +856,7 @@ static partial class JavaExtensions
                 case "System.IntPtr":
                     knownJavaType = "long";
                     return true;
+                case "CodeBinder.cbbool":
                 case "System.Boolean":
                     knownJavaType = "boolean";
                     return true;

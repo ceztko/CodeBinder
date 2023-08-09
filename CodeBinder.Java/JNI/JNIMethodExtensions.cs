@@ -73,13 +73,13 @@ static class JNIMethodExtensions
                 return "jobject";
             case "CodeBinder.cbstring":
                 return "jstring";
+            case "CodeBinder.cbbool":
+                return "jboolean";
             case "System.Runtime.InteropServices.HandleRef":
                 return "jHandleRef";
             case "System.UIntPtr":
             case "System.IntPtr":
                 return "jptr";
-            case "System.Boolean":
-                return "jboolean";
             case "System.Byte":
                 return "jbyte";
             case "System.SByte":
@@ -116,8 +116,6 @@ static class JNIMethodExtensions
         {
             case "System.IntPtr":
                 return "jLongBox";
-            case "System.Boolean":
-                return "jBooleanBox";
             case "System.Byte":
                 return "jByteBox";
             case "System.SByte":
@@ -140,6 +138,8 @@ static class JNIMethodExtensions
                 return "jDoubleBox";
             case "CodeBinder.cbstring":
                 return "jStringBox";
+            case "CodeBinder.cbbool":
+                return "jBooleanBox";
             default:
             {
                 if (symbol?.TypeKind == TypeKind.Struct)

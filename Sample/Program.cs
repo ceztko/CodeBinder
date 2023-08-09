@@ -9,6 +9,7 @@ using CodeBinder.JavaScript;
 using System;
 using System.IO;
 using System.Linq;
+using CodeBinder.NativeAOT;
 
 namespace ConsoleApp1;
 
@@ -67,15 +68,6 @@ class Program
         }
 
         {
-            // CLang conversion
-            var conv = Converter.CreateFor<ConversionCSharpToCLang>();
-            conv.Conversion.PublicInterfaceOnly = true;
-            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryCLang");
-            genargs.EagerStringConversion = true;
-            conv.ConvertAndWrite(project, genargs);
-        }
-
-        {
             // Java conversion
             var conv = Converter.CreateFor<ConversionCSharpToJava>();
             conv.Conversion.SkipBody = false;
@@ -97,6 +89,22 @@ class Program
             var conv = Converter.CreateFor<ConversionCSharpToJNI>();
             conv.Conversion.NamespaceMapping.PushMapping("Euronovate.LibPdf", "com.euronovate.libpdf");
             genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryJNI");
+            genargs.EagerStringConversion = true;
+            conv.ConvertAndWrite(project, genargs);
+        }
+
+        {
+            // CLang conversion
+            var conv = Converter.CreateFor<ConversionCSharpToCLang>();
+            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryCLang", "sgen");
+            genargs.EagerStringConversion = true;
+            conv.ConvertAndWrite(project, genargs);
+        }
+
+        {
+            // CLang conversion
+            var conv = Converter.CreateFor<ConversionCSharpToNativeAOT>();
+            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryNAOT", "sgen");
             genargs.EagerStringConversion = true;
             conv.ConvertAndWrite(project, genargs);
         }
