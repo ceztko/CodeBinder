@@ -32,7 +32,7 @@ public class NAOTModuleContextParent : NAOTModuleContext
 
     protected override IEnumerable<TypeConversion<NAOTModuleContext>> GetConversions()
     {
-        if (Compilation.Conversion.CreateTemplateProject)
+        if (Compilation.Conversion.CreateTemplate)
             yield return new NAOTModuleConversion(this, true, Compilation.Conversion);
         else
             yield return new NAOTModuleConversion(this, false, Compilation.Conversion);

@@ -115,7 +115,7 @@ class Program
 
             // EXPERIMENTAL: NativeAOT conversion (partial method definitions)
             genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryNAOT");
-            conv.Conversion.CreateTemplateProject = true;
+            conv.Conversion.CreateTemplate = true;
             conv.ConvertAndWrite(project, genargs); 
         }
     }

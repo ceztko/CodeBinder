@@ -54,7 +54,12 @@ $codebinder = Join-Path bin $conf CodeBinder.exe
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=CLang "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryCLang sgen))"
 
-# EXPERIMENTAL: NativeAOT
+# EXPERIMENTAL: NativeAOT (partial method declarations)
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=NAOT "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAOT sgen))"
+    
+# EXPERIMENTAL: NativeAOT (partial method definitions)
+& $codebinder `
+    "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
+    --language=NAOT --create-template "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAOT))"
