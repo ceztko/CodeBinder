@@ -2,7 +2,7 @@
 
 public abstract class AnnotationCollection
 {
-    [Requires(Policies.ReifiedGenerics)]
+    [Requires(Features.ReifiedGenerics)]
     public List<TAnnotation> GetAll<TAnnotation>()
         where TAnnotation : Annotation
     {
@@ -11,7 +11,7 @@ public abstract class AnnotationCollection
         return annotations;
     }
 
-    [Requires(Policies.ReifiedGenerics)]
+    [Requires(Features.ReifiedGenerics)]
     [OverloadBinding("WithList", OverloadFeature.ParameterArity)]
     public void GetAll<TAnnotation>(List<TAnnotation> annotations, bool clear = true)
         where TAnnotation : Annotation
@@ -29,7 +29,7 @@ public abstract class AnnotationCollection
         return ret;
     }
 
-    [Requires(Policies.ReifiedGenerics)]
+    [Requires(Features.ReifiedGenerics)]
     void getAllPrivate<TAnnotation>(List<TAnnotation> annotations)
         where TAnnotation : Annotation
     {

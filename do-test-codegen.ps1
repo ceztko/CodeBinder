@@ -2,6 +2,7 @@
 
 $conf="Release"
 dotnet build CodeBinder.sln --configuration $conf /p:Platform="Any CPU"
+dotnet restore "$((Join-Path Test CodeBinder.Test.sln))"
 
 $codebinder = Join-Path bin $conf CodeBinder.exe
 
@@ -40,10 +41,11 @@ $codebinder = Join-Path bin $conf CodeBinder.exe
     --language=TypeScript --nsmapping=SampleLibrary:SampleLibrary `
     "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryMTS))"
 
+# NodeJS NAPI
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=NAPI --nsmapping=SampleLibrary:SampleLibrary `
-    "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryMTS))"
+    "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAPI))"
 
 # Project template conversions: creates the entry points for native methods
 

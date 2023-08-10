@@ -36,7 +36,7 @@ public class Annotation : HandledObject<Annotation>
         }
     }
 
-    [Requires(Policies.ReifiedGenerics)]
+    [Requires(Features.ReifiedGenerics)]
     internal static AnnotationType GetAnnotationType<TAnnotation>()
     where TAnnotation : Annotation
     {

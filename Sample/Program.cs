@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using System.Linq;
 using CodeBinder.NativeAOT;
+using System.Diagnostics;
 
 namespace Sample;
 
@@ -32,10 +33,10 @@ class Program
         var rootPath = exedir.Parent!.Parent!;
         var testSolution = Path.Combine("..", "..", "Test", "CodeBinder.Test.sln");
         var solution = Solution.Open(testSolution);
+        restoreSolution(solution.FilePath);
         var project = solution.Projects.First((project) => project.Name == "SampleLibrary");
         var targetPath = Path.Combine(rootPath.Parent!.ToString(), "CodeBinder-TestCodeGen");
         GeneratorOptions genargs = new GeneratorOptions();
-
 
         {
             // Java conversion
@@ -57,12 +58,11 @@ class Program
         {
             // JNI conversion
             var conv = Converter.CreateFor<ConversionCSharpToJNI>();
-            conv.Conversion.NamespaceMapping.PushMapping("Euronovate.LibPdf", "com.euronovate.libpdf");
+            conv.Conversion.NamespaceMapping.PushMapping("SampleLibrary", "SampleLibrary");
             genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryJNI");
             genargs.EagerStringConversion = true;
             conv.ConvertAndWrite(project, genargs);
         }
-
 
         {
             // ObjectiveC conversion
@@ -118,5 +118,17 @@ class Program
             conv.Conversion.CreateTemplateProject = true;
             conv.ConvertAndWrite(project, genargs); 
         }
+    }
+
+    static void restoreSolution(string solutionPath)
+    {
+        var process = new Process();
+        process.StartInfo.UseShellExecute = true;
+        process.StartInfo.FileName = "dotnet";
+        process.StartInfo.Arguments = $"restore {solutionPath}";
+        process.Start();
+        process.WaitForExit();
+        if (process.ExitCode != 0)
+            throw new Exception("Failed solution restore");
     }
 }

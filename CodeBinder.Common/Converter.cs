@@ -48,7 +48,7 @@ public abstract class Converter
         else
         {
             var casolution = workspace.OpenSolutionAsync(project.Solution.FilePath).Result;
-            caproject = casolution.Projects.First((proj) => proj.Id.Id == project.Id);
+            caproject = casolution.Projects.First((proj) => proj.FilePath == project.FilePath);
         }
         
         convertAndWrite(new ProjectConverter(this, caproject), args);

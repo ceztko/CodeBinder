@@ -31,14 +31,14 @@ public class Document : HandledObject<Document>
         SLFreeDocument(handle);
     }
 
-    [Requires(Policies.PassByRef)]
+    [Requires(Features.PassByRef)]
     [OverloadBinding("WithFile", OverloadFeature.TypeMatch)]
     public static bool IsPdfDocument(string filename, out DocVersion version)
     {
         return SLIsPdfDocument(filename, out version);
     }
 
-    [Requires(Policies.PassByRef)]
+    [Requires(Features.PassByRef)]
     [OverloadBinding("WithArray", OverloadFeature.TypeMatch)]
     public static bool IsPdfDocument(byte[] bytes, out DocVersion version)
     {
@@ -95,11 +95,11 @@ public class Document : HandledObject<Document>
 
     [DllImport("SampleLibrary", CallingConvention = CallingConvention.Cdecl), Order]
     [return: MarshalAs(UnmanagedType.I1)]
-    static extern bool SLIsPdfDocument(cbstring filename, out DocVersion version);
+    static extern cbbool SLIsPdfDocument(cbstring filename, out DocVersion version);
 
     [DllImport("SampleLibrary", CallingConvention = CallingConvention.Cdecl), Order]
     [return: MarshalAs(UnmanagedType.I1)]
-    static extern bool SLIsPdfDocumentBuffer([In] byte[] buffer, int size, out DocVersion version);
+    static extern cbbool SLIsPdfDocumentBuffer([In] byte[] buffer, int size, out DocVersion version);
 
     #endregion // DllImport
 }
@@ -144,7 +144,7 @@ public partial class PageCollection : IEnumerable<Page>
         return ret;
     }
 
-    [Requires(Policies.Iterators, Policies.Generators)]
+    [Requires(Features.Iterators, Features.Generators)]
     public IEnumerator<Page> GetEnumerator()
     {
         int count = Count;
@@ -152,7 +152,7 @@ public partial class PageCollection : IEnumerable<Page>
             yield return this[i];
     }
 
-    [Requires(Policies.DotNet)]
+    [Requires(Features.DotNet)]
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
