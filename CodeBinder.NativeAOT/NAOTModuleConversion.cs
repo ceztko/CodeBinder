@@ -3,11 +3,17 @@
 
 namespace CodeBinder.NativeAOT;
 
-public class NativeAOTModuleConversion : TypeConversion<NativeAOTModuleContext, NativeAOTCompilationContext, ConversionCSharpToNativeAOT>
+public class NAOTModuleConversion : TypeConversion<NAOTModuleContext, NAOTCompilationContext, ConversionCSharpToNativeAOT>
 {
-    public NativeAOTModuleConversion(NativeAOTModuleContext context, ConversionCSharpToNativeAOT conversion)
+    // True if the conversion is a template conversion,
+    // eg. the method are not partial declarations but full definitions
+    public bool IsTemplateConversion { get; private set; }
+
+    public NAOTModuleConversion(NAOTModuleContext context, bool isTemplate,
+            ConversionCSharpToNativeAOT conversion)
         : base(context, conversion)
     {
+        IsTemplateConversion = isTemplate;
     }
 
     protected override string GetFileName() => $"{ModuleName}.cs";
@@ -19,14 +25,13 @@ public class NativeAOTModuleConversion : TypeConversion<NativeAOTModuleContext, 
 
     protected sealed override void write(CodeBuilder builder)
     {
-        builder.Append("using CodeBinder").EndOfStatement();
-        builder.Append("using System.Runtime.InteropServices").EndOfStatement();
         builder.AppendLine();
         builder.Append("partial class ").Append(ModuleName).AppendLine();
         using (builder.Block())
         {
-            builder.AppendLine("// Partial method declarations");
-            builder.AppendLine();
+            if (!IsTemplateConversion)
+                builder.AppendLine("// Partial method declarations").AppendLine();
+
             writePartialMethodDeclarations(builder);
         }
     }
@@ -35,14 +40,14 @@ public class NativeAOTModuleConversion : TypeConversion<NativeAOTModuleContext, 
     {
         foreach (var method in Context.Methods)
         {
-            builder.Append(new CLangMethodDeclarationWriter(method, this));
+            builder.Append(new NAOTMethodWriter(method, IsTemplateConversion, this));
             builder.AppendLine();
         }
     }
 
     protected override string GetGeneratedPreamble() => ConversionCSharpToNativeAOT.SourcePreamble;
 
-    public override NativeAOTCompilationContext Compilation
+    public override NAOTCompilationContext Compilation
     {
         get { return Context.Compilation; }
     }

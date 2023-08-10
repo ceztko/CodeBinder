@@ -5,10 +5,10 @@ using CodeBinder.Attributes;
 namespace CodeBinder.NativeAOT;
 
 [ConversionLanguageName(LanguageName)]
-public class ConversionCSharpToNativeAOT : CSharpLanguageConversionBase<NativeAOTCompilationContext, NativeAOTModuleContext>
+public class ConversionCSharpToNativeAOT : CSharpLanguageConversionBase<NAOTCompilationContext, NAOTModuleContext>
 {
     internal const string SourcePreamble = "/* This file was generated. DO NOT EDIT! */";
-    public const string LanguageName = "NativeAOT";
+    public const string LanguageName = "NAOT";
 
     public ConversionCSharpToNativeAOT() { }
 
@@ -16,15 +16,38 @@ public class ConversionCSharpToNativeAOT : CSharpLanguageConversionBase<NativeAO
 
     public override bool NeedNamespaceMapping => false;
 
+    // True if the conversion is a template conversion,
+    // eg. the method are not partial declarations but full definitions
+    public bool CreateTemplateProject { get; set; }
+
     public override IReadOnlyCollection<string> SupportedPolicies => new[] { Features.Delegates };
 
-    protected override NativeAOTCompilationContext CreateCompilationContext()
+    protected override NAOTCompilationContext CreateCompilationContext()
     {
-        return new NativeAOTCompilationContext(this);
+        return new NAOTCompilationContext(this);
     }
 
     public override IReadOnlyList<string> PreprocessorDefinitions
     {
         get { return new string[] { "NativeAOT" }; }
     }
+
+    public override IEnumerable<IConversionWriter> DefaultConversions
+    {
+        get
+        {
+            if (!CreateTemplateProject)
+            {
+                yield return new StringConversionWriter($"globals.cs",() => Globals)
+                    { GeneratedPreamble = SourcePreamble };
+            }
+        }
+    }
+
+    const string Globals =
+"""
+global using System.Runtime.InteropServices;
+global using System.Runtime.CompilerServices;
+global using CodeBinder;
+""";
 }

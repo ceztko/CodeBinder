@@ -21,7 +21,7 @@ public class ConversionCSharpToNAPI : CSharpLanguageConversionBase<NAPICompilati
 
     public override IReadOnlyList<string> PreprocessorDefinitions
     {
-        get { return new string[] { "NODEJS" }; }
+        get { return new string[] { "NODEJS", "NAPI" }; }
     }
 
     public override IEnumerable<IConversionWriter> DefaultConversions

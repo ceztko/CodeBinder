@@ -11,7 +11,7 @@ using System.IO;
 using System.Linq;
 using CodeBinder.NativeAOT;
 
-namespace ConsoleApp1;
+namespace Sample;
 
 class Program
 {
@@ -36,36 +36,6 @@ class Program
         var targetPath = Path.Combine(rootPath.Parent!.ToString(), "CodeBinder-TestCodeGen");
         GeneratorOptions genargs = new GeneratorOptions();
 
-        {
-            // TypeScript conversion
-            var conv = Converter.CreateFor<ConversionCSharpToTypeScript>();
-            conv.Conversion.GenerationFlags = TypeScriptGenerationFlags.None;
-            conv.Conversion.NamespaceMapping.PushMapping("SampleLibrary", "SampleLibrary");
-            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryMTS");
-            genargs.EagerStringConversion = true;
-            conv.ConvertAndWrite(project, genargs);
-
-            conv.Conversion.GenerationFlags = TypeScriptGenerationFlags.CommonJSCompat;
-            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryTS");
-            conv.ConvertAndWrite(project, genargs);
-        }
-
-        {
-            // NAPI conversion
-            var conv = Converter.CreateFor<ConversionCSharpToNAPI>();
-            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryNAPI");
-            genargs.EagerStringConversion = true;
-            conv.ConvertAndWrite(project, genargs);
-        }
-
-        {
-            // ObjC conversion
-            var conv = Converter.CreateFor<ConversionCSharpToObjC>();
-            conv.Conversion.SkipBody = false;
-            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryObjC");
-            genargs.EagerStringConversion = true;
-            conv.ConvertAndWrite(project, genargs);
-        }
 
         {
             // Java conversion
@@ -93,6 +63,41 @@ class Program
             conv.ConvertAndWrite(project, genargs);
         }
 
+
+        {
+            // ObjectiveC conversion
+            var conv = Converter.CreateFor<ConversionCSharpToObjC>();
+            conv.Conversion.SkipBody = false;
+            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryObjC");
+            genargs.EagerStringConversion = true;
+            conv.ConvertAndWrite(project, genargs);
+        }
+
+        {
+            // TypeScript conversion (commonjs compatible)
+            var conv = Converter.CreateFor<ConversionCSharpToTypeScript>();
+            conv.Conversion.GenerationFlags = TypeScriptGenerationFlags.None;
+            conv.Conversion.NamespaceMapping.PushMapping("SampleLibrary", "SampleLibrary");
+            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryMTS");
+            genargs.EagerStringConversion = true;
+            conv.ConvertAndWrite(project, genargs);
+
+            // TypeScript conversion (ESModule compatible)
+            conv.Conversion.GenerationFlags = TypeScriptGenerationFlags.CommonJSCompat;
+            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryTS");
+            conv.ConvertAndWrite(project, genargs);
+        }
+
+        {
+            // NAPI conversion
+            var conv = Converter.CreateFor<ConversionCSharpToNAPI>();
+            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryNAPI");
+            genargs.EagerStringConversion = true;
+            conv.ConvertAndWrite(project, genargs);
+        }
+
+        // Project template conversions (CLang, NativeAOT): creates the entry points for native methods
+        
         {
             // CLang conversion
             var conv = Converter.CreateFor<ConversionCSharpToCLang>();
@@ -102,11 +107,16 @@ class Program
         }
 
         {
-            // CLang conversion
+            // EXPERIMENTAL: NativeAOT conversion (partial method declarations)
             var conv = Converter.CreateFor<ConversionCSharpToNativeAOT>();
             genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryNAOT", "sgen");
             genargs.EagerStringConversion = true;
             conv.ConvertAndWrite(project, genargs);
+
+            // EXPERIMENTAL: NativeAOT conversion (partial method definitions)
+            genargs.TargetRootPath = Path.Combine(targetPath, "SampleLibraryNAOT");
+            conv.Conversion.CreateTemplateProject = true;
+            conv.ConvertAndWrite(project, genargs); 
         }
     }
 }

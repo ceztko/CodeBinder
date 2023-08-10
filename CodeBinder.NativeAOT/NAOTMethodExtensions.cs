@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace CodeBinder.NativeAOT;
 
-public static class NativeAOTMethodExtensions
+public static class NAOTMethodExtensions
 {
     enum DeclarationType
     {
@@ -28,20 +28,16 @@ public static class NativeAOTMethodExtensions
     {
         bool isByRef = parameter.IsRef() || parameter.IsOut();
         var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
-        string? suffix;
-        string type = getCLangType(symbol, parameter.GetAttributes(provider),
-            isByRef ? DeclarationType.ParamByRef : DeclarationType.Regular, out suffix);
+        string type = getNAOTType(symbol, parameter.GetAttributes(provider),
+            isByRef ? DeclarationType.ParamByRef : DeclarationType.Regular);
         builder.Append(type).Space().Append(parameter.Identifier.Text);
-        if (suffix != null)
-            builder.Append(suffix);
-
         return builder;
     }
 
-    static bool tryGetCLangBinder(this ITypeSymbol typeSymbol, bool pointerType,
+    static bool tryGetNAOTBinder(this ITypeSymbol typeSymbol, bool pointerType,
         [NotNullWhen(true)] out string? binderStr)
     {
-        if (!tryGetCLangBinder(typeSymbol, out binderStr))
+        if (!tryGetNAOTBinder(typeSymbol, out binderStr))
         {
             binderStr = null;
             return false;
@@ -53,30 +49,30 @@ public static class NativeAOTMethodExtensions
         return true;
     }
 
-    public static bool TryGetCLangBinder(this BaseTypeDeclarationSyntax typeSyntax,
+    public static bool TryGetNAOTBinder(this BaseTypeDeclarationSyntax typeSyntax,
         ICompilationProvider provider, [NotNullWhen(true)] out string? binderStr)
     {
-        return TryGetCLangBinder(typeSyntax, false, provider, out binderStr);
+        return TryGetNAOTBinder(typeSyntax, false, provider, out binderStr);
     }
 
-    public static bool TryGetCLangBinder(this BaseTypeDeclarationSyntax typeSyntax, bool pointerType,
+    public static bool TryGetNAOTBinder(this BaseTypeDeclarationSyntax typeSyntax, bool pointerType,
         ICompilationProvider provider, [NotNullWhen(true)] out string? binderStr)
     {
         var symbol = typeSyntax.GetTypeSymbol(provider);
-        return tryGetCLangBinder(symbol, pointerType, out binderStr);
+        return tryGetNAOTBinder(symbol, pointerType, out binderStr);
     }
 
-    public static bool TryGetCLangBinder(this ParameterSyntax parameter,
+    public static bool TryGetNAOTBinder(this ParameterSyntax parameter,
         ICompilationProvider provider, [NotNullWhen(true)] out string? binderStr)
     {
-        return TryGetCLangBinder(parameter, false, provider, out binderStr);
+        return TryGetNAOTBinder(parameter, false, provider, out binderStr);
     }
 
-    public static bool TryGetCLangBinder(this ParameterSyntax parameter, bool pointerType,
+    public static bool TryGetNAOTBinder(this ParameterSyntax parameter, bool pointerType,
         ICompilationProvider provider, [NotNullWhen(true)] out string? binderStr)
     {
         var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
-        if (tryGetCLangBinder(symbol, pointerType, out binderStr))
+        if (tryGetNAOTBinder(symbol, pointerType, out binderStr))
         {
             return true;
         }
@@ -98,7 +94,7 @@ public static class NativeAOTMethodExtensions
         }
     }
 
-    static bool tryGetCLangBinder(ITypeSymbol symbol, [NotNullWhen(true)] out string? binderStr)
+    static bool tryGetNAOTBinder(ITypeSymbol symbol, [NotNullWhen(true)] out string? binderStr)
     {
         var attributes = symbol.GetAttributes();
         if (!attributes.TryGetAttribute<NativeBindingAttribute>(out var attribute))
@@ -111,58 +107,56 @@ public static class NativeAOTMethodExtensions
         return true;
     }
 
-    public static string GetCLangDeclaration(this VariableDeclarationSyntax declaration, ICompilationProvider provider)
+    public static string GetNAOTDeclaration(this VariableDeclarationSyntax declaration, ICompilationProvider provider)
     {
         var symbol = declaration.Type.GetTypeSymbolThrow(provider);
-        var type = getCLangType(symbol, declaration.Variables[0].GetAttributes(provider),
-            DeclarationType.Regular, out _);
+        var type = getNAOTType(symbol, declaration.Variables[0].GetAttributes(provider),
+            DeclarationType.Regular);
         return $"{type} {declaration.Variables[0].Identifier.Text}";
     }
 
-    public static string GetCLangDeclaration(this ParameterSyntax parameter, ICompilationProvider provider)
+    public static string GetNAOTDeclaration(this ParameterSyntax parameter, ICompilationProvider provider)
     {
         var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
-        string? suffix;
-        var type = getCLangType(symbol, parameter.GetAttributes(provider), DeclarationType.Regular, out suffix);
-        if (suffix == null)
-            return $"{type} {parameter.Identifier.Text}";
-        else
-            return $"{type} {parameter.Identifier.Text}{suffix}";
+        var type = getNAOTType(symbol, parameter.GetAttributes(provider), DeclarationType.Regular);
+        return $"{type} {parameter.Identifier.Text}";
     }
 
-    public static string GetCLangMethodName(this MethodDeclarationSyntax method)
+    public static string GetNAOTType(this ParameterSyntax parameter, ICompilationProvider provider)
+    {
+        var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
+        return getNAOTType(symbol, parameter.GetAttributes(provider), DeclarationType.Regular);
+    }
+
+    public static string GetNAOTMethodName(this MethodDeclarationSyntax method)
     {
         return method.GetName();
     }
 
-    internal static string GetCLangReturnType(this MethodDeclarationSyntax method,
+    internal static string GetNAOTReturnType(this MethodDeclarationSyntax method,
         ICompilationProvider provider)
     {
         var symbol = method.GetDeclaredSymbol<IMethodSymbol>(provider);
-        return GetCLangReturnType(symbol);
+        return getNAOTReturnType(symbol);
     }
 
-    public static string GetCLangReturnType(this DelegateDeclarationSyntax dlg, ICompilationProvider provider)
+    public static string GetNAOTReturnType(this DelegateDeclarationSyntax dlg, ICompilationProvider provider)
     {
         // TODO: Should be possible to prpare static cpp trampolines also for delegates.
         // Maybe not so easy
         var symbol = dlg.GetDeclaredSymbol<INamedTypeSymbol>(provider);
-        return GetCLangReturnType(symbol.DelegateInvokeMethod!);
+        return getNAOTReturnType(symbol.DelegateInvokeMethod!);
     }
 
-    public static string GetCLangReturnType(this IMethodSymbol method)
+    static string getNAOTReturnType(IMethodSymbol method)
     {
-        string? suffix;
-        string type = getCLangType(method.ReturnType, method.GetReturnTypeAttributes(),
-            DeclarationType.Return, out suffix);
-        if (suffix == null)
-            return type;
-        else
-            return $"{type} {suffix}";
+        string type = getNAOTType(method.ReturnType, method.GetReturnTypeAttributes(),
+            DeclarationType.Return);
+        return type;
     }
 
-    private static string getCLangType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes,
-        DeclarationType declType, out string? suffix)
+    private static string getNAOTType(ITypeSymbol symbol, IEnumerable<AttributeData> attributes,
+        DeclarationType declType)
     {
         string? bindedType;
         switch (symbol.TypeKind)
@@ -170,9 +164,8 @@ public static class NativeAOTMethodExtensions
             // Handle some special types first
             case TypeKind.Enum:
             {
-                suffix = null;
                 string? binded;
-                if (!tryGetCLangBinder(symbol, out binded))
+                if (!tryGetNAOTBinder(symbol, out binded))
                     throw new Exception("Could not find the binder for the parameter");
 
                 if (declType == DeclarationType.ParamByRef)
@@ -182,9 +175,8 @@ public static class NativeAOTMethodExtensions
             }
             case TypeKind.Delegate:
             {
-                suffix = null;
                 string? binded;
-                if (!tryGetCLangBinder(symbol, out binded))
+                if (!tryGetNAOTBinder(symbol, out binded))
                     throw new Exception("Could not find the binder for the parameter");
 
                 return binded;
@@ -193,7 +185,6 @@ public static class NativeAOTMethodExtensions
             {
                 if (declType == DeclarationType.Return)
                 {
-                    suffix = null;
                     if (attributes.HasAttribute<ConstAttribute>())
                         ;
                 }
@@ -206,25 +197,20 @@ public static class NativeAOTMethodExtensions
                     if (attributes.TryGetAttribute<MarshalAsAttribute>(out var marshalAsAttr) &&
                         marshalAsAttr.TryGetNamedArgument("SizeConst", out fixedSizeArray))
                     {
-                        suffix = $"[{fixedSizeArray}]";
-                    }
-                    else
-                    {
-                        suffix = null;
                     }
                 }
 
                 var arrayType = (IArrayTypeSymbol)symbol;
-                if (!tryGetCLangBinder(arrayType.ElementType, out bindedType))
+                if (!tryGetNAOTBinder(arrayType.ElementType, out bindedType))
                 {
                     string typeName = arrayType.ElementType.GetFullName();
                     switch (declType)
                     {
                         case DeclarationType.Regular:
-                            bindedType = getCLangPointerType(typeName, attributes);
+                            bindedType = getNAOTPointerType(typeName, attributes);
                             break;
                         case DeclarationType.Return:
-                            bindedType = getCLangPointerType(typeName, attributes);
+                            bindedType = getNAOTPointerType(typeName, attributes);
                             break;
                         default:
                             throw new NotSupportedException();
@@ -235,7 +221,6 @@ public static class NativeAOTMethodExtensions
             }
             default:
             {
-                suffix = null;
                 string typeName = symbol.GetFullName();
 
                 // TODO: Optmize CLR types with ITypeSymbol.SpecialType, handling of constParameter,
@@ -246,17 +231,17 @@ public static class NativeAOTMethodExtensions
                     {
                         case DeclarationType.Regular:
                         {
-                            bindedType = "cbstring";
+                            bindedType = "CodeBinder.cbstring";
                             break;
                         }
                         case DeclarationType.Return:
                         {
-                            bindedType = "cbstring";
+                            bindedType = "CodeBinder.cbstring";
                             break;
                         }
                         case DeclarationType.ParamByRef:
                         {
-                            bindedType = "cbstring*";
+                            bindedType = "CodeBinder.cbstring*";
                             break;
                         }
                         default:
@@ -265,7 +250,7 @@ public static class NativeAOTMethodExtensions
                 }
                 else
                 {
-                    if (tryGetCLangBinder(symbol, out bindedType))
+                    if (tryGetNAOTBinder(symbol, out bindedType))
                     {
                         if (declType == DeclarationType.ParamByRef)
                             bindedType = $"{bindedType}*";
@@ -276,10 +261,10 @@ public static class NativeAOTMethodExtensions
                         {
                             case DeclarationType.Regular:
                             case DeclarationType.Return:
-                                bindedType = getCLangType(typeName, attributes);
+                                bindedType = getNAOTType(typeName, attributes);
                                 break;
                             case DeclarationType.ParamByRef:
-                                bindedType = getCLangPointerType(typeName, attributes);
+                                bindedType = getNAOTPointerType(typeName, attributes);
                                 break;
                             default:
                                 throw new NotSupportedException();
@@ -293,7 +278,7 @@ public static class NativeAOTMethodExtensions
         return bindedType;
     }
 
-    static string getCLangType(string typeName, IEnumerable<AttributeData> attributes)
+    static string getNAOTType(string typeName, IEnumerable<AttributeData> attributes)
     {
         switch (typeName)
         {
@@ -337,7 +322,7 @@ public static class NativeAOTMethodExtensions
         }
     }
 
-    static string getCLangPointerType(string typeName, IEnumerable<AttributeData> attributes)
+    static string getNAOTPointerType(string typeName, IEnumerable<AttributeData> attributes)
     {
         switch (typeName)
         {

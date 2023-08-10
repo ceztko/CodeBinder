@@ -4,15 +4,15 @@ using CodeBinder.Attributes;
 
 namespace CodeBinder.NativeAOT;
 
-public class NativeAOTCollectionContext : CSharpCollectionContextBase<NativeAOTCompilationContext>
+public class NAOTCollectionContext : CSharpCollectionContextBase<NAOTCompilationContext>
 {
-    public NativeAOTCollectionContext(NativeAOTCompilationContext context)
+    public NAOTCollectionContext(NAOTCompilationContext context)
         : base(context)
     {
-        Init += CLangCollectionContext_VisitorInit;
+        Init += NAOTCollectionContext_VisitorInit;
     }
 
-    private void CLangCollectionContext_VisitorInit(CSharpNodeVisitor visitor)
+    private void NAOTCollectionContext_VisitorInit(CSharpNodeVisitor visitor)
     {
         visitor.ClassDeclarationVisit += Visitor_ClassDeclarationVisit;
         visitor.StructDeclarationVisit += Visitor_StructDeclarationVisit;
@@ -49,18 +49,18 @@ public class NativeAOTCollectionContext : CSharpCollectionContextBase<NativeAOTC
 
     private void visitType(TypeDeclarationSyntax type)
     {
-        CLangModuleContextChild? module = null;
+        NAOTModuleContextChild? module = null;
         string? moduleName;
         if (type.TryGetModuleName(this, out moduleName))
         {
-            CLangModuleContextParent? parent;
+            NAOTModuleContextParent? parent;
             if (!Compilation.TryGetModule(moduleName, out parent))
             {
-                parent = new CLangModuleContextParent(moduleName, Compilation);
+                parent = new NAOTModuleContextParent(moduleName, Compilation);
                 Compilation.AddModule(parent);
             }
 
-            module = new CLangModuleContextChild(Compilation);
+            module = new NAOTModuleContextChild(Compilation);
             Compilation.AddModuleChild(module, parent);
         }
 

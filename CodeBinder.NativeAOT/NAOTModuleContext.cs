@@ -3,13 +3,13 @@
 
 namespace CodeBinder.NativeAOT;
 
-public abstract class NativeAOTModuleContext : TypeContext<NativeAOTModuleContext, NativeAOTCompilationContext>
+public abstract class NAOTModuleContext : TypeContext<NAOTModuleContext, NAOTCompilationContext>
 {
-    NativeAOTCompilationContext _Compilation;
+    NAOTCompilationContext _Compilation;
 
-    public override NativeAOTCompilationContext Compilation => _Compilation;
+    public override NAOTCompilationContext Compilation => _Compilation;
 
-    protected NativeAOTModuleContext(NativeAOTCompilationContext context)
+    protected NAOTModuleContext(NAOTCompilationContext context)
     {
         _Compilation = context;
     }
@@ -20,19 +20,22 @@ public abstract class NativeAOTModuleContext : TypeContext<NativeAOTModuleContex
     }
 }
 
-public class CLangModuleContextParent : NativeAOTModuleContext
+public class NAOTModuleContextParent : NAOTModuleContext
 {
     private string _Name;
 
-    public CLangModuleContextParent(string name, NativeAOTCompilationContext context)
+    public NAOTModuleContextParent(string name, NAOTCompilationContext context)
         : base(context)
     {
         _Name = name;
     }
 
-    protected override IEnumerable<TypeConversion<NativeAOTModuleContext>> GetConversions()
+    protected override IEnumerable<TypeConversion<NAOTModuleContext>> GetConversions()
     {
-        yield return new NativeAOTModuleConversion(this, Compilation.Conversion);
+        if (Compilation.Conversion.CreateTemplateProject)
+            yield return new NAOTModuleConversion(this, true, Compilation.Conversion);
+        else
+            yield return new NAOTModuleConversion(this, false, Compilation.Conversion);
     }
 
     public override IEnumerable<MethodDeclarationSyntax> Methods
@@ -53,11 +56,11 @@ public class CLangModuleContextParent : NativeAOTModuleContext
     }
 }
 
-public class CLangModuleContextChild : NativeAOTModuleContext
+public class NAOTModuleContextChild : NAOTModuleContext
 {
     private List<MethodDeclarationSyntax> _methods;
 
-    public CLangModuleContextChild(NativeAOTCompilationContext context)
+    public NAOTModuleContextChild(NAOTCompilationContext context)
         : base(context)
     {
         _methods = new List<MethodDeclarationSyntax>();
@@ -68,7 +71,7 @@ public class CLangModuleContextChild : NativeAOTModuleContext
         _methods.Add(method);
     }
 
-    protected override IEnumerable<TypeConversion<NativeAOTModuleContext>> GetConversions()
+    protected override IEnumerable<TypeConversion<NAOTModuleContext>> GetConversions()
     {
         throw new NotImplementedException();
     }

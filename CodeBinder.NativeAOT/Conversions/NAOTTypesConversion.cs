@@ -3,24 +3,20 @@
 using CodeBinder.Attributes;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 
 namespace CodeBinder.NativeAOT;
 
-class NativeAOTTypesConversion : NativeAOTConversionWriter
+class NAOTTypesConversion : NAOTConversionWriter
 {
-    public NativeAOTTypesConversion(NativeAOTCompilationContext compilation)
+    public NAOTTypesConversion(NAOTCompilationContext compilation)
         : base(compilation) { }
 
-    protected override string GetFileName() => "Types.cs";
+    protected override string GetFileName() => "types.cs";
 
     protected override void write(CodeBuilder builder)
     {
-        builder.AppendLine("using CodeBinder").EndOfStatement();
-        builder.AppendLine();
         writeOpaqueTypes(builder);
         writeEnums(builder);
-        writeFunctionPointerDelegates(builder);
         writeDefinedTypes(builder);
     }
 
@@ -34,7 +30,7 @@ class NativeAOTTypesConversion : NativeAOTConversionWriter
         foreach (var type in Compilation.OpaqueTypes)
         {
             string? typeStr;
-            if (!type.TryGetCLangBinder(Compilation, out typeStr))
+            if (!type.TryGetNAOTBinder(Compilation, out typeStr))
                 typeStr = type.Identifier.Text;
 
             builder.Append("partial struct ").Append(typeStr).AppendLine(" { }");
@@ -53,7 +49,7 @@ class NativeAOTTypesConversion : NativeAOTConversionWriter
         foreach (var type in Compilation.StructTypes)
         {
             string? typeStr;
-            if (!type.TryGetCLangBinder(Compilation, out typeStr))
+            if (!type.TryGetNAOTBinder(Compilation, out typeStr))
                 typeStr = type.Identifier.Text;
 
             builder.Append("struct ").AppendLine(typeStr);
@@ -108,7 +104,7 @@ class NativeAOTTypesConversion : NativeAOTConversionWriter
                         else
                             splitted = new string[] { substitution.Value.Regex.Replace(item.GetName(), substitution.Value.Pattern) };
 
-                        bindedItemName = getCLangSplittedIdentifier(tmpbuilder, stem, splitted);
+                        bindedItemName = getNAOTSplittedIdentifier(tmpbuilder, stem, splitted);
                     }
 
                     builder.Append(bindedItemName).Space().Append("=").Space().Append(value.ToString()).Comma().AppendLine();
@@ -116,26 +112,6 @@ class NativeAOTTypesConversion : NativeAOTConversionWriter
             }
 
             builder.AppendLine();
-        }
-    }
-
-    private void writeFunctionPointerDelegates(CodeBuilder builder)
-    {
-        // Function pointer delegates
-        builder.AppendLine("// Function pointer delegates");
-        builder.AppendLine();
-        foreach (var callback in Compilation.Callbacks)
-        {
-            string name;
-            AttributeData? bidingAttrib;
-            if (callback.TryGetAttribute<NativeBindingAttribute>(Compilation, out bidingAttrib))
-                name = bidingAttrib.GetConstructorArgument<string>(0);
-            else
-                name = callback.Identifier.Text;
-
-            builder.Append("unsafe delegate").Space().Append(callback.GetCLangReturnType(Compilation)).Space()
-                .Append(name).Parenthesized().Append(new CLangParameterListWriter(callback.ParameterList, Compilation))
-                .Close().EndOfStatement();
         }
     }
 
@@ -147,11 +123,11 @@ class NativeAOTTypesConversion : NativeAOTConversionWriter
                 continue;
 
             var field = (member as FieldDeclarationSyntax)!;
-            builder.Append(field.Declaration.GetCLangDeclaration(Compilation)).EndOfStatement();
+            builder.Append(field.Declaration.GetNAOTDeclaration(Compilation)).EndOfStatement();
         }
     }
 
-    string getCLangSplittedIdentifier(StringBuilder builder, string prefix, string[] splitted)
+    string getNAOTSplittedIdentifier(StringBuilder builder, string prefix, string[] splitted)
     {
         builder.Clear();
         if (prefix != null)
