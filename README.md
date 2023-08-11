@@ -1,4 +1,3 @@
-
 # Syntax
 
 CodeBinder is a tool that transpiles C# projects in several languages/frameworks, specifically aimed for wrappers to native libraries using .NET native interop.  
@@ -38,9 +37,9 @@ An example test project/solution can be found in `Test/CodeBinder.Test.sln`. You
 * Run `do-test-codegen.cmd` (or `do-test-codegen.ps1`) to build the solution and run the sample code gen;
 * Execute the `Sample` project in the `CodeBinder.sln` solution.
 
-Generated code will be found in `../CodeBinder-TestCodeGen`
+Generated code will be found in `../CodeBinder-TestCodeGen`.
 
-# Language/syntax supported
+# Supported target languages/C# syntax
 
 ## Supported languages
 
@@ -53,7 +52,7 @@ The following languages are supported only to create implementation templates (t
 - C/C++
 - NativeAOT (Experimental)
 
-## Supported statements
+## Supported C# statements
 
 - Block
 - BreakStatement
@@ -73,7 +72,7 @@ The following languages are supported only to create implementation templates (t
 - UsingStatement
 - WhileStatement
 
-## Unsupported statements
+## Unsupported C# statements
 
 - ForEachVariableStatement
 - CheckedStatement
@@ -84,7 +83,7 @@ The following languages are supported only to create implementation templates (t
 - LocalFunctionStatement
 - YieldStatement
 
-## Supported expressions
+## Supported C# expressions
 
 - ArrayCreationExpression
 - OmittedArraySizeExpression
@@ -113,7 +112,7 @@ The following languages are supported only to create implementation templates (t
 - PredefinedType
 - RefType
 
-## Unsupported expressions
+## Unsupported C# expressions
 
 - RefExpression (`ref int i2 = ref i;`)
 - DeclarationExpression (out var declaration or a tuple deconstruction)
@@ -143,3 +142,10 @@ The following languages are supported only to create implementation templates (t
 - IsPatternExpression
 - CheckedExpression
 - ConditionalAccessExpression
+
+# Limitations
+
+- Enumeration is currently transpiled only in TypeScript
+- Delegate interop is not currently supported in any target
+- HandledObject should inherit `SafeHandle` and stop using HadleRef
+- All targets should make more use of SyntaxTree manipulation to implement their transpilation capabilities
