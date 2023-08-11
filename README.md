@@ -43,7 +43,7 @@ Generated code will be found in `../CodeBinder-TestCodeGen`.
 
 ## Supported languages
 
-- Java/JNI (Android/SDK)
+- Java/JNI (JDK/Android)
 - ObjectiveC
 - TypeScript (commonjs/ESModule, using NodeJS)
 
