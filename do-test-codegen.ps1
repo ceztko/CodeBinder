@@ -2,6 +2,8 @@
 
 $conf="Release"
 dotnet build CodeBinder.sln --configuration $conf /p:Platform="Any CPU"
+
+# This is needed as per https://github.com/dotnet/roslyn/issues/52293
 dotnet restore "$((Join-Path Test CodeBinder.Test.sln))"
 
 $codebinder = Join-Path bin $conf CodeBinder.exe
@@ -10,56 +12,56 @@ $codebinder = Join-Path bin $conf CodeBinder.exe
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=Java --nsmapping=SampleLibrary:SampleLibrary `
-    "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryJDK))"
+    "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryJDK))"
 
 # Java Android
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=Java --android --nsmapping=SampleLibrary:SampleLibrary `
-    "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryAndroid))"
+    "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryAndroid))"
 
 # Java JNI
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=JNI --nsmapping=SampleLibrary:SampleLibrary `
-    "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryJNI))"
+    "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryJNI))"
 
 # ObjectiveC
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
-    --language=ObjectiveC "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryObjC))"
+    --language=ObjectiveC "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryObjC))"
 
 # TypeScript (commonjs compatible)
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=TypeScript --commonjs --nsmapping=SampleLibrary:SampleLibrary `
-    "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryTS))"
+    "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryTS))"
 
 # TypeScript (ESModule compatible)
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=TypeScript --nsmapping=SampleLibrary:SampleLibrary `
-    "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryMTS))"
+    "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryMTS))"
 
 # NodeJS NAPI
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
     --language=NAPI --nsmapping=SampleLibrary:SampleLibrary `
-    "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAPI))"
+    "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAPI))"
 
 # Project template conversions: creates the entry points for native methods
 
 # CLang
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
-    --language=CLang "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryCLang sgen))"
+    --language=CLang "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryCLang sgen))"
 
 # EXPERIMENTAL: NativeAOT (partial method declarations)
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
-    --language=NAOT "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAOT sgen))"
+    --language=NAOT "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAOT sgen))"
     
 # EXPERIMENTAL: NativeAOT (partial method definitions)
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
-    --language=NAOT --create-template "--rootpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAOT))"
+    --language=NAOT --create-template "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAOT))"

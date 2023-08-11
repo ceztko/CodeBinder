@@ -49,7 +49,7 @@ class Program
     {
         HashSet<string> projects = new();
         string? solutionPath = null;
-        string? targetRootPath = null;
+        string? targetPath = null;
         string? language = null;
         List<string> namespaceMappings = new();
         bool shouldShowHelp = false;
@@ -60,7 +60,7 @@ class Program
             { "s|solution=", "The solution to be converted", s => solutionPath = s },
             { "m|nsmapping=", "Mapping for the given, must be colon separated ns1:ns2", ns => namespaceMappings.Add(ns) },
             { "l|language=", "The target language for the conversion", l => language = l },
-            { "r|rootpath=", "The target root path for the conversion", r => targetRootPath = r },
+            { "t|targetpath=", "The target root path for the conversion", t => targetPath = t },
             { "h|help", "Show this message and exit", h => shouldShowHelp = h != null },
         };
 
@@ -85,7 +85,7 @@ class Program
             if (projects.Count == 0 && solutionPath == null)
                 throw new Exception("A project or a solution must be specified");
 
-            if (targetRootPath == null)
+            if (targetPath == null)
                 throw new Exception("A target root path must be specified");
 
             try
@@ -129,7 +129,7 @@ class Program
         }
 
         GeneratorOptions genargs = new GeneratorOptions();
-        genargs.TargetRootPath = targetRootPath;
+        genargs.TargetPath = targetPath;
 
         // TODO: Handle multiple projects
         if (solutionPath != null)

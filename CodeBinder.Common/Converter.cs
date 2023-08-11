@@ -14,7 +14,7 @@ public class ConverterOptions
 
 public class GeneratorOptions
 {
-    public string? TargetRootPath;
+    public string? TargetPath;
     /// <summary>Create string before writing to file. For DEBUG</summary>
     public bool EagerStringConversion;
 }
@@ -36,7 +36,7 @@ public abstract class Converter
 
     public void ConvertAndWrite(Project project, GeneratorOptions args, IProgress<string>? progress = null)
     {
-        if (args.TargetRootPath == null)
+        if (args.TargetPath == null)
             throw new ArgumentNullException("args.TargtetRootPath");
 
         Microsoft.CodeAnalysis.Project caproject;
@@ -56,7 +56,7 @@ public abstract class Converter
 
     public void ConvertAndWrite(Solution solution, GeneratorOptions args, IProgress<string>? progress = null)
     {
-        if (args.TargetRootPath == null)
+        if (args.TargetPath == null)
             throw new ArgumentNullException("args.TargtetRootPath");
 
         convertAndWrite(solution, solution.Projects, args);
@@ -64,7 +64,7 @@ public abstract class Converter
 
     public void ConvertAndWrite(IEnumerable<Project> projectsToConvert, GeneratorOptions args, IProgress<string>? progress = null)
     {
-        if (args.TargetRootPath == null)
+        if (args.TargetPath == null)
             throw new ArgumentNullException("args.TargtetRootPath");
 
         Solution? solution = null;
@@ -95,7 +95,7 @@ public abstract class Converter
 
     void convertAndWrite(ProjectConverter converter, GeneratorOptions args)
     {
-        Debug.Assert(args.TargetRootPath != null);
+        Debug.Assert(args.TargetPath != null);
         foreach (var conversion in converter.GetConversionDelegates().Concat(Conversion.DefaultConversionDelegates))
         {
             if (conversion.Skip)
@@ -103,7 +103,7 @@ public abstract class Converter
 
             var targetBasePath = conversion.TargetBasePath ?? string.Empty;
             targetBasePath = targetBasePath.Replace('\\', Path.DirectorySeparatorChar).Replace('/', Path.DirectorySeparatorChar);
-            var basepath = Path.Combine(args.TargetRootPath, targetBasePath);
+            var basepath = Path.Combine(args.TargetPath, targetBasePath);
             Directory.CreateDirectory(basepath);
             var filepath = Path.Combine(basepath, conversion.TargetFileName);
             if (args.EagerStringConversion)
