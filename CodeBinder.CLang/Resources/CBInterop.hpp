@@ -1,4 +1,9 @@
-﻿#ifndef CODE_BINDER_INTEROP_CPP_HEADER
+﻿/**
+ * SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
+ * SPDX-License-Identifier: MIT-0
+ */
+
+#ifndef CODE_BINDER_INTEROP_CPP_HEADER
 #define CODE_BINDER_INTEROP_CPP_HEADER
 #pragma once
 

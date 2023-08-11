@@ -1,4 +1,9 @@
-﻿#ifndef CBOCINTEROP_HEADER
+﻿/**
+ * SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
+ * SPDX-License-Identifier: MIT-0
+ */
+
+#ifndef CBOCINTEROP_HEADER
 #define CBOCINTEROP_HEADER
 #pragma once
 

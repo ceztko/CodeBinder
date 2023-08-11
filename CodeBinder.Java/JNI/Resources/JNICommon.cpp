@@ -1,4 +1,9 @@
-﻿#include "JNICommon.h"
+﻿/**
+ * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto <ceztko@gmail.com>
+ * SPDX-License-Identifier: MIT-0
+ */
+
+#include "JNICommon.h"
 #include <utility>
 #include <string>
 #include <cassert>

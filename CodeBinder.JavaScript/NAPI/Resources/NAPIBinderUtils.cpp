@@ -1,4 +1,9 @@
-﻿#include "NAPIBinderUtils.h"
+﻿/**
+ * SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
+ * SPDX-License-Identifier: MIT-0
+ */
+
+#include "NAPIBinderUtils.h"
 #include "JSInterop.h"
 
 namespace js

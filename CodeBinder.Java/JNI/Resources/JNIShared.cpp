@@ -1,4 +1,9 @@
-﻿#include <jni.h>
+﻿/**
+ * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto <ceztko@gmail.com>
+ * SPDX-License-Identifier: MIT-0
+ */
+
+#include <jni.h>
 #include <cassert>
 #include "JNIShared.h"
 

@@ -1,4 +1,9 @@
-﻿#ifndef CBHANDLEDOBJECT_HEADER
+﻿/**
+ * SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
+ * SPDX-License-Identifier: MIT-0
+ */
+
+#ifndef CBHANDLEDOBJECT_HEADER
 #define CBHANDLEDOBJECT_HEADER
 #pragma once
 

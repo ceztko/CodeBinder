@@ -1,4 +1,9 @@
-﻿#pragma once
+﻿/**
+ * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto <ceztko@gmail.com>
+ * SPDX-License-Identifier: MIT-0
+ */
+
+#pragma once
 
 #include <jni.h>
 

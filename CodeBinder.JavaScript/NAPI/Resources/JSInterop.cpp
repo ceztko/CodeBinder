@@ -1,4 +1,9 @@
-﻿#ifdef _WIN32
+﻿/**
+ * SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
+ * SPDX-License-Identifier: MIT-0
+ */
+
+#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
