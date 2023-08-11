@@ -93,8 +93,7 @@ public class NAOTCompilationContext : CSharpCompilationContextBase<NAOTModuleCon
         {
             if (Conversion.CreateTemplate)
             {
-                yield return new StringConversionWriter($"{LibraryName}NAOT.csproj",
-                    () => TemplateCSProj) { GeneratedPreamble = ConversionCSharpToNativeAOT.SourcePreamble };
+                yield return new StringConversionWriter($"{LibraryName}NAOT.csproj", () => TemplateCSProj);
             }
             else
             {
