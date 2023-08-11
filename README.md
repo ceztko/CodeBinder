@@ -1,4 +1,7 @@
+
 # Syntax
+
+CodeBinder is a tool that transpiles C# projects in several languages/frameworks, specifically aimed for wrappers to native libraries using .NET native interop.  
 
 Usage: `CodeBinder [OPTIONS]`
 
@@ -37,9 +40,20 @@ An example test project/solution can be found in `Test/CodeBinder.Test.sln`. You
 
 Generated code will be found in `../CodeBinder-TestCodeGen`
 
-# Syntax supported
+# Language/syntax supported
 
-### Supported
+## Supported languages
+
+- Java/JNI (Android/SDK)
+- ObjectiveC
+- TypeScript (commonjs/ESModule, using NodeJS)
+
+The following languages are supported only to create implementation templates (the definitions of the `DllImport` methods declared in the C# project being transpiled):
+
+- C/C++
+- NativeAOT (Experimental)
+
+## Supported statements
 
 - Block
 - BreakStatement
@@ -59,7 +73,7 @@ Generated code will be found in `../CodeBinder-TestCodeGen`
 - UsingStatement
 - WhileStatement
 
-### Unsupported
+## Unsupported statements
 
 - ForEachVariableStatement
 - CheckedStatement
@@ -70,9 +84,7 @@ Generated code will be found in `../CodeBinder-TestCodeGen`
 - LocalFunctionStatement
 - YieldStatement
 
-# Expressions
-
-### Supported
+## Supported expressions
 
 - ArrayCreationExpression
 - OmittedArraySizeExpression
@@ -101,7 +113,8 @@ Generated code will be found in `../CodeBinder-TestCodeGen`
 - PredefinedType
 - RefType
 
-### Unsupported
+## Unsupported expressions
+
 - RefExpression (`ref int i2 = ref i;`)
 - DeclarationExpression (out var declaration or a tuple deconstruction)
 - ThrowExpression (https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/throw#the-throw-expression)
