@@ -70,6 +70,7 @@ public class CLangCollectionContext : CSharpCollectionContextBase<CLangCompilati
             switch (kind)
             {
                 case SyntaxKind.MethodDeclaration:
+                {
                     if (module != null && !member.ShouldDiscard(Compilation))
                     {
                         var method = (MethodDeclarationSyntax)member;
@@ -77,15 +78,12 @@ public class CLangCollectionContext : CSharpCollectionContextBase<CLangCompilati
                             module.AddNativeMethod(method);
                     }
                     break;
-                case SyntaxKind.ClassDeclaration:
-                    visitType((ClassDeclarationSyntax)member);
-                    break;
-                case SyntaxKind.StructDeclaration:
-                    visitType((StructDeclarationSyntax)member);
-                    break;
+                }
                 case SyntaxKind.DelegateDeclaration:
+                {
                     visitType((DelegateDeclarationSyntax)member);
                     break;
+                }
             }
         }
     }

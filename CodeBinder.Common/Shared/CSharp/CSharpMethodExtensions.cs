@@ -1048,7 +1048,7 @@ public static class CSharpMethodExtensions
     }
 
     /// <summary>
-    /// True if this parameter is a R/W ref argument
+    /// True if this parameter is a ref argument
     /// </summary>
     public static bool IsRefLike(this ArgumentSyntax argument)
     {
@@ -1056,6 +1056,7 @@ public static class CSharpMethodExtensions
         {
             case SyntaxKind.RefKeyword:
             case SyntaxKind.OutKeyword:
+            case SyntaxKind.InKeyword:
                 return true;
             default:
                 return false;
@@ -1064,7 +1065,9 @@ public static class CSharpMethodExtensions
 
     public static bool IsRefLike(this ParameterSyntax parameter)
     {
-        return parameter.Modifiers.Any(SyntaxKind.RefKeyword) || parameter.Modifiers.Any(SyntaxKind.OutKeyword);
+        return parameter.Modifiers.Any(SyntaxKind.RefKeyword)
+            || parameter.Modifiers.Any(SyntaxKind.OutKeyword)
+            || parameter.Modifiers.Any(SyntaxKind.InKeyword);
     }
 
     public static bool IsRef(this ParameterSyntax parameter)

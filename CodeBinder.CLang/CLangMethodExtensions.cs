@@ -47,7 +47,7 @@ public static class CLangMethodExtensions
     public static CodeBuilder Append(this CodeBuilder builder, ParameterSyntax parameter,
         bool cppMethod, ICompilationProvider provider)
     {
-        bool isByRef = parameter.IsRef() || parameter.IsOut();
+        bool isByRef = parameter.IsRefLike();
         var symbol = parameter.Type!.GetTypeSymbolThrow(provider);
         string? suffix;
         string type = getCLangType(symbol, parameter.GetAttributes(provider),
