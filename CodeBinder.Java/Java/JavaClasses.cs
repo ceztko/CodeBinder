@@ -29,7 +29,11 @@ public class BinderUtils
                 _register = cleanerClass.getDeclaredMethod(""register"", Object.class, Runnable.class);
                 _cleaner = create.invoke(null);
             }
-            catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException |
+            catch (ClassNotFoundException ex)
+            {
+                // Do nothing. ""java.lang.ref.Cleaner"" is not avaiable
+            }
+            catch (InvocationTargetException | IllegalAccessException |
                    NoSuchMethodException ex)
             {
                 System.err.println(ex);
