@@ -87,7 +87,7 @@ static partial class TypeScriptExtensions
         return false;
     }
 
-    public static bool NeedNullForgivingOperator(this ITypeSymbol symbol)
+    public static bool NeedsNullForgivingOperator(this ITypeSymbol symbol)
     {
         switch (symbol.TypeKind)
         {
@@ -100,6 +100,30 @@ static partial class TypeScriptExtensions
                 else
                     return true;
             default:
+                return false;
+        }
+    }
+
+    public static bool IsNumericalType(this ITypeSymbol symbol, out TypeScriptNumericalType type)
+    {
+        switch (symbol.SpecialType)
+        {
+            case SpecialType.System_Byte:
+            case SpecialType.System_SByte:
+            case SpecialType.System_UInt16:
+            case SpecialType.System_Int16:
+            case SpecialType.System_UInt32:
+            case SpecialType.System_Int32:
+            case SpecialType.System_Single:
+            case SpecialType.System_Double:
+                type = TypeScriptNumericalType.Number;
+                return true;
+            case SpecialType.System_UInt64:
+            case SpecialType.System_Int64:
+                type = TypeScriptNumericalType.BigInt;
+                return true;
+            default:
+                type = TypeScriptNumericalType.Unknown;
                 return false;
         }
     }
@@ -342,4 +366,11 @@ static partial class TypeScriptExtensions
 
         return char.ToLowerInvariant(text[0]) + text.Substring(1);
     }
+}
+
+enum TypeScriptNumericalType
+{
+    Unknown = 0,
+    Number,
+    BigInt
 }

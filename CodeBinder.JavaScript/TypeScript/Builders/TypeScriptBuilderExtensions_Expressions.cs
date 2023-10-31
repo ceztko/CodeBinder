@@ -1,6 +1,8 @@
 ﻿// SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
+using CodeBinder.Shared.CSharp;
+
 namespace CodeBinder.JavaScript.TypeScript;
 
 static partial class TypeScriptBuilderExtension
@@ -66,15 +68,27 @@ static partial class TypeScriptBuilderExtension
             case SyntaxKind.AsExpression:
             {
                 var typeSymbol = syntax.Right.GetSymbol<ITypeSymbol>(context);
-                if (typeSymbol.TypeKind == TypeKind.TypeParameter)
+                switch (typeSymbol.TypeKind)
                 {
-                    // In case of type parameter, ignore actual instance check
-                    builder.Append(syntax.Left, context).Space().Append("as").Space().Append(syntax.Right, context);
+                    case TypeKind.Enum:
+                    {
+                        // Enums don't support using normal cast
+                        builder.Append(syntax.Left, context);
+                        break;
+                    }
+                    case TypeKind.TypeParameter:
+                    {
+                        // In case of type parameter, ignore actual instance check
+                        builder.Append(syntax.Left, context).Space().Append("as").Space().Append(syntax.Right, context);
+                        break;
+                    }
+                    default:
+                    {
+                        builder.Append("BinderUtils.as<").Append(syntax.Right, context).Append(">").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context);
+                        break;
+                    }    
                 }
-                else
-                {
-                    builder.Append("BinderUtils.as<").Append(syntax.Right, context).Append(">").Parenthesized().Append(syntax.Left, context).CommaSeparator().Append(syntax.Right, context);
-                }
+
                 return builder;
             }
             case SyntaxKind.DivideExpression:
@@ -137,37 +151,48 @@ static partial class TypeScriptBuilderExtension
     public static CodeBuilder Append(this CodeBuilder builder, CastExpressionSyntax syntax, TypeScriptCompilationContext context)
     {
         var typeSymbol = syntax.Type.GetSymbol<ITypeSymbol>(context);
-        if (typeSymbol.TypeKind == TypeKind.TypeParameter)
+        switch (typeSymbol.TypeKind)
         {
-            // In case of type parameter, ignore actual instance check
-            builder.Append(syntax.Expression, context).Space().Append("as").Space().Append(syntax.Type, context);
-        }
-        else
-        {
-            switch (typeSymbol.SpecialType)
+            case TypeKind.Enum:
             {
-                case SpecialType.System_Boolean:
-                    builder.Append("Boolean").Parenthesized().Append(syntax.Expression, context).Close();
-                    return builder;
-                case SpecialType.System_IntPtr:
-                case SpecialType.System_SByte:
-                case SpecialType.System_Byte:
-                case SpecialType.System_Int16:
-                case SpecialType.System_UInt16:
-                case SpecialType.System_Int32:
-                case SpecialType.System_UInt32:
-                case SpecialType.System_Single:
-                case SpecialType.System_Double:
-                    builder.Append("Number").Parenthesized().Append(syntax.Expression, context).Close();
-                    return builder;
-                case SpecialType.System_Int64:
-                case SpecialType.System_UInt64:
-                    builder.Append("BigInt").Parenthesized().Append(syntax.Expression, context).Close();
-                    return builder;
-                default:
-                    builder.Append("BinderUtils.cast<").Append(syntax.Type, context).Append(">").Parenthesized()
-                        .Append(syntax.Expression, context).CommaSeparator().Append(syntax.Type, context).Close();
-                    break;
+                // Enums don't support using normal cast
+                builder.Append(syntax.Expression, context);
+                break;
+            }
+            case TypeKind.TypeParameter:
+            {
+                // In case of type parameter, ignore actual instance check
+                builder.Append(syntax.Expression, context).Space().Append("as").Space().Append(syntax.Type, context);
+                break;
+            }
+            default:
+            {
+                switch (typeSymbol.SpecialType)
+                {
+                    case SpecialType.System_Boolean:
+                        builder.Append("Boolean").Parenthesized().Append(syntax.Expression, context).Close();
+                        return builder;
+                    case SpecialType.System_IntPtr:
+                    case SpecialType.System_SByte:
+                    case SpecialType.System_Byte:
+                    case SpecialType.System_Int16:
+                    case SpecialType.System_UInt16:
+                    case SpecialType.System_Int32:
+                    case SpecialType.System_UInt32:
+                    case SpecialType.System_Single:
+                    case SpecialType.System_Double:
+                        builder.Append("Number").Parenthesized().Append(syntax.Expression, context).Close();
+                        return builder;
+                    case SpecialType.System_Int64:
+                    case SpecialType.System_UInt64:
+                        builder.Append("BigInt").Parenthesized().Append(syntax.Expression, context).Close();
+                        return builder;
+                    default:
+                        builder.Append("BinderUtils.cast<").Append(syntax.Type, context).Append(">").Parenthesized()
+                            .Append(syntax.Expression, context).CommaSeparator().Append(syntax.Type, context).Close();
+                        break;
+                }
+                break;
             }
         }
 
@@ -517,7 +542,7 @@ static partial class TypeScriptBuilderExtension
 
     public static CodeBuilder Append(this CodeBuilder builder, TypeOfExpressionSyntax syntax, TypeScriptCompilationContext context)
     {
-        builder.Append(syntax.Type, context).Append(".class");
+        builder.Append(syntax.Type, context);
         return builder;
     }
 
