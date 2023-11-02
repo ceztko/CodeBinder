@@ -47,7 +47,7 @@ const mod = { exports: {} };
         if (Context.Conversion.GenerationFlags.HasFlag(TypeScriptGenerationFlags.CommonJSCompat))
             builder.AppendLine($"(proc as any).dlopen(mod, path.join(__dirname, `${{shprefix}}{Context.LibraryName}.${{shext}}`));");
         else
-            builder.AppendLine($"(proc as any).dlopen(mod, fileURLToPath(new URL(`{{shprefix}}{Context.LibraryName}.${{shext}}`, import.meta.url)));");
+            builder.AppendLine($"(proc as any).dlopen(mod, fileURLToPath(new URL(`${{shprefix}}{Context.LibraryName}.${{shext}}`, import.meta.url)));");
 
         builder.AppendLine($"""
 let napi = (mod.exports as any)({ConversionCSharpToTypeScript.CodeBinderNamespace});
