@@ -52,7 +52,9 @@ Init::Init()
     LOAD_SYMBOL(module, napi_throw_error);
     LOAD_SYMBOL(module, napi_throw_type_error);
     LOAD_SYMBOL(module, napi_throw_range_error);
+    LOAD_SYMBOL(module, napi_get_undefined);
     LOAD_SYMBOL(module, napi_get_null);
+    LOAD_SYMBOL(module, napi_strict_equals);
     LOAD_SYMBOL(module, napi_get_global);
     LOAD_SYMBOL(module, napi_get_boolean);
     LOAD_SYMBOL(module, napi_get_value_string_utf8);
