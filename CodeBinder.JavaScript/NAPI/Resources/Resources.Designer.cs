@@ -61,7 +61,12 @@ namespace CodeBinder.JavaScript.NAPI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #ifdef _WIN32
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2023 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#ifdef _WIN32
         ///#define WIN32_LEAN_AND_MEAN
         ///#include &lt;Windows.h&gt;
         ///
@@ -80,15 +85,7 @@ namespace CodeBinder.JavaScript.NAPI {
         ///}
         ///
         ///static Init s_init;
-        ///
-        ///#define DEFINE_NAPI_SYMBOLS
-        ///#include &quot;JSInterop.h&quot;
-        ///
-        ///namespace js
-        ///{
-        ///    extern napi_ref s_AddonThisRef;
-        ///
-        ///    napi [rest of string was truncated]&quot;;.
+        ///        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JSInterop_cpp {
             get {
@@ -97,12 +94,20 @@ namespace CodeBinder.JavaScript.NAPI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #pragma once
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2023 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#pragma once
         ///
         ///#include &lt;cassert&gt;
         ///#include &lt;cstring&gt;
         ///#include &lt;vector&gt;
         ///#include &lt;type_traits&gt;
+        ///
+        ///#define BUILDING_NODE_EXTENSION
+        ///#include &lt;node_api.h&gt;
         ///
         ///#include &quot;JSNAPI.h&quot;
         ///
@@ -114,11 +119,7 @@ namespace CodeBinder.JavaScript.NAPI {
         ///#define DECLARE_SYMBOL(symbol) extern decltype(::symbol)* symbol
         ///#endif
         ///
-        ///// https://artificial-mind.net/blog/2020/10/03/always-false
-        ///template &lt;class... T&gt;
-        ///constexpr bool always_false = false;
-        ///
-        ///#define CHECK_JS_EXCEPTION(env) if (js::IsJSExceptionPending(env)) [rest of string was truncated]&quot;;.
+        ///// https://a [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JSInterop_h {
             get {
@@ -127,12 +128,30 @@ namespace CodeBinder.JavaScript.NAPI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #include &quot;NAPIBinderUtils.h&quot;
+        ///   Looks up a localized string similar to #pragma once
+        ///
+        ///#define BUILDING_NODE_EXTENSION
+        ///#include &lt;node_api.h&gt;
+        ///.
+        /// </summary>
+        internal static string JSNAPI_h {
+            get {
+                return ResourceManager.GetString("JSNAPI_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2023 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#include &quot;NAPIBinderUtils.h&quot;
         ///#include &quot;JSInterop.h&quot;
         ///
         ///namespace js
         ///{
-        ///    extern &quot;C&quot; napi_value NAPI_CreateNativeHandleRef(
+        ///    extern &quot;C&quot; napi_value NAPI_CreateNativeHandle(
         ///        napi_env env, napi_callback_info info)
         ///    {
         ///        napi_status status;
@@ -141,10 +160,7 @@ namespace CodeBinder.JavaScript.NAPI {
         ///        status = napi_get_cb_info(env, info, &amp;argc, args, nullptr, nullptr);
         ///        assert(status == napi_ok);
         ///
-        ///        napi_ref ref;
-        ///        napi_create_reference(env, args[0], 1, &amp;ref);
-        ///        assert(status == napi_ok);
-        ///        return  [rest of string was truncated]&quot;;.
+        ///        napi [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string NAPIBinderUtils_cpp {
             get {
@@ -153,20 +169,25 @@ namespace CodeBinder.JavaScript.NAPI {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #include &quot;JSNAPI.h&quot;
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2023 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#include &quot;JSNAPI.h&quot;
         ///
         ///namespace js
         ///{
-        ///    extern &quot;C&quot; napi_value NAPI_CreateNativeHandleRef(
+        ///    extern &quot;C&quot; napi_value NAPI_CreateNativeHandle(
         ///        napi_env env, napi_callback_info info);
         ///
-        ///    extern &quot;C&quot; napi_value NAPI_CreateWeakNativeHandleRef(
+        ///    extern &quot;C&quot; napi_value NAPI_CreateWeakNativeHandle(
         ///        napi_env env, napi_callback_info info);
         ///
-        ///    extern &quot;C&quot; napi_value NAPI_FreeNativeHandleRef(
+        ///    extern &quot;C&quot; napi_value NAPI_FreeNativeHandle(
         ///        napi_env env, napi_callback_info info);
-        ///}
-        ///.
+        ///
+        ///    extern &quot;C&quot; napi_value NAPI_NativeHand [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string NAPIBinderUtils_h {
             get {

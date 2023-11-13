@@ -10,6 +10,9 @@
 #include <vector>
 #include <type_traits>
 
+#define BUILDING_NODE_EXTENSION
+#include <node_api.h>
+
 #include "JSNAPI.h"
 
 #include <CBInterop.hpp>

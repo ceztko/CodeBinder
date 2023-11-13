@@ -30,6 +30,7 @@ public class ConversionCSharpToNAPI : CSharpLanguageConversionBase<NAPICompilati
         {
             yield return new StringConversionWriter("JSInterop.h", () => Resources.JSInterop_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter("JSInterop.cpp", () => Resources.JSInterop_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+            yield return new StringConversionWriter("JSNAPI.h", () => Resources.JSNAPI_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter("NAPIBinderUtils.h", () => Resources.NAPIBinderUtils_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter("NAPIBinderUtils.cpp", () => Resources.NAPIBinderUtils_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
         }
