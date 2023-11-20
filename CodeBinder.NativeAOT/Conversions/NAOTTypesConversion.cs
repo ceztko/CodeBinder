@@ -8,16 +8,27 @@ namespace CodeBinder.NativeAOT;
 
 class NAOTTypesConversion : NAOTConversionWriter
 {
-    public NAOTTypesConversion(NAOTCompilationContext compilation)
-        : base(compilation) { }
+    public bool IsTemplate {  get; set; }
+
+    public NAOTTypesConversion(NAOTCompilationContext compilation, bool template)
+        : base(compilation)
+    {
+        IsTemplate = template;
+    }
 
     protected override string GetFileName() => "types.cs";
 
     protected override void write(CodeBuilder builder)
     {
-        writeOpaqueTypes(builder);
-        writeEnums(builder);
-        writeDefinedTypes(builder);
+        if (IsTemplate)
+        {
+            writeOpaqueTypes(builder);
+        }
+        else
+        {
+            writeEnums(builder);
+            writeDefinedTypes(builder);
+        }
     }
 
     void writeOpaqueTypes(CodeBuilder builder)
@@ -33,7 +44,7 @@ class NAOTTypesConversion : NAOTConversionWriter
             if (!type.TryGetNAOTBinder(Compilation, out typeStr))
                 typeStr = type.Identifier.Text;
 
-            builder.Append("partial struct ").Append(typeStr).AppendLine(" { }");
+            builder.Append("global using ").Append(typeStr).Append(" = System.IntPtr").EndOfStatement();
         }
 
         builder.AppendLine();

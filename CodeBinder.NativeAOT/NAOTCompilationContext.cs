@@ -94,10 +94,11 @@ public class NAOTCompilationContext : CSharpCompilationContextBase<NAOTModuleCon
             if (Conversion.CreateTemplate)
             {
                 yield return new StringConversionWriter($"{LibraryName}NAOT.csproj", () => TemplateCSProj);
+                yield return new NAOTTypesConversion(this, true);
             }
             else
             {
-                yield return new NAOTTypesConversion(this);
+                yield return new NAOTTypesConversion(this, false);
                 yield return new NAOTDelegatesConversion(this);
             }
         }
