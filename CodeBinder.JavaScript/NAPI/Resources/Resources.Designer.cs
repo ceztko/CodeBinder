@@ -61,6 +61,54 @@ namespace CodeBinder.JavaScript.NAPI {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to #ifndef SRC_JS_NATIVE_API_H_
+        ///#define SRC_JS_NATIVE_API_H_
+        ///
+        ///// This file needs to be compatible with C compilers.
+        ///#include &lt;stdbool.h&gt;  // NOLINT(modernize-deprecated-headers)
+        ///#include &lt;stddef.h&gt;   // NOLINT(modernize-deprecated-headers)
+        ///
+        ///// Use INT_MAX, this should only be consumed by the pre-processor anyway.
+        ///#define NAPI_VERSION_EXPERIMENTAL 2147483647
+        ///#ifndef NAPI_VERSION
+        ///#ifdef NAPI_EXPERIMENTAL
+        ///#define NAPI_VERSION NAPI_VERSION_EXPERIMENTAL
+        ///#else
+        ///// The baseline version for N-API.
+        ///// The NAPI_VERSION c [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string js_native_api_h {
+            get {
+                return ResourceManager.GetString("js_native_api_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #ifndef SRC_JS_NATIVE_API_TYPES_H_
+        ///#define SRC_JS_NATIVE_API_TYPES_H_
+        ///
+        ///// This file needs to be compatible with C compilers.
+        ///// This is a public include file, and these includes have essentially
+        ///// became part of it&apos;s API.
+        ///#include &lt;stddef.h&gt;  // NOLINT(modernize-deprecated-headers)
+        ///#include &lt;stdint.h&gt;  // NOLINT(modernize-deprecated-headers)
+        ///
+        ///#if !defined __cplusplus || (defined(_MSC_VER) &amp;&amp; _MSC_VER &lt; 1900)
+        ///typedef uint16_t char16_t;
+        ///#endif
+        ///
+        ///#ifndef NAPI_CDECL
+        ///#ifdef _WIN32
+        ///#define NAPI_CDECL __cdecl
+        ///#els [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string js_native_api_types_h {
+            get {
+                return ResourceManager.GetString("js_native_api_types_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to /**
         /// * SPDX-FileCopyrightText: (C) 2023 Francesco Pretto &lt;ceztko@gmail.com&gt;
         /// * SPDX-License-Identifier: MIT-0
@@ -131,7 +179,7 @@ namespace CodeBinder.JavaScript.NAPI {
         ///   Looks up a localized string similar to #pragma once
         ///
         ///#define BUILDING_NODE_EXTENSION
-        ///#include &lt;node_api.h&gt;
+        ///#include &quot;node_api.h&quot;
         ///.
         /// </summary>
         internal static string JSNAPI_h {
@@ -192,6 +240,61 @@ namespace CodeBinder.JavaScript.NAPI {
         internal static string NAPIBinderUtils_h {
             get {
                 return ResourceManager.GetString("NAPIBinderUtils_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #ifndef SRC_NODE_API_H_
+        ///#define SRC_NODE_API_H_
+        ///
+        ///#ifdef BUILDING_NODE_EXTENSION
+        ///#ifdef _WIN32
+        ///// Building native addon against node
+        ///#define NAPI_EXTERN __declspec(dllimport)
+        ///#elif defined(__wasm32__)
+        ///#define NAPI_EXTERN __attribute__((__import_module__(&quot;napi&quot;)))
+        ///#endif
+        ///#endif
+        ///#include &quot;js_native_api.h&quot;
+        ///#include &quot;node_api_types.h&quot;
+        ///
+        ///struct uv_loop_s;  // Forward declaration.
+        ///
+        ///#ifdef _WIN32
+        ///#define NAPI_MODULE_EXPORT __declspec(dllexport)
+        ///#else
+        ///#define NAPI_MODULE_EXPORT __attribute__((visibility(&quot;default&quot;)))
+        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string node_api_h {
+            get {
+                return ResourceManager.GetString("node_api_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to #ifndef SRC_NODE_API_TYPES_H_
+        ///#define SRC_NODE_API_TYPES_H_
+        ///
+        ///#include &quot;js_native_api_types.h&quot;
+        ///
+        ///typedef struct napi_callback_scope__* napi_callback_scope;
+        ///typedef struct napi_async_context__* napi_async_context;
+        ///typedef struct napi_async_work__* napi_async_work;
+        ///
+        ///#if NAPI_VERSION &gt;= 3
+        ///typedef void(NAPI_CDECL* napi_cleanup_hook)(void* arg);
+        ///#endif  // NAPI_VERSION &gt;= 3
+        ///
+        ///#if NAPI_VERSION &gt;= 4
+        ///typedef struct napi_threadsafe_function__* napi_threadsafe_function;
+        ///#endif  // NAPI_VERSION &gt;= 4
+        ///
+        ///#if NAPI_VERSION &gt;=  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string node_api_types_h {
+            get {
+                return ResourceManager.GetString("node_api_types_h", resourceCulture);
             }
         }
     }
