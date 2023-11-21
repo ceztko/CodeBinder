@@ -51,8 +51,7 @@ public class ConversionCSharpToCLang : CSharpLanguageConversionBase<CLangCompila
         {
             yield return new StringConversionWriter(BaseTypesHeader, () => CLangResources.CBBaseTypes_h) { GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter("CBInterop.h", () => CLangResources.CBInterop_h) { GeneratedPreamble = SourcePreamble };
-            if (!PublicInterfaceOnly)
-                yield return new StringConversionWriter("CBInterop.hpp", () => CLangResources.CBInterop_hpp) { GeneratedPreamble = SourcePreamble };
+            yield return new StringConversionWriter("CBInterop.hpp", () => CLangResources.CBInterop_hpp) { GeneratedPreamble = SourcePreamble };
         }
     }
 }

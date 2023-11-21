@@ -40,4 +40,12 @@ public class JNICompilationContext : CSharpCompilationContextBase<JNIModuleConte
     {
         get { return _modules.Values; }
     }
+
+    public override IEnumerable<IConversionWriter> DefaultConversions
+    {
+        get
+        {
+            yield return new JNIMethodInitConversion(this);
+        }
+    }
 }

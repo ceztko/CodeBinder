@@ -135,6 +135,12 @@ extern "C" EXPORT_ATTRIB napi_value napi_register_module_v1(napi_env env, napi_v
 {
     return Init(env, exports);
 }
+
+// Reference this symbol to ensure all functions are defined"
+// See https://github.com/dotnet/samples/tree/3870722f5c5e80fd6a70946e6e96a5c990620e42/core/nativeaot/NativeLibrary#user-content-building-static-libraries
+void* CB_JNIExports[] = {
+    (void*)napi_register_module_v1
+};
 """);
         }
     }
