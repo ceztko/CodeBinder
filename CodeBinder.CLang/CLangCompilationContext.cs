@@ -94,7 +94,8 @@ public class CLangCompilationContext : CSharpCompilationContextBase<CLangModuleC
             yield return new CLangLibraryHeaderConversion(this);
             yield return new CLangLibDefsHeaderConversion(this);
             yield return new CLangTypesHeaderConversion(this);
-            yield return new CLangMethodInitConversion(this);
+            if (!Conversion.PublicInterfaceOnly)
+                yield return new CLangMethodInitConversion(this);
         }
     }
 }
