@@ -16,7 +16,7 @@ class NAOTMethodWriter : CodeWriter<MethodDeclarationSyntax, NAOTModuleConversio
     protected override void Write()
     {
         if (!IsTemplateCreation)
-            Builder.AppendLine("[UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]");
+            Builder.AppendLine($"[UnmanagedCallersOnly(EntryPoint = \"{Item.GetNAOTMethodName()}\", CallConvs = new[] {{ typeof(CallConvCdecl) }})]");
 
         Builder.Append("public static unsafe partial").Space().Append(Item.GetNAOTReturnType(Context)).Space();
         Builder.Append(Item.GetNAOTMethodName()).AppendLine("(");
