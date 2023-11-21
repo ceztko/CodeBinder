@@ -51,4 +51,6 @@ public class TypeScriptCompilationContext : CSharpCompilationContext<ConversionC
     {
         return new TypeScriptCollectionContext(this);
     }
+
+    public string NAPIWrapperName => $"NAPI{LibraryName}";
 }

@@ -9,7 +9,7 @@ class TypeScriptNAPIWrapperWriter : TypeScriptConversionWriter
 
     protected override string GetFileName()
     {
-        return $"NAPI{Context.LibraryName}.{Context.Conversion.TypeScriptSourceExtension}";
+        return $"{Context.NAPIWrapperName}.{Context.Conversion.TypeScriptSourceExtension}";
     }
 
     protected override void write(CodeBuilder builder)

@@ -21,7 +21,7 @@ class TypeScriptCodeBinderConversion : TypeScriptConversionWriter
     protected override void write(CodeBuilder builder)
     {
         builder.AppendLine($"""
-import napi_ from './NAPIENLibPdf{Context.Conversion.TypeScriptModuleLoadSuffix}';
+import napi_ from './{Context.NAPIWrapperName}{Context.Conversion.TypeScriptModuleLoadSuffix}';
 let napi: any = napi_;
 """);
         builder.AppendLine();

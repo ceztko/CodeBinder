@@ -22,7 +22,7 @@ class TypeScriptLibraryConversion : TypeScriptConversionWriter
         builder.AppendLine();
         builder.AppendLine($$"""
 import { {{ string.Join(", ", TypeScriptCodeBinderClasses.Classes) }} } from './CodeBinder{{ Context.Conversion.TypeScriptModuleLoadSuffix }}';
-import napi_ from './NAPIENLibPdf{{Context.Conversion.TypeScriptModuleLoadSuffix}}';
+import napi_ from './{{Context.NAPIWrapperName}}{{Context.Conversion.TypeScriptModuleLoadSuffix}}';
 let napi: any = napi_;
 """);
         builder.AppendLine();
