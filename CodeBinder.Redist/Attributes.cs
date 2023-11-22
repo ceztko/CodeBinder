@@ -209,6 +209,19 @@ public sealed class NativeLibraryAttribute : CodeBinderAttribute
 }
 
 /// <summary>
+/// Attribute to specify a native library dependency
+/// </summary>
+public sealed class NativeDependencyAttribute : CodeBinderAttribute
+{
+    public NativeDependencyAttribute(string name)
+    {
+        Name = name;
+    }
+
+    public string Name { get; private set; }
+}
+
+/// <summary>
 /// Verbatim conversion writing
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method, AllowMultiple = true)]
