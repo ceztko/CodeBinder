@@ -1,7 +1,7 @@
 ﻿// SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
-namespace CodeBinder.Redist;
+namespace CodeBinder;
 
 /// <summary>
 /// An handle to a managed object that must be manually freed.
