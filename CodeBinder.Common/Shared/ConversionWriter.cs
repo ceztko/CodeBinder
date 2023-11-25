@@ -67,5 +67,7 @@ public interface IConversionWriter
 
     string? BasePath { get; }
 
+    bool? UseUTF8Bom { get; }
+
     bool Skip { get; }
 }

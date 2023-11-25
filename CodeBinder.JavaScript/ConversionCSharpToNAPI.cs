@@ -52,5 +52,6 @@ NAPI {
 
     const string Exports_ld64 = """
 _napi_register_module_v1
+
 """;
 }

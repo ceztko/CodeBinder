@@ -25,28 +25,22 @@ public class ConversionDelegate
         _builder = builder;
     }
 
-    public string TargetFileName
-    {
-        get { return _builder.FileName; }
-    }
+    public string TargetFileName => _builder.FileName;
 
-    public string? TargetBasePath
-    {
-        get { return _builder.BasePath; }
-    }
+    public string? TargetBasePath => _builder.BasePath;
 
     /// <summary>
     /// Use UTF8 Bom. null means automatic, depending on conversion default
     /// </summary>
-    public bool? UseUTF8Bom => null;
+    public bool? UseUTF8Bom => _builder.UseUTF8Bom;
+
+    public bool Skip => _builder.Skip;
 
     public void Write(Stream stream, Encoding encoding)
     {
         var writer = new StreamWriter(stream, encoding);
         write(writer);
     }
-
-    public bool Skip => _builder.Skip;
 
     public string ToFullString()
     {
