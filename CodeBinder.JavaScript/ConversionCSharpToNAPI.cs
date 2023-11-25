@@ -37,6 +37,20 @@ public class ConversionCSharpToNAPI : CSharpLanguageConversionBase<NAPICompilati
             yield return new StringConversionWriter("js_native_api_types.h", () => Resources.js_native_api_types_h) { BasePath = "Internal" };
             yield return new StringConversionWriter("NAPIBinderUtils.h", () => Resources.NAPIBinderUtils_h) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter("NAPIBinderUtils.cpp", () => Resources.NAPIBinderUtils_cpp) { BasePath = "Internal", GeneratedPreamble = SourcePreamble };
+            yield return new StringConversionWriter("symbols.ld.exports", () => Exports_ld) { GeneratedPreamble = SourcePreamble };
+            yield return new StringConversionWriter("symbols.ld64.exports", () => Exports_ld64) { GeneratedPreamble = SourcePreamble };
         }
     }
+
+    const string Exports_ld = """
+NAPI {
+    global: _init; _fini;
+        napi_register_module_v1;
+    local: *;
+};
+""";
+
+    const string Exports_ld64 = """
+_napi_register_module_v1
+""";
 }
