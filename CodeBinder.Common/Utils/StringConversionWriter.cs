@@ -13,6 +13,8 @@ public sealed class StringConversionWriter : ConversionWriter
 
     public new string? BasePath { get; set; }
 
+    public new bool? UseUTF8Bom { get; set; }
+
     public StringConversionWriter(string filename, Func<string> resourceString)
     {
         FileName = filename;
@@ -24,6 +26,8 @@ public sealed class StringConversionWriter : ConversionWriter
     protected override string? GetBasePath() => BasePath;
 
     protected sealed override string? GetGeneratedPreamble() => GeneratedPreamble;
+
+    protected override bool? GetUseUTF8Bom() => UseUTF8Bom;
 
     protected override void write(CodeBuilder builder)
     {

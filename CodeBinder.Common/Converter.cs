@@ -106,15 +106,21 @@ public abstract class Converter
             var basepath = Path.Combine(args.TargetPath, targetBasePath);
             Directory.CreateDirectory(basepath);
             var filepath = Path.Combine(basepath, conversion.TargetFileName);
+            bool useUTF8Bom;
+            if (conversion.UseUTF8Bom is bool value)
+                useUTF8Bom = value;
+            else
+                useUTF8Bom = Conversion.UseUTF8Bom;
+
             if (args.EagerStringConversion)
             {
-                File.WriteAllText(filepath, conversion.ToFullString(), new UTF8Encoding(Conversion.UseUTF8Bom));
+                File.WriteAllText(filepath, conversion.ToFullString(), new UTF8Encoding(useUTF8Bom));
             }
             else
             {
                 using (var filestream = new FileStream(filepath, FileMode.OpenOrCreate))
                 {
-                    conversion.Write(filestream, new UTF8Encoding(Conversion.UseUTF8Bom));
+                    conversion.Write(filestream, new UTF8Encoding(useUTF8Bom));
                 }
             }
         }

@@ -44,11 +44,15 @@ public abstract class ConversionWriter : IConversionWriter
 
     protected virtual string? GetGeneratedPreamble() => null;
 
+    protected virtual bool? GetUseUTF8Bom() => null;
+
     public string FileName => GetFileName();
 
     public string? BasePath => GetBasePath();
 
     public string? GeneratedPreamble => GetGeneratedPreamble();
+
+    public bool? UseUTF8Bom => GetUseUTF8Bom();
 }
 
 /// <summary>

@@ -35,6 +35,11 @@ public class ConversionDelegate
         get { return _builder.BasePath; }
     }
 
+    /// <summary>
+    /// Use UTF8 Bom. null means automatic, depending on conversion default
+    /// </summary>
+    public bool? UseUTF8Bom => null;
+
     public void Write(Stream stream, Encoding encoding)
     {
         var writer = new StreamWriter(stream, encoding);
