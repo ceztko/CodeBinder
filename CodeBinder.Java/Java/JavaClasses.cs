@@ -129,7 +129,7 @@ public class HandleRef
         this.handle = handle;
     }
 
-    public long getWrapper()
+    public Object getWrapper()
     {
         return this.wrapper;
     }
