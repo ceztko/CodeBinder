@@ -128,6 +128,16 @@ public class HandleRef
         this.wrapper = wrapper;
         this.handle = handle;
     }
+
+    public long getWrapper()
+    {
+        return this.wrapper;
+    }
+
+    public long getHandle()
+    {
+        return this.handle;
+    }
 }";
 
     public const string NativeHandle = """
