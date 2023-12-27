@@ -24,6 +24,8 @@ public class ConversionCSharpToNAPI : CSharpLanguageConversionBase<NAPICompilati
         get { return new string[] { "NODEJS", "NAPI" }; }
     }
 
+    public override bool NeedNamespaceMapping => false;
+
     public override IEnumerable<IConversionWriter> DefaultConversions
     {
         get

@@ -49,6 +49,7 @@ let napi: any = napi_;
         foreach (var strct in Context.Structs)
             builder.Append(new TypeScriptStructWriter(strct)).AppendLine();
 
+        /* TODO: Handle namespace mapping
         var types = new Dictionary<string, List<CSharpBaseTypeContext>>();
         foreach (var type in Context.NestingTypes)
         {
@@ -62,6 +63,7 @@ let napi: any = napi_;
 
             nsTypes.Add(type);
         }
+        */
     }
 
     List<TTypeContext> getSortedTypes<TTypeContext>(IEnumerable<TTypeContext> types)

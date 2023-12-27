@@ -20,6 +20,8 @@ public class ConversionCSharpToTypeScript : CSharpLanguageConversion<TypeScriptC
     {
     }
 
+    public override bool NeedNamespaceMapping => false;
+
     public override string GetMethodBaseName(IMethodSymbol symbol)
     {
         if (symbol.MethodKind == MethodKind.Constructor)
