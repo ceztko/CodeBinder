@@ -166,7 +166,7 @@ public static class NAOTMethodExtensions
             {
                 string? binded;
                 if (!tryGetNAOTBinder(symbol, out binded))
-                    throw new Exception("Could not find the binder for the parameter");
+                    throw new Exception($"Could not find the binder for the type {symbol}");
 
                 if (declType == DeclarationType.ParamByRef)
                     return $"{binded} *";
@@ -177,7 +177,7 @@ public static class NAOTMethodExtensions
             {
                 string? binded;
                 if (!tryGetNAOTBinder(symbol, out binded))
-                    throw new Exception("Could not find the binder for the parameter");
+                    throw new Exception($"Could not find the binder for the type {symbol}");
 
                 return binded;
             }
@@ -337,6 +337,8 @@ public static class NAOTMethodExtensions
             }
             case "CodeBinder.cbbool":
                 return "cbbool*";
+            case "CodeBinder.cbstring":
+                return "cbstring*";
             case "System.Byte":
                 return "byte*";
             case "System.SByte":

@@ -249,7 +249,7 @@ public static class CLangMethodExtensions
                 suffix = null;
                 string? binded;
                 if (!tryGetCLangBinder(symbol, out binded))
-                    throw new Exception("Could not find the binder for the parameter");
+                    throw new Exception($"Could not find the binder for the type {symbol}");
 
                 if (declType == DeclarationType.ParamByRef)
                     return $"{binded} *";
@@ -261,7 +261,7 @@ public static class CLangMethodExtensions
                 suffix = null;
                 string? binded;
                 if (!tryGetCLangBinder(symbol, out binded))
-                    throw new Exception("Could not find the binder for the parameter");
+                    throw new Exception($"Could not find the binder for the type {symbol}");
 
                 return binded;
             }
