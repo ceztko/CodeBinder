@@ -118,7 +118,7 @@ public abstract class Converter
             }
             else
             {
-                using (var filestream = new FileStream(filepath, FileMode.OpenOrCreate))
+                using (var filestream = new FileStream(filepath, FileMode.Create))
                 {
                     conversion.Write(filestream, new UTF8Encoding(useUTF8Bom));
                 }
