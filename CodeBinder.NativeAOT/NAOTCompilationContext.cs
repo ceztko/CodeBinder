@@ -110,8 +110,7 @@ public class NAOTCompilationContext : CSharpCompilationContextBase<NAOTModuleCon
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
-    <LangVersion>preview</LangVersion>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
