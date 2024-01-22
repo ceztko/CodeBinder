@@ -297,6 +297,8 @@ public static class NAOTMethodExtensions
                 return "cbstring";
             case "CodeBinder.cbbool":
                 return "cbbool";
+            case "CodeBinder.cboptbool":
+                return "cboptbool";
             case "System.Byte":
                 return "byte";
             case "System.SByte":
@@ -337,6 +339,8 @@ public static class NAOTMethodExtensions
             }
             case "CodeBinder.cbbool":
                 return "cbbool*";
+            case "CodeBinder.cboptbool":
+                return "cboptbool*";
             case "CodeBinder.cbstring":
                 return "cbstring*";
             case "System.Byte":

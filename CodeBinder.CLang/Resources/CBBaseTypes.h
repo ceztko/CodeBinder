@@ -36,6 +36,12 @@ typedef struct
     uintptr_t opaque;
 } cbstring;
 
+typedef struct
+{
+    cbbool has_value;
+    cbbool value;
+} cboptbool;
+
 #ifdef __cplusplus
 #define cbstringnull cbstring{ }
 #else // __cplusplus

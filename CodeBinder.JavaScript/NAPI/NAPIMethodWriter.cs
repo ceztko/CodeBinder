@@ -1,9 +1,6 @@
 ﻿// SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
-using CodeBinder.CLang;
-using CodeBinder.JavaScript.TypeScript;
-
 namespace CodeBinder.JavaScript.NAPI;
 
 class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModuleConversion>
@@ -305,6 +302,11 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
                         case "CodeBinder.cbbool":
                         {
                             Builder.Append($"GetBoolFromNapiValue(env, args[{index}])");
+                            break;
+                        }
+                        case "CodeBinder.cboptbool":
+                        {
+                            Builder.Append($"GetOptBoolFromNapiValue(env, args[{index}])");
                             break;
                         }
                         case "System.SByte":

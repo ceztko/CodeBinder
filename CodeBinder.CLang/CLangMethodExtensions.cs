@@ -191,6 +191,8 @@ public static class CLangMethodExtensions
                 {
                     case "CodeBinder.cbbool":
                         return "cbbool";
+                    case "CodeBinder.cbstring":
+                        return "cbstring";
                     default:
                         throw new Exception($"Unsupported by type {fullName}");
                 }
@@ -416,6 +418,8 @@ public static class CLangMethodExtensions
                 return "cbstring";
             case "CodeBinder.cbbool":
                 return "cbbool";
+            case "CodeBinder.cboptbool":
+                return "cboptbool";
             case "System.Byte":
                 return "uint8_t";
             case "System.SByte":
@@ -457,6 +461,8 @@ public static class CLangMethodExtensions
             }
             case "CodeBinder.cbbool":
                 return "cbbool*";
+            case "CodeBinder.cboptbool":
+                return "cboptbool*";
             case "System.Byte":
                 return "uint8_t*";
             case "System.SByte":

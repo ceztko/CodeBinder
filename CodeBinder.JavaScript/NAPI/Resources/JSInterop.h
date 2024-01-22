@@ -119,6 +119,24 @@ namespace js
         return (cbbool)ret;
     }
 
+    inline cboptbool GetOptBoolFromNapiValue(napi_env env, napi_value value)
+    {
+        if (IsNull(env, value))
+        {
+            return cboptbool{ };
+        }
+        else
+        {
+            bool boolval;
+            napi_get_value_bool(env, value, &boolval);
+
+            cboptbool ret;
+            ret.has_value = (cbbool)true;
+            ret.value = (cbbool)boolval;
+            return ret;
+        }
+    }
+
     inline int8_t GetInt8FromNapiValue(napi_env env, napi_value value)
     {
         int32_t ret;

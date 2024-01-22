@@ -25,7 +25,9 @@ public class NAOTModuleConversion : TypeConversion<NAOTModuleContext, NAOTCompil
 
     protected sealed override void write(CodeBuilder builder)
     {
-        builder.AppendLine();
+        if (!IsTemplateConversion)
+            builder.AppendLine();
+
         builder.Append("partial class ").Append(ModuleName).AppendLine();
         using (builder.Block())
         {
@@ -45,7 +47,8 @@ public class NAOTModuleConversion : TypeConversion<NAOTModuleContext, NAOTCompil
         }
     }
 
-    protected override string GetGeneratedPreamble() => ConversionCSharpToNativeAOT.SourcePreamble;
+    protected override string GetGeneratedPreamble() => IsTemplateConversion
+        ? string.Empty : ConversionCSharpToNativeAOT.SourcePreamble;
 
     public override NAOTCompilationContext Compilation
     {
