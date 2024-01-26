@@ -199,6 +199,12 @@ class JNITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, JNIModuleC
                                     Builder.Append(param.Identifier.Text);
                                 break;
                             }
+                            case "CodeBinder.cboptbool":
+                            {
+                                Builder.Append("OPTJ2N")
+                                        .Parenthesized().Append("jenv").CommaSeparator().Append(param.Identifier.Text).Close();
+                                break;
+                            }
                             default:
                             {
                                 Builder.Append(param.Identifier.Text);

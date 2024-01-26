@@ -61,24 +61,25 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #include &quot;JNITypes.h&quot;
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2019 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#include &quot;JNITypes.h&quot;
         ///
         ///extern &quot;C&quot;
         ///{
-        ///    JNIEXPORT jlong JNICALL Java_CodeBinder_Java_BinderUtils_newGlobalRef(
+        ///    JNIEXPORT jlong JNICALL Java_CodeBinder_BinderUtils_newGlobalRef(
         ///        JNIEnv *env, jclass, jobject obj)
         ///    {
         ///        return (jlong)env-&gt;NewGlobalRef(obj);
         ///    }
         ///
-        ///    JNIEXPORT void JNICALL Java_CodeBinder_Java_BinderUtils_deleteGlobalRef(
+        ///    JNIEXPORT void JNICALL Java_CodeBinder_BinderUtils_deleteGlobalRef(
         ///        JNIEnv *env, jclass, jlong globalref)
         ///    {
-        ///        env-&gt;DeleteGlobalRef((jobject)globalref);
-        ///    }
-        ///	
-        ///	JNIEXPORT jlong JNICALL Java_CodeBinder_Java_BinderUtils_newGlobalWeakRef(
-        ///		JNIEnv *env, jclass, jobject obj) [rest of string was truncated]&quot;;.
+        ///        env-&gt;DeleteGlobalRef((jobject)globalref) [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBinderUtils_cpp {
             get {
@@ -87,7 +88,12 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #include &quot;JNIBoxes.h&quot;
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#include &quot;JNIBoxes.h&quot;
         ///
         ///#include &lt;CBInterop.h&gt;
         ///
@@ -104,12 +110,7 @@ namespace CodeBinder.JNI.Resources {
         ///    else
         ///    {
         ///        m_chars = m_env-&gt;GetStringUTFChars(m_jstring, &amp;m_isCopy);
-        ///        jsize length = env-&gt;GetStringUTFLength(m_jstring);
-        ///        m_value = CBCreateStringViewLen(m_chars, (size_t)length);
-        ///    }
-        ///}
-        ///
-        ///S [rest of string was truncated]&quot;;.
+        ///        jsize length [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxes_cpp {
             get {
@@ -118,7 +119,11 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /* This file was generated. DO NOT EDIT! */
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
         ///#pragma once
         ///
         ///#include &quot;JNITypesPrivate.h&quot;
@@ -136,9 +141,7 @@ namespace CodeBinder.JNI.Resources {
         ///        m_value = (TNative)box-&gt;GetValue(env);
         ///    }
         ///    ~BJ2NImpl()
-        ///    {
-        ///        m_box-&gt;SetValue(m_env, (typename TJBox::ValueType)m_value);
-        ///     [rest of string was truncated]&quot;;.
+        ///    { [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIBoxes_h {
             get {
@@ -147,7 +150,12 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #include &quot;JNICommon.h&quot;
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#include &quot;JNICommon.h&quot;
         ///#include &lt;utility&gt;
         ///#include &lt;string&gt;
         ///#include &lt;cassert&gt;
@@ -163,11 +171,7 @@ namespace CodeBinder.JNI.Resources {
         ///}
         ///
         ///SN2J::SN2J(JNIEnv* env, const cbstring&amp; str)
-        ///    : m_handled(false), m_env(env), m_string(str) { }
-        ///
-        ///// Move semantics
-        ///SN2J::SN2J(JNIEnv* env, cbstring&amp;&amp; str)
-        ///    :  [rest of string was truncated]&quot;;.
+        ///    [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNICommon_cpp {
             get {
@@ -176,20 +180,21 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /* This file was generated. DO NOT EDIT! */
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
         ///#pragma once
         ///
         ///#include &lt;jni.h&gt;
         ///#include &lt;stdexcept&gt;
         ///#include &quot;JNIShared.h&quot;
         ///#include &quot;JNIBoxes.h&quot;
+        ///#include &quot;JNIOptional.h&quot;
         ///#include &lt;CBBaseTypes.h&gt;
         ///
-        ///// https://artificial-mind.net/blog/2020/10/03/always-false
-        ///template &lt;class... T&gt;
-        ///constexpr bool always_false = false;
-        ///
-        ///// Wraps jstring and convert to utf-16 chars
+        /// // Wraps jstring and convert to utf-16 chars
         ///class SJ2N
         ///{
         ///public:
@@ -199,7 +204,8 @@ namespace CodeBinder.JNI.Resources {
         ///    operator cbstring() const;
         ///private:
         ///    JNIEnv* m_env;
-        ///    jstring m_string [rest of string was truncated]&quot;;.
+        ///    jstring m_string;
+        ///    const char* m_c [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNICommon_h {
             get {
@@ -208,7 +214,41 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #include &lt;jni.h&gt;
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2023 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#pragma once
+        ///
+        ///#include &quot;JNITypesPrivate.h&quot;
+        ///#include &lt;CBBaseTypes.h&gt;
+        ///
+        ///template &lt;typename TJBoxed, typename TNative&gt;
+        ///class OPTJ2NImplBase
+        ///{
+        ///protected:
+        ///    static TNative getValue(JNIEnv* env, TJBoxed boxed, jfieldID fieldId)
+        ///    {
+        ///        (void)env;
+        ///        (void)jarray;
+        ///        (void)fieldId;
+        ///        static_assert(always_false&lt;TJBoxed, TNative&gt;, &quot;Not implemented&quot;);
+        ///        re [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string JNIOptional_h {
+            get {
+                return ResourceManager.GetString("JNIOptional_h", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#include &lt;jni.h&gt;
         ///#include &lt;cassert&gt;
         ///#include &quot;JNIShared.h&quot;
         ///
@@ -230,10 +270,7 @@ namespace CodeBinder.JNI.Resources {
         ///    return getEnv(s_jvm);
         ///}
         ///
-        ///JNIEnv* getEnv(JavaVM* jvm)
-        ///{
-        ///    // GetEnv can be used only if current thread was created
-        ///    // with Java, otherwise AttachCurrentProces [rest of string was truncated]&quot;;.
+        ///JNIEnv* getEnv(JavaVM [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNIShared_cpp {
             get {
@@ -242,7 +279,12 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #pragma once
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#pragma once
         ///
         ///#include &quot;JNITypesPrivate.h&quot;
         ///
@@ -258,7 +300,12 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #include &quot;JNITypesPrivate.h&quot;
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#include &quot;JNITypesPrivate.h&quot;
         ///
         ///const char * _jBooleanBoxBase::getFieldIdSignature()
         ///{
@@ -272,15 +319,7 @@ namespace CodeBinder.JNI.Resources {
         ///
         ///void _jBooleanBoxBase::setValue(JNIEnv * env, jfieldID field, ValueType value)
         ///{
-        ///    env-&gt;SetBooleanField(this, field, value);
-        ///}
-        ///
-        ///const char* _jByteBoxBase::getFieldIdSignature()
-        ///{
-        ///    return &quot;B&quot;;
-        ///}
-        ///
-        ///_jByteBoxBase::ValueType _jByteBoxB [rest of string was truncated]&quot;;.
+        ///    env-&gt;SetBooleanField(this, field, valu [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNITypes_cpp {
             get {
@@ -289,25 +328,24 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #pragma once
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#pragma once
         ///
         ///#include &lt;jni.h&gt;
         ///
         ///#if defined(__APPLE__) &amp;&amp; !defined(JNI_VERSION_1_8)
-        ///// Workaround for old macosx JDK7 build that doesn&apos;t
-        ///// export symbols on gcc/clang
-        ///// TODO: Create a custom jni.h wrapper header and include it
-        ///// as a more common header
+        /// // Workaround for old macosx JDK7 build that doesn&apos;t
+        /// // export symbols on gcc/clang
+        /// // TODO: Create a custom jni.h wrapper header and include it
+        /// // as a more common header
         ///#undef JNIIMPORT
         ///#undef JNIEXPORT
         ///#define JNIIMPORT __attribute__((visibility(&quot;default&quot;)))
-        ///#define JNIEXPORT __attribute__((visibility(&quot;default&quot;)))
-        ///#endif
-        ///
-        ///#define jBooleanBox jobject
-        ///#define jByteBox jobject
-        ///#define jShortBox jobject
-        ///#de [rest of string was truncated]&quot;;.
+        ///#define JNIEXPORT __attribute [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNITypes_h {
             get {
@@ -316,7 +354,12 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #include &quot;JNITypesPrivate.h&quot;
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#include &quot;JNITypesPrivate.h&quot;
         ///
         ///#include &quot;JNIShared.h&quot;
         ///
@@ -333,9 +376,18 @@ namespace CodeBinder.JNI.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #pragma once
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2021 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#pragma once
         ///
         ///#include &quot;JNITypes.h&quot;
+        ///
+        /// // https://artificial-mind.net/blog/2020/10/03/always-false
+        ///template &lt;class... T&gt;
+        ///constexpr bool always_false = false;
         ///
         ///#undef jBooleanBox
         ///#undef jByteBox
@@ -349,16 +401,7 @@ namespace CodeBinder.JNI.Resources {
         ///
         ///// Template for box types
         ///template &lt;typename BaseT&gt;
-        ///class _jTypeBox : public BaseT
-        ///{
-        ///public:
-        ///    typename BaseT::ValueType GetValue(JNIEnv *env) const;
-        ///    void SetValue(JNIEnv *env, typename BaseT::ValueType value);
-        ///private:
-        ///    jfieldID getFieldId(JNIEnv *env) const;
-        ///};
-        ///
-        ///// Base box types [rest of string was truncated]&quot;;.
+        ///cla [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string JNITypesPrivate_h {
             get {

@@ -9,13 +9,10 @@
 #include <stdexcept>
 #include "JNIShared.h"
 #include "JNIBoxes.h"
+#include "JNIOptional.h"
 #include <CBBaseTypes.h>
 
-// https://artificial-mind.net/blog/2020/10/03/always-false
-template <class... T>
-constexpr bool always_false = false;
-
-// Wraps jstring and convert to utf-16 chars
+ // Wraps jstring and convert to utf-16 chars
 class SJ2N
 {
 public:

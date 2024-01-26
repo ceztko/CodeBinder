@@ -75,6 +75,8 @@ static class JNIMethodExtensions
                 return "jstring";
             case "CodeBinder.cbbool":
                 return "jboolean";
+            case "CodeBinder.cboptbool":
+                return "jBoolean";
             case "System.Runtime.InteropServices.HandleRef":
                 return "jHandleRef";
             case "System.UIntPtr":
