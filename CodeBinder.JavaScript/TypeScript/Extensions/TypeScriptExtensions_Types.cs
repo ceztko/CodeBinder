@@ -348,9 +348,9 @@ static partial class TypeScriptExtensions
             }
             case SymbolKind.ArrayType:
             {
-                var arrayType = (IArrayTypeSymbol)symbol;
-                if (!arrayType.ElementType.IsCLRPrimitiveType())
-                    fullTypeName = arrayType.ElementType.GetFullName();
+                var arraySymbol = (IArrayTypeSymbol)symbol;
+                if (!arraySymbol.ElementType.IsCLRPrimitiveType())
+                    fullTypeName = arraySymbol.ElementType.GetFullName();
                 break;
             }
             case SymbolKind.TypeParameter:
@@ -375,17 +375,46 @@ static partial class TypeScriptExtensions
                 case SyntaxKind.ArrayType:
                 {
                     var arrayType = (ArrayTypeSyntax)type;
+                    var arraySymbol = (IArrayTypeSymbol)symbol;
                     Debug.Assert(arrayType.RankSpecifiers.Count == 1);
-                    builder.Append(typeScriptTypeName).append(arrayType.RankSpecifiers[0], true, context);
+                    if (arraySymbol.ElementType.IsCLRPrimitiveType())
+                    {
+                        builder.Append(typeScriptTypeName).append(arrayType.RankSpecifiers[0], context);
+                    }
+                    else
+                    {
+                        builder.Append("Array").AngleBracketed().Append(typeScriptTypeName).Close()
+                            .append(arrayType.RankSpecifiers[0], context);
+                    }    
                     break;
                 }
                 case SyntaxKind.NullableType:
                 {
                     string? boxTypeName;
                     if (TypeScriptUtils.TryGetBoxType(fullTypeName, out boxTypeName))
+                    {
                         builder.Append(boxTypeName);
+                    }
                     else
-                        builder.Append(typeScriptTypeName).Append(" | null");
+                    {
+                        var nullableType = (NullableTypeSyntax)type;
+                        switch (symbol.TypeKind)
+                        {
+                            case TypeKind.Class:
+                            case TypeKind.Struct:
+                            case TypeKind.Interface:
+                            case TypeKind.TypeParameter:
+                            case TypeKind.Array:
+                                var elementTypeSymbol = nullableType.ElementType.GetSymbol<ITypeSymbol>(context);
+                                writeTypeScriptType(builder, elementTypeSymbol.GetFullName(), nullableType.ElementType, elementTypeSymbol, false, true, context, out _);
+                                builder.Append(" | null");
+                                break;
+                            case TypeKind.Enum:
+                                throw new NotImplementedException("TODO");
+                            default:
+                                throw new NotSupportedException();
+                        }
+                    }
 
                     break;
                 }
@@ -422,8 +451,8 @@ static partial class TypeScriptExtensions
                 {
                     var arrayType = (ArrayTypeSyntax)type;
                     Debug.Assert(arrayType.RankSpecifiers.Count == 1);
-                    TypeScriptBuilderExtension.Append(builder, arrayType.ElementType, context)
-                        .append(arrayType.RankSpecifiers[0], false, context);
+                    builder.Append("Array").AngleBracketed().Append(arrayType.ElementType, context).Close()
+                        .append(arrayType.RankSpecifiers[0], context);
                     break;
                 }
                 case SyntaxKind.GenericName:
@@ -441,6 +470,7 @@ static partial class TypeScriptExtensions
                         case TypeKind.Struct:
                         case TypeKind.Interface:
                         case TypeKind.TypeParameter:
+                        case TypeKind.Array:
                             var elementTypeSymbol = nullableType.ElementType.GetSymbol<ITypeSymbol>(context);
                             writeTypeScriptType(builder, elementTypeSymbol.GetFullName(), nullableType.ElementType, elementTypeSymbol, false, true, context, out _);
                             builder.Append(" | null");
@@ -483,34 +513,18 @@ static partial class TypeScriptExtensions
         return builder;
     }
 
-    static CodeBuilder append(this CodeBuilder builder, ArrayRankSpecifierSyntax syntax, bool customArrayType, TypeScriptCompilationContext context)
+    static CodeBuilder append(this CodeBuilder builder, ArrayRankSpecifierSyntax syntax, TypeScriptCompilationContext context)
     {
-        if (customArrayType)
+        if (syntax.Sizes.Count != 0)
         {
-            if (syntax.Sizes.Count != 0)
-            {
-                Debug.Assert(syntax.Sizes.Count == 1);
-                var size = syntax.Sizes[0];
-                // Ignore omitted array size expression. It can be either:
-                // - An initialization "new Array<number>", which valid TS syntax
-                // - A declaration of any kind, eg. a parameter "param: Array<number>",
-                // which will work without any rank specifier
-                if (!size.IsKind(SyntaxKind.OmittedArraySizeExpression))
-                    builder.Parenthesized().Append(size, context).Close();
-            }
-        }
-        else
-        {
-            if (syntax.Sizes.Count == 0)
-            {
-                builder.Append("[]");
-            }
-            else
-            {
-                Debug.Assert(syntax.Sizes.Count == 1);
-                var size = syntax.Sizes[0];
-                builder.Bracketed().Append(size, context).Close();
-            }
+            Debug.Assert(syntax.Sizes.Count == 1);
+            var size = syntax.Sizes[0];
+            // Ignore omitted array size expression. It can be either:
+            // - An initialization "new Array<number>", which valid TS syntax
+            // - A declaration of any kind, eg. a parameter "param: Array<number>",
+            // which will work without any rank specifier
+            if (!size.IsKind(SyntaxKind.OmittedArraySizeExpression))
+                builder.Parenthesized().Append(size, context).Close();
         }
 
         return builder;

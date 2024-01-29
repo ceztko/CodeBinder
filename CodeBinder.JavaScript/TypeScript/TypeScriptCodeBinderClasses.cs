@@ -381,14 +381,14 @@ export interface IDisposable {
 """
 export class KeyValuePair<TKey, TValue> extends ObjectTS
 {
-    key:TKey | null;
-    value:TValue | null;
+    key:TKey;
+    value:TValue;
 
     constructor(key?: TKey, value?: TValue)
     {
         super();
-        this.key = key ?? null;
-        this.value = value ?? null;
+        this.key = key ?? null!;
+        this.value = value ?? null!;
     }
 }
 """;
