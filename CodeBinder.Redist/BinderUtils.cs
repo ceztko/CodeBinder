@@ -22,6 +22,11 @@ public static class BinderUtils
         return new NativeHandle(GCHandle.Alloc(obj, GCHandleType.Weak));
     }
 
+    public static void KeepAlive(object obj)
+    {
+        GC.KeepAlive(obj);
+    }
+
     public static void FreeNativeHandle(ref NativeHandle nativeHandle)
     {
         nativeHandle.Handle.Free();

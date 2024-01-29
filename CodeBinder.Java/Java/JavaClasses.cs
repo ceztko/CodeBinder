@@ -10,6 +10,7 @@ static class JavaClasses
 
 public class BinderUtils
 {
+    static volatile Object _keepAlive;
     static Object _cleaner;
     static Method _register;
 
@@ -87,6 +88,11 @@ public class BinderUtils
             deleteGlobalWeakRef(nativeHandle.handle);
         else
             deleteGlobalRef(nativeHandle.handle);
+    }
+
+    public static void keepAlive(Object obj)
+    {
+        _keepAlive = obj;
     }
 
     static void registerForFinalization(Object obj, IObjectFinalizer finalizer)

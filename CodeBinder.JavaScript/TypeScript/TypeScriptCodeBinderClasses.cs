@@ -132,6 +132,11 @@ export class BinderUtils
         napi.FreeNativeHandle(nativeHandle.address);
     }
 
+    static keepAlive(obj: object): void
+    {
+        // Do nothing
+    }
+
     // FIXME: This is garbage, this should replaced by proper AST manipulation
     static clear(arr: { set length(count: number); }): { (): void; }
     {
