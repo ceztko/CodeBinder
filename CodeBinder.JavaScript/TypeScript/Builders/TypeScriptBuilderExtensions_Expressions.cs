@@ -212,7 +212,11 @@ static partial class TypeScriptBuilderExtension
         {
             var property = (IPropertySymbol)symbol;
             Debug.Assert(property.IsIndexer);
-            builder.Append(syntax.Expression, context).Dot().Append(syntax, property, context).Parenthesized().Append(syntax.ArgumentList, false, context);
+            if (context.IsCompilationDefined(property.ContainingType))
+                builder.Append(syntax.Expression, context).Dot().Append(syntax, property, context).Parenthesized().Append(syntax.ArgumentList, false, context);
+            else
+                builder.Append(syntax.Expression, context).Append(syntax.ArgumentList, true, context);
+
             return builder;
         }
 
