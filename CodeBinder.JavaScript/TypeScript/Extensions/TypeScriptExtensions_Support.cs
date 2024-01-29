@@ -16,5 +16,6 @@ enum SymbolReplacementKind
     Method,
     StaticMethod,
     Field,
+    Property,
     Literal
 }

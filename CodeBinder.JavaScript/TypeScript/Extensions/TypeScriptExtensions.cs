@@ -24,10 +24,12 @@ static partial class TypeScriptExtensions
                 { "Length", new SymbolReplacement() { Name = "length", Kind = SymbolReplacementKind.Field } },
             } },
             { "System.Collections.Generic.List<T>", new Dictionary<string, SymbolReplacement>() {
+                { "Count", new SymbolReplacement() { Name = "length", Kind = SymbolReplacementKind.Property } },
                 { "Add", new SymbolReplacement() { Name = "push", Kind = SymbolReplacementKind.Method } },
                 { "Clear", new SymbolReplacement() { Name = "BinderUtils.clear", Kind = SymbolReplacementKind.StaticMethod } }, // FIXME: This is an ugly workaround. Solution is AST manipulation
             } },
             { "System.Collections.Generic.IList<T>", new Dictionary<string, SymbolReplacement>() {
+                { "Count", new SymbolReplacement() { Name = "length", Kind = SymbolReplacementKind.Property } },
                 { "Add", new SymbolReplacement() { Name = "push", Kind = SymbolReplacementKind.Method } },
                 { "Clear", new SymbolReplacement() { Name = "BinderUtils.clear", Kind = SymbolReplacementKind.StaticMethod } },// FIXME: This is an ugly workaround. Solution is AST manipulation
             } },
@@ -165,7 +167,7 @@ static partial class TypeScriptExtensions
     public static bool HasTypeScriptReplacement(this IPropertySymbol propertySymbol, [NotNullWhen(true)]out SymbolReplacement? javaReplacement)
     {
         // TODO: look for interface/overridden class
-        if (_replacements.TryGetValue(propertySymbol.ContainingType.GetFullName(), out var replacements))
+        if (_replacements.TryGetValue(propertySymbol.ContainingType.ConstructedFrom.GetFullName(), out var replacements))
             return replacements.TryGetValue(propertySymbol.Name, out javaReplacement);
 
         javaReplacement = null;
@@ -174,7 +176,7 @@ static partial class TypeScriptExtensions
 
     public static bool HasTypeScriptReplacement(this IFieldSymbol fieldSymbol, [NotNullWhen(true)]out SymbolReplacement? replacement)
     {
-        if (_replacements.TryGetValue(fieldSymbol.ContainingType.GetFullName(), out var replacements))
+        if (_replacements.TryGetValue(fieldSymbol.ContainingType.ConstructedFrom.GetFullName(), out var replacements))
             return replacements.TryGetValue(fieldSymbol.Name, out replacement);
 
         replacement = null;
