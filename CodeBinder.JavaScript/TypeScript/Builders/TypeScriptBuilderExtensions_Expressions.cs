@@ -1,8 +1,6 @@
 ﻿// SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
-using CodeBinder.Shared.CSharp;
-
 namespace CodeBinder.JavaScript.TypeScript;
 
 static partial class TypeScriptBuilderExtension

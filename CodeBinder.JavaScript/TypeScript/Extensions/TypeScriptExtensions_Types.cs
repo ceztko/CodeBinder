@@ -1,6 +1,10 @@
 ﻿// SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 
+using CodeBinder.JavaScript.NAPI;
+using System.Drawing;
+using System.Security.Policy;
+
 namespace CodeBinder.JavaScript.TypeScript;
 
 static partial class TypeScriptExtensions
@@ -372,7 +376,7 @@ static partial class TypeScriptExtensions
                 {
                     var arrayType = (ArrayTypeSyntax)type;
                     Debug.Assert(arrayType.RankSpecifiers.Count == 1);
-                    builder.Append(typeScriptTypeName).append(arrayType.RankSpecifiers[0], context);
+                    builder.Append(typeScriptTypeName).append(arrayType.RankSpecifiers[0], true, context);
                     break;
                 }
                 case SyntaxKind.NullableType:
@@ -418,7 +422,8 @@ static partial class TypeScriptExtensions
                 {
                     var arrayType = (ArrayTypeSyntax)type;
                     Debug.Assert(arrayType.RankSpecifiers.Count == 1);
-                    TypeScriptBuilderExtension.Append(builder, arrayType.ElementType, context).append(arrayType.RankSpecifiers[0], context);
+                    TypeScriptBuilderExtension.Append(builder, arrayType.ElementType, context)
+                        .append(arrayType.RankSpecifiers[0], false, context);
                     break;
                 }
                 case SyntaxKind.GenericName:
@@ -478,18 +483,34 @@ static partial class TypeScriptExtensions
         return builder;
     }
 
-    static CodeBuilder append(this CodeBuilder builder, ArrayRankSpecifierSyntax syntax, TypeScriptCompilationContext context)
+    static CodeBuilder append(this CodeBuilder builder, ArrayRankSpecifierSyntax syntax, bool customArrayType, TypeScriptCompilationContext context)
     {
-        if (syntax.Sizes.Count > 0)
+        if (customArrayType)
         {
-            Debug.Assert(syntax.Sizes.Count == 1);
-            var size = syntax.Sizes[0];
-            // Ignore omitted array size expression. It can be either:
-            // - An initialization "new Array<number>", which valid TS syntax
-            // - A declaration of any kind, eg. a parameter "param: Array<number>",
-            // which will work without any rank specifier
-            if (!size.IsKind(SyntaxKind.OmittedArraySizeExpression))
-                builder.Parenthesized().Append(size, context);
+            if (syntax.Sizes.Count != 0)
+            {
+                Debug.Assert(syntax.Sizes.Count == 1);
+                var size = syntax.Sizes[0];
+                // Ignore omitted array size expression. It can be either:
+                // - An initialization "new Array<number>", which valid TS syntax
+                // - A declaration of any kind, eg. a parameter "param: Array<number>",
+                // which will work without any rank specifier
+                if (!size.IsKind(SyntaxKind.OmittedArraySizeExpression))
+                    builder.Parenthesized().Append(size, context).Close();
+            }
+        }
+        else
+        {
+            if (syntax.Sizes.Count == 0)
+            {
+                builder.Append("[]");
+            }
+            else
+            {
+                Debug.Assert(syntax.Sizes.Count == 1);
+                var size = syntax.Sizes[0];
+                builder.Bracketed().Append(size, context).Close();
+            }
         }
 
         return builder;
@@ -590,6 +611,26 @@ static partial class TypeScriptExtensions
                     case SpecialType.System_Boolean:
                     {
                         builder.Append("BooleanArray");
+                        break;
+                    }
+                    case SpecialType.System_String:
+                    {
+                        builder.Append("string[]");
+                        break;
+                    }
+                    case SpecialType.None:
+                    {
+                        var typeName = arrayType.ElementType.GetFullName();
+                        switch (typeName)
+                        {
+                            case "CodeBinder.cbstring":
+                            {
+                                builder.Append("string[]");
+                                break;
+                            }
+                            default:
+                                throw new NotSupportedException();
+                        }
                         break;
                     }
                     default:

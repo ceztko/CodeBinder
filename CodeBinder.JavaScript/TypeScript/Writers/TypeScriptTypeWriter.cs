@@ -93,7 +93,10 @@ abstract class TypeScriptBaseTypeWriter<TTypeContext> : CodeWriter<TTypeContext>
 
             var accessibility = member.GetAccessibility(Compilation);
             if (accessibility.IsInternal())
-                Builder.AppendLine("/** @internal */");
+            {
+                Builder.AppendLine().AppendLine("/** @internal */");
+                first = false;
+            }
 
             foreach (var writer in member.GetWriters(partialDeclarations, Compilation))
                 Builder.AppendLine(ref first).Append(writer);

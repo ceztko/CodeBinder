@@ -131,24 +131,4 @@ static class NAPIMethodExtensions
             }
         }
     }
-
-    /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
-    public static CodeBuilder Parenthesized(this CodeBuilder builder, bool childIstance = true)
-    {
-        builder.Append("(");
-        if (childIstance)
-            return builder.UsingChild(")");
-        else
-            return builder.Using(")");
-    }
-
-    /// <param name="childIstance">False to use in using directive, true to use in a single line</param>
-    public static CodeBuilder AngleBracketed(this CodeBuilder builder, bool childIstance = true)
-    {
-        builder.Append("<");
-        if (childIstance)
-            return builder.UsingChild(">");
-        else
-            return builder.Using(">");
-    }
 }
