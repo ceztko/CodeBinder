@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SPDX-FileCopyrightText: (C) 2023 Francesco Pretto <ceztko@gmail.com>
  * SPDX-License-Identifier: MIT-0
  */
@@ -15,7 +15,7 @@ protected:
     static TNative getValue(JNIEnv* env, TJBoxed boxed, jfieldID fieldId)
     {
         (void)env;
-        (void)jarray;
+        (void)boxed;
         (void)fieldId;
         static_assert(always_false<TJBoxed, TNative>, "Not implemented");
         return TNative{ };
