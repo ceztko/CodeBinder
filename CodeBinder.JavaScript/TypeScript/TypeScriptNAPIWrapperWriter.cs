@@ -19,6 +19,7 @@ class TypeScriptNAPIWrapperWriter : TypeScriptConversionWriter
         builder.AppendLine("import * as proc from 'node:process';");
         builder.AppendLine($"import * as CodeBinder from './CodeBinder{Context.Conversion.TypeScriptModuleLoadSuffix}';");
         builder.AppendLine("import * as path from 'path';");
+        builder.AppendLine("import * as fs from 'fs';");
         if (!Context.Conversion.GenerationFlags.HasFlag(TypeScriptGenerationFlags.CommonJSCompat))
             builder.AppendLine("import { fileURLToPath } from 'node:url';");
         builder.AppendLine();
@@ -54,7 +55,32 @@ switch (proc.platform)
     }
 }
 
-// https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/65252
+function getLibraryPath(libFileName: string): string
+{
+""");
+
+        if (Context.Conversion.GenerationFlags.HasFlag(TypeScriptGenerationFlags.CommonJSCompat))
+            builder.AppendLine($"    return path.join(__dirname, arch, libFileName);");
+        else
+            builder.AppendLine($"    return fileURLToPath(new URL(path.join(arch, libFileName), import.meta.url));");
+
+        builder.AppendLine(
+"""
+}
+
+function loadLibrary(exports: object, libName: string): void
+{
+    let libpath = getLibraryPath(`{libName}.{shext}`);
+    if (!fs.existsSync(libpath))
+    {
+        libpath = getLibraryPath(`{shprefix}{libName}.{shext}`);
+        if (!fs.existsSync(libpath))
+           throw new Error(`Could not find library ${libName}`); 
+    }
+
+    // https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/65252
+    (proc as any).dlopen(exports, libpath);
+}
 
 const mod = { exports: {} };
 """);
@@ -73,10 +99,6 @@ export default napi;
 
     void appendLoadLibrary(CodeBuilder builder, string libraryName)
     {
-        if (Context.Conversion.GenerationFlags.HasFlag(TypeScriptGenerationFlags.CommonJSCompat))
-            builder.AppendLine($"(proc as any).dlopen(mod, path.join(__dirname, arch, `${{shprefix}}{libraryName}.${{shext}}`));");
-        else
-            builder.AppendLine($"(proc as any).dlopen(mod, fileURLToPath(new URL(path.join(arch, `${{shprefix}}{libraryName}.${{shext}}`), import.meta.url)));");
-
+        builder.AppendLine($"loadLibrary(mod, '{libraryName}');");
     }
 }
