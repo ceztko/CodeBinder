@@ -70,10 +70,10 @@ function getLibraryPath(libFileName: string): string
 
 function loadLibrary(exports: object, libName: string): void
 {
-    let libpath = getLibraryPath(`{libName}.{shext}`);
+    let libpath = getLibraryPath(`${libName}.${shext}`);
     if (!fs.existsSync(libpath))
     {
-        libpath = getLibraryPath(`{shprefix}{libName}.{shext}`);
+        libpath = getLibraryPath(`${shprefix}${libName}.${shext}`);
         if (!fs.existsSync(libpath))
            throw new Error(`Could not find library ${libName}`); 
     }
