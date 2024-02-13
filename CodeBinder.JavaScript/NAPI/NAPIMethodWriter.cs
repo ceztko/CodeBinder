@@ -65,7 +65,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
                     {
                         var arrayType = (IArrayTypeSymbol)symbol.Type;
                         bool commit = symbol.HasAttribute<OutAttribute>();
-                        Builder.Append("AJS2N").AngleBracketed().Append(arrayType.ElementType.GetCLangType()).Close()
+                        Builder.Append("AJS2N").AngleBracketed().Append($"{(commit ? "" : "const ")}{arrayType.ElementType.GetCLangType()}").Close()
                             .Parenthesized().Append("env")
                             .CommaSeparator().Append(param.Identifier.Text)
                             .CommaSeparator().Append(commit ? "true" : "false")
