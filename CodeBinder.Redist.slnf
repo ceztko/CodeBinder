@@ -1,0 +1,9 @@
+{
+  "solution": {
+    "path": "CodeBinder.sln",
+    "projects": [
+      "CodeBinder.Apple.Redist\\CodeBinder.Apple.Redist.csproj",
+      "CodeBinder.Redist\\CodeBinder.Redist.csproj"
+    ]
+  }
+}

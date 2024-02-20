@@ -5,10 +5,19 @@
     <LangVersion>10.0</LangVersion>
     <Nullable>enable</Nullable>
     <OutDir Condition="'$(TargetFramework)' == 'net452'">$(OutputPath)\Net452</OutDir>
+
+    <PackageId>CodeBinder.Apple.Redist</PackageId>
+    <Version>1.0.0</Version>
+    <PackageIcon>icon.png</PackageIcon>
+    <Description>Redistributable components for CodeBinder code generation</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CodeBinder.Redist\CodeBinder.Redist.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="..\Resources\icon.png" Link="icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
