@@ -53,6 +53,7 @@ class Program
         string? language = null;
         List<string> namespaceMappings = new();
         bool shouldShowHelp = false;
+        bool shouldListLanguages = false;
         var conversions = GetConverterInfos();
 
         var options = new OptionSet {
@@ -62,6 +63,7 @@ class Program
             { "l|language=", "The target language for the conversion", l => language = l },
             { "t|targetpath=", "The target root path for the conversion", t => targetPath = t },
             { "h|help", "Show this message and exit", h => shouldShowHelp = h != null },
+            { "L|list", "List all supported languages and exit", L => shouldListLanguages = L != null },
         };
 
         var supportedExtraArgs = new List<string>();
@@ -75,6 +77,16 @@ class Program
         if (shouldShowHelp)
         {
             ShowHelp(options);
+            return;
+        }
+
+        if (shouldListLanguages)
+        {
+            Console.WriteLine("CodeBinder supported languages:");
+            Console.WriteLine();
+            foreach (var conversion in conversions)
+                Console.WriteLine(conversion.LanguageName);
+
             return;
         }
 

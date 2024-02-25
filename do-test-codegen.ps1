@@ -34,20 +34,18 @@ $codebinder = Join-Path bin $conf CodeBinder.exe
 # TypeScript (commonjs compatible)
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
-    --language=TypeScript --commonjs --nsmapping=SampleLibrary:SampleLibrary `
+    --language=TypeScript --commonjs `
     "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryTS))"
 
 # TypeScript (ESModule compatible)
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
-    --language=TypeScript --nsmapping=SampleLibrary:SampleLibrary `
-    "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryMTS))"
+    --language=TypeScript "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryMTS))"
 
 # NodeJS NAPI
 & $codebinder `
     "--solution=$((Join-Path Test CodeBinder.Test.sln))" --project=SampleLibrary `
-    --language=NAPI --nsmapping=SampleLibrary:SampleLibrary `
-    "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAPI))"
+    --language=NAPI "--targetpath=$((Join-Path .. CodeBinder-TestCodeGen SampleLibraryNAPI))"
 
 # Project template conversions: creates the entry points for native methods
 

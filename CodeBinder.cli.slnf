@@ -1,0 +1,8 @@
+{
+  "solution": {
+    "path": "CodeBinder.sln",
+    "projects": [
+      "CodeBinder\\CodeBinder.csproj"
+    ]
+  }
+}
