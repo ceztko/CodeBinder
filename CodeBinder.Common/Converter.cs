@@ -14,9 +14,14 @@ public class ConverterOptions
 
 public class GeneratorOptions
 {
-    public string? TargetPath;
+    public string? TargetPath { get; set; }
     /// <summary>Create string before writing to file. For DEBUG</summary>
-    public bool EagerStringConversion;
+    public bool EagerStringConversion { get; set; }
+
+    /// <summary>
+    /// Properties that will be used to create the msbuild workspace
+    /// </summary>
+    public Dictionary<string, string> Properties { get; } = new Dictionary<string, string>();
 }
 
 public abstract class Converter
@@ -40,7 +45,7 @@ public abstract class Converter
             throw new ArgumentNullException("args.TargtetRootPath");
 
         Microsoft.CodeAnalysis.Project caproject;
-        var workspace = createWorkspace();
+        var workspace = createWorkspace(args.Properties);
         if (project.Solution == null)
         {
             caproject = workspace.OpenProjectAsync(project.FilePath).Result;
@@ -84,7 +89,7 @@ public abstract class Converter
 
     void convertAndWrite(Solution solution, IEnumerable<Project> projectsToConvert, GeneratorOptions args)
     {
-        var workspace = createWorkspace();
+        var workspace = createWorkspace(args.Properties);
         var casolution = workspace.OpenSolutionAsync(solution.FilePath).Result;
         foreach (var project in projectsToConvert)
         {
@@ -126,11 +131,14 @@ public abstract class Converter
         }
     }
 
-    MSBuildWorkspace createWorkspace()
+    MSBuildWorkspace createWorkspace(IReadOnlyDictionary<string, string> extProperties)
     {
         // Creat a workspace with all the preprocessor definition
         // also available as a valorized (the value is arbitrarily 1) property
         var properties = new Dictionary<string, string>{ { "CODE_BINDER", "1" } };
+        foreach (var property in extProperties)
+            properties.Add(property.Key, property.Value);
+
         if (Conversion.PreprocessorDefinitions.Count != 0)
         {
             foreach (var definition in Conversion.PreprocessorDefinitions)

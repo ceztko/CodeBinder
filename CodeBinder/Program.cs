@@ -55,10 +55,12 @@ class Program
         bool shouldShowHelp = false;
         bool shouldListLanguages = false;
         var conversions = GetConverterInfos();
+        List<string> properties = new();
 
         var options = new OptionSet {
             { "p|project=", "The project to be converted", p => projects.Add(p) },
             { "s|solution=", "The solution to be converted", s => solutionPath = s },
+            { "e|property=", "Property for the msbuild workspace, must be colon separated key:value", pr => properties.Add(pr) },
             { "m|nsmapping=", "Mapping for the given, must be colon separated ns1:ns2", ns => namespaceMappings.Add(ns) },
             { "l|language=", "The target language for the conversion", l => language = l },
             { "t|targetpath=", "The target root path for the conversion", t => targetPath = t },
@@ -130,18 +132,28 @@ class Program
             throw;
         }
 
+        GeneratorOptions genargs = new GeneratorOptions();
+        // Set the properties for the msbuild workspace creation
+        foreach (var prop in properties)
+        {
+            var splitted = prop.Split(':');
+            if (splitted.Length != 2)
+                throw new Exception("Property must be in the form key:value");
+
+            genargs.Properties.Add(splitted[0], splitted[1]);
+        }
+
+        genargs.TargetPath = targetPath;
+
         // Set the namespace mappings in the conversion
         foreach (var nsmapping in namespaceMappings)
         {
             var splitted = nsmapping.Split(':');
             if (splitted.Length != 2)
-                throw new Exception("Mapping must be in the form ns:mappens");
+                throw new Exception("Mapping must be in the form ns:mapping");
 
             converter.Conversion.NamespaceMapping.PushMapping(splitted[0], splitted[1]);
         }
-
-        GeneratorOptions genargs = new GeneratorOptions();
-        genargs.TargetPath = targetPath;
 
         // TODO: Handle multiple projects
         if (solutionPath != null)
