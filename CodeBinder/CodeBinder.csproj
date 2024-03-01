@@ -5,7 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <PackageIcon>icon.png</PackageIcon>
     <Description>CodeBinder code transpiler</Description>
     <PackAsTool>true</PackAsTool>
