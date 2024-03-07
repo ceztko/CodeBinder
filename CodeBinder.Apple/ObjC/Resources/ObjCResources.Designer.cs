@@ -61,7 +61,12 @@ namespace CodeBinder.Apple {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #ifndef CBHANDLEDOBJECT_HEADER
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2020 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#ifndef CBHANDLEDOBJECT_HEADER
         ///#define CBHANDLEDOBJECT_HEADER
         ///#pragma once
         ///
@@ -69,21 +74,16 @@ namespace CodeBinder.Apple {
         ///#import &lt;Foundation/Foundation.h&gt;
         ///#import &quot;CBHandleRef.h&quot;
         ///
-        ///OBJC_CODEBINDER_API @interface CBHandledObjectBase : NSObject
+        ///OBJC_CODEBINDER_API @protocol CBIObjectFinalizer
+        ///@end
+        ///
+        ///OBJC_CODEBINDER_API @interface CBHandledObjectFinalizer : NSObject&lt;CBIObjectFinalizer&gt;
         ///{
-        ///    @private void * _handle;
+        ///    @private void* _handle;
         ///}
-        ///    - (BOOL)isEqualTo:(NSObject *)obj;
+        ///@end
         ///
-        ///    - (NSUInteger)hash;
-        ///
-        ///    @property(nonatomic,readonly) void * unsafeHandle;
-        ///    - (void *)unsafeHandle;
-        ///
-        ///    @property(nonatomic,readonly) CBHandleRef * handle;
-        ///    - (CBHandleRef *)handle;
-        ///
-        ///  [rest of string was truncated]&quot;;.
+        ///OBJC_CODEBINDER_API @interface CBFin [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBHandledObject_h {
             get {
@@ -92,32 +92,30 @@ namespace CodeBinder.Apple {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #ifndef CBHANDLEDOBJECT_INTERNAL_HEADER
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2020 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#ifndef CBHANDLEDOBJECT_INTERNAL_HEADER
         ///#define CBHANDLEDOBJECT_INTERNAL_HEADER
         ///#pragma once
         ///
-        ///@interface CBHandledObjectBase ()
+        ///#import &quot;../Support/CBHandledObject.h&quot;
+        ///
+        ///@interface CBHandledObjectFinalizer ()
         ///    - (id)init;
         ///
-        ///    - (id)init:(void *)handle;
+        ///    -(void)dealloc;
         ///
-        ///    - (void)dealloc;
+        ///    -(void)freeHandle:(void*)handle;
         ///
-        ///    - (void)setHandle:(void *)handle;
-        ///
-        ///    - (void)freeHandle:(void *)handle;
-        ///
-        ///    @property(nonatomic,readonly) void * referenceHandle;
-        ///    - (void *)referenceHandle;
+        ///    @property(nonatomic) void* handle;
+        ///    -(void*)handle;
+        ///    -(void)setHandle:(void*)value;
         ///@end
         ///
-        ///@interface CBHandledObject ()
-        ///    - (id)init;
-        ///
-        ///    - (id)init:(void *)handle;
-        ///@end
-        ///
-        ///#endif // CBHANDLEDOBJECT_INTE [rest of string was truncated]&quot;;.
+        ///@interface CBFinalizableO [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBHandledObject_Internal_h {
             get {
@@ -126,31 +124,31 @@ namespace CodeBinder.Apple {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #import &quot;CBHandledObject.h&quot;
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2020 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#import &quot;CBHandledObject.h&quot;
         ///#import &quot;../Internal/CBHandledObject.h&quot;
         ///#import &quot;../Internal/CBOCBinderUtils.h&quot;
         ///#import &quot;CBException.h&quot;
         ///
-        ///@implementation CBHandledObjectBase
+        ///@implementation CBHandledObjectFinalizer
         ///    - (id)init
         ///    {
         ///        self = [super init];
         ///        if (self == nil)
         ///            return nil;
-        ///        _handle = NULL;
         ///        return self;
         ///    }
         ///
-        ///    - (id)init:(void *)handle
+        ///    -(void)dealloc
         ///    {
-        ///        self = [super init];
-        ///        if (self == nil)
-        ///            return nil;
-        ///        _handle = handle;
-        ///        return self;
+        ///        [self freeHandle:_handle];
         ///    }
         ///
-        /// [rest of string was truncated]&quot;;.
+        ///    - [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBHandledObject_mm {
             get {
@@ -159,7 +157,12 @@ namespace CodeBinder.Apple {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #ifndef CB_BINDERUTILS
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2020 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#ifndef CB_BINDERUTILS
         ///#define CB_BINDERUTILS
         ///#pragma once
         ///
@@ -168,25 +171,16 @@ namespace CodeBinder.Apple {
         ///#include &lt;cinttypes&gt;
         ///#import &lt;Foundation/Foundation.h&gt;
         ///
-        ///inline void* CBGetNativeHandle(CBHandleRef* handle)
-        ///{
-        ///    if (handle == nil)
-        ///        return nullptr;
+        ///OCENLIBPDF_API @interface OCBinderUtils : NSObject
+        ///+(void)setException:(NSException*)exception;
         ///
-        ///    return handle.handle;
-        ///}
+        ///+(void)checkException;
         ///
-        ///inline void* CBGetNativeHandle(void* handle)
-        ///{
-        ///    return handle;
-        ///}
+        ///+(void)keepAlive:(NSObject*)obj;
         ///
-        ///inline NSUInteger* CBGetNativeArray(CBNSUIntegerArray* arr)
-        ///{
-        ///    if (arr == nil)
-        ///        return nullptr;
+        ///@end
         ///
-        ///    return arr [rest of string was truncated]&quot;;.
+        ///inline void* CBGetNativeHandle(CBHandleRef* handl [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBOCBinderUtils_h {
             get {
@@ -195,7 +189,45 @@ namespace CodeBinder.Apple {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #ifndef CBOCINTEROP_HEADER
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2020 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#import &quot;CBOCBinderUtils.h&quot;
+        ///
+        ///@implementation OCBinderUtils
+        ///
+        ///    +(void)setException:(NSException*)exception
+        ///    {
+        ///        @throw exception;
+        ///    }
+        ///
+        ///    +(void)checkException
+        ///    {
+        ///        // Do nothing
+        ///    }
+        ///
+        ///    +(void)keepAlive:(NSObject*)obj;
+        ///    {
+        ///        // Do nothing
+        ///    }
+        ///@end
+        ///.
+        /// </summary>
+        internal static string CBOCBinderUtils_mm {
+            get {
+                return ResourceManager.GetString("CBOCBinderUtils_mm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /**
+        /// * SPDX-FileCopyrightText: (C) 2020 Francesco Pretto &lt;ceztko@gmail.com&gt;
+        /// * SPDX-License-Identifier: MIT-0
+        /// */
+        ///
+        ///#ifndef CBOCINTEROP_HEADER
         ///#define CBOCINTEROP_HEADER
         ///#pragma once
         ///
@@ -215,11 +247,7 @@ namespace CodeBinder.Apple {
         ///
         ///public:
         ///    SN2OC(NSString* str)
-        ///        : m_handled(false), m_cstr{ }, m_ocstr((NSString* __strong*)nil)
-        ///    {
-        ///        if (str != nil)
-        ///            m_cstr = CBCreateStringView([str UTF8String]);
-        ///    [rest of string was truncated]&quot;;.
+        ///        : m_handled(false), m_cstr{ }, m_ocstr((N [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBOCInterop_h {
             get {

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SPDX-FileCopyrightText: (C) 2020 Francesco Pretto <ceztko@gmail.com>
  * SPDX-License-Identifier: MIT-0
  */

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #if defined(OBJC_CODEBINDER_SHARED) || !defined(OBJC_CODEBINDER_STATIC)
 

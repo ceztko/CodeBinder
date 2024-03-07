@@ -13,6 +13,7 @@ public class BinderUtils
     static volatile Object _keepAlive;
     static Object _cleaner;
     static Method _register;
+    static final ThreadLocal<RuntimeException> _exception = new ThreadLocal<RuntimeException>();
 
     static
     {
@@ -41,6 +42,21 @@ public class BinderUtils
                 throw new RuntimeException(ex);
             }
         }
+    }
+
+    public static void checkException()
+    {
+        RuntimeException exception = _exception.get();
+        if (exception != null)
+        {
+            _exception.remove();
+            throw exception;
+        }
+    }
+
+    public static void setException(RuntimeException exception)
+    {
+        _exception.set(exception);
     }
 
     // Simulates as operator https://stackoverflow.com/a/148949/213871

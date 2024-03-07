@@ -582,6 +582,12 @@ static partial class ObjCExtensions
                 objcTypeKind = ObjCTypeKind.Class;
                 return true;
             }
+            case "CodeBinder.BinderUtils":
+            {
+                objcTypeKind = ObjCTypeKind.Class;
+                knownObjCType = "CBBinderUtils";
+                return true;
+            }
             case "CodeBinder.IObjectFinalizer":
             {
                 objcTypeKind = ObjCTypeKind.Protocol;
