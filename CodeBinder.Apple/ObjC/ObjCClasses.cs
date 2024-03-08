@@ -34,7 +34,7 @@ static class ObjCClasses
 #define CB_EXCPETION
 #pragma once
 
-#import "cboclibdefs.h"
+#import "../objclibdefs.h"
 #import <Foundation/Foundation.h>
 
 // Substitute for .NET Excpetion
@@ -52,7 +52,7 @@ OCLIBRARY_MACRO @interface CBException : NSException
 #define CB_KEYVALUEPAIR
 #pragma once
 
-#import ""cboclibdefs.h""
+#import "../objclibdefs.h"
 #import <Foundation/Foundation.h>
 
 // Substitute for .NET KeyValuePair
@@ -80,7 +80,7 @@ OCLIBRARY_MACRO @interface CBKeyValuePair<__covariant KeyType, __covariant Value
 #define CB_HANDLEREF
 #pragma once
 
-#import ""cboclibdefs.h""
+#import "../objclibdefs.h"
 #import <Foundation/Foundation.h>
 
 // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
@@ -104,7 +104,7 @@ OCLIBRARY_MACRO @interface CBHandleRef : NSObject
 """;
 
     public const string CBException_mm = """
-#import ""CBException.h""
+#import "CBException.h"
 
 @implementation CBException
 
@@ -118,7 +118,7 @@ OCLIBRARY_MACRO @interface CBHandleRef : NSObject
 }
 - (id)init:(NSString *)message
 {
-    self = [super initWithName:@""Exception"" reason:message userInfo:nil];
+    self = [super initWithName:@"Exception" reason:message userInfo:nil];
     if (self == nil)
         return nil;
 
@@ -165,7 +165,7 @@ OCLIBRARY_MACRO @interface CBHandleRef : NSObject
 
     public const string CBKeyValuePair_mm =
 """
-#import ""CBKeyValuePair.h""
+#import "CBKeyValuePair.h"
 
 @implementation CBKeyValuePair
 
@@ -194,7 +194,7 @@ OCLIBRARY_MACRO @interface CBHandleRef : NSObject
 
     public const string CBHandleRef_mm =
 """
-#import ""CBHandleRef.h""
+#import "CBHandleRef.h"
 
 @implementation CBHandleRef
 

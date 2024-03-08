@@ -215,8 +215,8 @@ static class ObjCUtils
             case "CodeBinder.cbbool":
                 typeName = "cbbool";
                 return true;
-            case "CodeBinder.cbstring": // We assume it's always eagerly casted to NSString
-                typeName = "NSString";
+            case "CodeBinder.cbstring": // NOTE: We assume it's always eagerly casted to NSString
+                typeName = "NSString*";
                 return true;
             case "System.UIntPtr":
                 typeName = "void *";

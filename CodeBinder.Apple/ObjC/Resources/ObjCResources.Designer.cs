@@ -70,20 +70,20 @@ namespace CodeBinder.Apple {
         ///#define CBHANDLEDOBJECT_HEADER
         ///#pragma once
         ///
-        ///#import &quot;cboclibdefs.h&quot;
+        ///#import &quot;../objclibdefs.h&quot;
         ///#import &lt;Foundation/Foundation.h&gt;
         ///#import &quot;CBHandleRef.h&quot;
         ///
-        ///OBJC_CODEBINDER_API @protocol CBIObjectFinalizer
+        ///OCLIBRARY_MACRO @protocol CBIObjectFinalizer
         ///@end
         ///
-        ///OBJC_CODEBINDER_API @interface CBHandledObjectFinalizer : NSObject&lt;CBIObjectFinalizer&gt;
+        ///OCLIBRARY_MACRO @interface CBHandledObjectFinalizer : NSObject&lt;CBIObjectFinalizer&gt;
         ///{
         ///    @private void* _handle;
         ///}
         ///@end
         ///
-        ///OBJC_CODEBINDER_API @interface CBFin [rest of string was truncated]&quot;;.
+        ///OCLIBRARY_MACRO @interface CBFinalizableO [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBHandledObject_h {
             get {

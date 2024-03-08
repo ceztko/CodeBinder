@@ -7,7 +7,7 @@
 #define CBHANDLEDOBJECT_HEADER
 #pragma once
 
-#import "cboclibdefs.h"
+#import "../objclibdefs.h"
 #import <Foundation/Foundation.h>
 #import "CBHandleRef.h"
 

@@ -29,7 +29,7 @@ class ObjCArrayBoxWriter : ConversionWriter
             builder.AppendLine($"#define CB_{BoxTypeName.ToUpper()}");
             builder.AppendLine("#pragma once");
             builder.AppendLine();
-            builder.AppendLine(@"#import ""cboclibdefs.h""");
+            builder.AppendLine(@"#import ""../objclibdefs.h""");
             builder.AppendLine("#import <Foundation/Foundation.h>");
         }
         else
