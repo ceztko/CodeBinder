@@ -12,7 +12,7 @@
 #include <cinttypes>
 #import <Foundation/Foundation.h>
 
-OCENLIBPDF_API @interface CBBinderUtils : NSObject
+@interface CBBinderUtils : NSObject
 +(void)setException:(NSException*)exception;
 
 +(void)checkException;

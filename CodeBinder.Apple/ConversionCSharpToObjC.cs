@@ -59,26 +59,16 @@ public class ConversionCSharpToObjC : CSharpLanguageConversion<ObjCCompilationCo
         {
             yield return new ObjCBaseTypesHeaderConversion();
             yield return new StringConversionWriter(nameof(ObjCResources.CBHandledObject_Internal_h).ToObjCHeaderFilename(), () => ObjCResources.CBHandledObject_Internal_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
-            yield return new StringConversionWriter(nameof(ObjCResources.CBHandledObject_h).ToObjCHeaderFilename(), () => ObjCResources.CBHandledObject_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter(nameof(ObjCResources.CBHandledObject_mm).ToObjCImplementationFilename(), () => ObjCResources.CBHandledObject_mm) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter(nameof(ObjCResources.CBOCInterop_h).ToObjCHeaderFilename(), () => ObjCResources.CBOCInterop_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter(nameof(ObjCResources.CBOCBinderUtils_h).ToObjCHeaderFilename(), () => ObjCResources.CBOCBinderUtils_h) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter(nameof(ObjCResources.CBOCBinderUtils_mm).ToObjCImplementationFilename(), () => ObjCResources.CBOCBinderUtils_mm) { BasePath = InternalBasePath, GeneratedPreamble = SourcePreamble };
-            yield return new StringConversionWriter(nameof(ObjCResources.cboclibdefs_h).ToObjCHeaderFilename(), () => ObjCResources.cboclibdefs_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
-            yield return new StringConversionWriter(nameof(ObjCClasses.CBException_h).ToObjCHeaderFilename(), () => ObjCClasses.CBException_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter(nameof(ObjCClasses.CBException_mm).ToObjCImplementationFilename(), () => ObjCClasses.CBException_mm) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter(nameof(ObjCClasses.CBIEqualityCompararer_h).ToObjCHeaderFilename(), () => ObjCClasses.CBIEqualityCompararer_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter(nameof(ObjCClasses.CBIReadOnlyList_h).ToObjCHeaderFilename(), () => ObjCClasses.CBIReadOnlyList_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter(nameof(ObjCClasses.CBIDisposable_h).ToObjCHeaderFilename(), () => ObjCClasses.CBIDisposable_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
-            yield return new StringConversionWriter(nameof(ObjCClasses.CBKeyValuePair_h).ToObjCHeaderFilename(), () => ObjCClasses.CBKeyValuePair_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter(nameof(ObjCClasses.CBKeyValuePair_mm).ToObjCImplementationFilename(), () => ObjCClasses.CBKeyValuePair_mm) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
-            yield return new StringConversionWriter(nameof(ObjCClasses.CBHandleRef_h).ToObjCHeaderFilename(), () => ObjCClasses.CBHandleRef_h) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
             yield return new StringConversionWriter(nameof(ObjCClasses.CBHandleRef_mm).ToObjCImplementationFilename(), () => ObjCClasses.CBHandleRef_mm) { BasePath = SupportBasePath, GeneratedPreamble = SourcePreamble };
-            foreach (var type in ObjCUtils.GetInteropTypes())
-            {
-                yield return new ObjCArrayBoxWriter(type, false);
-                yield return new ObjCArrayBoxWriter(type, true);
-            }
         }
     }
 }

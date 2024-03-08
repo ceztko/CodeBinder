@@ -11,22 +11,22 @@
 #import <Foundation/Foundation.h>
 #import "CBHandleRef.h"
 
-OBJC_CODEBINDER_API @protocol CBIObjectFinalizer
+OCLIBRARY_MACRO @protocol CBIObjectFinalizer
 @end
 
-OBJC_CODEBINDER_API @interface CBHandledObjectFinalizer : NSObject<CBIObjectFinalizer>
+OCLIBRARY_MACRO @interface CBHandledObjectFinalizer : NSObject<CBIObjectFinalizer>
 {
     @private void* _handle;
 }
 @end
 
-OBJC_CODEBINDER_API @interface CBFinalizableObject : NSObject
+OCLIBRARY_MACRO @interface CBFinalizableObject : NSObject
 {
     @private NSMutableArray* _finalizers;
 }
 @end
 
-OBJC_CODEBINDER_API @interface CBHandledObjectBase : CBFinalizableObject
+OCLIBRARY_MACRO @interface CBHandledObjectBase : CBFinalizableObject
 {
     @private void* _handle;
     @private BOOL _handled;
@@ -44,7 +44,7 @@ OBJC_CODEBINDER_API @interface CBHandledObjectBase : CBFinalizableObject
 
 @class CBHandledObject;
 
-OBJC_CODEBINDER_API @interface CBHandledObject <BaseT : CBHandledObjectBase*> : CBHandledObjectBase
+OCLIBRARY_MACRO @interface CBHandledObject <BaseT : CBHandledObjectBase*> : CBHandledObjectBase
 @end
 
 #endif // CBHANDLEDOBJECT_HEADER

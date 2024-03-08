@@ -21,7 +21,6 @@ class ObjCLibraryHeaderConversion : ObjCHeaderConversionWriter
         {
             // TODO: Move all this conditional in a better internal header JUST FOR THE COMPILATION UNITS (*.mm files) and not the headers
             // Ensure compilation units will export symbols
-            builder.AppendLine($"#define {ObjCLibDefsHeaderConversion.GetLibraryExportMacro(Compilation)}");
             builder.AppendLine();
 
             // Ensure compilation has ARC enabled

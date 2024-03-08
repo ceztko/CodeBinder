@@ -212,6 +212,12 @@ static class ObjCUtils
             case "CodeBinder.Apple.NSInteger":
                 typeName = "NSInteger";
                 return true;
+            case "CodeBinder.cbbool":
+                typeName = "cbbool";
+                return true;
+            case "CodeBinder.cbstring": // We assume it's always eagerly casted to NSString
+                typeName = "NSString";
+                return true;
             case "System.UIntPtr":
                 typeName = "void *";
                 return true;

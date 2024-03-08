@@ -171,7 +171,7 @@ namespace CodeBinder.Apple {
         ///#include &lt;cinttypes&gt;
         ///#import &lt;Foundation/Foundation.h&gt;
         ///
-        ///OCENLIBPDF_API @interface OCBinderUtils : NSObject
+        ///@interface CBBinderUtils : NSObject
         ///+(void)setException:(NSException*)exception;
         ///
         ///+(void)checkException;
@@ -180,7 +180,9 @@ namespace CodeBinder.Apple {
         ///
         ///@end
         ///
-        ///inline void* CBGetNativeHandle(CBHandleRef* handl [rest of string was truncated]&quot;;.
+        ///inline void* CBGetNativeHandle(CBHandleRef* handle)
+        ///{
+        ///    if ( [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string CBOCBinderUtils_h {
             get {
@@ -196,7 +198,7 @@ namespace CodeBinder.Apple {
         ///
         ///#import &quot;CBOCBinderUtils.h&quot;
         ///
-        ///@implementation OCBinderUtils
+        ///@implementation CBBinderUtils
         ///
         ///    +(void)setException:(NSException*)exception
         ///    {
@@ -252,32 +254,6 @@ namespace CodeBinder.Apple {
         internal static string CBOCInterop_h {
             get {
                 return ResourceManager.GetString("CBOCInterop_h", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to #pragma once
-        ///
-        ///#if defined(OBJC_CODEBINDER_SHARED) || !defined(OBJC_CODEBINDER_STATIC)
-        ///
-        ///#ifdef OBJC_CODEBINDER_EXPORT
-        ///    #define OBJC_CODEBINDER_API __attribute__ ((visibility (&quot;default&quot;)))
-        ///#else
-        ///    #define OBJC_CODEBINDER_IMPORT
-        ///    #define OBJC_CODEBINDER_API
-        ///#endif
-        ///
-        ///#else
-        ///    #define OBJC_CODEBINDER_API
-        ///    #ifndef OBJC_CODEBINDER_EXPORT
-        ///        #define OBJC_CODEBINDER_IMPORT
-        ///    #endif
-        ///#endif
-        ///.
-        /// </summary>
-        internal static string cboclibdefs_h {
-            get {
-                return ResourceManager.GetString("cboclibdefs_h", resourceCulture);
             }
         }
     }

@@ -8,10 +8,13 @@ class ObjCArrayBoxWriter : ConversionWriter
     public ObjCInteropType PrimitiveType { get; private set; }
     public bool IsHeader { get; private set; }
 
-    public ObjCArrayBoxWriter(ObjCInteropType primitiveType, bool isheader)
+    string m_libraryMacro;
+
+    public ObjCArrayBoxWriter(ObjCCompilationContext compilation, ObjCInteropType primitiveType, bool isheader)
     {
         PrimitiveType = primitiveType;
         IsHeader = isheader;
+        m_libraryMacro = ObjCLibDefsHeaderConversion.GetLibraryApiMacro(compilation);
     }
 
     protected override string GetFileName() => IsHeader ? HeaderFile : ImplementationFile;
@@ -31,7 +34,6 @@ class ObjCArrayBoxWriter : ConversionWriter
         }
         else
         {
-            builder.AppendLine("#define OBJC_CODEBINDER_EXPORT");
             builder.AppendLine($"#import \"{HeaderFile}\"");
             builder.AppendLine("#include <cstdlib>");
         }
@@ -39,7 +41,7 @@ class ObjCArrayBoxWriter : ConversionWriter
         builder.AppendLine();
         if (IsHeader)
         {
-            builder.Append("OBJC_CODEBINDER_API").Space().Append("@interface").Space().Append(BoxTypeName).Space().AppendLine(": NSObject");
+            builder.Append(m_libraryMacro).Space().Append("@interface").Space().Append(BoxTypeName).Space().AppendLine(": NSObject");
             using (builder.Block())
             {
                 // Fields
