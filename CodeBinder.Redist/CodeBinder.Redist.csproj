@@ -8,7 +8,7 @@
     <OutDir Condition="'$(TargetFramework)' == 'net452'">$(OutputPath)\Net452</OutDir>
 
     <PackageId>CodeBinder.Redist</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <PackageIcon>icon.png</PackageIcon>
     <Description>Redistributable components for CodeBinder code generation</Description>
   </PropertyGroup>

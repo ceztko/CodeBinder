@@ -68,7 +68,7 @@ public class HandledObjectBase : FinalizableObject
 
     protected virtual void FreeHandle(IntPtr handle)
     {
-        throw new NotImplementedException();
+        throw new NotImplementedException(GetType().ToString());
     }
 
     /// <summary>
