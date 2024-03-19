@@ -402,9 +402,63 @@ static partial class TypeScriptBuilderExtension
     {
         _ = context;
         if (syntax.Token.IsKind(SyntaxKind.StringLiteralToken) && syntax.Token.Text.StartsWith("@"))
+        {
             builder.Append(syntax.Token.Text.Replace("\"", "\"\"")); // Handle verbatim strings
+        }
+        else if (syntax.Token.IsKind(SyntaxKind.NumericLiteralToken))
+        {
+            ITypeSymbol type;
+            var operation = syntax.GetOperation(context);
+            if (operation == null)
+            {
+                type = syntax.GetTypeSymbol(context)!;
+            }
+            else
+            {
+                // Find the first implicit type in the
+                // hiearchy and look up in the ancestors
+                Debug.Assert(operation.Type != null);
+                while (true)
+                {
+                    type = operation.Type!;
+                    if (operation.IsImplicit
+                        || operation.Parent == null
+                        || operation.Parent.Type == null)
+                    {
+                        break;
+                    }
+
+                    operation = operation.Parent;
+                }
+            }
+
+            switch (type.SpecialType)
+            {
+                case SpecialType.System_UInt64:
+                case SpecialType.System_Int64:
+                {
+                    // Add literal 'n'
+                    builder.Append(syntax.Token.Text).Append("n");
+                    break;
+                }
+                case SpecialType.System_Single:
+                {
+                    // Remove literal 'f'
+                    builder.Append(syntax.Token.Text.Trim('f'));
+                    break;
+                }
+                default:
+                {
+                    builder.Append(syntax.Token.Text);
+                    break;
+                }    
+            }
+        }
         else
+        {
             builder.Append(syntax.Token.Text);
+        }
+
         return builder;
     }
 
