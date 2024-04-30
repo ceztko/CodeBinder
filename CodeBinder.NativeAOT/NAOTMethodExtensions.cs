@@ -164,14 +164,10 @@ public static class NAOTMethodExtensions
             // Handle some special types first
             case TypeKind.Enum:
             {
-                string? binded;
-                if (!tryGetNAOTBinder(symbol, out binded))
-                    throw new Exception($"Could not find the binder for the type {symbol}");
-
                 if (declType == DeclarationType.ParamByRef)
-                    return $"{binded} *";
+                    return $"{symbol.Name} *";
                 else
-                    return binded;
+                    return symbol.Name;
             }
             case TypeKind.Delegate:
             {

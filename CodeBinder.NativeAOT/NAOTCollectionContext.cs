@@ -41,9 +41,6 @@ public class NAOTCollectionContext : CSharpCollectionContextBase<NAOTCompilation
 
     private void Visitor_EnumDeclarationVisit(CSharpNodeVisitor visitor, EnumDeclarationSyntax node)
     {
-        if (!node.GetAttributes(this).HasAttribute<NativeBindingAttribute>())
-            return;
-
         Compilation.AddEnum(node);
     }
 
