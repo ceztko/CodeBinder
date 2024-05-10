@@ -569,7 +569,7 @@ static partial class TypeScriptExtensions
                 {
                     case SpecialType.System_Byte:
                     {
-                        builder.Append("Uint8ClampedArray");
+                        builder.Append("Uint8Array");
                         break;
                     }
                     case SpecialType.System_SByte:
@@ -751,7 +751,7 @@ static partial class TypeScriptExtensions
             }
             case "System.Byte[]":
             {
-                knownTypeScriptType = "Uint8ClampedArray";
+                knownTypeScriptType = "Uint8Array";
                 isInterface = false;
                 return true;
             }

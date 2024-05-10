@@ -439,13 +439,13 @@ export class NotImplementedException extends Error
 """
 export class BooleanArray
 {
-    #actualArray: Uint8ClampedArray;
+    #actualArray: Uint8Array;
 
     [index: number]: boolean;
 
     constructor(length? : number)
     {
-        this.#actualArray = new Uint8ClampedArray(length ?? 0);
+        this.#actualArray = new Uint8Array(length ?? 0);
         return new Proxy(this, BooleanArray.indexedHandler);
     }
 
