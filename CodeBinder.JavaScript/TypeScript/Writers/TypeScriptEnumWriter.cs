@@ -19,5 +19,5 @@ class TypeScriptEnumWriter : TypeScriptBaseTypeWriter<TypeScriptEnumContext>
         }
     }
 
-    public override string TypeDeclaration => "const enum";
+    public override string TypeDeclaration => "enum";
 }
