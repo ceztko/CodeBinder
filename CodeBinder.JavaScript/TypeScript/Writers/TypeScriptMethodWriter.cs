@@ -254,6 +254,8 @@ class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
 
     protected override void WriteMethodBodyPrefixInternal()
     {
+        WriteParameterDefaults();
+
         if (_isStructType)
         {
             Builder.Append("let ret = new").Space().Append(Symbol.ContainingType.Name).EmptyParameterList().EndOfStatement();
@@ -284,8 +286,6 @@ class ConstructorWriter : MethodWriter<ConstructorDeclarationSyntax>
                 Builder.Append(Item.Initializer, _wrapperMethodName != null, Context).EndOfStatement();
             }
         }
-
-        WriteParameterDefaults();
     }
 
     public override bool WriteMethodBody => !_isStructType;
