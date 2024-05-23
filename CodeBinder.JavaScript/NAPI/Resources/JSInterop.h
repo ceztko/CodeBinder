@@ -228,6 +228,9 @@ namespace js
 
     inline cbstring CreateCBStringFromNapiValue(napi_env env, napi_value str)
     {
+        if (IsNull(env, str))
+            return cbstring{ };
+
         size_t len;
         napi_get_value_string_utf8(env, str, nullptr, 0, &len);
         cbstring ret = CBCreateStringFixed(len);
