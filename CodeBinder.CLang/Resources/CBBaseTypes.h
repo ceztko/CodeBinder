@@ -21,14 +21,16 @@
 #include <objc/objc.h>
 #endif
 
-#if defined(__cplusplus) && defined(_MSC_VER)
-// In MSVC bool is guaranteed to be 1 byte, with true == 1 and false == 0
+#ifdef __cplusplus
+ // In all modern compilers bool is guaranteed to be 1 byte, with true == 1 and false == 0
 typedef bool cbbool;
-#elif defined(__APPLE__)
+#else // __cplusplus
+#ifdef __OBJC__
 typedef BOOL cbbool;
-#else // Others
+#else // __OBJC__
 typedef signed char cbbool;
-#endif
+#endif // __OBJC__
+#endif // __cplusplus
 
 typedef struct
 {
