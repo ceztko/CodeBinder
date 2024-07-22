@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: MIT
 
 using CodeBinder.JavaScript.NAPI;
+using CodeBinder.Shared;
 using System.Drawing;
 using System.Security.Policy;
+using System.Xml.Linq;
 
 namespace CodeBinder.JavaScript.TypeScript;
 
@@ -22,7 +24,8 @@ static partial class TypeScriptExtensions
 
     public static string? GetTypeScriptDefaultLiteral(this TypeSyntax type, TypeScriptCompilationContext context)
     {
-        var fullName = type.GetFullName(context);
+        var symbol = type.GetTypeSymbolThrow(context);
+        var fullName = symbol.GetFullName();
         switch(fullName)
         {
             case "System.Void":
@@ -45,10 +48,17 @@ static partial class TypeScriptExtensions
             case "System.UInt64":
                 return "0n";
             default:
-                if (type.IsKind(SyntaxKind.NullableType))
-                    return "null";
+                if (symbol.TypeKind == TypeKind.Enum)
+                {
+                    return $"0 as {symbol.Name}";
+                }
                 else
-                    return "null!";
+                {
+                    if (type.IsKind(SyntaxKind.NullableType))
+                        return "null";
+                    else
+                        return "null!";
+                }
         }
     }
 
