@@ -60,3 +60,22 @@ These issues involve edge cases, specific C# constructs that are rarely used in 
 5. **Alternative Finalizers in `JavaClasses.cs`:**
    - **Issue:** `HandledObjectFinalizer` and `IObjectFinalizer` have `#TODO` comments regarding whether they should implement `Runnable` natively or generate a `finalize()` block based on platform constraints.
    - **Action:** Refine the finalization strategy by fully adopting `java.lang.ref.Cleaner` for Java 9+ while maintaining robust legacy `finalize()` fallbacks strictly separated by API level (especially for Android).
+
+### Unhandled Language Edge Cases & Bugs
+Additional issues discovered during code review, beyond explicit comments.
+
+1. **Unsupported Expressions Exception Handling:**
+   - **Issue:** `JavaBuilderExtensions_Expressions.cs` natively throws raw `Exception` instances for syntax items like `CoalesceExpression`, `PointerMemberAccessExpression`, `AliasQualifiedName`, `TupleType`, etc.
+   - **Action:** Introduce specific diagnostic error reporting (e.g., `CompilationError`) and skip generation instead of throwing runtime exceptions that break the transpilation process.
+2. **Missing `SymbolReplacementKind` implementations:**
+   - **Issue:** `JavaExtensions_Types.cs` and `JavaBuilderExtensions_Expressions.cs` throw `NotImplementedException` for property symbol replacements configured as `SymbolReplacementKind.Method` (in setters) or unknown symbol replacement types in binary expressions.
+   - **Action:** Complete the logic to allow mapping properties to setter methods properly, or restrict definition of those unsupported types via validation.
+3. **Catch-All Exception Generation `Exception e`:**
+   - **Issue:** `JavaBuilderExtensions_Statements.cs` handles parameterless catch blocks `catch { ... }` by translating them directly to `catch (Exception e) { ... }`.
+   - **Action:** Java requires catching checked exceptions explicitly or catching `Throwable` for true catch-all parity with C#'s parameterless catch. This could lead to compiler errors in generated Java files or missing JVM Errors.
+4. **Unsupported Statements Exception Handling:**
+   - **Issue:** `GotoStatement`, `GotoCaseStatement`, and `GotoDefaultStatement` throw `NotSupportedException`.
+   - **Action:** Like expressions, these should provide an appropriate diagnostic message or transpiler warning instead of aborting the operation.
+5. **Generic `Exception` Throws:**
+   - **Issue:** Across `JavaUtils.cs` and the extensions files, dozens of `switch` blocks fall back to `throw new Exception()` for simple mismatches (e.g., trying to identify modifiers, checking parenthesis directions).
+   - **Action:** Ensure meaningful exception messages are always thrown, such as `throw new ArgumentOutOfRangeException(nameof(modifier));`, or refactor the code to fail gracefully with logging.
