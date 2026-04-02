@@ -47,7 +47,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
         var methodSymbol = Item.GetDeclaredSymbol<IMethodSymbol>(Context);
         if (!methodSymbol.ReturnsVoid)
         {
-            Builder.Append(methodSymbol.GetCLangReturnType()).Space().Append("cret_").Space().Append("=").Space();
+            Builder.Append(methodSymbol.GetCLangReturnType(true)).Space().Append("cret_").Space().Append("=").Space();
         }
 
         Builder.Append(Item.GetCLangMethodName());

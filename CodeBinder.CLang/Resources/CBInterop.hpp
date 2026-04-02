@@ -24,8 +24,7 @@ namespace cb
     /// and just return from them
     /// </summary>
     class StackUnwinder : public ::std::exception
-    {
-    };
+    {};
 
     inline void* AllocMemory(size_t size)
     {
@@ -45,6 +44,7 @@ namespace cb
 class cbstringbase
 {
     cbstringbase(const cbstringbase&) = delete;
+    cbstringbase& operator=(const cbstringbase&) = delete;
 
 public:
     ~cbstringbase()
@@ -75,13 +75,22 @@ protected:
     }
 
     cbstringbase()
-        : m_str{ "", 0 } { }
+        : m_str{ "", 0 } {}
 
     cbstringbase(nullptr_t)
-        : m_str{ } { }
+        : m_str{ } {}
+
+    cbstringbase(size_t size)
+        : m_str(CBCreateStringFixed(size)) {}
 
     cbstringbase(const cbstring& str)
-        : m_str(str) { }
+        : m_str(str) {}
+
+    cbstringbase(cbstringbase&& str) noexcept
+        : m_str(str.m_str)
+    {
+        str.m_str = { };
+    }
 
     // Non owning
     cbstringbase(const char* str, size_t len)
@@ -100,6 +109,8 @@ protected:
     }
 
 public:
+    operator const cbstring& () const { return m_str; }
+
     // Dereferencing cast to std::string_view without null check
     std::string_view operator*() const
     {
@@ -127,6 +138,11 @@ public:
         return m_str.data;
     }
 
+    explicit operator char* ()
+    {
+        return (char*)m_str.data;
+    }
+
     bool operator==(std::nullptr_t nullpointer) const
     {
         return m_str.data == nullptr;
@@ -149,28 +165,31 @@ class cbstringp final : public cbstringbase
     void operator delete(void*) = delete;
 
 public:
-    cbstringp() { }
+    cbstringp() {}
 
-    cbstringp(cbstring&& str)
+    cbstringp(cbstring&& str) noexcept
         : cbstringbase(str)
     {
         str = { };
     }
 
+    cbstringp(cbstringp&& str) noexcept
+        : cbstringbase(std::move(str)) {}
+
     cbstringp(std::nullptr_t)
-        : cbstringbase(nullptr) { }
+        : cbstringbase(nullptr) {}
 
     cbstringp(const char* str, size_t len)
-        : cbstringbase(str, len) { }
+        : cbstringbase(str, len) {}
 
     cbstringp(const char* str)
-        : cbstringbase(str, str == nullptr ? 0 : std::char_traits<char>::length(str)) { }
+        : cbstringbase(str, str == nullptr ? 0 : std::char_traits<char>::length(str)) {}
 
     cbstringp(const std::string_view& str)
-        : cbstringbase(str.data() == nullptr ? "" : str.data(), str.length()) { }
+        : cbstringbase(str.data() == nullptr ? "" : str.data(), str.length()) {}
 
     cbstringp(const std::string& str)
-        : cbstringbase(str.data(), str.length()) { }
+        : cbstringbase(str.data(), str.length()) {}
 
     void operator=(const std::string_view& str)
     {
@@ -186,11 +205,6 @@ public:
     {
         cbstringbase::operator=(init(str, str == nullptr ? 0 : std::char_traits<char>::length(str)));
     }
-
-    operator const cbstring& () const
-    {
-        return str();
-    }
 };
 
 // Used to wrap ref parameters
@@ -198,7 +212,7 @@ class cbstringpr final
 {
 public:
     explicit cbstringpr(cbstring* pstr)
-        : m_cstr(pstr), m_str(pstr == nullptr ? cbstring() : *pstr) { }
+        : m_cstr(pstr), m_str(pstr == nullptr ? cbstring() : *pstr) {}
 
     ~cbstringpr()
     {
@@ -238,31 +252,37 @@ class cbstringr final : public cbstringbase
     void operator delete(void*) = delete;
 
 public:
-    cbstringr(cbstring&& str)
+    cbstringr(cbstring&& str) noexcept
         : cbstringbase(str)
     {
         str = { };
     }
 
-    cbstringr() { }
+    cbstringr(cbstringr&& str) noexcept
+        : cbstringbase(std::move(str)) {}
+
+    cbstringr() {}
 
     cbstringr(std::nullptr_t)
-        : cbstringbase(nullptr) { }
+        : cbstringbase(nullptr) {}
+
+    cbstringr(size_t size)
+        : cbstringbase(size) {}
 
     cbstringr(const char* str, size_t len)
-        : cbstringbase(init(str, len)) { }
+        : cbstringbase(init(str, len)) {}
 
     cbstringr(const char* str)
-        : cbstringbase(init(str, str == nullptr ? 0 : std::char_traits<char>::length(str))) { }
+        : cbstringbase(init(str, str == nullptr ? 0 : std::char_traits<char>::length(str))) {}
 
     cbstringr(const std::string_view& str)
-        : cbstringbase(init(str.data() == nullptr ? "" : str.data(), str.length())) { }
+        : cbstringbase(init(str.data() == nullptr ? "" : str.data(), str.length())) {}
 
     cbstringr(const std::string& str)
-        : cbstringbase(init(str.data(), str.length())) { }
+        : cbstringbase(init(str.data(), str.length())) {}
 
     // Cast to cbstring with a move semantics
-    operator cbstring() &&
+    operator cbstring()&&
     {
         return release();
     }

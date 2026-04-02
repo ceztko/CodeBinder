@@ -20,7 +20,7 @@
 #define DECLARE_SYMBOL(symbol) extern decltype(::symbol)* symbol
 #endif
 
-// https://artificial-mind.net/blog/2020/10/03/always-false
+ // https://artificial-mind.net/blog/2020/10/03/always-false
 template <class... T>
 constexpr bool always_false = false;
 
@@ -226,15 +226,15 @@ namespace js
         return (void*)reinterpret_cast<uint64_t&>(ret);
     }
 
-    inline cbstring CreateCBStringFromNapiValue(napi_env env, napi_value str)
+    inline cbstringr CreateCBStringFromNapiValue(napi_env env, napi_value str)
     {
         if (IsNull(env, str))
             return cbstring{ };
 
         size_t len;
         napi_get_value_string_utf8(env, str, nullptr, 0, &len);
-        cbstring ret = CBCreateStringFixed(len);
-        napi_get_value_string_utf8(env, str, (char*)ret.data, len + 1, nullptr);
+        cbstringr ret(len);
+        napi_get_value_string_utf8(env, str, (char*)ret, len + 1, nullptr);
         return ret;
     }
 
@@ -340,12 +340,13 @@ namespace js
     inline napi_value CreateNapiValue(napi_env env, TNArray* arr, size_t size)
     {
         napi_value arrayBuffer;
-        napi_status status = napi_create_external_arraybuffer(env, (void*)arr, size, nullptr, nullptr, &arrayBuffer);
+        size_t byteSize = size * sizeof(TNArray);
+        napi_status status = napi_create_external_arraybuffer(env, (void*)arr, byteSize, nullptr, nullptr, &arrayBuffer);
         if (status == napi_no_external_buffers_allowed)
         {
             void* data;
-            napi_create_arraybuffer(env, size, &data, &arrayBuffer);
-            std::memcpy(data, arr, size * sizeof(TNArray));
+            napi_create_arraybuffer(env, byteSize, &data, &arrayBuffer);
+            std::memcpy(data, arr, byteSize);
         }
 
         napi_value ret;
