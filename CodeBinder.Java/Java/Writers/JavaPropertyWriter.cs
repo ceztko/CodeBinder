@@ -49,7 +49,13 @@ abstract class PropertyWriter<TProperty> : JavaCodeWriter<TProperty>
 
         Builder.Append("private").Space();
         Builder.Append(JavaType).Space();
-        Builder.Append(UnderlyingFieldName).EndOfStatement();
+        Builder.Append(UnderlyingFieldName);
+        var symbol = Item.Type.GetTypeSymbolThrow(Context);
+        if (symbol.TypeKind == TypeKind.Enum)
+            Builder.Append(" = ").Append(JavaType).Append(".fromValue(0)");
+
+        Builder.EndOfStatement();
+
     }
 
     private void WriteAccessors(AccessorListSyntax accessorList)
