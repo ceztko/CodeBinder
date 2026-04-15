@@ -149,6 +149,16 @@ export class BinderUtils
         napi.FreeNativeHandle(nativeHandle.address);
     }
 
+    static addMemoryPressure(bytesAllocated: BigInt): void
+    {
+        napi.AdjustEternalMemory(bytesAllocated);
+    }
+
+    static removeMemoryPressure(bytesAllocated: BigInt): void
+    {
+        napi.AdjustEternalMemory(-bytesAllocated);
+    }
+
     static keepAlive(obj: object): void
     {
         // Do nothing

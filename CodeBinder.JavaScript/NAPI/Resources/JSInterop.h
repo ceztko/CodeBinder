@@ -179,7 +179,7 @@ namespace js
         return ret;
     }
 
-    inline uint64_t GetInt64FromNapiValue(napi_env env, napi_value value)
+    inline int64_t GetInt64FromNapiValue(napi_env env, napi_value value)
     {
         int64_t ret;
         bool lossless;

@@ -114,6 +114,10 @@ public:
 
 +(void)keepAlive:(NSObject*)obj;
 
++(void)addMemoryPressure:(int64_t)bytesAllocated;
+
++(void)removeMemoryPressure:(int64_t)bytesAllocated;
+
 @end
 
 inline void* CBGetNativeHandle(CBHandleRef* handle)

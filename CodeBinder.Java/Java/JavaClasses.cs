@@ -10,7 +10,6 @@ static class JavaClasses
 
 public class BinderUtils
 {
-    static volatile Object _keepAlive;
     static Object _cleaner;
     static Method _register;
     static final ThreadLocal<RuntimeException> _exception = new ThreadLocal<RuntimeException>();
@@ -108,7 +107,18 @@ public class BinderUtils
 
     public static void keepAlive(Object obj)
     {
-        _keepAlive = obj;
+        if (obj == null)
+            throw new IllegalArgumentException();
+    }
+
+    public static void addMemoryPressure(long bytesAllocated)
+    {
+        // Do nothing, there's no equivalent in Java
+    }
+
+    public static void removeMemoryPressure(long bytesAllocated)
+    {
+        // Do nothing, there's no equivalent in Java
     }
 
     static void registerForFinalization(Object obj, IObjectFinalizer finalizer)

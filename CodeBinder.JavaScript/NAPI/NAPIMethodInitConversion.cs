@@ -102,10 +102,11 @@ assert(status == napi_ok);
                         }
                     }
 
-                    declareMethod(builder, "CreateNativeHandle", "NAPI_CreateNativeHandle");
-                    declareMethod(builder, "CreateWeakNativeHandle", "NAPI_CreateWeakNativeHandle");
-                    declareMethod(builder, "FreeNativeHandle", "NAPI_FreeNativeHandle");
-                    declareMethod(builder, "NativeHandleGetTarget", "NAPI_NativeHandleGetTarget");
+                    declareMethod(builder, "CreateNativeHandle", "NAPI_CBCreateNativeHandle");
+                    declareMethod(builder, "CreateWeakNativeHandle", "NAPI_CBCreateWeakNativeHandle");
+                    declareMethod(builder, "FreeNativeHandle", "NAPI_CBFreeNativeHandle");
+                    declareMethod(builder, "NativeHandleGetTarget", "NAPI_CBNativeHandleGetTarget");
+                    declareMethod(builder, "AdjustEternalMemory", "NAPI_CBAdjustEternalMemory");
                 }
                 builder.EndOfStatement();
                 builder.AppendLine();

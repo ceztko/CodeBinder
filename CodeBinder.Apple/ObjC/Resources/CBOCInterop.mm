@@ -36,4 +36,14 @@ thread_local ThreadLocalException s_exception;
     {
         // Do nothing
     }
+
+    +(void)addMemoryPressure:(int64_t)bytesAllocated;
+    {
+        // Do nothing, there's no equivalent in Objective-C
+    }
+
+    +(void)removeMemoryPressure:(int64_t)bytesAllocated;
+    {
+        // Do nothing, there's no equivalent in Objective-C
+    }
 @end

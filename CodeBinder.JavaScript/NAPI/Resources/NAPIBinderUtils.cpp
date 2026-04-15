@@ -8,7 +8,7 @@
 
 namespace js
 {
-    extern "C" napi_value NAPI_CreateNativeHandle(
+    extern "C" napi_value NAPI_CBCreateNativeHandle(
         napi_env env, napi_callback_info info)
     {
         napi_status status;
@@ -23,7 +23,7 @@ namespace js
         return CreateNapiValue(env, ref);
     }
 
-    extern "C" napi_value NAPI_CreateWeakNativeHandle(
+    extern "C" napi_value NAPI_CBCreateWeakNativeHandle(
         napi_env env, napi_callback_info info)
     {
         napi_status status;
@@ -38,7 +38,7 @@ namespace js
         return CreateNapiValue(env, ref);
     }
 
-    extern "C" napi_value NAPI_FreeNativeHandle(
+    extern "C" napi_value NAPI_CBFreeNativeHandle(
         napi_env env, napi_callback_info info)
     {
         napi_status status;
@@ -54,7 +54,7 @@ namespace js
         return nullptr;
     }
 
-    extern "C" napi_value NAPI_NativeHandleGetTarget(
+    extern "C" napi_value NAPI_CBNativeHandleGetTarget(
         napi_env env, napi_callback_info info)
     {
         napi_status status;
@@ -69,5 +69,19 @@ namespace js
         assert(status == napi_ok);
 
         return ret;
+    }
+
+
+    extern "C" napi_value NAPI_CBAdjustEternalMemory(
+        napi_env env, napi_callback_info info)
+    {
+        size_t argc = 1;
+        napi_value args[1];
+        napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
+        assert(argc == 1);
+
+        auto value = GetInt64FromNapiValue(env, args[0]);
+        napi_adjust_external_memory(env, value, nullptr);
+        return nullptr;
     }
 }
