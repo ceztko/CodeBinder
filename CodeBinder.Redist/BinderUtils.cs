@@ -42,6 +42,16 @@ public static class BinderUtils
         return new NativeHandle(GCHandle.Alloc(obj, GCHandleType.Weak));
     }
 
+    public static void AddMemoryPressure(long bytesAllocated)
+    {
+        GC.AddMemoryPressure(bytesAllocated);
+    }
+
+    public static void RemoveMemoryPressure(long bytesAllocated)
+    {
+        GC.RemoveMemoryPressure(bytesAllocated);
+    }
+
     public static void KeepAlive(object obj)
     {
         GC.KeepAlive(obj);
