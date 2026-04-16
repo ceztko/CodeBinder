@@ -42,11 +42,23 @@ public static class BinderUtils
 
     public static void AddMemoryPressure(long bytesAllocated)
     {
+        if (bytesAllocated == 0)
+        {
+            // Prevent from throwing
+            return;
+        }
+
         GC.AddMemoryPressure(bytesAllocated);
     }
 
     public static void RemoveMemoryPressure(long bytesAllocated)
     {
+        if (bytesAllocated == 0)
+        {
+            // Prevent from throwing
+            return;
+        }
+
         GC.RemoveMemoryPressure(bytesAllocated);
     }
 

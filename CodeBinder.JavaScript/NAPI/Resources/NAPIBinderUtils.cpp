@@ -80,8 +80,15 @@ namespace js
         napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
         assert(argc == 1);
 
-        auto value = GetInt64FromNapiValue(env, args[0]);
-        napi_adjust_external_memory(env, value, nullptr);
+        auto delta = GetInt64FromNapiValue(env, args[0]);
+        if (delta == 0)
+        {
+            // Early exit to avoid the overhead
+            return nullptr;
+        }
+
+        int64_t adjusted_value;
+        napi_adjust_external_memory(env, delta, &adjusted_value);
         return nullptr;
     }
 }

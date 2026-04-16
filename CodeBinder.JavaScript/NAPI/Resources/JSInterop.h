@@ -78,6 +78,7 @@ namespace js
     DECLARE_SYMBOL(napi_add_finalizer);
     DECLARE_SYMBOL(napi_get_reference_value);
     DECLARE_SYMBOL(napi_get_last_error_info);
+    DECLARE_SYMBOL(napi_adjust_external_memory);
 
     // Adapter class to find the correct typed array type
     template <typename TNArray>
