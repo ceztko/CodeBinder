@@ -208,27 +208,29 @@ public abstract class CSharpValidationContext : CSharpValidationContextBase
             {
                 foreach (var statement in node.Body.Statements)
                 {
-                    var expressionSyntax = statement as ExpressionStatementSyntax;
-                    if (expressionSyntax == null)
-                    {
-                        Unsupported(node, "Unsupported FreeHandle body, it must be a call of static method");
-                        continue;
-                    }
+                    // TODO: Ensure that the body just don't call instance methods of the class
 
-                    var invocation = expressionSyntax.Expression as InvocationExpressionSyntax;
-                    if (invocation == null)
-                    {
-                        Unsupported(node, "Unsupported FreeHandle body, it must be a call of static method");
-                        continue;
-                    }
+                    //var expressionSyntax = statement as ExpressionStatementSyntax;
+                    //if (expressionSyntax == null)
+                    //{
+                    //    Unsupported(node, "Unsupported FreeHandle body, it must be a call of static method");
+                    //    continue;
+                    //}
 
-                    IMethodSymbol? methodSymbol;
-                    if (!invocation.TryGetSymbol(this, out methodSymbol)
-                        || !methodSymbol.IsStatic)
-                    {
-                        Unsupported(node, "Unsupported FreeHandle body, it must be a call of static method");
-                        continue;
-                    }
+                    //var invocation = expressionSyntax.Expression as InvocationExpressionSyntax;
+                    //if (invocation == null)
+                    //{
+                    //    Unsupported(node, "Unsupported FreeHandle body, it must be a call of static method");
+                    //    continue;
+                    //}
+
+                    //IMethodSymbol? methodSymbol;
+                    //if (!invocation.TryGetSymbol(this, out methodSymbol)
+                    //    || !methodSymbol.IsStatic)
+                    //{
+                    //    Unsupported(node, "Unsupported FreeHandle body, it must be a call of static method");
+                    //    continue;
+                    //}
                 }
             }
         }
