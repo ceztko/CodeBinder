@@ -93,4 +93,5 @@ Init::Init()
     LOAD_SYMBOL(module, napi_add_finalizer);
     LOAD_SYMBOL(module, napi_get_reference_value);
     LOAD_SYMBOL(module, napi_get_last_error_info);
+    LOAD_SYMBOL(module, napi_adjust_external_memory);
 }
