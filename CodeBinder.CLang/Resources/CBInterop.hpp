@@ -57,7 +57,12 @@ protected:
     static cbstring init(const char* str, size_t len)
     {
         cbstring ret{ };
-        if (len != 0)
+        if (len == 0)
+        {
+            if (str != nullptr)
+                ret.data = ""; // Handle with a const empty string to avoid allocations
+        }
+        else
         {
             auto newstr = (char*)CBAllocMemory(len + 1);
             std::memcpy(newstr, str, len);
@@ -186,14 +191,14 @@ public:
         : cbstringbase(str, str == nullptr ? 0 : std::char_traits<char>::length(str)) {}
 
     cbstringp(const std::string_view& str)
-        : cbstringbase(str.data() == nullptr ? "" : str.data(), str.length()) {}
+        : cbstringbase(str.data(), str.length()) {}
 
     cbstringp(const std::string& str)
         : cbstringbase(str.data(), str.length()) {}
 
     void operator=(const std::string_view& str)
     {
-        cbstringbase::operator=(init(str.data() == nullptr ? "" : str.data(), str.length()));
+        cbstringbase::operator=(init(str.data(), str.length()));
     }
 
     void operator=(const std::string& str)
@@ -276,7 +281,7 @@ public:
         : cbstringbase(init(str, str == nullptr ? 0 : std::char_traits<char>::length(str))) {}
 
     cbstringr(const std::string_view& str)
-        : cbstringbase(init(str.data() == nullptr ? "" : str.data(), str.length())) {}
+        : cbstringbase(init(str.data(), str.length())) {}
 
     cbstringr(const std::string& str)
         : cbstringbase(init(str.data(), str.length())) {}
