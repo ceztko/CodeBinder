@@ -9,7 +9,6 @@ static class JavaClasses
     public const string BinderUtils =
 
 """
-import java.lang.reflect.*;
 import java.lang.ref.*;
 
 public class BinderUtils
