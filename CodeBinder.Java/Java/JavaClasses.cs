@@ -5,8 +5,153 @@ namespace CodeBinder.Java;
 
 static class JavaClasses
 {
+    // This unconditionally enables java.lang.ref.Cleaner. It's compatible only with >= JDK9
     public const string BinderUtils =
-@"import java.lang.reflect.*;
+
+"""
+import java.lang.reflect.*;
+import java.lang.ref.*;
+
+public class BinderUtils
+{
+    static Cleaner _cleaner;
+    static final ThreadLocal<RuntimeException> _exception = new ThreadLocal<RuntimeException>();
+
+    static
+    {
+        _cleaner = Cleaner.create();
+    }
+
+    public static void checkException()
+    {
+        RuntimeException exception = _exception.get();
+        if (exception != null)
+        {
+            _exception.remove();
+            throw exception;
+        }
+    }
+
+    public static void setException(RuntimeException exception)
+    {
+        _exception.set(exception);
+    }
+
+    // Simulates as operator https://stackoverflow.com/a/148949/213871
+    public static <T> T as(Object obj, Class<T> clazz)
+    {
+        if (clazz.isInstance(obj))
+            return clazz.cast(obj);
+
+        return null;
+    }
+
+    public static boolean equals(String lhs, String rhs)
+    {
+        if (lhs == null)
+        {
+            if (rhs == null)
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            return lhs.equals(rhs);
+        }
+    }
+
+    public static boolean isCleanerAvaiable()
+    {
+        return true;
+    }
+
+    public static NativeHandle createNativeHandle(Object obj)
+    {
+        return new NativeHandle(newGlobalRef(obj), false);
+    }
+
+    public static NativeHandle createWeakNativeHandle(Object obj)
+    {
+        return new NativeHandle(newGlobalWeakRef(obj), true);
+    }
+
+    public static void freeNativeHandle(NativeHandle nativeHandle)
+    {
+        if (nativeHandle.weak)
+            deleteGlobalWeakRef(nativeHandle.handle);
+        else
+            deleteGlobalRef(nativeHandle.handle);
+    }
+
+    public static void keepAlive(Object obj)
+    {
+        if (obj == null)
+            throw new IllegalArgumentException();
+    }
+
+    public static void addMemoryPressure(long bytesAllocated)
+    {
+        // Do nothing, there's no equivalent in Java
+    }
+
+    public static void removeMemoryPressure(long bytesAllocated)
+    {
+        // Do nothing, there's no equivalent in Java
+    }
+
+    static void registerForFinalization(Object obj, IObjectFinalizer finalizer)
+    {
+        _cleaner.register(obj, finalizer);
+    }
+
+    static native long newGlobalRef(Object obj);
+    static native void deleteGlobalRef(long globalref);
+    static native long newGlobalWeakRef(Object obj);
+    static native void deleteGlobalWeakRef(long globalref);
+    static native Object getGlobalRefTarget(long handle);
+    static native Object getGlobalWeakRefTarget(long handle);
+}
+""";
+
+    public const string HandleRef =
+"""
+// https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref 
+public class HandleRef
+{
+    public final Object wrapper;
+    public final long handle;
+
+    public HandleRef()
+    {
+        this.wrapper = null;
+        this.handle = 0;
+    }
+
+    public HandleRef(Object wrapper, long handle)
+    {
+        this.wrapper = wrapper;
+        this.handle = handle;
+    }
+
+    public Object getWrapper()
+    {
+        return this.wrapper;
+    }
+
+    public long getHandle()
+    {
+        return this.handle;
+    }
+}
+""";
+
+    // This enables java.lang.ref.Cleaner only if available/detected. It's
+    // compatible with JDK8
+    public const string BinderUtilsJDK8 =
+
+"""
+import java.lang.reflect.*;
 
 public class BinderUtils
 {
@@ -16,8 +161,8 @@ public class BinderUtils
 
     static
     {
-        String versionStr = System.getProperty(""java.specification.version"");
-        if (versionStr.startsWith(""1."") || versionStr.startsWith(""0.""))
+        String versionStr = System.getProperty("java.specification.version");
+        if (versionStr.startsWith("1.") || versionStr.startsWith("0."))
             versionStr = versionStr.substring(2);
 
         int version = Integer.parseInt(versionStr);
@@ -25,14 +170,14 @@ public class BinderUtils
         {
             try
             {
-                Class cleanerClass = Class.forName(""java.lang.ref.Cleaner"");
-                Method create = cleanerClass.getMethod(""create"");
-                _register = cleanerClass.getDeclaredMethod(""register"", Object.class, Runnable.class);
+                Class cleanerClass = Class.forName("java.lang.ref.Cleaner");
+                Method create = cleanerClass.getMethod("create");
+                _register = cleanerClass.getDeclaredMethod("register", Object.class, Runnable.class);
                 _cleaner = create.invoke(null);
             }
             catch (ClassNotFoundException ex)
             {
-                // Do nothing. ""java.lang.ref.Cleaner"" is not avaiable
+                // Do nothing. "java.lang.ref.Cleaner" is not avaiable
             }
             catch (InvocationTargetException | IllegalAccessException |
                    NoSuchMethodException ex)
@@ -140,37 +285,9 @@ public class BinderUtils
     static native void deleteGlobalWeakRef(long globalref);
     static native Object getGlobalRefTarget(long handle);
     static native Object getGlobalWeakRefTarget(long handle);
-}";
-    // https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
-    public const string HandleRef =
-@"// https://docs.microsoft.com/en-us/dotnet/api/system.runtime.interopservices.handleref
-public class HandleRef
-{
-    public final Object wrapper;
-    public final long handle;
+}
+""";
 
-    public HandleRef()
-    {
-        this.wrapper = null;
-        this.handle = 0;
-    }
-
-    public HandleRef(Object wrapper, long handle)
-    {
-        this.wrapper = wrapper;
-        this.handle = handle;
-    }
-
-    public Object getWrapper()
-    {
-        return this.wrapper;
-    }
-
-    public long getHandle()
-    {
-        return this.handle;
-    }
-}";
 
     public const string NativeHandle = """
 public class NativeHandle

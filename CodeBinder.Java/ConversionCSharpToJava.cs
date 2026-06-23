@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: MIT
 using CodeBinder.Attributes;
 using CodeBinder.Java.Shared;
-using System.Text;
 
 namespace CodeBinder.Java;
 
 [ConversionLanguageName("Java")]
-[ConfigurationSwitch("android", "Output is compatible with android sdk (Java)")]
+[ConfigurationSwitch("android", "Output is compatible with Android SDK")]
+[ConfigurationSwitch("jdk8", "Output is compatible with JDK8")]
 public class ConversionCSharpToJava : CSharpLanguageConversion
 {
     internal const string CodeBinderNamespace = "CodeBinder";
@@ -32,6 +32,12 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
         if (args.Count == 1 && args[0].Key == "android")
         {
             JavaPlatform = JavaPlatform.Android;
+            return true;
+        }
+
+        if (args.Count == 1 && args[0].Key == "jdk8")
+        {
+            JavaPlatform = JavaPlatform.JDK8;
             return true;
         }
 
@@ -97,6 +103,7 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
             switch (JavaPlatform)
             {
                 case JavaPlatform.JDK:
+                case JavaPlatform.JDK8:
                     return ["JAVA", "JVM", "JVM_JDK", "JNI_JDK"];
                 case JavaPlatform.Android:
                     return ["JAVA", "JVM", "JVM_ANDROID", "JNI_ANDROID"];
@@ -116,7 +123,11 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
     {
         get
         {
-            yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.BinderUtils), JavaClasses.BinderUtils);
+            if (JavaPlatform == JavaPlatform.JDK8)
+                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.BinderUtils), JavaClasses.BinderUtilsJDK8);
+            else
+                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.BinderUtils), JavaClasses.BinderUtils);
+
             yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandleRef), JavaClasses.HandleRef);
             yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.NativeHandle), JavaClasses.NativeHandle);
             yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.FinalizableObject), JavaClasses.FinalizableObject);
@@ -143,6 +154,16 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
 
 public enum JavaPlatform
 {
+    /// <summary>
+    /// Default JDK platform (JDK11)
+    /// </summary>
     JDK = 0,
-    Android
+    /// <summary>
+    /// Android SDK
+    /// </summary>
+    Android,
+    /// <summary>
+    /// Legacy JDK8 platform
+    /// </summary>
+    JDK8,
 }
