@@ -31,7 +31,7 @@ extern "C"
 #endif // __cplusplus
 
 #if defined(WIN32) && !defined(_WINBASE_)
-    __declspec(dllimport) void __stdcall LocalFree(void* pv);
+    __declspec(dllimport) void* __stdcall LocalFree(void* pv);
     __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
 #endif // WIN32
 
