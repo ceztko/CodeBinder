@@ -30,30 +30,34 @@ extern "C"
 {
 #endif // __cplusplus
 
-#if defined(WIN32) && !defined(_WINBASE_)
+#if defined(_WIN32) && !defined(_WINBASE_)
     __declspec(dllimport) void* __stdcall LocalFree(void* pv);
-    __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, size_t uBytes);
-#endif // WIN32
+#ifdef _WIN64
+    __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, unsigned __int64 uBytes);
+#else // _WIN32
+    __declspec(dllimport) void* __stdcall LocalAlloc(unsigned int uFlags, unsigned long uBytes);
+#endif // _WIN64
+#endif // _WIN32
 
     inline void* CBAllocMemory(size_t size)
     {
-#ifdef WIN32
+#ifdef _WIN32
 #ifndef LMEM_FIXED
         const unsigned int LMEM_FIXED = 0x0000;
 #endif // LMEM_FIXED
         return LocalAlloc(LMEM_FIXED, size);
-#else
+#else // !_WIN32
         return malloc(size);
-#endif
+#endif // _WIN32
     }
 
     inline void CBFreeMemory(void* ptr)
     {
-#ifdef WIN32
+#ifdef _WIN32
         LocalFree(ptr);
-#else
+#else // !_WIN32
         free(ptr);
-#endif
+#endif // _WIN32
     }
 
     inline size_t CBStringGetLength(const cbstring* str)
