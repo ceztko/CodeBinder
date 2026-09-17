@@ -6,6 +6,10 @@ indent_style = space
 indent_size = 4
 
 [*.cs]
+end_of_line = crlf
+charset = utf-8-bom
+indent_style = space
+indent_size = 4
 trim_trailing_whitespace = true
 insert_final_newline = true
 
