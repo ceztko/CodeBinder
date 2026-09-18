@@ -292,56 +292,6 @@ public static class JavaUtils
         }
     }
 
-    public static string ToJavaType(this JavaInteropType type)
-    {
-        switch (type)
-        {
-            case JavaInteropType.Boolean:
-                return "boolean";
-            case JavaInteropType.Byte:
-                return "byte";
-            case JavaInteropType.Short:
-                return "short";
-            case JavaInteropType.Integer:
-                return "int";
-            case JavaInteropType.Long:
-                return "long";
-            case JavaInteropType.Float:
-                return "float";
-            case JavaInteropType.Double:
-                return "double";
-            case JavaInteropType.String:
-                return "String";
-            default:
-                throw new Exception();
-        }
-    }
-
-    public static JavaInteropType ToJavaInteropType(string javaKeyword)
-    {
-        switch (javaKeyword)
-        {
-            case "boolean":
-                return JavaInteropType.Boolean;
-            case "byte":
-                return JavaInteropType.Byte;
-            case "short":
-                return JavaInteropType.Short;
-            case "int":
-                return JavaInteropType.Integer;
-            case "long":
-                return JavaInteropType.Long;
-            case "float":
-                return JavaInteropType.Float;
-            case "double":
-                return JavaInteropType.Double;
-            case "string":
-                return JavaInteropType.String;
-            default:
-                throw new Exception();
-        }
-    }
-
     public static string ToString(this ParenthesisType type, ParenthesisDirection direction)
     {
         switch (direction)

@@ -1,0 +1,128 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.codebinder</groupId>
+        <artifactId>codebinder-redist-parent</artifactId>
+        <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>codebinder-redist</artifactId>
+    <packaging>jar</packaging>
+
+    <name>CodeBinder Java redistributable components (JDK)</name>
+    <description>Multi-release jar: the baseline classes target JDK8 and fall back to Object.finalize(), the "META-INF/versions/9" overlay uses java.lang.ref.Cleaner</description>
+
+    <build>
+        <!-- Baseline source root. "src/main/java8" is added by build-helper below -->
+        <sourceDirectory>${sharedSourceRoot}</sourceDirectory>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-java8-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${java8SourceRoot}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <!-- Baseline: shared classes + the JDK8 BinderUtils -->
+                    <release>8</release>
+                </configuration>
+                <executions>
+                    <execution>
+                        <!-- Overlay: the JDK9+ BinderUtils. It is compiled after
+                             the baseline so that the shared classes it references
+                             are already in "target/classes", which is on the
+                             compile classpath -->
+                        <id>compile-java9</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>9</release>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${java9SourceRoot}</compileSourceRoot>
+                            </compileSourceRoots>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/versions/9</outputDirectory>
+                            <useIncrementalCompilation>false</useIncrementalCompilation>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Specification-Title>${project.artifactId}</Specification-Title>
+                            <Specification-Version>${project.version}</Specification-Version>
+                            <Multi-Release>true</Multi-Release>
+                        </manifestEntries>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <artifactItems>
+                        <artifactItem>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <version>${project.version}</version>
+                            <type>${project.packaging}</type>
+                            <overWrite>true</overWrite>
+                            <outputDirectory>${installPath}</outputDirectory>
+                            <destFileName>codebinder-redist.jar</destFileName>
+                        </artifactItem>
+                    </artifactItems>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,13 +1,12 @@
 ﻿// SPDX-FileCopyrightText: (C) 2018 Francesco Pretto <ceztko@gmail.com>
 // SPDX-License-Identifier: MIT
 using CodeBinder.Attributes;
-using CodeBinder.Java.Shared;
 
 namespace CodeBinder.Java;
 
 [ConversionLanguageName("Java")]
 [ConfigurationSwitch("android", "Output is compatible with Android SDK")]
-[ConfigurationSwitch("jdk8", "Output is compatible with JDK8")]
+[ConfigurationSwitch("jdk8", "Deprecated, it does nothing: the JDK8 support now lives in the codebinder-redist multi-release jar")]
 public class ConversionCSharpToJava : CSharpLanguageConversion
 {
     internal const string CodeBinderNamespace = "CodeBinder";
@@ -35,11 +34,11 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
             return true;
         }
 
+        // Kept for retrocompatibility with existing codegen scripts. The JDK8
+        // and JDK9+ variants of "CodeBinder.BinderUtils" are both shipped by the
+        // codebinder-redist multi-release jar, so there's nothing to switch here
         if (args.Count == 1 && args[0].Key == "jdk8")
-        {
-            JavaPlatform = JavaPlatform.JDK8;
             return true;
-        }
 
         return false;
     }
@@ -103,7 +102,6 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
             switch (JavaPlatform)
             {
                 case JavaPlatform.JDK:
-                case JavaPlatform.JDK8:
                     return ["JAVA", "JVM", "JVM_JDK", "JNI_JDK"];
                 case JavaPlatform.Android:
                     return ["JAVA", "JVM", "JVM_ANDROID", "JNI_ANDROID"];
@@ -118,38 +116,6 @@ public class ConversionCSharpToJava : CSharpLanguageConversion
     {
         get { return false; }
     }
-
-    public override IEnumerable<IConversionWriter> DefaultConversions
-    {
-        get
-        {
-            if (JavaPlatform == JavaPlatform.JDK8)
-                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.BinderUtils), JavaClasses.BinderUtilsJDK8);
-            else
-                yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.BinderUtils), JavaClasses.BinderUtils);
-
-            yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandleRef), JavaClasses.HandleRef);
-            yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.NativeHandle), JavaClasses.NativeHandle);
-            yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.FinalizableObject), JavaClasses.FinalizableObject);
-            yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandledObjectBase), JavaClasses.HandledObjectBase);
-            yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandledObject), JavaClasses.HandledObject);
-            yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.HandledObjectFinalizer), JavaClasses.HandledObjectFinalizer);
-            yield return new JavaVerbatimConversionWriter(nameof(JavaClasses.IObjectFinalizer), JavaClasses.IObjectFinalizer);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Boolean);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Byte);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Short);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Integer);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Long);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Float);
-            yield return new JavaInteropBoxWriter(JavaInteropType.Double);
-            yield return new JavaInteropBoxWriter(JavaInteropType.String);
-            for (int i = 0; i < 10; i++)
-            {
-                yield return new JavaDelegateWriter(true, i);
-                yield return new JavaDelegateWriter(false, i);
-            }
-        }
-    }
 }
 
 public enum JavaPlatform
@@ -162,8 +128,4 @@ public enum JavaPlatform
     /// Android SDK
     /// </summary>
     Android,
-    /// <summary>
-    /// Legacy JDK8 platform
-    /// </summary>
-    JDK8,
 }

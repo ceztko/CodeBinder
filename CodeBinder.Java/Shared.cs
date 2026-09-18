@@ -17,18 +17,6 @@ public enum ParenthesisType
     Brace,
 }
 
-public enum JavaInteropType
-{
-    Boolean,
-    Byte,
-    Short,
-    Integer,
-    Long,
-    Float,
-    Double,
-    String,
-}
-
 [Flags]
 enum JavaTypeFlags
 {
