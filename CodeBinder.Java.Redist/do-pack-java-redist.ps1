@@ -2,8 +2,8 @@
 
 # Builds, and optionally publishes, the Java redistributable components:
 #
-#   com.codebinder:codebinder-redist          multi-release jar for JDK projects
-#   com.codebinder:codebinder-android-redist  plain jar for Android projects
+#   org.codebinder:codebinder-redist          multi-release jar for JDK projects
+#   org.codebinder:codebinder-android-redist  plain jar for Android projects
 #
 # Both carry the same "CodeBinder" package and must never end up on the same
 # classpath. The version is declared once, as the "revision" property of the

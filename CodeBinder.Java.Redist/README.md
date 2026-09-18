@@ -9,8 +9,8 @@ that several generated libraries can coexist on one classpath.
 
 | Artifact | Target | Bytecode | Finalization |
 |---|---|---|---|
-| `com.codebinder:codebinder-redist` | JDK projects | 52 baseline + 53 overlay | `Object.finalize()` on JDK8, `java.lang.ref.Cleaner` on JDK9+ |
-| `com.codebinder:codebinder-android-redist` | Android projects | 55 | `java.lang.ref.Cleaner`, requires **API level 33** |
+| `org.codebinder:codebinder-redist` | JDK projects | 52 baseline + 53 overlay | `Object.finalize()` on JDK8, `java.lang.ref.Cleaner` on JDK9+ |
+| `org.codebinder:codebinder-android-redist` | Android projects | 55 | `java.lang.ref.Cleaner`, requires **API level 33** |
 
 `codebinder-redist` is a [multi-release jar](https://openjdk.org/jeps/238): the
 baseline classes target JDK8 and know nothing about `java.lang.ref.Cleaner`,
@@ -37,7 +37,7 @@ Maven, for a generated JDK wrapper:
 
 ```xml
 <dependency>
-    <groupId>com.codebinder</groupId>
+    <groupId>org.codebinder</groupId>
     <artifactId>codebinder-redist</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -49,7 +49,7 @@ Gradle, for a generated Android library. It has to be `api`, not
 the AAR.
 
 ```groovy
-api 'com.codebinder:codebinder-android-redist:1.0.0'
+api 'org.codebinder:codebinder-android-redist:1.0.0'
 ```
 
 ## Layout
