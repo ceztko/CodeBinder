@@ -18,15 +18,7 @@ while `META-INF/versions/9/CodeBinder/BinderUtils.class` uses it directly. The
 JVM picks the right one, with no reflection on either side.
 
 Android gets a separate artifact rather than the multi-release one because the
-Android toolchain doesn't handle `META-INF/versions` consistently: depending on
-the AGP/R8 version it either strips the overlay — silently downgrading Android
-to `Object.finalize()` — or keeps it, which quietly makes API 33 a hard
-requirement. A dedicated jar makes the choice explicit. It also ships
-`META-INF/proguard/codebinder-redist.pro`, which R8 picks up automatically: the
-generated JNI trampolines resolve these types and members by name
-(`FindClass("CodeBinder/HandleRef")`, `GetFieldID(cls, "handle", "J")`,
-`GetFieldID(cls, "value", ...)`, `Java_CodeBinder_BinderUtils_*`), so nothing in
-the package may be renamed.
+Android toolchain doesn't handle `META-INF/versions` consistently.
 
 **The two artifacts carry the same `CodeBinder` package and must never be on the
 same classpath.**
@@ -73,42 +65,26 @@ javap -p META-INF/versions/9/CodeBinder/BinderUtils.class
 
 ## Building
 
-Needs a JDK 11 or newer toolchain (the `release 9` and `release 11` compiler
-settings). There are no tests.
+Requires a JDK 11 or newer toolchain (the `release 9` and `release 11` compiler
+settings).
 
 ```
 ./do-pack-java-redist.ps1            # build both jars
-./do-pack-java-redist.ps1 Upload     # build and publish
+./do-pack-java-redist.ps1 Upload     # publish
 ```
 
-`Upload` publishes each artifact with `deploy:deploy-file`, to the repository
-named by an environment variable. The part before the `@` is the repository id,
-which selects the `<server>` of `~/.m2/settings.xml` that holds the credentials
-for that host; the rest is the url to publish to.
+`Upload` publishes each artifact with `deploy:deploy-file`, to a repository
+that can be personalized with the following variales.
 
 ```powershell
-$env:CODEBINDER_JDK_MAVEN_REPO = "https://central@artifactory.internal.euronovate.com/artifactory/libs-release-local"
-$env:CODEBINDER_ANDROID_MAVEN_REPO = "https://android-releases@nexus.internal.euronovate.com/repository/android-releases/"
+$env:CODEBINDER_JDK_MAVEN_REPO = "https://<repoid>@<host>/<path>"
+$env:CODEBINDER_ANDROID_MAVEN_REPO = "https://<repoid>@<host>/<path>"
 ```
 
-| Variable | Artifact |
-|---|---|
-| `CODEBINDER_JDK_MAVEN_REPO` | `codebinder-redist` |
-| `CODEBINDER_ANDROID_MAVEN_REPO` | `codebinder-android-redist` |
 
-Either variable left unset falls back to maven central with the id `central`,
-which nobody here can write to, so an `Upload` that forgot to set them fails on
-authentication rather than publishing somewhere unintended. A value without the
-`<repositoryId>@` part is rejected outright.
-
-Note that the url to publish to is not the url to resolve from: on Artifactory
-`libs-release` is a read-only virtual repository, and deployment has to name the
-local one behind it, `libs-release-local`.
+Either variable left unset falls back to maven central with the id `central`.
+A value without the `<repositoryId>@` part is rejected outright.
 
 What consumers resolve is a parent-free descriptor with the version resolved,
 written by `flatten-maven-plugin` to `<module>/target/pom-publish.xml`. The
 aggregator pom is never published.
-
-The version is declared once, as the `revision` property of `pom.xml`; bump it
-there. Maven requires every child to restate its parent's version, so the two
-modules refer to the property rather than repeating the number. Nothing published ever carries the unresolved property.
