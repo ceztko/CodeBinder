@@ -76,7 +76,7 @@ extern "C"
         }
         else
         {
-            cbstring ret = { newstr, len };
+            cbstring ret = { newstr, len | CB_STRING_OWNSDATA_FLAG };
             memcpy(newstr, str, len);
             newstr[len] = '\0';
             return ret;
@@ -93,7 +93,7 @@ extern "C"
         }
         else
         {
-            cbstring ret = { newstr, len };
+            cbstring ret = { newstr, len | CB_STRING_OWNSDATA_FLAG };
             memcpy(newstr, str, len);
             newstr[len] = '\0';
             return ret;
@@ -110,7 +110,7 @@ extern "C"
         }
         else
         {
-            cbstring ret = { newstr, len };
+            cbstring ret = { newstr, len | CB_STRING_OWNSDATA_FLAG };
             newstr[0] = '\0';
             return ret;
         }
