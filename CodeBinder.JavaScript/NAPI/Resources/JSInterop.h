@@ -239,6 +239,26 @@ namespace js
         return ret;
     }
 
+    // Wraps js string and convert to a non owning cbstring.
+    // NOTE: A cbstring with CB_STRING_OWNSDATA_FLAG set is owned
+    // by the callee, so the converted string is kept here instead
+    class SJS2N final
+    {
+        SJS2N(const SJS2N&) = delete;
+        SJS2N& operator=(const SJS2N&) = delete;
+    public:
+        SJS2N(napi_env env, napi_value str)
+            : m_str(CreateCBStringFromNapiValue(env, str)) { }
+    public:
+        inline operator cbstring() const
+        {
+            const cbstring& str = m_str;
+            return CBCreateStringViewLen(str.data, CBSLEN(str));
+        }
+    private:
+        cbstringr m_str;
+    };
+
     inline napi_value CreateNapiValue(napi_env env, bool value)
     {
         napi_value ret;
@@ -747,19 +767,42 @@ namespace js
         }
     };
 
+    // Wraps js box with a string value. The current value is passed
+    // as a non owning cbstring, while a value set by the callee is owned
     template <>
-    struct BJS2NShim<cbstring>
+    class BJS2N<cbstring> final
     {
-        static cbstring Acquire(napi_env env, napi_value value)
+    public:
+        BJS2N(napi_env env, napi_value box)
+            : m_env(env), m_jsbox(box), m_str(env, getBoxValue(env, box)), m_nvalue(m_str) { }
+        ~BJS2N()
         {
-            return CreateCBStringFromNapiValue(env, value);
+            if (m_nvalue.data != ((cbstring)m_str).data)
+            {
+                napi_value value;
+                if (m_nvalue.data == nullptr)
+                    napi_get_null(m_env, &value);
+                else
+                    napi_create_string_utf8(m_env, m_nvalue.data, CBStringGetLength(&m_nvalue), &value);
+
+                napi_set_named_property(m_env, m_jsbox, "value", value);
+            }
+
+            CBFreeString(&m_nvalue);
         }
-        static napi_value Release(napi_env env, cbstring nvalue)
+    public:
+        inline operator cbstring* () { return &m_nvalue; }
+    private:
+        static napi_value getBoxValue(napi_env env, napi_value box)
         {
             napi_value ret;
-            napi_create_string_utf8(env, nvalue.data, CBStringGetLength(&nvalue), &ret);
-            CBFreeString(&nvalue);
+            napi_get_named_property(env, box, "value", &ret);
             return ret;
         }
+    private:
+        napi_env m_env;
+        napi_value m_jsbox;
+        SJS2N m_str;
+        cbstring m_nvalue;
     };
 }

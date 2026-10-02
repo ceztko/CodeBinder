@@ -293,7 +293,7 @@ class NAPITrampolineMethodWriter : CodeWriter<MethodDeclarationSyntax, NAPIModul
 
                         case "CodeBinder.cbstring":
                         {
-                            Builder.Append($"CreateCBStringFromNapiValue(env, args[{index}])");
+                            Builder.Append($"SJS2N(env, args[{index}])");
                             break;
                         }
                         case "CodeBinder.cbbool":

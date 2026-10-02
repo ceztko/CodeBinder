@@ -192,53 +192,81 @@ struct AJNIShim<jdoubleArray, jdouble>
     }
 };
 
+// Wraps java string array and convert to a native one with non owning
+// cbstring, as a cbstring with CB_STRING_OWNSDATA_FLAG set is owned by
+// the callee. The converted strings are kept in m_strings
 template <>
-struct AJNIShim<jstringArray, cbstring>
+class AJ2NImpl<jstringArray, cbstring>
 {
-    static cbstring* GetNativeArray(JNIEnv* env, jstringArray jarray)
+    AJ2NImpl(const AJ2NImpl&) = delete;
+    AJ2NImpl& operator=(const AJ2NImpl&) = delete;
+public:
+    AJ2NImpl(JNIEnv* env, jstringArray array, bool commit)
+        : m_env(env), m_jarray(array), m_commit(commit),
+          m_size(0), m_strings(nullptr), m_narray(nullptr)
     {
-        jsize size = env->GetArrayLength(jarray);
-        auto ret = new cbstring[size];
-        for (jsize i = 0; i < size; i++)
+        if (array == nullptr)
+            return;
+
+        m_size = env->GetArrayLength(array);
+        m_strings = new cbstring[m_size];
+        m_narray = new cbstring[m_size];
+        for (jsize i = 0; i < m_size; i++)
         {
-            auto jstr = (jstring)env->GetObjectArrayElement(jarray, i);
+            auto jstr = (jstring)env->GetObjectArrayElement(array, i);
             if (jstr == nullptr)
             {
-                ret[i] = { };
+                m_strings[i] = { };
             }
             else
             {
                 jsize length = env->GetStringUTFLength(jstr);
                 jboolean isCopy;
                 auto chars = env->GetStringUTFChars(jstr, &isCopy);
-                ret[i] = CBCreateStringLen(chars, (size_t)length);
+                m_strings[i] = CBCreateStringLen(chars, (size_t)length);
                 // NOTE: Unconditionally release the string is required
                 env->ReleaseStringUTFChars(jstr, chars);
             }
+
+            m_narray[i] = CBCreateStringViewLen(m_strings[i].data, CBSLEN(m_strings[i]));
         }
-
-        return ret;
     }
-
-    static void FreeNativeArray(JNIEnv* env, jstringArray jarray, cbstring* narray, bool commit)
+    ~AJ2NImpl()
     {
-        jsize size = env->GetArrayLength(jarray);
-        if (commit)
+        if (m_jarray == nullptr)
+            return;
+
+        for (jsize i = 0; i < m_size; i++)
         {
-            // Set the new string on the java array
-            for (jsize i = 0; i < size; i++)
+            // Set the strings replaced by the callee on the java array
+            if (m_commit && m_narray[i].data != m_strings[i].data)
             {
-                if (narray[i].data == nullptr)
-                    env->SetObjectArrayElement(jarray, i, nullptr);
+                if (m_narray[i].data == nullptr)
+                    m_env->SetObjectArrayElement(m_jarray, i, nullptr);
                 else
-                    env->SetObjectArrayElement(jarray, i, env->NewStringUTF(narray[i].data));
+                    m_env->SetObjectArrayElement(m_jarray, i, m_env->NewStringUTF(m_narray[i].data));
             }
+
+            // Free the strings set by the callee and the converted ones
+            CBFreeString(&m_narray[i]);
+            CBFreeString(&m_strings[i]);
         }
 
-        // Free the native strings
-        for (jsize i = 0; i < size; i++)
-            CBFreeString(&narray[i]);
+        delete[] m_narray;
+        delete[] m_strings;
     }
+public:
+    inline cbstring* n_array() { return m_narray; }
+    inline operator cbstring* () { return m_narray; }
+    inline const cbstring* n_array() const { return m_narray; }
+    inline operator const cbstring* () const { return m_narray; }
+private:
+    JNIEnv* m_env;
+    jstringArray m_jarray;
+    bool m_commit;
+    jsize m_size;
+    cbstring* m_strings;
+    cbstring* m_narray;
 };
 
 template <>
